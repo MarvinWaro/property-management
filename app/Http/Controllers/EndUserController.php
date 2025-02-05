@@ -7,11 +7,21 @@ use Illuminate\Http\Request;
 
 class EndUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $endUsers = EndUser::paginate(5); // 10 users per page
+        // Get the search term from the request
+        $search = $request->get('search');
+
+        // Paginate the users with 5 users per page, applying the search filter
+        $endUsers = EndUser::when($search, function ($query, $search) {
+            return $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%");
+        })->paginate(5); // 5 items per page
+
         return view('manage-users.index', compact('endUsers'));
     }
+
 
     public function store(Request $request)
     {
