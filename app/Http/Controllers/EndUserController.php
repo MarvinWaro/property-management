@@ -9,11 +9,9 @@ class EndUserController extends Controller
 {
     public function index()
     {
-        $endUsers = EndUser::all(); // Get all end users
+        $endUsers = EndUser::paginate(5); // 10 users per page
         return view('manage-users.index', compact('endUsers'));
     }
-
-    // app/Http/Controllers/EndUserController.php
 
     public function store(Request $request)
     {
