@@ -22,21 +22,27 @@ class EndUserController extends Controller
         return view('manage-users.index', compact('endUsers'));
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:end_users,email',
-            'phone_number' => 'required|string|max:15',
+            'phone_number' => 'required|digits_between:1,15',
         ]);
 
         // Create the new user
         EndUser::create($request->all());
 
-        // Redirect back to the users index or dashboard
+        // If it's an AJAX request, return a JSON response
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        // Otherwise, redirect to the index page
         return redirect()->route('end_users.index')->with('success', 'User created successfully');
     }
+
+
 
 
 

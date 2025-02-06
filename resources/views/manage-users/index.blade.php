@@ -41,23 +41,32 @@
                             </button>
                         </div>
 
-                        <!-- Modal -->
-                        <div id="addUserModal" class="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 hidden">
+                        <!-- Create User Modal -->
+                        <div id="addUserModal" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden">
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-full sm:w-1/3 max-w-lg">
                                 <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Add New End User</h2>
-                                <form id="addUserForm" action="{{ route('end-users.store') }}" method="POST">
+                                <form id="addUserForm" action="{{ route('end_users.store') }}" method="POST">
                                     @csrf
                                     <div class="mb-4">
                                         <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                                        <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
+                                        <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" value="{{ old('name') }}" required>
+                                        @error('name')
+                                            <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                     <div class="mb-4">
                                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                                        <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
+                                        <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" value="{{ old('email') }}" required>
+                                        @error('email')
+                                            <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                     <div class="mb-4">
                                         <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-                                        <input type="text" id="phone_number" name="phone_number" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
+                                        <input type="tel" id="phone_number" name="phone_number" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" pattern="[0-9]{1,15}" maxlength="15" value="{{ old('phone_number') }}" required>
+                                        @error('phone_number')
+                                            <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                     <div class="mb-4 text-right">
                                         <button type="submit" class="text-xs px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
@@ -66,6 +75,7 @@
                                 </form>
                             </div>
                         </div>
+
 
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
