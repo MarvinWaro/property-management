@@ -26,9 +26,7 @@
                                 </button>
                             </form>
 
-                            <!-- Add New User Button on the right -->
-                            <button type="button" id="addNewUserBtn" class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
-                                <!-- Icon -->
+                            <a href="{{ route('end_users.create') }}" type="button" class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center ms-5">
                                 <span class="mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                         <path d="M10 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM16.25 5.75a.75.75 0 0 0-1.5 0v2h-2a.75.75 0 0 0 0 1.5h2v2a.75.75 0 0 0 1.5 0v-2h2a.75.75 0 0 0 0-1.5h-2v-2Z" />
@@ -38,33 +36,7 @@
                                 <span class="hidden sm:inline-flex">
                                     Add New End User
                                 </span>
-                            </button>
-                        </div>
-
-                        <!-- Modal -->
-                        <div id="addUserModal" class="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 hidden">
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-full sm:w-1/3 max-w-lg">
-                                <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Add New End User</h2>
-                                <form id="addUserForm" action="{{ route('end-users.store') }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                                        <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                                        <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-                                        <input type="text" id="phone_number" name="phone_number" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" required>
-                                    </div>
-                                    <div class="mb-4 text-right">
-                                        <button type="submit" class="text-xs px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-                                        <button type="button" class="text-xs ml-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700" id="closeModalBtn">Cancel</button>
-                                    </div>
-                                </form>
-                            </div>
+                            </a>
                         </div>
 
                         <!-- Table with dynamic content -->
@@ -80,6 +52,7 @@
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Name</th>
                                     <th scope="col" class="px-6 py-3">Email</th>
+                                    <th scope="col" class="px-6 py-3">Department</th>
                                     <th scope="col" class="px-6 py-3">Active Cell Phone Number</th>
                                     <th scope="col" class="px-6 py-3">Action</th>
                                 </tr>
@@ -92,6 +65,7 @@
                                         </th>
                                         <td class="px-6 py-4">{{ $endUser->name }}</td>
                                         <td class="px-6 py-4">{{ $endUser->email }}</td>
+                                        <td class="px-6 py-4">{{ $endUser->department }}</td>
                                         <td class="px-6 py-4">{{ $endUser->phone_number }}</td>
                                         <td class="px-2 py-4 flex">
                                             <a href="#" class="px-3 py-1 text-blue-500 hover:text-blue-600">
@@ -165,23 +139,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Show Modal
-        document.getElementById('addNewUserBtn').addEventListener('click', function() {
-            document.getElementById('addUserModal').classList.remove('hidden');
-        });
-
-        // Close Modal
-        document.getElementById('closeModalBtn').addEventListener('click', function() {
-            document.getElementById('addUserModal').classList.add('hidden');
-        });
-
-        // Optionally, you can close the modal when the form is submitted (successful).
-        document.getElementById('addUserForm').addEventListener('submit', function() {
-            // You can hide the modal after submission (e.g., on successful creation)
-            document.getElementById('addUserModal').classList.add('hidden');
-        });
-    </script>
 
 </x-app-layout>

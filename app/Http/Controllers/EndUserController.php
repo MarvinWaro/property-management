@@ -22,20 +22,30 @@ class EndUserController extends Controller
         return view('manage-users.index', compact('endUsers'));
     }
 
+    public function create()
+    {
+        return view('manage-users.create');
+    }
 
     public function store(Request $request)
     {
+        // Validate the request data
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:end_users,email',
-            'phone_number' => 'required|string|max:15',
+            'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number',
+            'department' => 'required|string', // Make sure department is required
         ]);
 
-        // Create the new user
-        EndUser::create($request->all());
+        // Create the new user including department
+        EndUser::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'department' => $request->department, // Ensure department is included
+        ]);
 
-        // Redirect back to the users index or dashboard
-        return redirect()->route('end_users.index')->with('success', 'User created successfully');
+        return redirect()->route('end_users.index')->with('success', 'User created successfully!');
     }
 
 

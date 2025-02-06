@@ -1,0 +1,245 @@
+/* .loader {
+    --path: #2f3545;
+    --dot: #5628ee;
+    --duration: 3s;
+    width: 44px;
+    height: 44px;
+    position: relative;
+}
+
+@media (prefers-color-scheme: dark) {
+    .loader {
+        --path: #ffffff;
+        --dot: #5628ee;
+    }
+}
+
+.loader:before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    display: block;
+    background: var(--dot);
+    top: 37px;
+    left: 19px;
+    transform: translate(-18px, -18px);
+    animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.loader svg rect,
+.loader svg polygon,
+.loader svg circle {
+    fill: none;
+    stroke: var(--path);
+    stroke-width: 10px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.loader svg polygon {
+    stroke-dasharray: 145 76 145 76;
+    stroke-dashoffset: 0;
+    animation: pathTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg rect {
+    stroke-dasharray: 192 64 192 64;
+    stroke-dashoffset: 0;
+    animation: pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg circle {
+    stroke-dasharray: 150 50 150 50;
+    stroke-dashoffset: 75;
+    animation: pathCircle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader.triangle {
+    width: 48px;
+}
+
+.loader.triangle:before {
+    left: 21px;
+    transform: translate(-10px, -18px);
+    animation: dotTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+@keyframes pathTriangle {
+    33% {
+        stroke-dashoffset: 74;
+    }
+
+    66% {
+        stroke-dashoffset: 147;
+    }
+
+    100% {
+        stroke-dashoffset: 221;
+    }
+}
+
+@keyframes dotTriangle {
+    33% {
+        transform: translate(0, 0);
+    }
+
+    66% {
+        transform: translate(10px, -18px);
+    }
+
+    100% {
+        transform: translate(-10px, -18px);
+    }
+}
+
+@keyframes pathRect {
+    25% {
+        stroke-dashoffset: 64;
+    }
+
+    50% {
+        stroke-dashoffset: 128;
+    }
+
+    75% {
+        stroke-dashoffset: 192;
+    }
+
+    100% {
+        stroke-dashoffset: 256;
+    }
+}
+
+@keyframes dotRect {
+    25% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(18px, -18px);
+    }
+
+    75% {
+        transform: translate(0, -36px);
+    }
+
+    100% {
+        transform: translate(-18px, -18px);
+    }
+}
+
+@keyframes pathCircle {
+    25% {
+        stroke-dashoffset: 125;
+    }
+
+    50% {
+        stroke-dashoffset: 175;
+    }
+
+    75% {
+        stroke-dashoffset: 225;
+    }
+
+    100% {
+        stroke-dashoffset: 275;
+    }
+}
+
+.loader {
+    display: inline-block;
+    margin: 0 16px;
+} */
+
+
+.sharingon {
+    width: 6em;
+    height: 6em;
+    background-color: red;
+    border: 6px solid black;
+    animation: rot 1s ease-in-out infinite;
+}
+
+.ring {
+    position: absolute;
+    content: "";
+    left: 50%;
+    top: 50%;
+    width: 3.5em;
+    height: 3.5em;
+    border: 4px solid rgb(110, 13, 13, 0.5);
+    transform: translate(-50%, -50%);
+}
+
+.sharingon,
+.ring,
+.to,
+.circle {
+    border-radius: 50%;
+}
+
+.to,
+.circle {
+    position: absolute;
+    content: "";
+    width: 0.9em;
+    height: 0.9em;
+    background-color: black;
+}
+
+.to:nth-child(1) {
+    top: -0.5em;
+    left: 50%;
+    transform: translate(-40%);
+}
+
+.to::before {
+    content: "";
+    position: absolute;
+    top: -0.5em;
+    right: -0.2em;
+    width: 1.1em;
+    height: 0.9em;
+    box-sizing: border-box;
+    border-left: 16px solid black;
+    border-radius: 100% 0 0;
+}
+
+.to:nth-child(2) {
+    bottom: 0.5em;
+    left: -0.35em;
+    transform: rotate(-120deg);
+}
+
+.to:nth-child(3) {
+    bottom: 0.5em;
+    right: -0.35em;
+    transform: rotate(120deg);
+}
+
+.circle {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px 1px;
+    width: 1em;
+    height: 1em;
+}
+
+@keyframes rot {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
