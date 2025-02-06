@@ -10,10 +10,28 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
                     <div class="relative overflow-x-auto">
-                        <!-- Add New User Button -->
-                        <button type="button" id="addNewUserBtn" class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            Add New End User
-                        </button>
+                        <!-- Button and Search Bar Container -->
+                        <div class="flex items-center justify-between mb-2 mt-2 space-x-2 w-full">
+                            <!-- Search Bar on the left -->
+                            <!-- Search Bar on the left -->
+                            <form method="GET" action="{{ route('end_users.index') }}" class="w-full max-w-sm">
+                                <input type="text" name="search" value="{{ request()->get('search') }}" placeholder="Search..."
+                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            </form>
+                            <!-- Add New User Button on the right -->
+                            <button type="button" id="addNewUserBtn" class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
+                                <!-- Icon -->
+                                <span class="mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                        <path d="M10 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM16.25 5.75a.75.75 0 0 0-1.5 0v2h-2a.75.75 0 0 0 0 1.5h2v2a.75.75 0 0 0 1.5 0v-2h2a.75.75 0 0 0 0-1.5h-2v-2Z" />
+                                    </svg>
+                                </span>
+                                <!-- Text (Visible on larger screens) -->
+                                <span class="hidden sm:inline-flex">
+                                    Add New End User
+                                </span>
+                            </button>
+                        </div>
 
                         <!-- Modal -->
                         <div id="addUserModal" class="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 hidden">
@@ -41,33 +59,6 @@
                             </div>
                         </div>
 
-                        <!-- Search Bar -->
-                        <div class="flex items-start justify-between mb-2 mt-2">
-                            <!-- Search Form with Small Icon -->
-                            <form method="GET" action="{{ route('end_users.index') }}" class="flex items-center w-full max-w-sm">
-                                <label for="simple-search" class="sr-only">Search</label>
-                                <div class="relative w-full">
-                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                        <!-- Smaller Search Icon -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                            <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" name="search" value="{{ request()->get('search') }}" id="simple-search"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            placeholder="Search..."/>
-                                </div>
-                                <button type="submit" class="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                    <!-- Smaller Search Button Icon -->
-                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                    </svg>
-                                    <span class="sr-only">Search</span>
-                                </button>
-                            </form>
-                        </div>
-
-
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
@@ -94,23 +85,23 @@
                                         <td class="px-6 py-4">{{ $endUser->name }}</td>
                                         <td class="px-6 py-4">{{ $endUser->email }}</td>
                                         <td class="px-6 py-4">{{ $endUser->phone_number }}</td>
-                                        <td class="px-6 py-4 flex space-x-1">
-                                            <a href="#" class="px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                        <td class="px-2 py-4 flex">
+                                            <a href="#" class="px-3 py-1 text-blue-500 hover:text-blue-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5">
                                                     <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
                                                     <path fill-rule="evenodd" d="M1.38 8.28a.87.87 0 0 1 0-.566 7.003 7.003 0 0 1 13.238.006.87.87 0 0 1 0 .566A7.003 7.003 0 0 1 1.379 8.28ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" clip-rule="evenodd" />
                                                 </svg>
                                             </a>
-                                            <a href="#" class="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                            <a href="#" class="px-3 py-1 text-blue-500 hover:text-yellow-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5">
                                                     <path fill-rule="evenodd" d="M11.013 2.513a1.75 1.75 0 0 1 2.475 2.474L6.226 12.25a2.751 2.751 0 0 1-.892.596l-2.047.848a.75.75 0 0 1-.98-.98l.848-2.047a2.75 2.75 0 0 1 .596-.892l7.262-7.261Z" clip-rule="evenodd" />
                                                 </svg>
                                             </a>
                                             <form action="#" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                                <button type="submit" class="px-3 py-1 text-blue-500 hover:text-red-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5">
                                                         <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
                                                     </svg>
                                                 </button>
@@ -122,7 +113,7 @@
                         </table>
 
                         <!-- Pagination -->
-                        <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4" aria-label="Table navigation">
+                        <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-3" aria-label="Table navigation">
                             <!-- Entries Indicator -->
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
                                 Showing
@@ -134,7 +125,7 @@
                             </span>
 
                             <!-- Pagination Links -->
-                            <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+                            <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8 mb-5">
                                 <!-- Previous Page Link -->
                                 @if ($endUsers->onFirstPage())
                                     <li>
