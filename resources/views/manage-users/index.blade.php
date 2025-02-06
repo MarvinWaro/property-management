@@ -13,11 +13,19 @@
                         <!-- Button and Search Bar Container -->
                         <div class="flex items-center justify-between mb-2 mt-2 space-x-2 w-full">
                             <!-- Search Bar on the left -->
-                            <!-- Search Bar on the left -->
-                            <form method="GET" action="{{ route('end_users.index') }}" class="w-full max-w-sm">
+                            <form method="GET" action="{{ route('end_users.index') }}" class="w-full max-w-sm flex items-center space-x-2">
                                 <input type="text" name="search" value="{{ request()->get('search') }}" placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                                <!-- Search Icon Button (This will submit the form) -->
+                                <button type="submit" class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
+                                    <!-- Search Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </form>
+
                             <!-- Add New User Button on the right -->
                             <button type="button" id="addNewUserBtn" class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
                                 <!-- Icon -->
@@ -32,6 +40,7 @@
                                 </span>
                             </button>
                         </div>
+
 
                         <!-- Modal -->
                         <div id="addUserModal" class="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 hidden">
