@@ -16,5 +16,4 @@ Route::middleware(['auth:sanctum',config('jetstream.auth_session'),'verified',])
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
     Route::post('/end-users', [EndUserController::class, 'store'])->name('end_users.store');
 
-
 });

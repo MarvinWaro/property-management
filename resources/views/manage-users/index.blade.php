@@ -5,6 +5,39 @@
         </h2>
     </x-slot>
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2">
+        @if(session('success'))
+            <div id="success-toast" class="flex items-center w-full max-w-xs p-4 text-white bg-green-500 rounded-lg shadow">
+                <!-- Success Icon -->
+                <svg class="w-5 h-5 text-white me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <div class="text-sm font-medium flex-1">{{ session('success') }}</div>
+                <button onclick="closeToast('success-toast')" class="ml-4 bg-green-600 p-1.5 rounded-lg hover:bg-green-700">
+                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                </button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div id="error-toast" class="flex items-center w-full max-w-xs p-4 text-white bg-red-500 rounded-lg shadow">
+                <!-- Error Icon -->
+                <svg class="w-5 h-5 text-white me-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <div class="text-sm font-medium flex-1">{{ session('error') }}</div>
+                <button onclick="closeToast('error-toast')" class="ml-4 bg-red-600 p-1.5 rounded-lg hover:bg-red-700">
+                    <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                </button>
+            </div>
+        @endif
+    </div>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
@@ -75,7 +108,6 @@
                                 </form>
                             </div>
                         </div>
-
 
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -193,5 +225,34 @@
             document.getElementById('addUserModal').classList.add('hidden');
         });
     </script>
+
+    {{-- SCRIPT FOR TOAST --}}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function () {
+                let successToast = document.getElementById("success-toast");
+                let errorToast = document.getElementById("error-toast");
+
+                if (successToast) {
+                    successToast.classList.add("opacity-0", "transition-opacity", "duration-500");
+                    setTimeout(() => successToast.remove(), 500);
+                }
+                if (errorToast) {
+                    errorToast.classList.add("opacity-0", "transition-opacity", "duration-500");
+                    setTimeout(() => errorToast.remove(), 500);
+                }
+            }, 3000);
+        });
+
+        function closeToast(id) {
+            let toast = document.getElementById(id);
+            if (toast) {
+                toast.classList.add("opacity-0", "transition-opacity", "duration-500");
+                setTimeout(() => toast.remove(), 500);
+            }
+        }
+    </script>
+
 
 </x-app-layout>

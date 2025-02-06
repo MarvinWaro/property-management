@@ -27,19 +27,15 @@ class EndUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:end_users,email',
-            'phone_number' => 'required|digits_between:1,15',
+            'phone_number' => 'required|digits_between:1,15|max:15',
         ]);
 
-        // Create the new user
-        EndUser::create($request->all());
-
-        // If it's an AJAX request, return a JSON response
-        if ($request->ajax()) {
-            return response()->json(['success' => true]);
+        try {
+            EndUser::create($request->all());
+            return redirect()->route('end_users.index')->with('success', 'User created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->route('end_users.index')->with('error', 'Failed to add user.');
         }
-
-        // Otherwise, redirect to the index page
-        return redirect()->route('end_users.index')->with('success', 'User created successfully');
     }
 
 
