@@ -48,6 +48,33 @@ class EndUserController extends Controller
         return redirect()->route('end_users.index')->with('success', 'User created successfully!');
     }
 
+    // Show Edit Form
+    public function edit(EndUser $endUser)
+    {
+        return view('manage-users.edit', compact('endUser'));
+    }
 
+    // Handle Update Request
+    public function update(Request $request, EndUser $endUser)
+    {
+        // Validate input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:end_users,email,' . $endUser->id,
+            'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number,' . $endUser->id,
+            'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+        ]);
+
+        // Update user
+        $endUser->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'department' => $request->department,
+        ]);
+
+        // Redirect with success message
+        return redirect()->route('end_users.index')->with('success', 'User updated successfully');
+    }
 
 }
