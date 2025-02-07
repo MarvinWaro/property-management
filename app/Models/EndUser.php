@@ -10,10 +10,8 @@ class EndUser extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone_number',
-        'department' // 👈 Add this!
+        'name', 'email', 'phone_number', 'department', 'active', 'excluded'
     ];
 }
+
 
