@@ -9,7 +9,7 @@ class Location extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['location_name'];
+    protected $fillable = ['location_name', 'active', 'excluded'];
 
     // Ensure location names are alphanumeric
     public static function rules()

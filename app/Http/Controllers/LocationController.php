@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Location;
 use Illuminate\Http\Request;
+use App\Models\Location;
 
 class LocationController extends Controller
 {
@@ -12,11 +12,12 @@ class LocationController extends Controller
         // Get the search term from the request
         $search = $request->get('search');
 
-        // Fetch and paginate locations with search filter
-        $locations = Location::when($search, function ($query, $search) {
+        // Fetch locations that are not excluded
+        $locations = Location::where('excluded', 0)
+            ->when($search, function ($query, $search) {
                 return $query->where('location_name', 'like', "%{$search}%");
             })
-            ->paginate(5); // Paginate with 5 per page
+            ->paginate(5);
 
         return view('manage-location.index', compact('locations'));
     }
@@ -28,19 +29,47 @@ class LocationController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input
+        // Validate input (no regex, just max length)
         $request->validate([
-            'location_name' => 'required|string|regex:/^[a-zA-Z0-9\s]+$/|unique:locations,location_name|max:255',
+            'location_name' => 'required|string|max:255',
         ]);
 
-        // Store new location
+        // Check if an ACTIVE location exists
+        $existingLocation = Location::where('excluded', 0)
+            ->where('location_name', $request->location_name)
+            ->first();
+
+        if ($existingLocation) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['location_name' => 'Location name is already taken.']);
+        }
+
+        // Check if an EXCLUDED location exists
+        $excludedLocation = Location::where('excluded', 1)
+            ->where('location_name', $request->location_name)
+            ->first();
+
+        if ($excludedLocation) {
+            // Reactivate the excluded location
+            $excludedLocation->update([
+                'excluded' => 0,
+                'active' => 1
+            ]);
+
+            return redirect()->route('location.index')->with('success', 'Location reactivated successfully.');
+        }
+
+        // If no excluded location is found, create a new location
         Location::create([
             'location_name' => $request->location_name,
+            'active' => 1,
+            'excluded' => 0
         ]);
 
-        // Redirect with success message
-        return redirect()->route('location.index')->with('success', 'Location added successfully.');
+        return redirect()->route('location.index')->with('success', 'Location created successfully.');
     }
+
 
     public function edit(Location $location)
     {
@@ -49,21 +78,33 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
-        // Validate input
+        // Validate input (no regex, just max length and unique rule)
         $request->validate([
-            'location_name' => 'required|string|regex:/^[a-zA-Z0-9\s]+$/|unique:locations,location_name,' . $location->id . '|max:255',
+            'location_name' => 'required|string|max:255|unique:locations,location_name,' . $location->id,
         ]);
 
         // Update location
         $location->update([
-            'location_name' => $request->location_name
+            'location_name' => $request->location_name,
         ]);
 
         return redirect()->route('location.index')->with('success', 'Location updated successfully.');
     }
 
-    public function destroy(string $id)
+
+    public function destroy(Location $location)
     {
-        //
+        // Check if the location is already excluded
+        if ($location->excluded) {
+            return redirect()->route('location.index')->with('error', 'Location is already excluded.');
+        }
+
+        // Mark the location as excluded and inactive
+        $location->update([
+            'excluded' => 1,
+            'active' => 0
+        ]);
+
+        return redirect()->route('location.index')->with('success', 'Location has been marked as excluded.');
     }
 }

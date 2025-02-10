@@ -89,9 +89,8 @@
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Delete Action -->
                                                     <li>
-                                                        <form action="#" method="POST"
-                                                            class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                            onsubmit="return confirmDelete(event)">
+                                                        <form action="{{ route('location.destroy', $location->id) }}" method="POST"
+                                                            onsubmit="return confirmDelete(event)" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="flex items-center w-full text-left text-red-500">
@@ -158,4 +157,17 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Delete Confirmation -->
+    <script>
+        function confirmDelete(event) {
+            event.preventDefault(); // Prevent default form submission
+            if (confirm("Are you sure you want to delete this location? This action cannot be undone.")) {
+                event.target.submit(); // Submit the form if confirmed
+            }
+        }
+    </script>
+
+
 </x-app-layout>

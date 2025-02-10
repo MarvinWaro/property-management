@@ -9,6 +9,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+    // Dashboard Route
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -27,7 +28,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::post('/location', [LocationController::class, 'store'])->name('location.store');
     Route::get('/location/{location}/edit', [LocationController::class, 'edit'])->name('location.edit');
     Route::put('/location/{location}', [LocationController::class, 'update'])->name('location.update');
-    
+    Route::delete('/location/{location}', [LocationController::class, 'destroy'])->name('location.destroy');
+
 
 });
 

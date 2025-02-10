@@ -9,10 +9,13 @@ return new class extends Migration {
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->string('location_name')->unique(); // Alphanumeric input
+            $table->string('location_name'); // Alphanumeric input
+            $table->boolean('active')->default(1); // 1 = Active, 0 = Inactive
+            $table->boolean('excluded')->default(0); // 1 = Excluded, 0 = Not Excluded
             $table->timestamps();
         });
     }
+
 
     public function down(): void
     {
