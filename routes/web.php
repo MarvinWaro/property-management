@@ -23,5 +23,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     // Location Routes
     Route::get('/location', [LocationController::class, 'index'])->name('location.index');
+    Route::get('/location/create', [LocationController::class, 'create'])->name('location.create');
+    Route::post('/location', [LocationController::class, 'store'])->name('location.store');
+    Route::get('/location/{location}/edit', [LocationController::class, 'edit'])->name('location.edit');
+    Route::put('/location/{location}', [LocationController::class, 'update'])->name('location.update');
+    
+
 });
 

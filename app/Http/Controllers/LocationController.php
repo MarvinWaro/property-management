@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         // Get the search term from the request
@@ -24,50 +21,47 @@ class LocationController extends Controller
         return view('manage-location.index', compact('locations'));
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('manage-location.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        // Validate input
+        $request->validate([
+            'location_name' => 'required|string|regex:/^[a-zA-Z0-9\s]+$/|unique:locations,location_name|max:255',
+        ]);
+
+        // Store new location
+        Location::create([
+            'location_name' => $request->location_name,
+        ]);
+
+        // Redirect with success message
+        return redirect()->route('location.index')->with('success', 'Location added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Location $location)
     {
-        //
+        return view('manage-location.edit', compact('location'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Location $location)
     {
-        //
+        // Validate input
+        $request->validate([
+            'location_name' => 'required|string|regex:/^[a-zA-Z0-9\s]+$/|unique:locations,location_name,' . $location->id . '|max:255',
+        ]);
+
+        // Update location
+        $location->update([
+            'location_name' => $request->location_name
+        ]);
+
+        return redirect()->route('location.index')->with('success', 'Location updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //
