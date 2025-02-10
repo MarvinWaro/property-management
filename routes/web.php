@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EndUserController;
+use App\Http\Controllers\LocationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,5 +21,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::put('/end_users/{endUser}', [EndUserController::class, 'update'])->name('end_users.update');
     Route::delete('/end_users/{endUser}', [EndUserController::class, 'destroy'])->name('end_users.destroy');
 
+    // Location Routes
+    Route::get('/location', [LocationController::class, 'index'])->name('location.index');
 });
 
