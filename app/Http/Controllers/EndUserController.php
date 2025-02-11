@@ -73,7 +73,7 @@ class EndUserController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return redirect()->route('end_users.index')->with('success', 'User reactivated successfully.');
+            return redirect()->route('end_users.index')->with('success', 'User added successfully.');
         }
 
         // If no excluded user is found, create a new user
@@ -86,7 +86,7 @@ class EndUserController extends Controller
             'excluded' => 0,
         ]);
 
-        return redirect()->route('end_users.index')->with('success', 'User created successfully.');
+        return redirect()->route('end_users.index')->with('success', 'User added successfully.');
     }
 
 
@@ -132,6 +132,7 @@ class EndUserController extends Controller
             'active' => 0    // Mark user as inactive
         ]);
 
-        return redirect()->route('end_users.index')->with('success', 'User has been marked as excluded.');
+        return redirect()->route('end_users.index')->with('success', 'User has been removed.');
     }
+
 }

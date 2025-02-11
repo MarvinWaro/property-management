@@ -156,7 +156,7 @@
     </div>
 
 
-    {{-- This is for the success message --}}
+    {{-- This is for the success message
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             @if (session('success'))
@@ -169,7 +169,7 @@
                 });
             @endif
         });
-    </script>
+    </script> --}}
 
     <!-- Delete Confirmation -->
     <script>
@@ -194,7 +194,7 @@
             @if (session('deleted'))
                 setTimeout(() => {
                     Swal.fire({
-                        title: "Deleted!",
+                        title: "Success!",
                         text: "{{ session('deleted') }}",
                         icon: "success",
                         confirmButtonColor: "#3085d6",

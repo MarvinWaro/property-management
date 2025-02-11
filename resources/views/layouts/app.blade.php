@@ -99,7 +99,6 @@
 </body>
 
 {{-- for loader --}}
-
 <script>
     // Show the loader
     function showLoader() {
@@ -116,6 +115,21 @@
         showLoader();
         setTimeout(hideLoader, 3000); // Adjust if needed
     };
+</script>
+
+{{-- This is for the success message --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        @if (session('success'))
+            Swal.fire({
+                title: "Success!",
+                text: "{{ session('success') }}",
+                icon: "success",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "OK"
+            });
+        @endif
+    });
 </script>
 
 

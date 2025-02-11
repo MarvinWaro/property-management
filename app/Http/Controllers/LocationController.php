@@ -57,7 +57,7 @@ class LocationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return redirect()->route('location.index')->with('success', 'Location reactivated successfully.');
+            return redirect()->route('location.index')->with('success', 'Location added successfully.');
         }
 
         // If no excluded location is found, create a new location
