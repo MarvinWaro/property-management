@@ -14,6 +14,15 @@
 
     <link href="{{ asset('css/main.css') }}" rel="stylesheet">
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.all.min.js"></script>
+
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -24,8 +33,8 @@
 <body class="font-sans antialiased">
 
     <!-- Loading Screen (Hidden by Default) -->
-    <!-- Loader HTML -->
-    {{-- <div id="loading-screen"
+        <!-- Loader HTML -->
+        {{-- <div id="loading-screen"
         class="loader-container fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 hidden">
         <!-- Loader 1 -->
         <div class="loader">

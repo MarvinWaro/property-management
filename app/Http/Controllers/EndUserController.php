@@ -31,7 +31,7 @@ class EndUserController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input, excluding unique checks for now
+        // Validate input
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
@@ -39,50 +39,50 @@ class EndUserController extends Controller
             'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
         ]);
 
-        // Check if an ACTIVE user exists with the same email
-        $existingEmailUser = EndUser::where('excluded', 0)
-            ->where('email', $request->email)
-            ->first();
-
-        // Check if an ACTIVE user exists with the same phone number
-        $existingPhoneUser = EndUser::where('excluded', 0)
-            ->where('phone_number', $request->phone_number)
-            ->first();
-
-        // If either already exists, show the correct error message
-        if ($existingEmailUser || $existingPhoneUser) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors([
-                    'email' => $existingEmailUser ? 'Email is already taken.' : null,
-                    'phone_number' => $existingPhoneUser ? 'Phone number is already taken.' : null,
-                ]);
-        }
-
-        // Check if an EXCLUDED user exists with the same email or phone number
-        $excludedUser = EndUser::where('excluded', 1)
+        // Check if an ACTIVE user exists with the same email or phone number
+        $existingUser = EndUser::where('excluded', 0)
             ->where(function ($query) use ($request) {
                 $query->where('email', $request->email)
                         ->orWhere('phone_number', $request->phone_number);
             })
             ->first();
 
+        if ($existingUser) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'email' => 'Email is already taken.',
+                    'phone_number' => 'Phone number is already taken.',
+                ]);
+        }
+
+        // Find any EXCLUDED user (regardless of email/phone) and reuse it
+        $excludedUser = EndUser::where('excluded', 1)->first();
+
         if ($excludedUser) {
-            // Reactivate the excluded user
+            // Reactivate the excluded user with new details
             $excludedUser->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,
                 'department' => $request->department,
-                'excluded' => 0, // Mark as active again
-                'active' => 1
+                'excluded' => 0, // Mark as active
+                'active' => 1,
+                'updated_at' => now(),
             ]);
 
             return redirect()->route('end_users.index')->with('success', 'User reactivated successfully.');
         }
 
         // If no excluded user is found, create a new user
-        EndUser::create($request->all());
+        EndUser::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'department' => $request->department,
+            'active' => 1,
+            'excluded' => 0,
+        ]);
 
         return redirect()->route('end_users.index')->with('success', 'User created successfully.');
     }

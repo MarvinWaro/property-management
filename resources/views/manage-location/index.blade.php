@@ -89,11 +89,10 @@
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Delete Action -->
                                                     <li>
-                                                        <form action="{{ route('location.destroy', $location->id) }}" method="POST"
-                                                            onsubmit="return confirmDelete(event)" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                        <form id="deleteForm{{ $location->id }}" action="{{ route('location.destroy', $location->id) }}" method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="flex items-center w-full text-left text-red-500">
+                                                            <button type="button" class="flex items-center px-4 py-2 text-red-500 hover:text-red-700" onclick="confirmDelete({{ $location->id }})">
                                                                 <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                                     <path fill-rule="evenodd"
                                                                         d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
@@ -160,14 +159,45 @@
 
 
     <!-- Delete Confirmation -->
-    <script>
+    {{-- <script>
         function confirmDelete(event) {
             event.preventDefault(); // Prevent default form submission
             if (confirm("Are you sure you want to delete this location? This action cannot be undone.")) {
                 event.target.submit(); // Submit the form if confirmed
             }
         }
+    </script> --}}
+
+    <script>
+        function confirmDelete(locationId) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm' + locationId).submit();
+                }
+            });
+        }
     </script>
 
+    {{-- @if (session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "{{ session('success') }}",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "OK"
+                });
+            });
+        </script>
+    @endif --}}
 
 </x-app-layout>
