@@ -39,20 +39,22 @@ class EndUserController extends Controller
             'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
         ]);
 
-        // Check if an ACTIVE user exists with the same email or phone number
-        $existingUser = EndUser::where('excluded', 0)
-            ->where(function ($query) use ($request) {
-                $query->where('email', $request->email)
-                        ->orWhere('phone_number', $request->phone_number);
-            })
-            ->first();
+        // Check if email is already taken (ACTIVE users only)
+        $emailExists = EndUser::where('excluded', 0)
+            ->where('email', $request->email)
+            ->exists();
 
-        if ($existingUser) {
+        // Check if phone number is already taken (ACTIVE users only)
+        $phoneExists = EndUser::where('excluded', 0)
+            ->where('phone_number', $request->phone_number)
+            ->exists();
+
+        if ($emailExists || $phoneExists) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
-                    'email' => 'Email is already taken.',
-                    'phone_number' => 'Phone number is already taken.',
+                    'email' => $emailExists ? 'Email is already taken.' : null,
+                    'phone_number' => $phoneExists ? 'Phone number is already taken.' : null,
                 ]);
         }
 
@@ -132,6 +134,4 @@ class EndUserController extends Controller
 
         return redirect()->route('end_users.index')->with('success', 'User has been marked as excluded.');
     }
-
-
 }
