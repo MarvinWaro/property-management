@@ -29,7 +29,7 @@ class LocationController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input (no regex, just max length)
+        // Validate input
         $request->validate([
             'location_name' => 'required|string|max:255',
         ]);
@@ -45,16 +45,16 @@ class LocationController extends Controller
                 ->withErrors(['location_name' => 'Location name is already taken.']);
         }
 
-        // Check if an EXCLUDED location exists
-        $excludedLocation = Location::where('excluded', 1)
-            ->where('location_name', $request->location_name)
-            ->first();
+        // Find the first EXCLUDED location and reuse it
+        $excludedLocation = Location::where('excluded', 1)->first();
 
         if ($excludedLocation) {
-            // Reactivate the excluded location
+            // Reactivate the excluded location with new details
             $excludedLocation->update([
-                'excluded' => 0,
-                'active' => 1
+                'location_name' => $request->location_name,
+                'excluded' => 0, // Mark as active
+                'active' => 1,
+                'updated_at' => now(),
             ]);
 
             return redirect()->route('location.index')->with('success', 'Location reactivated successfully.');
@@ -69,6 +69,7 @@ class LocationController extends Controller
 
         return redirect()->route('location.index')->with('success', 'Location created successfully.');
     }
+
 
 
     public function edit(Location $location)
