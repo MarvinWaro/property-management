@@ -8,7 +8,6 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-
                 <div class="section-container p-5">
                     <div class="relative overflow-x-auto">
                         <!-- Button and Search Bar Container -->
@@ -152,27 +151,32 @@
                         </nav>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
 
-    <!-- Delete Confirmation -->
-    {{-- <script>
-        function confirmDelete(event) {
-            event.preventDefault(); // Prevent default form submission
-            if (confirm("Are you sure you want to delete this location? This action cannot be undone.")) {
-                event.target.submit(); // Submit the form if confirmed
-            }
-        }
-    </script> --}}
+    {{-- This is for the success message --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            @if (session('success'))
+                Swal.fire({
+                    title: "Success!",
+                    text: "{{ session('success') }}",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "OK"
+                });
+            @endif
+        });
+    </script>
 
+    <!-- Delete Confirmation -->
     <script>
         function confirmDelete(locationId) {
             Swal.fire({
                 title: "Are you sure?",
-                text: "You won't be able to revert this!",
+                text: "HINDI MO NA MAARING BALIKAN ANG MGA BAGAY NA TAPOS NA",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -184,20 +188,21 @@
                 }
             });
         }
-    </script>
 
-    {{-- @if (session('success'))
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                Swal.fire({
-                    title: "Deleted!",
-                    text: "{{ session('success') }}",
-                    icon: "success",
-                    confirmButtonColor: "#3085d6",
-                    confirmButtonText: "OK"
-                });
-            });
-        </script>
-    @endif --}}
+        // Show success alert if session deleted exists
+        document.addEventListener("DOMContentLoaded", function () {
+            @if (session('deleted'))
+                setTimeout(() => {
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "{{ session('deleted') }}",
+                        icon: "success",
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "OK"
+                    });
+                }, 500); // Small delay to ensure the page fully loads
+            @endif
+        });
+    </script>
 
 </x-app-layout>

@@ -70,8 +70,6 @@ class LocationController extends Controller
         return redirect()->route('location.index')->with('success', 'Location created successfully.');
     }
 
-
-
     public function edit(Location $location)
     {
         return view('manage-location.edit', compact('location'));
@@ -92,7 +90,6 @@ class LocationController extends Controller
         return redirect()->route('location.index')->with('success', 'Location updated successfully.');
     }
 
-
     public function destroy(Location $location)
     {
         // Check if the location is already excluded
@@ -106,6 +103,7 @@ class LocationController extends Controller
             'active' => 0
         ]);
 
-        return redirect()->route('location.index')->with('success', 'Location has been marked as excluded.');
+        return redirect()->route('location.index')->with('deleted', 'Location has been removed.');
     }
+
 }
