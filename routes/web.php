@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PropertyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,6 +31,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::put('/location/{location}', [LocationController::class, 'update'])->name('location.update');
     Route::delete('/location/{location}', [LocationController::class, 'destroy'])->name('location.destroy');
 
+    // Property Routes
+    Route::get('/property', [PropertyController::class, 'index'])->name('property.index');
+    
 
 });
 

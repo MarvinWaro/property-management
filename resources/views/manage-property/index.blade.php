@@ -9,6 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
+
                     <div class="relative overflow-x-auto">
                         <!-- Button and Search Bar Container -->
                         <div class="flex items-center justify-between mb-2 mt-2 space-x-2 w-full">
@@ -26,6 +27,7 @@
                                 </button>
                             </form>
 
+                            {{-- Button Add New Property in the List --}}
                             <a href="{{ route('location.create') }}" type="button" class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center ms-5">
                                 <span class="mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
@@ -34,7 +36,7 @@
                                 </span>
                                 <!-- Text (Visible on larger screens) -->
                                 <span class="hidden sm:inline-flex">
-                                    Add New Location
+                                    Add New Property
                                 </span>
                             </a>
                         </div>
@@ -42,7 +44,7 @@
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-                                CHED Respective Location
+                                CHED Property Details
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                                     These are CHED personnel responsible for managing institutional properties, ensuring accountability and proper utilization before their transition or departure, allowing seamless asset handover and continued operational efficiency.
                                 </p>
@@ -50,20 +52,44 @@
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" class="px-6 py-3">ID</th>
+                                    <th scope="col" class="px-6 py-3">Item Name</th>
+                                    <th scope="col" class="px-6 py-3">Description</th>
+                                    <th scope="col" class="px-6 py-3">Serial No</th>
+                                    <th scope="col" class="px-6 py-3">Model No</th>
+                                    <th scope="col" class="px-6 py-3">Acquisition Date</th>
+                                    <th scope="col" class="px-6 py-3">Acquisition Cost</th>
+                                    <th scope="col" class="px-6 py-3">Unit of Measure</th>
+                                    <th scope="col" class="px-6 py-3">Qty (Physical Count)</th>
+                                    <th scope="col" class="px-6 py-3">Fund</th>
                                     <th scope="col" class="px-6 py-3">Location</th>
-                                    <th scope="col" class="px-6 py-3">Action</th>
+                                    <th scope="col" class="px-6 py-3">End User</th>
+                                    <th scope="col" class="px-6 py-3">Condition</th>
+                                    <th scope="col" class="px-6 py-3">Remarks</th>
+                                    <th scope="col" class="px-6 py-3">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($locations as $location)
+                                @foreach ($properties as $property)
                                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            {{ $location->id }}
+                                            {{ $property->id }}
                                         </th>
-                                        <td class="px-6 py-4">{{ $location->location_name }}</td>
-                                        <td class="px-2 py-4">
+                                        <td class="px-6 py-4">{{ $property->item_name }}</td>
+                                        <td class="px-6 py-4">{{ $property->item_description ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->serial_no ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->model_no ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->acquisition_date ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">₱{{ number_format($property->acquisition_cost, 2) }}</td>
+                                        <td class="px-6 py-4">{{ $property->unit_of_measure ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->quantity_per_physical_count }}</td>
+                                        <td class="px-6 py-4">{{ $property->fund }}</td>
+                                        <td class="px-6 py-4">{{ $property->location->location_name ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->endUser->name ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $property->condition }}</td>
+                                        <td class="px-6 py-4">{{ $property->remarks ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">
                                             <!-- Dropdown Button -->
-                                            <button id="dropdownMenuButton{{ $location->id }}" data-dropdown-toggle="dropdownMenu{{ $location->id }}"
+                                            <button id="dropdownMenuButton{{ $property->id }}" data-dropdown-toggle="dropdownMenu{{ $property->id }}"
                                                 class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-1 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                                                 type="button">
                                                 <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
@@ -72,11 +98,11 @@
                                             </button>
 
                                             <!-- Dropdown Menu -->
-                                            <div id="dropdownMenu{{ $location->id }}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
+                                            <div id="dropdownMenu{{ $property->id }}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
                                                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
                                                     <!-- Edit Action -->
                                                     <li>
-                                                        <a href="{{ route('location.edit', $location->id) }}"
+                                                        <a href="#!"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil me-3">
                                                                 <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
@@ -88,10 +114,10 @@
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Delete Action -->
                                                     <li>
-                                                        <form id="deleteForm{{ $location->id }}" action="{{ route('location.destroy', $location->id) }}" method="POST" class="inline">
+                                                        <form action="#" method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="button" class="flex items-center px-4 py-2 text-red-500 hover:text-red-700" onclick="confirmDelete({{ $location->id }})">
+                                                            <button type="button" class="flex items-center px-4 py-2 text-red-500 hover:text-red-700" onclick="confirmDelete({{ $property->id }})">
                                                                 <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                                     <path fill-rule="evenodd"
                                                                         d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
@@ -115,32 +141,32 @@
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
                                 Showing
                                 <span class="font-semibold text-gray-900 dark:text-white">
-                                    {{ $locations->firstItem() }}-{{ $locations->lastItem() }}
+                                    {{ $properties->firstItem() }}-{{ $properties->lastItem() }}
                                 </span>
                                 of
-                                <span class="font-semibold text-gray-900 dark:text-white">{{ $locations->total() }}</span>
+                                <span class="font-semibold text-gray-900 dark:text-white">{{ $properties->total() }}</span>
                             </span>
 
                             <!-- Pagination Links -->
                             <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8 mb-5">
                                 <!-- Previous Page Link -->
-                                @if ($locations->onFirstPage())
+                                @if ($properties->onFirstPage())
                                     <li>
                                         <a href="#" class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg cursor-not-allowed">Previous</a>
                                     </li>
                                 @else
                                     <li>
-                                        <a href="{{ $locations->previousPageUrl() }}" class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+                                        <a href="{{ $properties->previousPageUrl() }}" class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
                                     </li>
                                 @endif
 
                                 {{-- <!-- Pagination Links -->
-                                {{ $locations->links('pagination::tailwind') }} --}}
+                                {{ $properties->links('pagination::tailwind') }} --}}
 
                                 <!-- Next Page Link -->
-                                @if ($locations->hasMorePages())
+                                @if ($properties->hasMorePages())
                                     <li>
-                                        <a href="{{ $locations->nextPageUrl() }}" class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+                                        <a href="{{ $properties->nextPageUrl() }}" class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
                                     </li>
                                 @else
                                     <li>
@@ -150,6 +176,7 @@
                             </ul>
                         </nav>
                     </div>
+
                 </div>
             </div>
         </div>

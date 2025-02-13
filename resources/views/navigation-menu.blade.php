@@ -18,6 +18,10 @@
                             {{ __('Dashboard') }}
                         </x-nav-link>
 
+                        <x-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
+                            {{ __('Manage Property') }}
+                        </x-nav-link>
+
                         <x-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
                             {{ __('Manage Users') }}
                         </x-nav-link>
@@ -170,6 +174,10 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
+                {{ __('Manage Property') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
