@@ -22,7 +22,11 @@ class Property extends Model
         'location_id',
         'end_user_id',
         'condition',
-        'remarks'
+        'remarks',
+
+        // new fields
+        'active',
+        'excluded'
     ];
 
     /**

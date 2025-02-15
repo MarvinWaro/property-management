@@ -33,13 +33,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     // Property Routes
     Route::get('/property', [PropertyController::class, 'index'])->name('property.index');
-    // Show the form
     Route::get('/property/create', [PropertyController::class, 'create'])->name('property.create');
-    // Handle form submission
     Route::post('/property', [PropertyController::class, 'store'])->name('property.store');
-
-
-
-
+    Route::get('/property/{property}/edit', [PropertyController::class, 'edit'])->name('property.edit');
+    Route::put('/property/{property}', [PropertyController::class, 'update'])->name('property.update');
+    Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
+    
 });
 
