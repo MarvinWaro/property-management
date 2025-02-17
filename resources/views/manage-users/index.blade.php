@@ -176,50 +176,16 @@
                     </div>
 
                     <!-- Pagination -->
-                    <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-3"
-                        aria-label="Table navigation">
-                        <!-- Entries Indicator -->
-                        <span
-                            class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                            Showing
-                            <span class="font-semibold text-gray-900 dark:text-white">
-                                {{ $endUsers->firstItem() }}-{{ $endUsers->lastItem() }}
-                            </span>
-                            of
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ $endUsers->total() }}</span>
-                        </span>
+                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
+                        <!-- On the left side (optional) -->
+                        <div class="text-sm text-gray-500">
+                            {{-- Put something like "Showing 1–5 of 20" if you want, or leave empty --}}
+                        </div>
 
-                        <!-- Pagination Links -->
-                        <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8 mb-5">
-                            <!-- Previous Page Link -->
-                            @if ($endUsers->onFirstPage())
-                                <li>
-                                    <a href="#"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg cursor-not-allowed">Previous</a>
-                                </li>
-                            @else
-                                <li>
-                                    <a href="{{ $endUsers->previousPageUrl() }}"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                </li>
-                            @endif
-
-                            {{-- <!-- Pagination Links -->
-                            {{ $endUsers->links('pagination::tailwind') }} --}}
-
-                            <!-- Next Page Link -->
-                            @if ($endUsers->hasMorePages())
-                                <li>
-                                    <a href="{{ $endUsers->nextPageUrl() }}"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                </li>
-                            @else
-                                <li>
-                                    <a href="#"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg cursor-not-allowed">Next</a>
-                                </li>
-                            @endif
-                        </ul>
+                        <!-- On the right side -->
+                        <div class="mt-2 sm:mt-0">
+                            {{ $endUsers->links('pagination::tailwind') }}
+                        </div>
                     </nav>
                 </div>
             </div>
@@ -287,6 +253,5 @@
             toggleEndUserClearButton();
         });
     </script>
-
 
 </x-app-layout>
