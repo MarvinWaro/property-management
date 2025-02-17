@@ -195,5 +195,10 @@ class PropertyController extends Controller
             ->with('success', 'Property has been removed.');
     }
 
+    public function view(Property $property)
+    {
+        return view('manage-property.view', compact('property'));
+    }
+
 
 }

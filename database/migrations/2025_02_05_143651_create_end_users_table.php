@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->string('department');
             $table->string('phone_number')->unique();
+            $table->string('picture')->nullable(); // New column for the picture
             $table->boolean('active')->default(1); // 1 = Active, 0 = Inactive
             $table->boolean('excluded')->default(0); // 1 = Excluded, 0 = Not Excluded
             $table->timestamps();
@@ -30,3 +31,4 @@ return new class extends Migration {
         Schema::dropIfExists('end_users');
     }
 };
+

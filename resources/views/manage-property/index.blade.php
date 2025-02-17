@@ -113,7 +113,12 @@
                                         <td class="px-6 py-4">{{ $property->quantity_per_physical_count }}</td>
                                         <td class="px-6 py-4">{{ $property->fund ?? 'TBA' }}</td>
                                         <td class="px-6 py-4">{{ $property->endUser->name ?? 'TBA' }}</td>
-                                        <td class="px-6 py-4">{{ $property->condition }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-full
+                                                {{ strtolower($property->condition) == 'serviceable' ? 'bg-green-500 text-white' : (strtolower($property->condition) == 'unserviceable' ? 'bg-red-500 text-white' : '') }}">
+                                                {{ $property->condition ?: 'TBA/NA' }}
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4">
                                             <!-- Dropdown Button -->
                                             <button id="dropdownMenuButton{{ $property->id }}"
@@ -136,20 +141,18 @@
 
                                                     <!-- View Action -->
                                                     <li>
-                                                        <a href="#"
+                                                        <a href="{{ route('property.view', $property->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <!-- Icon -->
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
-                                                                height="20" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="1"
-                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-eye me-3">
-                                                                <path
-                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                                                                 <circle cx="12" cy="12" r="3" />
                                                             </svg>
                                                             View
                                                         </a>
+
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
 
@@ -219,51 +222,16 @@
                     </div>
 
                     <!-- Pagination -->
-                    <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4 mb-3"
-                        aria-label="Table navigation">
-                        <!-- Entries Indicator -->
-                        <span
-                            class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                            Showing
-                            <span class="font-semibold text-gray-900 dark:text-white">
-                                {{ $properties->firstItem() }}-{{ $properties->lastItem() }}
-                            </span>
-                            of
-                            <span
-                                class="font-semibold text-gray-900 dark:text-white">{{ $properties->total() }}</span>
-                        </span>
+                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
+                        <!-- On the left side (optional) -->
+                        <div class="text-sm text-gray-500">
+                            {{-- Put something like "Showing 1–5 of 20" if you want, or leave empty --}}
+                        </div>
 
-                        <!-- Pagination Links -->
-                        <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8 mb-5">
-                            <!-- Previous Page Link -->
-                            @if ($properties->onFirstPage())
-                                <li>
-                                    <a href="#"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg cursor-not-allowed">Previous</a>
-                                </li>
-                            @else
-                                <li>
-                                    <a href="{{ $properties->previousPageUrl() }}"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                </li>
-                            @endif
-
-                            {{-- <!-- Pagination Links -->
-                            {{ $properties->links('pagination::tailwind') }} --}}
-
-                            <!-- Next Page Link -->
-                            @if ($properties->hasMorePages())
-                                <li>
-                                    <a href="{{ $properties->nextPageUrl() }}"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                </li>
-                            @else
-                                <li>
-                                    <a href="#"
-                                        class="flex items-center justify-center px-3 h-8 text-gray-500 bg-white border border-gray-300 rounded-e-lg cursor-not-allowed">Next</a>
-                                </li>
-                            @endif
-                        </ul>
+                        <!-- On the right side -->
+                        <div class="mt-2 sm:mt-0">
+                            {{ $properties->links('pagination::tailwind') }}
+                        </div>
                     </nav>
 
                 </div>
