@@ -113,7 +113,12 @@
                                         <td class="px-6 py-4">{{ $property->quantity_per_physical_count }}</td>
                                         <td class="px-6 py-4">{{ $property->fund ?? 'TBA' }}</td>
                                         <td class="px-6 py-4">{{ $property->endUser->name ?? 'TBA' }}</td>
-                                        <td class="px-6 py-4">{{ $property->condition }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-full
+                                                {{ strtolower($property->condition) == 'serviceable' ? 'bg-green-500 text-white' : (strtolower($property->condition) == 'unserviceable' ? 'bg-red-500 text-white' : '') }}">
+                                                {{ $property->condition ?: 'TBA/NA' }}
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4">
                                             <!-- Dropdown Button -->
                                             <button id="dropdownMenuButton{{ $property->id }}"
@@ -136,20 +141,18 @@
 
                                                     <!-- View Action -->
                                                     <li>
-                                                        <a href="#"
+                                                        <a href="{{ route('property.view', $property->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <!-- Icon -->
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
-                                                                height="20" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="1"
-                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-eye me-3">
-                                                                <path
-                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                                                                 <circle cx="12" cy="12" r="3" />
                                                             </svg>
                                                             View
                                                         </a>
+
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
 

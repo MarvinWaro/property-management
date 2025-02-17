@@ -85,9 +85,10 @@
                                     seamless asset handover and continued operational efficiency.
                                 </p>
                             </caption>
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
+                                    <!-- New column header for Photo -->
+                                    <th scope="col" class="px-6 py-3">Photo</th>
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Name</th>
                                     <th scope="col" class="px-6 py-3">Email</th>
@@ -98,10 +99,14 @@
                             </thead>
                             <tbody>
                                 @foreach ($endUsers as $endUser)
-                                    <tr
-                                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <th scope="row"
-                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <!-- Photo Column -->
+                                        <td class="px-6 py-4">
+                                            <img class="w-10 h-10 rounded-full object-cover"
+                                                src="{{ $endUser->picture ? asset('storage/' . $endUser->picture) : asset('images/default.png') }}"
+                                                alt="{{ $endUser->name }}'s Profile Picture">
+                                        </td>
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $endUser->id }}
                                         </th>
                                         <td class="px-6 py-4">{{ $endUser->name }}</td>
@@ -114,30 +119,25 @@
                                                 data-dropdown-toggle="dropdownMenu{{ $endUser->id }}"
                                                 class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-1 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                                                 type="button">
-                                                <svg class="w-5 h-5" aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                                     viewBox="0 0 16 3">
-                                                    <path
-                                                        d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+                                                    <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                                 </svg>
                                             </button>
 
                                             <!-- Dropdown Menu -->
                                             <div id="dropdownMenu{{ $endUser->id }}"
                                                 class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
-                                                <ul
-                                                    class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
+                                                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
                                                     <!-- Edit Action -->
                                                     <li>
                                                         <a href="{{ route('end_users.edit', $endUser->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
-                                                                height="20" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="1"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
                                                                 stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-pencil me-3">
-                                                                <path
-                                                                    d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                                                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                                                                 <path d="m15 5 4 4" />
                                                             </svg>
                                                             Edit
@@ -153,8 +153,8 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button"
-                                                                class="flex items-center w-full text-left text-red-500"
-                                                                onclick="confirmDelete({{ $endUser->id }})">
+                                                                    class="flex items-center w-full text-left text-red-500"
+                                                                    onclick="confirmDelete({{ $endUser->id }})">
                                                                 <svg class="w-5 h-5 mr-2"
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     viewBox="0 0 16 16" fill="currentColor">
@@ -174,6 +174,7 @@
                             </tbody>
                         </table>
                     </div>
+
 
                     <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">

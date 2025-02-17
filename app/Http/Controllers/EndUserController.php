@@ -31,12 +31,13 @@ class EndUserController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input
+        // Validate input including the picture file
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone_number' => 'required|digits_between:1,15',
             'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture' => 'nullable|image|max:10240', // 10MB max
         ]);
 
         // Check if email is already taken (ACTIVE users only)
@@ -58,6 +59,12 @@ class EndUserController extends Controller
                 ]);
         }
 
+        // Handle file upload if exists
+        $picturePath = null;
+        if ($request->hasFile('picture')) {
+            $picturePath = $request->file('picture')->store('pictures', 'public');
+        }
+
         // Find any EXCLUDED user (regardless of email/phone) and reuse it
         $excludedUser = EndUser::where('excluded', 1)->first();
 
@@ -68,6 +75,7 @@ class EndUserController extends Controller
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,
                 'department' => $request->department,
+                'picture' => $picturePath,
                 'excluded' => 0, // Mark as active
                 'active' => 1,
                 'updated_at' => now(),
@@ -82,13 +90,13 @@ class EndUserController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'department' => $request->department,
+            'picture' => $picturePath,
             'active' => 1,
             'excluded' => 0,
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User added successfully.');
     }
-
 
     // Show Edit Form
     public function edit(EndUser $endUser)
@@ -99,13 +107,20 @@ class EndUserController extends Controller
     // Handle Update Request
     public function update(Request $request, EndUser $endUser)
     {
-        // Validate input
+        // Validate input including the picture file
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:end_users,email,' . $endUser->id,
             'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number,' . $endUser->id,
             'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture' => 'nullable|image|max:10240', // 10MB max
         ]);
+
+        // Handle file upload if exists
+        $picturePath = $endUser->picture; // Keep existing picture if no new upload
+        if ($request->hasFile('picture')) {
+            $picturePath = $request->file('picture')->store('pictures', 'public');
+        }
 
         // Update user
         $endUser->update([
@@ -113,6 +128,7 @@ class EndUserController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'department' => $request->department,
+            'picture' => $picturePath,
         ]);
 
         // Redirect with success message
