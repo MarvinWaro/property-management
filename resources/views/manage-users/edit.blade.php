@@ -18,31 +18,34 @@
                             @method('PUT')
 
                             <!-- Profile Photo Update -->
-                            <!-- Profile Photo Update -->
                             <div x-data="{
                                     // System default image (CHED logo)
                                     defaultImage: '{{ asset('img/ched-logo.png') }}',
                                     // Current photo: if user has a custom photo, use it; otherwise, use CHED logo.
                                     photoPreview: '{{ $endUser->picture ? asset('storage/' . $endUser->picture) : asset('img/ched-logo.png') }}',
-                                    photoName: null
+                                    photoName: null,
+                                    removePhoto: false
                                 }" class="mb-4">
 
                                 <!-- Hidden File Input -->
                                 <input type="file" name="picture" class="hidden" x-ref="photo"
                                     x-on:change="
-                                            photoName = $refs.photo.files[0].name;
-                                            const reader = new FileReader();
-                                            reader.onload = (e) => {
-                                                photoPreview = e.target.result;
-                                            };
-                                            reader.readAsDataURL($refs.photo.files[0]);
+                                        photoName = $refs.photo.files[0].name;
+                                        removePhoto = false;  // Reset removal flag if a new file is chosen
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            photoPreview = e.target.result;
+                                        };
+                                        reader.readAsDataURL($refs.photo.files[0]);
                                     ">
+
+                                <!-- Hidden Input for Removal Flag -->
+                                <input type="hidden" name="remove_photo" x-model="removePhoto">
 
                                 <div>
                                     <!-- Preview Image -->
                                     <div class="mt-2">
-                                        <img :src="photoPreview" class="w-40 h-40 rounded-full shadow object-cover"
-                                            alt="Profile Photo">
+                                        <img :src="photoPreview" class="w-40 h-40 rounded-full shadow object-cover" alt="Profile Photo">
                                     </div>
                                     <div class="flex gap-2 mt-2">
                                         <!-- Select New Photo Button -->
@@ -56,8 +59,7 @@
                                         <button type="button"
                                             class="inline-flex items-center px-4 py-2 bg-red-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm transition ease-in-out duration-150"
                                             :class="{
-                                                'hover:bg-red-600 focus:border-red-700 focus:shadow-outline-red active:bg-red-700': photoPreview !==
-                                                    defaultImage,
+                                                'hover:bg-red-600 focus:border-red-700 focus:shadow-outline-red active:bg-red-700': photoPreview !== defaultImage,
                                                 'opacity-50 cursor-not-allowed': photoPreview === defaultImage
                                             }"
                                             x-bind:disabled="photoPreview === defaultImage"
@@ -66,6 +68,7 @@
                                                     // Reset back to the system default (CHED logo)
                                                     photoPreview = defaultImage;
                                                     photoName = null;
+                                                    removePhoto = true;  // Set the flag so the controller knows to remove the picture
                                                     $refs.photo.value = '';
                                                 }
                                             ">
@@ -78,18 +81,15 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Name Field -->
                                 <div>
-                                    <label for="name"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Your Name
                                     </label>
                                     <div class="mb-4">
                                         <div class="relative">
-                                            <div
-                                                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-user">
+                                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
                                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                                     <circle cx="12" cy="7" r="4" />
                                                 </svg>
@@ -110,18 +110,15 @@
 
                                 <!-- Email Field -->
                                 <div>
-                                    <label for="email"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Your Email
                                     </label>
                                     <div class="mb-4">
                                         <div class="relative">
-                                            <div
-                                                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-at-sign">
+                                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign">
                                                     <circle cx="12" cy="12" r="4" />
                                                     <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
                                                 </svg>
@@ -142,20 +139,17 @@
 
                                 <!-- Contact Number Field -->
                                 <div>
-                                    <label for="contact-number"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="contact-number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Your Contact Number
                                     </label>
                                     <div class="mb-4">
                                         <div class="relative">
-                                            <div
-                                                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-phone">
+                                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone">
                                                     <path
-                                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                                                 </svg>
                                             </div>
                                             <input type="text" id="contact-number" name="phone_number"
@@ -174,8 +168,7 @@
 
                                 <!-- Department Dropdown -->
                                 <div>
-                                    <label for="department"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="department" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Select Department
                                     </label>
                                     <div class="mb-4">
@@ -216,6 +209,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
