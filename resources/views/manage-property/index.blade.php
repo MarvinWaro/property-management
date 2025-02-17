@@ -10,24 +10,50 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
 
-                    <!-- Button and Search Bar Container -->
+                    {{-- this is the search bar and add container --}}
                     <div class="flex items-center justify-between mb-2 mt-2 space-x-2 w-full">
-                        <!-- Search Bar on the left -->
+                        <!-- Property Search Bar -->
                         <form method="GET" action="{{ route('property.index') }}"
                             class="w-full max-w-sm flex items-center space-x-2">
-                            <input type="text" name="search" value="{{ request()->get('search') }}"
-                                placeholder="Search..."
-                                class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <!-- Relative container for input + clear button -->
+                            <div class="relative flex-grow">
+                                <!-- Text Input -->
+                                <input type="text" name="search" id="propertySearchInput"
+                                    value="{{ request()->get('search') }}" oninput="togglePropertyClearButton()"
+                                    placeholder="Search..."
+                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
+                                        focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                        dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                        dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
-                            <!-- Search Icon Button (This will submit the form) -->
+                                <!-- Clear (X) button; hidden by default -->
+                                <button type="button" id="propertyClearBtn" onclick="clearPropertySearch()"
+                                    style="display: none;"
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500
+                                        hover:text-red-500 focus:outline-none">
+                                    <!-- X Icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                        <line x1="18" x2="6" y1="6" y2="18" />
+                                        <line x1="6" x2="18" y1="6" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Search Icon Button (submits the form) -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-1 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg hover:bg-blue-800
+                                    focus:ring-1 focus:outline-none focus:ring-blue-300 dark:bg-blue-600
+                                    dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center">
                                 <!-- Search Icon -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
-                                    <path fill-rule="evenodd"
-                                        d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
-                                        clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11
+                                        5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1
+                                        12.452 4.391l3.328 3.329a.75.75
+                                        0 1 1-1.06 1.06l-3.329-3.328A7
+                                        7 0 0 1 2 9Z" clip-rule="evenodd" />
                                 </svg>
                             </button>
                         </form>
@@ -152,26 +178,17 @@
                                                     <li>
                                                         <form id="deleteForm{{ $property->id }}"
                                                             action="{{ route('property.destroy', $property->id) }}"
-                                                            method="POST"
-                                                            class="inline"
-                                                        >
+                                                            method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button
-                                                                type="button"
+                                                            <button type="button"
                                                                 class="flex items-center px-4 py-2 text-red-500 hover:text-red-700"
-                                                                onclick="confirmDelete({{ $property->id }})"
-                                                            >
+                                                                onclick="confirmDelete({{ $property->id }})">
                                                                 <!-- Icon -->
-                                                                <svg
-                                                                    class="w-5 h-5 mr-2"
+                                                                <svg class="w-5 h-5 mr-2"
                                                                     xmlns="http://www.w3.org/2000/svg"
-                                                                    viewBox="0 0 16 16"
-                                                                    fill="currentColor"
-                                                                >
-                                                                    <path
-                                                                        fill-rule="evenodd"
-                                                                        d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3
+                                                                    viewBox="0 0 16 16" fill="currentColor">
+                                                                    <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3
                                                                         l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285
                                                                         a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3
                                                                         a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0
@@ -184,8 +201,7 @@
                                                                         a.75.75 0 0 1 .712.787l-.275 5.5
                                                                         a.75.75 0 0 1-1.498-.075l.275-5.5
                                                                         a.75.75 0 0 1 .786-.711Z"
-                                                                        clip-rule="evenodd"
-                                                                    />
+                                                                        clip-rule="evenodd" />
                                                                 </svg>
                                                                 Delete
                                                             </button>
@@ -287,6 +303,35 @@
                     });
                 }, 500); // Small delay to ensure the page fully loads
             @endif
+        });
+    </script>
+
+    <!-- JavaScript for toggling X icon and clearing input -->
+    <script>
+        function togglePropertyClearButton() {
+            const input = document.getElementById('propertySearchInput');
+            const clearBtn = document.getElementById('propertyClearBtn');
+
+            // Show X if there's text; otherwise hide
+            if (input.value.trim().length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+        }
+
+        function clearPropertySearch() {
+            const input = document.getElementById('propertySearchInput');
+            input.value = '';
+            document.getElementById('propertyClearBtn').style.display = 'none';
+
+            // If you want to auto-submit after clearing, uncomment:
+            // document.querySelector('form.w-full.max-w-sm').submit();
+        }
+
+        // On page load, display the X if there's an existing search term
+        document.addEventListener('DOMContentLoaded', () => {
+            togglePropertyClearButton();
         });
     </script>
 
