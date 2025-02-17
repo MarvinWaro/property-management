@@ -10,7 +10,7 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
 
-                    <!-- Button and Search Bar Container -->
+                    {{-- this is the search bar and add container --}}
                     <div class="flex items-center justify-between mb-2 mt-2 space-x-2 w-full">
                         <!-- Property Search Bar -->
                         <form method="GET" action="{{ route('property.index') }}"
