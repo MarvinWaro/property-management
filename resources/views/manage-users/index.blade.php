@@ -103,9 +103,10 @@
                                         <!-- Photo Column -->
                                         <td class="px-6 py-4">
                                             <img class="w-10 h-10 rounded-full object-cover"
-                                                src="{{ $endUser->picture ? asset('storage/' . $endUser->picture) : asset('images/default.png') }}"
+                                                src="{{ $endUser->picture ? asset('storage/' . $endUser->picture) : asset('img/ched-logo.png') }}"
                                                 alt="{{ $endUser->name }}'s Profile Picture">
                                         </td>
+
                                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $endUser->id }}
                                         </th>

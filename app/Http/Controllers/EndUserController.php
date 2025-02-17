@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EndUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
 
 class EndUserController extends Controller
 {
@@ -109,29 +111,40 @@ class EndUserController extends Controller
     {
         // Validate input including the picture file
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:end_users,email,' . $endUser->id,
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email|unique:end_users,email,' . $endUser->id,
             'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number,' . $endUser->id,
-            'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
-            'picture' => 'nullable|image|max:10240', // 10MB max
+            'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture'      => 'nullable|image|max:10240', // 10MB max
         ]);
 
-        // Handle file upload if exists
-        $picturePath = $endUser->picture; // Keep existing picture if no new upload
+        // Start with the current picture path
+        $picturePath = $endUser->picture;
+
+        // Convert the remove_photo flag to boolean
+        if ($request->boolean('remove_photo')) {
+            // Delete the old picture if it exists
+            if ($endUser->picture) {
+                Storage::disk('public')->delete($endUser->picture);
+            }
+            // Clear the picture path so that the DB will be set to null
+            $picturePath = null;
+        }
+
+        // Handle file upload if a new picture is provided
         if ($request->hasFile('picture')) {
             $picturePath = $request->file('picture')->store('pictures', 'public');
         }
 
-        // Update user
+        // Update the user record
         $endUser->update([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'         => $request->name,
+            'email'        => $request->email,
             'phone_number' => $request->phone_number,
-            'department' => $request->department,
-            'picture' => $picturePath,
+            'department'   => $request->department,
+            'picture'      => $picturePath,
         ]);
 
-        // Redirect with success message
         return redirect()->route('end_users.index')->with('success', 'User updated successfully');
     }
 
