@@ -47,20 +47,20 @@ class PropertyController extends Controller
 
         return view('manage-property.index', compact('properties'));
     }
-
     public function create()
     {
-        // Assuming you use excluded=0 for active items (if not, just remove `->where('excluded', 0)`):
+        // Fetch all locations and end users
         $locations = Location::all();
-        $endUsers = EndUser::all();
+        $endUsers  = EndUser::all();
 
         return view('manage-property.create', compact('locations', 'endUsers'));
     }
 
     public function store(Request $request)
     {
-        // Validate input
+        // Validate the request input, ensuring property_number uniqueness among active properties
         $request->validate([
+            'property_number'             => 'required|string|unique:properties,property_number,NULL,id,excluded,0',
             'item_name'                   => 'required|string|max:255',
             'item_description'            => 'nullable|string',
             'serial_no'                   => 'nullable|string|unique:properties,serial_no',
@@ -69,15 +69,14 @@ class PropertyController extends Controller
             'acquisition_cost'            => 'nullable|numeric',
             'unit_of_measure'             => 'nullable|string|max:50',
             'quantity_per_physical_count' => 'required|integer|min:1',
-            'fund'                        => 'nullable|string', // now optional
+            'fund'                        => 'nullable|string',
             'location_id'                 => 'required|exists:locations,id',
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
         ]);
 
-        // Check uniqueness in the active (excluded=0) scope if you want
-        // e.g. if we want no two active properties with the same serial no:
+        // Check uniqueness for serial_no among active properties, if provided
         if (!empty($request->serial_no)) {
             $existsActive = Property::where('excluded', 0)
                 ->where('serial_no', $request->serial_no)
@@ -90,12 +89,15 @@ class PropertyController extends Controller
             }
         }
 
-        // Attempt to find an EXCLUDED property to “reuse”
-        $excludedProperty = Property::where('excluded', 1)->first();
+        // Look for an excluded property with the same property_number to "reuse"
+        $excludedProperty = Property::where('excluded', 1)
+            ->where('property_number', $request->property_number)
+            ->first();
 
         if ($excludedProperty) {
-            // Reactivate it
+            // Reactivate the excluded property with updated values
             $excludedProperty->update([
+                'property_number'             => $request->property_number,
                 'item_name'                   => $request->item_name,
                 'item_description'            => $request->item_description,
                 'serial_no'                   => $request->serial_no,
@@ -118,8 +120,9 @@ class PropertyController extends Controller
                 ->with('success', 'Property reactivated successfully.');
         }
 
-        // Otherwise, create a new record
+        // Otherwise, create a new property record
         Property::create([
+            'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
             'item_description'            => $request->item_description,
             'serial_no'                   => $request->serial_no,
@@ -144,18 +147,18 @@ class PropertyController extends Controller
 
     public function edit(Property $property)
     {
-        // Fetch any data you need for drop-downs
+        // Fetch all locations and end users for the dropdowns
         $locations = Location::all();
         $endUsers  = EndUser::all();
 
-        // Return the 'edit' view, passing the property, location, and endUser data
         return view('manage-property.edit', compact('property', 'locations', 'endUsers'));
     }
 
     public function update(Request $request, Property $property)
     {
-        // Validate the input
+        // Validate the input; note the unique rule for property_number excludes the current property
         $request->validate([
+            'property_number'             => 'required|string|unique:properties,property_number,' . $property->id,
             'item_name'                   => 'required|string|max:255',
             'item_description'            => 'nullable|string',
             'serial_no'                   => 'nullable|string|unique:properties,serial_no,' . $property->id,
@@ -164,14 +167,14 @@ class PropertyController extends Controller
             'acquisition_cost'            => 'nullable|numeric',
             'unit_of_measure'             => 'nullable|string|max:50',
             'quantity_per_physical_count' => 'required|integer|min:1',
-            'fund'                        => 'nullable|string', // now optional
+            'fund'                        => 'nullable|string',
             'location_id'                 => 'required|exists:locations,id',
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
         ]);
 
-        // Update the property record
+        // Update the property record with all the request data, including property_number
         $property->update($request->all());
 
         return redirect()
@@ -199,6 +202,4 @@ class PropertyController extends Controller
     {
         return view('manage-property.view', compact('property'));
     }
-
-
 }

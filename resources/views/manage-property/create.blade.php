@@ -35,13 +35,11 @@
 
                                 <!-- 1. Item Name -->
                                 <div>
-                                    <label for="item_name"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Item Name
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Item Name <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
@@ -54,10 +52,10 @@
                                         <input type="text" id="item_name" name="item_name"
                                             value="{{ old('item_name') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('item_name') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('item_name') border-red-500 @enderror"
                                             placeholder="Enter item name...">
                                     </div>
                                     @error('item_name')
@@ -65,31 +63,58 @@
                                     @enderror
                                 </div>
 
+                                <!-- New: Property Number -->
+                                <div>
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Property Number <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="mb-4 relative">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                            <!-- SVG Icon (optional) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-hash">
+                                                <line x1="4" y1="12" x2="20" y2="12"></line>
+                                                <line x1="12" y1="4" x2="12" y2="20"></line>
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="property_number" name="property_number"
+                                            value="{{ old('property_number') }}"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('property_number') border-red-500 @enderror"
+                                            placeholder="Enter property number...">
+                                    </div>
+                                    @error('property_number')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
                                 <!-- 2. Serial No -->
                                 <div>
-                                    <label for="serial_no"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="serial_no" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Serial No
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-barcode">
-                                                <path
-                                                    d="M3 5v14m18-14v14M8 5v14m8-14v14M5 5v14m14-14v14M11 5v14m2-14v14" />
+                                                <path d="M3 5v14m18-14v14M8 5v14m8-14v14M5 5v14m14-14v14M11 5v14m2-14v14" />
                                             </svg>
                                         </div>
                                         <input type="text" id="serial_no" name="serial_no"
                                             value="{{ old('serial_no') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('serial_no') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('serial_no') border-red-500 @enderror"
                                             placeholder="Enter serial number...">
                                     </div>
                                     @error('serial_no')
@@ -99,30 +124,27 @@
 
                                 <!-- 3. Model No -->
                                 <div>
-                                    <label for="model_no"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="model_no" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Model No
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-monitor">
-                                                <rect x="2" y="3" width="20" height="14" rx="2"
-                                                    ry="2" />
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                                                 <path d="M12 17v4M8 21h8" />
                                             </svg>
                                         </div>
                                         <input type="text" id="model_no" name="model_no"
                                             value="{{ old('model_no') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('model_no') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('model_no') border-red-500 @enderror"
                                             placeholder="Enter model number...">
                                     </div>
                                     @error('model_no')
@@ -132,20 +154,17 @@
 
                                 <!-- 4. Acquisition Date -->
                                 <div>
-                                    <label for="acquisition_date"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="acquisition_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Acquisition Date
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-calendar">
-                                                <rect width="18" height="18" x="3" y="4" rx="2"
-                                                    ry="2" />
+                                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                                                 <line x1="16" x2="16" y1="2" y2="6" />
                                                 <line x1="8" x2="8" y1="2" y2="6" />
                                                 <line x1="3" x2="21" y1="10" y2="10" />
@@ -154,10 +173,10 @@
                                         <input type="date" id="acquisition_date" name="acquisition_date"
                                             value="{{ old('acquisition_date') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('acquisition_date') border-red-500 @enderror">
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('acquisition_date') border-red-500 @enderror">
                                     </div>
                                     @error('acquisition_date')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -166,30 +185,27 @@
 
                                 <!-- 5. Acquisition Cost -->
                                 <div>
-                                    <label for="acquisition_cost"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="acquisition_cost" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Acquisition Cost
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-credit-card">
-                                                <rect x="2" y="5" width="20" height="14" rx="2"
-                                                    ry="2" />
+                                                <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
                                                 <line x1="2" x2="22" y1="10" y2="10" />
                                             </svg>
                                         </div>
                                         <input type="number" step="0.01" id="acquisition_cost"
                                             name="acquisition_cost" value="{{ old('acquisition_cost') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('acquisition_cost') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('acquisition_cost') border-red-500 @enderror"
                                             placeholder="Enter cost...">
                                     </div>
                                     @error('acquisition_cost')
@@ -199,13 +215,11 @@
 
                                 <!-- 6. Unit of Measure -->
                                 <div>
-                                    <label for="unit_of_measure"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="unit_of_measure" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Unit of Measure
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
@@ -218,10 +232,10 @@
                                         <input type="text" id="unit_of_measure" name="unit_of_measure"
                                             value="{{ old('unit_of_measure') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('unit_of_measure') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('unit_of_measure') border-red-500 @enderror"
                                             placeholder="e.g., 'piece' or 'box'">
                                     </div>
                                     @error('unit_of_measure')
@@ -229,34 +243,32 @@
                                     @enderror
                                 </div>
 
-                                <!-- 7. Quantity -->
+                                <!-- 7. Quantity (Physical Count) -->
                                 <div>
-                                    <label for="quantity_per_physical_count"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="quantity_per_physical_count" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Quantity (Physical Count)
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-hash">
-                                                <line x1="4" x2="20" y1="9" y2="9" />
-                                                <line x1="4" x2="20" y1="15" y2="15" />
-                                                <line x1="10" x2="8" y1="3" y2="21" />
-                                                <line x1="16" x2="14" y1="3" y2="21" />
+                                                <line x1="4" y1="9" x2="20" y2="9" />
+                                                <line x1="4" y1="15" x2="20" y2="15" />
+                                                <line x1="10" y1="3" x2="8" y2="21" />
+                                                <line x1="16" y1="3" x2="14" y2="21" />
                                             </svg>
                                         </div>
                                         <input type="number" id="quantity_per_physical_count"
                                             name="quantity_per_physical_count"
                                             value="{{ old('quantity_per_physical_count', 1) }}" min="1"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('quantity_per_physical_count') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('quantity_per_physical_count') border-red-500 @enderror"
                                             placeholder="1">
                                     </div>
                                     @error('quantity_per_physical_count')
@@ -270,8 +282,7 @@
                                         Fund
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
@@ -282,15 +293,12 @@
                                                 <path d="M12 12h4" />
                                             </svg>
                                         </div>
-                                        <select
-                                            id="fund"
-                                            name="fund"
+                                        <select id="fund" name="fund"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                @error('fund') border-red-500 @enderror"
-                                        >
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('fund') border-red-500 @enderror">
                                             <option value="" disabled {{ !old('fund') ? 'selected' : '' }}>
                                                 -- Select Fund --
                                             </option>
@@ -309,37 +317,31 @@
 
                                 <!-- 9. Location -->
                                 <div>
-                                    <label for="location_id"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Location
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Location / Whereabouts <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-map-pin">
-                                                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799
-                                                            a1 1 0 0 1-1.202 0C9.539 20.193
-                                                            4 14.993 4 10a8 8 0 0 1 16 0Z" />
+                                                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
                                                 <circle cx="12" cy="10" r="3" />
                                             </svg>
                                         </div>
                                         <select id="location_id" name="location_id"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('location_id') border-red-500 @enderror">
-                                            <option value="" disabled
-                                                {{ !old('location_id') ? 'selected' : '' }}>
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('location_id') border-red-500 @enderror">
+                                            <option value="" disabled {{ !old('location_id') ? 'selected' : '' }}>
                                                 -- Select Location --
                                             </option>
                                             @foreach ($locations as $loc)
-                                                <option value="{{ $loc->id }}"
-                                                    {{ old('location_id') == $loc->id ? 'selected' : '' }}>
+                                                <option value="{{ $loc->id }}" {{ old('location_id') == $loc->id ? 'selected' : '' }}>
                                                     {{ $loc->location_name }}
                                                 </option>
                                             @endforeach
@@ -352,13 +354,11 @@
 
                                 <!-- 10. End User -->
                                 <div>
-                                    <label for="end_user_id"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        End User
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        End-user <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
@@ -370,17 +370,15 @@
                                         </div>
                                         <select id="end_user_id" name="end_user_id"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('end_user_id') border-red-500 @enderror">
-                                            <option value="" disabled
-                                                {{ !old('end_user_id') ? 'selected' : '' }}>
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('end_user_id') border-red-500 @enderror">
+                                            <option value="" disabled {{ !old('end_user_id') ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
                                             @foreach ($endUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                    {{ old('end_user_id') == $user->id ? 'selected' : '' }}>
+                                                <option value="{{ $user->id }}" {{ old('end_user_id') == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }} ({{ $user->department }})
                                                 </option>
                                             @endforeach
@@ -393,13 +391,11 @@
 
                                 <!-- 11. Condition -->
                                 <div>
-                                    <label for="condition"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Condition
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Condition <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
@@ -410,19 +406,17 @@
                                         </div>
                                         <select id="condition" name="condition"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('condition') border-red-500 @enderror">
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('condition') border-red-500 @enderror">
                                             <option value="" disabled {{ !old('condition') ? 'selected' : '' }}>
                                                 -- Select Condition --
                                             </option>
-                                            <option value="Serviceable"
-                                                {{ old('condition') === 'Serviceable' ? 'selected' : '' }}>
+                                            <option value="Serviceable" {{ old('condition') === 'Serviceable' ? 'selected' : '' }}>
                                                 Serviceable
                                             </option>
-                                            <option value="Unserviceable"
-                                                {{ old('condition') === 'Unserviceable' ? 'selected' : '' }}>
+                                            <option value="Unserviceable" {{ old('condition') === 'Unserviceable' ? 'selected' : '' }}>
                                                 Unserviceable
                                             </option>
                                         </select>
@@ -434,20 +428,17 @@
 
                                 <!-- 12. Item Description (Spans 2 columns) -->
                                 <div class="md:col-span-2">
-                                    <label for="item_description"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Item Description
+                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Item Description <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute top-2 start-0 ms-2 mt-1.5 pointer-events-none text-gray-400">
+                                        <div class="absolute top-2 start-0 ms-2 mt-1.5 pointer-events-none text-gray-400">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-file-text">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16
-                                                        a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                                 <path d="M14 2v6h6" />
                                                 <path d="M16 13H8" />
                                                 <path d="M16 17H8" />
@@ -456,10 +447,10 @@
                                         </div>
                                         <textarea id="item_description" name="item_description" rows="3"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pt-2.5 ps-8 pe-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                    @error('item_description') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full pt-2.5 ps-8 pe-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('item_description') border-red-500 @enderror"
                                             placeholder="Short description of the item...">{{ old('item_description') }}</textarea>
                                     </div>
                                     @error('item_description')
@@ -469,20 +460,17 @@
 
                                 <!-- 13. Remarks (Spans 2 columns) -->
                                 <div class="md:col-span-2">
-                                    <label for="remarks"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="remarks" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Remarks (optional)
                                     </label>
                                     <div class="mb-4 relative">
-                                        <div
-                                            class="absolute top-2 start-0 ms-2 mt-1.5 pointer-events-none text-gray-400">
+                                        <div class="absolute top-2 start-0 ms-2 mt-1.5 pointer-events-none text-gray-400">
                                             <!-- SVG Icon -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="lucide lucide-file-text">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16
-                                                        a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                                 <path d="M14 2v6h6" />
                                                 <path d="M16 13H8" />
                                                 <path d="M16 17H8" />
@@ -491,16 +479,17 @@
                                         </div>
                                         <textarea id="remarks" name="remarks" rows="3"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                focus:ring-blue-500 focus:border-blue-500 block w-full pt-2.5 ps-8 pe-2.5
-                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                @error('remarks') border-red-500 @enderror"
+                                                   focus:ring-blue-500 focus:border-blue-500 block w-full pt-2.5 ps-8 pe-2.5
+                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                   @error('remarks') border-red-500 @enderror"
                                             placeholder="Any additional notes...">{{ old('remarks') }}</textarea>
                                     </div>
                                     @error('remarks')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
+
                             </div>
                             <!-- End of Grid -->
 
@@ -516,6 +505,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div><!-- End .max-w-4xl -->
                 </div><!-- End .section-container -->
             </div>

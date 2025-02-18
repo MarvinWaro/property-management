@@ -78,8 +78,7 @@
                     <div class="relative overflow-x-auto">
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <caption
-                                class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                            <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
                                 CHED Property Details
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                                     These are CHED personnel responsible for managing institutional properties, ensuring
@@ -87,10 +86,10 @@
                                     seamless asset handover and continued operational efficiency.
                                 </p>
                             </caption>
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" class="px-6 py-3">ID</th>
+                                    <th scope="col" class="px-6 py-3">Property Number</th>
                                     <th scope="col" class="px-6 py-3">Item Name</th>
                                     <th scope="col" class="px-6 py-3">Unit of Measure</th>
                                     <th scope="col" class="px-6 py-3">Qty (Physical Count)</th>
@@ -102,17 +101,28 @@
                             </thead>
                             <tbody>
                                 @foreach ($properties as $property)
-                                    <tr
-                                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <th scope="row"
-                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $property->id }}
                                         </th>
-                                        <td class="px-6 py-4">{{ $property->item_name }}</td>
-                                        <td class="px-6 py-4">{{ $property->unit_of_measure ?? 'TBA' }}</td>
-                                        <td class="px-6 py-4">{{ $property->quantity_per_physical_count }}</td>
-                                        <td class="px-6 py-4">{{ $property->fund ?? 'TBA' }}</td>
-                                        <td class="px-6 py-4">{{ $property->endUser->name ?? 'TBA' }}</td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->property_number }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->item_name }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->unit_of_measure ?? 'TBA' }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->quantity_per_physical_count }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->fund ?? 'TBA' }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $property->endUser->name ?? 'TBA' }}
+                                        </td>
                                         <td class="px-6 py-4">
                                             <span class="px-2 py-1 rounded-full
                                                 {{ strtolower($property->condition) == 'serviceable' ? 'bg-green-500 text-white' : (strtolower($property->condition) == 'unserviceable' ? 'bg-red-500 text-white' : '') }}">
@@ -143,8 +153,8 @@
                                                     <li>
                                                         <a href="{{ route('property.view', $property->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            <!-- Icon -->
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-eye me-3">
                                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
@@ -152,7 +162,6 @@
                                                             </svg>
                                                             View
                                                         </a>
-
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
 
@@ -160,7 +169,6 @@
                                                     <li>
                                                         <a href="{{ route('property.edit', $property->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            <!-- Icon -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20"
                                                                 height="20" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="1"
@@ -187,7 +195,6 @@
                                                             <button type="button"
                                                                 class="flex items-center px-4 py-2 text-red-500 hover:text-red-700"
                                                                 onclick="confirmDelete({{ $property->id }})">
-                                                                <!-- Icon -->
                                                                 <svg class="w-5 h-5 mr-2"
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     viewBox="0 0 16 16" fill="currentColor">
@@ -213,7 +220,6 @@
 
                                                 </ul>
                                             </div>
-
                                         </td>
                                     </tr>
                                 @endforeach

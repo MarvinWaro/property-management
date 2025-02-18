@@ -5,11 +5,12 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-// In your properties migration
     public function up()
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
+            // Add the new property_number column. It's a string, manually input, and unique.
+            $table->string('property_number')->unique();
             $table->string('item_name');
             $table->text('item_description')->nullable();
             $table->string('serial_no')->unique()->nullable();
@@ -23,9 +24,9 @@ return new class extends Migration {
             $table->foreignId('end_user_id')->constrained('end_users')->onDelete('cascade');
             $table->string('condition');
             $table->text('remarks')->nullable();
-            // Add these two lines:
+            // Existing fields:
             $table->boolean('active')->default(1);     // 1 = Active
-            $table->boolean('excluded')->default(0);   // 1 = Excluded
+            $table->boolean('excluded')->default(0);     // 1 = Excluded
             $table->timestamps();
         });
     }
@@ -35,4 +36,5 @@ return new class extends Migration {
         Schema::dropIfExists('properties');
     }
 };
+
 
