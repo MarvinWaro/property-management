@@ -10,6 +10,7 @@ class Property extends Model
     use HasFactory;
 
     protected $fillable = [
+        'property_number',  // Added new field here
         'item_name',
         'item_description',
         'serial_no',
@@ -23,8 +24,6 @@ class Property extends Model
         'end_user_id',
         'condition',
         'remarks',
-
-        // new fields
         'active',
         'excluded'
     ];
@@ -45,4 +44,3 @@ class Property extends Model
         return $this->belongsTo(EndUser::class);
     }
 }
-
