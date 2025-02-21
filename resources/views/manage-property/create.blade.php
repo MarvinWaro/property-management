@@ -33,6 +33,26 @@
                             <!-- Use grid to create responsive two-column layout -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+                                {{-- Property Picture --}}
+                                <div class="md:col-span-2">
+                                    <label for="dropzone-file" id="dropzone-container" class="relative flex items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
+                                        <!-- Default instructions -->
+                                        <div id="default-content" class="flex flex-col items-center justify-center">
+                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                            </svg>
+                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                        </div>
+
+                                        <!-- Preview container -->
+                                        <div id="preview-container" class="absolute inset-0 grid gap-2 w-full h-full"></div>
+
+                                        <!-- File input -->
+                                        <input id="dropzone-file" type="file" name="images[]" class="hidden" multiple accept="image/*" />
+                                    </label>
+                                </div>
+
                                 <!-- 1. Item Name -->
                                 <div>
                                     <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -511,4 +531,73 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        const fileInput = document.getElementById('dropzone-file');
+        const previewContainer = document.getElementById('preview-container');
+        const defaultContent = document.getElementById('default-content');
+
+        fileInput.addEventListener('change', function(event) {
+            // Clear previous previews
+            previewContainer.innerHTML = '';
+
+            const files = event.target.files;
+            const numFiles = files.length;
+
+            // If no files are selected, display default instructions
+            if (numFiles === 0) {
+                defaultContent.style.display = 'flex';
+                return;
+            } else {
+                defaultContent.style.display = 'none';
+            }
+
+            // Limit file count to 3
+            if (numFiles > 3) {
+                alert('You can upload a maximum of 3 images.');
+                fileInput.value = ''; // Reset the input
+                previewContainer.innerHTML = '';
+                defaultContent.style.display = 'flex';
+                return;
+            }
+
+            // Set grid columns based on the number of files selected
+            let gridColsClass = '';
+            if (numFiles === 1) {
+                gridColsClass = 'grid-cols-1';
+            } else if (numFiles === 2) {
+                gridColsClass = 'grid-cols-2';
+            } else if (numFiles === 3) {
+                gridColsClass = 'grid-cols-3';
+            }
+            // Update preview container classes
+            previewContainer.className = `absolute inset-0 grid ${gridColsClass} gap-2 w-full h-full`;
+
+            // Process each file
+            Array.from(files).forEach(file => {
+                // Check file size (7MB = 7 * 1024 * 1024 bytes)
+                if (file.size > 7 * 1024 * 1024) {
+                    alert(`File "${file.name}" exceeds the 7MB size limit.`);
+                    fileInput.value = '';
+                    previewContainer.innerHTML = '';
+                    defaultContent.style.display = 'flex';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    // Make image fill its grid cell
+                    img.className = 'w-full h-full object-cover';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+
+
+
 </x-app-layout>

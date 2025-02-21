@@ -43,4 +43,10 @@ class Property extends Model
     {
         return $this->belongsTo(EndUser::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(PropertyImage::class);
+    }
+
 }
