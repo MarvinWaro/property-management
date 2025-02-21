@@ -28,6 +28,11 @@ class Property extends Model
         'excluded'
     ];
 
+    protected $casts = [
+        'acquisition_date' => 'date',
+    ];
+
+
     /**
      * Relationship: Property belongs to a Location
      */
@@ -43,4 +48,10 @@ class Property extends Model
     {
         return $this->belongsTo(EndUser::class);
     }
+
+    public function images()
+    {
+        return $this->hasMany(PropertyImage::class);
+    }
+
 }

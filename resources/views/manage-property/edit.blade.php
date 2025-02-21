@@ -27,12 +27,41 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('property.update', $property->id) }}" method="POST" onsubmit="showLoader()">
+                        <form action="{{ route('property.update', $property->id) }}" method="POST" onsubmit="showLoader()" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
                             <!-- Use grid to create responsive two-column layout -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                <!-- Dropzone for Property Pictures (Spans 2 columns) -->
+                                <div class="md:col-span-2">
+                                    <label for="dropzone-file" id="dropzone-container" class="relative flex items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
+                                        <!-- Default instructions (hidden if images exist) -->
+                                        <div id="default-content" class="flex flex-col items-center justify-center {{ $property->images->isNotEmpty() ? 'hidden' : 'flex' }}">
+                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                            </svg>
+                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                        </div>
+
+                                        <!-- Preview container: existing images are shown if available -->
+                                        <div id="preview-container" class="absolute inset-0 grid gap-2 w-full h-full
+                                            @if($property->images->isNotEmpty())
+                                                grid-cols-{{ $property->images->count() }}
+                                            @endif">
+                                            @if($property->images->isNotEmpty())
+                                                @foreach($property->images as $image)
+                                                    <img src="{{ asset('storage/' . $image->file_path) }}" class="w-full h-full object-cover object-center">
+                                                @endforeach
+                                            @endif
+                                        </div>
+
+                                        <!-- File input -->
+                                        <input id="dropzone-file" type="file" name="images[]" class="hidden" multiple accept="image/*">
+                                    </label>
+                                </div>
 
                                 <!-- 1. Item Name -->
                                 <div>
@@ -500,4 +529,68 @@
             </div>
         </div>
     </div>
+
+
+    <!-- JavaScript to handle dynamic preview updates -->
+    <script>
+        const fileInput = document.getElementById('dropzone-file');
+        const previewContainer = document.getElementById('preview-container');
+        const defaultContent = document.getElementById('default-content');
+
+        fileInput.addEventListener('change', function(event) {
+            // Clear previous previews (this removes existing images if new ones are chosen)
+            previewContainer.innerHTML = '';
+
+            const files = event.target.files;
+            const numFiles = files.length;
+
+            // Hide default instructions if files are selected
+            if (numFiles > 0) {
+                defaultContent.style.display = 'none';
+            } else {
+                defaultContent.style.display = 'flex';
+            }
+
+            // Limit file count to 3
+            if (numFiles > 3) {
+                alert('You can upload a maximum of 3 images.');
+                fileInput.value = ''; // Reset the input
+                // Optionally, you can reload existing images if needed
+                return;
+            }
+
+            // Set grid columns dynamically based on number of selected files
+            let gridColsClass = '';
+            if (numFiles === 1) {
+                gridColsClass = 'grid-cols-1';
+            } else if (numFiles === 2) {
+                gridColsClass = 'grid-cols-2';
+            } else if (numFiles === 3) {
+                gridColsClass = 'grid-cols-3';
+            }
+            previewContainer.className = `absolute inset-0 grid ${gridColsClass} gap-2 w-full h-full`;
+
+            // Process and display each selected file
+            Array.from(files).forEach(file => {
+                // Check file size (7MB = 7 * 1024 * 1024 bytes)
+                if (file.size > 7 * 1024 * 1024) {
+                    alert(`File "${file.name}" exceeds the 7MB size limit.`);
+                    fileInput.value = '';
+                    previewContainer.innerHTML = '';
+                    defaultContent.style.display = 'flex';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'w-full h-full object-cover object-center';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+
 </x-app-layout>
