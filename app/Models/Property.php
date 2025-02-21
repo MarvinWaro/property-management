@@ -28,6 +28,11 @@ class Property extends Model
         'excluded'
     ];
 
+    protected $casts = [
+        'acquisition_date' => 'date',
+    ];
+
+
     /**
      * Relationship: Property belongs to a Location
      */

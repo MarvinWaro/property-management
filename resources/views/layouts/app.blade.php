@@ -57,7 +57,7 @@
         </div>
     </div> --}}
 
-    <!-- Loader Container -->
+    {{-- <!-- Loader Container -->
     <div id="loading-screen" class="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 hidden">
         <!-- Sharingan Loader -->
         <div class="sharingon">
@@ -68,7 +68,7 @@
                 <div class="circle"></div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <x-banner />
 
@@ -98,7 +98,7 @@
 </body>
 
 {{-- for loader --}}
-<script>
+{{-- <script>
     // Show the loader
     function showLoader() {
         document.getElementById('loading-screen').classList.remove('hidden');
@@ -114,7 +114,7 @@
         showLoader();
         setTimeout(hideLoader, 3000); // Adjust if needed
     };
-</script>
+</script> --}}
 
 {{-- This is for the success message --}}
 <script>
