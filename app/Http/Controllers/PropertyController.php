@@ -14,21 +14,22 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        
 
         $properties = Property::where('excluded', 0)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     // Search multiple columns in the 'properties' table
                     $q->where('item_name', 'like', "%{$search}%")
-                    ->orWhere('item_description', 'like', "%{$search}%")
-                    ->orWhere('serial_no', 'like', "%{$search}%")
-                    ->orWhere('model_no', 'like', "%{$search}%")
-                    ->orWhere('acquisition_cost', 'like', "%{$search}%")
-                    ->orWhere('unit_of_measure', 'like', "%{$search}%")
-                    ->orWhere('fund', 'like', "%{$search}%")
-                    ->orWhere('condition', 'like', "%{$search}%")
-                    ->orWhere('remarks', 'like', "%{$search}%")
-                    ->orWhere('quantity_per_physical_count', 'like', "%{$search}%");
+                        ->orWhere('item_description', 'like', "%{$search}%")
+                        ->orWhere('serial_no', 'like', "%{$search}%")
+                        ->orWhere('model_no', 'like', "%{$search}%")
+                        ->orWhere('acquisition_cost', 'like', "%{$search}%")
+                        ->orWhere('unit_of_measure', 'like', "%{$search}%")
+                        ->orWhere('fund', 'like', "%{$search}%")
+                        ->orWhere('condition', 'like', "%{$search}%")
+                        ->orWhere('remarks', 'like', "%{$search}%")
+                        ->orWhere('quantity_per_physical_count', 'like', "%{$search}%");
 
                     // Also search in related 'location' model
                     $q->orWhereHas('location', function ($subQ) use ($search) {
@@ -37,10 +38,9 @@ class PropertyController extends Controller
 
                     // Also search in related 'endUser' model
                     $q->orWhereHas('endUser', function ($subQ) use ($search) {
-                        // You can include whichever columns you want to search, e.g. name, email, department...
                         $subQ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('department', 'like', "%{$search}%");
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('department', 'like', "%{$search}%");
                     });
                 });
             })
@@ -52,19 +52,20 @@ class PropertyController extends Controller
     public function create()
     {
         $locations = Location::all();
-        $endUsers  = EndUser::all();
+        // Only fetch active end users.
+        $endUsers  = EndUser::where('excluded', 0)->get();
 
         return view('manage-property.create', compact('locations', 'endUsers'));
     }
 
     public function store(Request $request)
     {
-        // 1) Remove commas BEFORE validation.
+        // Remove commas from acquisition cost and set to null if empty.
         $request->merge([
             'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : null,
         ]);
 
-        // 2) Validate (now Laravel sees e.g. "49000.00" instead of "49,000.00").
+        // Validate input.
         $request->validate([
             'property_number'             => 'required|string|unique:properties,property_number,NULL,id,excluded,0',
             'item_name'                   => 'required|string|max:255',
@@ -84,9 +85,7 @@ class PropertyController extends Controller
             'images.*'                    => 'image|max:7168',
         ]);
 
-        // 3) Optionally handle cases where acquisition_cost might be empty, if needed.
-
-        // Additional uniqueness check for serial_no among active properties
+        // Additional uniqueness check for serial_no among active properties.
         if (!empty($request->serial_no)) {
             $existsActive = Property::where('excluded', 0)
                 ->where('serial_no', $request->serial_no)
@@ -99,14 +98,11 @@ class PropertyController extends Controller
             }
         }
 
-        // Attempt to find an excluded property with the same property_number
-        // (for "reusing" an old/excluded property record):
-        $excludedProperty = Property::where('excluded', 1)
-            ->where('property_number', $request->property_number)
-            ->first();
+        // Attempt to find any excluded property record.
+        $excludedProperty = Property::where('excluded', 1)->first();
 
         if ($excludedProperty) {
-            // Reactivate the excluded property with updated values
+            // Reactivate the excluded property with new details.
             $excludedProperty->update([
                 'property_number'             => $request->property_number,
                 'item_name'                   => $request->item_name,
@@ -126,24 +122,22 @@ class PropertyController extends Controller
                 'active'                      => 1,
             ]);
 
-            // Process image uploads if available
+            // Process image uploads if available.
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                     $path     = $image->storeAs('property_images', $filename, 'public');
-
                     $excludedProperty->images()->create([
                         'file_path' => $path,
                     ]);
                 }
             }
 
-            return redirect()
-                ->route('property.index')
+            return redirect()->route('property.index')
                 ->with('success', 'Property reactivated successfully.');
         }
 
-        // Otherwise, create a brand-new property
+        // Otherwise, create a brand-new property.
         $property = Property::create([
             'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
@@ -163,39 +157,38 @@ class PropertyController extends Controller
             'excluded'                    => 0,
         ]);
 
-        // Process new images if provided
+        // Process new images if provided.
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path     = $image->storeAs('property_images', $filename, 'public');
-
                 $property->images()->create([
                     'file_path' => $path,
                 ]);
             }
         }
 
-        return redirect()
-            ->route('property.index')
+        return redirect()->route('property.index')
             ->with('success', 'Property created successfully.');
     }
 
     public function edit(Property $property)
     {
         $locations = Location::all();
-        $endUsers  = EndUser::all();
+        // Only fetch active end users.
+        $endUsers  = EndUser::where('excluded', 0)->get();
 
         return view('manage-property.edit', compact('property', 'locations', 'endUsers'));
     }
 
     public function update(Request $request, Property $property)
     {
-        // Remove commas BEFORE validation
+        // Remove commas from acquisition cost and set to null if empty.
         $request->merge([
             'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : null,
         ]);
 
-        // Validate
+        // Validate input.
         $request->validate([
             'property_number'             => 'required|string|unique:properties,property_number,' . $property->id,
             'item_name'                   => 'required|string|max:255',
@@ -215,7 +208,6 @@ class PropertyController extends Controller
             'images.*'                    => 'image|max:7168',
         ]);
 
-        // Update fields
         $property->update([
             'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
@@ -233,26 +225,23 @@ class PropertyController extends Controller
             'remarks'                     => $request->remarks,
         ]);
 
-        // If new images are provided, remove old ones & store new
         if ($request->hasFile('images')) {
-            // remove existing images
+            // Remove existing images.
             foreach ($property->images as $image) {
                 Storage::disk('public')->delete($image->file_path);
                 $image->delete();
             }
-            // store the new images
+            // Store new images.
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path     = $image->storeAs('property_images', $filename, 'public');
-
                 $property->images()->create([
                     'file_path' => $path,
                 ]);
             }
         }
 
-        return redirect()
-            ->route('property.index')
+        return redirect()->route('property.index')
             ->with('success', 'Property updated successfully!');
     }
 

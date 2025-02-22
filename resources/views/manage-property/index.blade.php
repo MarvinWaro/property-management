@@ -101,7 +101,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($properties as $property)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <tr class="{{ ($property->endUser && $property->endUser->excluded) ? 'bg-red-200 dark:bg-red-700' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $property->id }}
                                         </th>
@@ -146,9 +146,7 @@
                                             <!-- Dropdown Menu -->
                                             <div id="dropdownMenu{{ $property->id }}"
                                                 class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
-                                                <ul
-                                                    class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
-
+                                                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
                                                     <!-- View Action -->
                                                     <li>
                                                         <a href="{{ route('property.view', $property->id) }}"
@@ -164,7 +162,6 @@
                                                         </a>
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
-
                                                     <!-- Edit Action -->
                                                     <li>
                                                         <a href="{{ route('property.edit', $property->id) }}"
@@ -184,7 +181,6 @@
                                                         </a>
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
-
                                                     <!-- Delete Action -->
                                                     <li>
                                                         <form id="deleteForm{{ $property->id }}"
@@ -217,13 +213,13 @@
                                                             </button>
                                                         </form>
                                                     </li>
-
                                                 </ul>
                                             </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+
                         </table>
                     </div>
 
