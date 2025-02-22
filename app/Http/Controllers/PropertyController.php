@@ -14,7 +14,7 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        
+
 
         $properties = Property::where('excluded', 0)
             ->when($search, function ($query, $search) {
@@ -39,8 +39,8 @@ class PropertyController extends Controller
                     // Also search in related 'endUser' model
                     $q->orWhereHas('endUser', function ($subQ) use ($search) {
                         $subQ->where('name', 'like', "%{$search}%")
-                             ->orWhere('email', 'like', "%{$search}%")
-                             ->orWhere('department', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('department', 'like', "%{$search}%");
                     });
                 });
             })
