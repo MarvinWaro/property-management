@@ -35,28 +35,29 @@ class EndUserController extends Controller
     {
         // Validate input including the picture file
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email',
             'phone_number' => 'required|digits_between:1,15',
-            'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
-            'picture' => 'nullable|image|max:10240', // 10MB max
+            'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture'      => 'nullable|image|max:10240', // 10MB max
         ]);
 
-        // Check if email is already taken (ACTIVE users only)
+        // Check if email is already taken by an active user
         $emailExists = EndUser::where('excluded', 0)
             ->where('email', $request->email)
             ->exists();
 
-        // Check if phone number is already taken (ACTIVE users only)
+        // Check if phone number is already taken by an active user
         $phoneExists = EndUser::where('excluded', 0)
             ->where('phone_number', $request->phone_number)
             ->exists();
 
+        // If either is taken by an active user, show an error.
         if ($emailExists || $phoneExists) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
-                    'email' => $emailExists ? 'Email is already taken.' : null,
+                    'email'        => $emailExists ? 'Email is already taken.' : null,
                     'phone_number' => $phoneExists ? 'Phone number is already taken.' : null,
                 ]);
         }
@@ -67,34 +68,40 @@ class EndUserController extends Controller
             $picturePath = $request->file('picture')->store('pictures', 'public');
         }
 
-        // Find any EXCLUDED user (regardless of email/phone) and reuse it
-        $excludedUser = EndUser::where('excluded', 1)->first();
+        // ----------------------------------------------------------------
+        // 1) Attempt to find an *excluded* user by matching email (case-insensitive)
+        // ----------------------------------------------------------------
+        $excludedUser = EndUser::where('excluded', 1)
+            ->whereRaw('LOWER(email) = ?', [strtolower($request->email)])
+            ->first();
 
+        // If found, reactivate it with new info
         if ($excludedUser) {
-            // Reactivate the excluded user with new details
             $excludedUser->update([
-                'name' => $request->name,
-                'email' => $request->email,
+                'name'         => $request->name,
+                'email'        => $request->email,
                 'phone_number' => $request->phone_number,
-                'department' => $request->department,
-                'picture' => $picturePath,
-                'excluded' => 0, // Mark as active
-                'active' => 1,
-                'updated_at' => now(),
+                'department'   => $request->department,
+                'picture'      => $picturePath,
+                'excluded'     => 0, // Mark as active
+                'active'       => 1,
             ]);
 
-            return redirect()->route('end_users.index')->with('success', 'User added successfully.');
+            return redirect()->route('end_users.index')
+                ->with('success', 'User reactivated successfully.');
         }
 
-        // If no excluded user is found, create a new user
+        // ----------------------------------------------------------------
+        // 2) Otherwise, create a brand-new user
+        // ----------------------------------------------------------------
         EndUser::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'         => $request->name,
+            'email'        => $request->email,
             'phone_number' => $request->phone_number,
-            'department' => $request->department,
-            'picture' => $picturePath,
-            'active' => 1,
-            'excluded' => 0,
+            'department'   => $request->department,
+            'picture'      => $picturePath,
+            'active'       => 1,
+            'excluded'     => 0,
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User added successfully.');
