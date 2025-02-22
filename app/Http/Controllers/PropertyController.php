@@ -61,7 +61,7 @@ class PropertyController extends Controller
     {
         // 1) Remove commas BEFORE validation.
         $request->merge([
-            'acquisition_cost' => str_replace(',', '', $request->acquisition_cost)
+            'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : null,
         ]);
 
         // 2) Validate (now Laravel sees e.g. "49000.00" instead of "49,000.00").
@@ -192,7 +192,7 @@ class PropertyController extends Controller
     {
         // Remove commas BEFORE validation
         $request->merge([
-            'acquisition_cost' => str_replace(',', '', $request->acquisition_cost)
+            'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : null,
         ]);
 
         // Validate
