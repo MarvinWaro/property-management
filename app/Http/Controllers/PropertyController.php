@@ -14,6 +14,7 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        
 
         $properties = Property::where('excluded', 0)
             ->when($search, function ($query, $search) {
