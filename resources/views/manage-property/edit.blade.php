@@ -224,14 +224,20 @@
                                                 <line x1="2" x2="22" y1="10" y2="10" />
                                             </svg>
                                         </div>
-                                        <input type="number" step="0.01" id="acquisition_cost" name="acquisition_cost"
-                                            value="{{ old('acquisition_cost', $property->acquisition_cost) }}"
+                                        <!-- Use type="text" so we can comma-format in JavaScript -->
+                                        <input
+                                            type="text"
+                                            id="acquisition_cost"
+                                            name="acquisition_cost"
+                                            {{-- number_format() ensures the user sees commas for the saved DB value, e.g. 49,000.00 --}}
+                                            value="{{ old('acquisition_cost', number_format($property->acquisition_cost, 2)) }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('acquisition_cost') border-red-500 @enderror"
-                                            placeholder="Enter cost...">
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                @error('acquisition_cost') border-red-500 @enderror"
+                                            placeholder="0.00"
+                                        >
                                     </div>
                                     @error('acquisition_cost')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -592,5 +598,32 @@
             });
         });
     </script>
+
+
+    {{-- For the comma of cost --}}
+    <script>
+        // Attach the event listener to reformat the cost as the user types
+        const acqCostInput = document.getElementById('acquisition_cost');
+
+        acqCostInput.addEventListener('input', function () {
+            // Remove any non-digit character
+            let digits = this.value.replace(/\D/g, '');
+            if (digits === '') {
+                digits = '0';
+            }
+
+            // Convert digits to integer, treat as cents, then divide by 100
+            let intValue = parseInt(digits, 10);
+            let amount   = intValue / 100;
+
+            // Format with commas plus two decimal places
+            this.value = amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        });
+    </script>
+
+
 
 </x-app-layout>

@@ -48,9 +48,9 @@ class PropertyController extends Controller
 
         return view('manage-property.index', compact('properties'));
     }
+
     public function create()
     {
-        // Fetch all locations and end users
         $locations = Location::all();
         $endUsers  = EndUser::all();
 
@@ -59,7 +59,12 @@ class PropertyController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the request input, including image files.
+        // 1) Remove commas BEFORE validation.
+        $request->merge([
+            'acquisition_cost' => str_replace(',', '', $request->acquisition_cost)
+        ]);
+
+        // 2) Validate (now Laravel sees e.g. "49000.00" instead of "49,000.00").
         $request->validate([
             'property_number'             => 'required|string|unique:properties,property_number,NULL,id,excluded,0',
             'item_name'                   => 'required|string|max:255',
@@ -75,12 +80,13 @@ class PropertyController extends Controller
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
-            // Validate images: allow an array of up to 3 images
             'images'                      => 'nullable|array|max:3',
-            'images.*'                    => 'image|max:7168', // 7MB max per image (7 * 1024 KB)
+            'images.*'                    => 'image|max:7168',
         ]);
 
-        // Check uniqueness for serial_no among active properties, if provided
+        // 3) Optionally handle cases where acquisition_cost might be empty, if needed.
+
+        // Additional uniqueness check for serial_no among active properties
         if (!empty($request->serial_no)) {
             $existsActive = Property::where('excluded', 0)
                 ->where('serial_no', $request->serial_no)
@@ -93,7 +99,8 @@ class PropertyController extends Controller
             }
         }
 
-        // Look for an excluded property with the same property_number to "reuse"
+        // Attempt to find an excluded property with the same property_number
+        // (for "reusing" an old/excluded property record):
         $excludedProperty = Property::where('excluded', 1)
             ->where('property_number', $request->property_number)
             ->first();
@@ -123,7 +130,8 @@ class PropertyController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $path = $image->storeAs('property_images', $filename, 'public');
+                    $path     = $image->storeAs('property_images', $filename, 'public');
+
                     $excludedProperty->images()->create([
                         'file_path' => $path,
                     ]);
@@ -135,7 +143,7 @@ class PropertyController extends Controller
                 ->with('success', 'Property reactivated successfully.');
         }
 
-        // Otherwise, create a new property record
+        // Otherwise, create a brand-new property
         $property = Property::create([
             'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
@@ -155,11 +163,12 @@ class PropertyController extends Controller
             'excluded'                    => 0,
         ]);
 
-        // Process image uploads if available
+        // Process new images if provided
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('property_images', $filename, 'public');
+                $path     = $image->storeAs('property_images', $filename, 'public');
+
                 $property->images()->create([
                     'file_path' => $path,
                 ]);
@@ -171,10 +180,8 @@ class PropertyController extends Controller
             ->with('success', 'Property created successfully.');
     }
 
-
     public function edit(Property $property)
     {
-        // Fetch all locations and end users for the dropdowns
         $locations = Location::all();
         $endUsers  = EndUser::all();
 
@@ -183,7 +190,12 @@ class PropertyController extends Controller
 
     public function update(Request $request, Property $property)
     {
-        // Validate the input including optional images
+        // Remove commas BEFORE validation
+        $request->merge([
+            'acquisition_cost' => str_replace(',', '', $request->acquisition_cost)
+        ]);
+
+        // Validate
         $request->validate([
             'property_number'             => 'required|string|unique:properties,property_number,' . $property->id,
             'item_name'                   => 'required|string|max:255',
@@ -199,12 +211,11 @@ class PropertyController extends Controller
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
-            // Optional images: an array of up to 3 files, each image not exceeding 7MB
             'images'                      => 'nullable|array|max:3',
             'images.*'                    => 'image|max:7168',
         ]);
 
-        // Update the property fields
+        // Update fields
         $property->update([
             'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
@@ -222,18 +233,18 @@ class PropertyController extends Controller
             'remarks'                     => $request->remarks,
         ]);
 
-        // Check if new image files are provided
+        // If new images are provided, remove old ones & store new
         if ($request->hasFile('images')) {
-            // Option: Remove all existing images before uploading new ones
+            // remove existing images
             foreach ($property->images as $image) {
-                // Optionally delete the file from storage
                 Storage::disk('public')->delete($image->file_path);
                 $image->delete();
             }
-            // Loop through each new image file, store it, and create a related record
+            // store the new images
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('property_images', $filename, 'public');
+                $path     = $image->storeAs('property_images', $filename, 'public');
+
                 $property->images()->create([
                     'file_path' => $path,
                 ]);

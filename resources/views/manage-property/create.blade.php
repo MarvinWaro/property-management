@@ -210,7 +210,7 @@
                                     </label>
                                     <div class="mb-4 relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                                            <!-- SVG Icon -->
+                                            <!-- Icon, optional -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
@@ -219,14 +219,19 @@
                                                 <line x1="2" x2="22" y1="10" y2="10" />
                                             </svg>
                                         </div>
-                                        <input type="number" step="0.01" id="acquisition_cost"
-                                            name="acquisition_cost" value="{{ old('acquisition_cost') }}"
+                                        <!-- Notice type="text" so we can format with commas -->
+                                        <input
+                                            type="text"
+                                            id="acquisition_cost"
+                                            name="acquisition_cost"
+                                            value="{{ old('acquisition_cost') }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('acquisition_cost') border-red-500 @enderror"
-                                            placeholder="Enter cost...">
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                @error('acquisition_cost') border-red-500 @enderror"
+                                            placeholder="0.00"
+                                        >
                                     </div>
                                     @error('acquisition_cost')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -533,6 +538,7 @@
     </div>
 
 
+    {{-- Image Script --}}
     <script>
         const fileInput = document.getElementById('dropzone-file');
         const previewContainer = document.getElementById('preview-container');
@@ -598,6 +604,28 @@
         });
     </script>
 
+    {{-- Comma on Acquisition Cost --}}
+    <script>
+        const acqCostInput = document.getElementById('acquisition_cost');
+
+        acqCostInput.addEventListener('input', function () {
+            // 1) Remove all non-digit characters
+            let digits = this.value.replace(/\D/g, '');
+            if (digits === '') {
+                digits = '0';
+            }
+
+            // 2) Interpret as cents: parse integer, then divide by 100
+            let intValue = parseInt(digits, 10);
+            let amount   = intValue / 100;
+
+            // 3) Format with commas + always 2 decimals
+            this.value = amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        });
+    </script>
 
 
 </x-app-layout>
