@@ -35,7 +35,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                                 <!-- Dropzone for Property Pictures (Spans 2 columns) -->
-                                <div class="md:col-span-2">
+                                <div class="md:col-span-2 relative">
                                     <label for="dropzone-file" id="dropzone-container" class="relative flex items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                         <!-- Default instructions (hidden if images exist) -->
                                         <div id="default-content" class="flex flex-col items-center justify-center {{ $property->images->isNotEmpty() ? 'hidden' : 'flex' }}">
@@ -61,6 +61,15 @@
                                         <!-- File input -->
                                         <input id="dropzone-file" type="file" name="images[]" class="hidden" multiple accept="image/*">
                                     </label>
+
+                                    <!-- Remove Images button: only display if images exist -->
+                                    @if($property->images->isNotEmpty())
+                                    <button type="button" id="clear-images" class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                        Remove Images
+                                    </button>
+                                    <!-- Hidden input to flag removal for backend processing -->
+                                    <input type="hidden" name="remove_existing_images" id="remove_existing_images" value="0">
+                                    @endif
                                 </div>
 
                                 <!-- 1. Item Name -->
@@ -537,35 +546,38 @@
     </div>
 
 
-    <!-- JavaScript to handle dynamic preview updates -->
     <script>
         const fileInput = document.getElementById('dropzone-file');
         const previewContainer = document.getElementById('preview-container');
         const defaultContent = document.getElementById('default-content');
+        const clearButton = document.getElementById('clear-images');
+        const removedImagesInput = document.getElementById('remove_existing_images');
 
         fileInput.addEventListener('change', function(event) {
-            // Clear previous previews (this removes existing images if new ones are chosen)
+            // Clear previous previews
             previewContainer.innerHTML = '';
 
             const files = event.target.files;
             const numFiles = files.length;
 
-            // Hide default instructions if files are selected
-            if (numFiles > 0) {
-                defaultContent.style.display = 'none';
-            } else {
+            // If no files are selected, display default instructions
+            if (numFiles === 0) {
                 defaultContent.style.display = 'flex';
+                return;
+            } else {
+                defaultContent.style.display = 'none';
             }
 
             // Limit file count to 3
             if (numFiles > 3) {
                 alert('You can upload a maximum of 3 images.');
                 fileInput.value = ''; // Reset the input
-                // Optionally, you can reload existing images if needed
+                previewContainer.innerHTML = '';
+                defaultContent.style.display = 'flex';
                 return;
             }
 
-            // Set grid columns dynamically based on number of selected files
+            // Set grid columns based on the number of files selected
             let gridColsClass = '';
             if (numFiles === 1) {
                 gridColsClass = 'grid-cols-1';
@@ -574,9 +586,10 @@
             } else if (numFiles === 3) {
                 gridColsClass = 'grid-cols-3';
             }
+            // Update preview container classes
             previewContainer.className = `absolute inset-0 grid ${gridColsClass} gap-2 w-full h-full`;
 
-            // Process and display each selected file
+            // Process each file
             Array.from(files).forEach(file => {
                 // Check file size (7MB = 7 * 1024 * 1024 bytes)
                 if (file.size > 7 * 1024 * 1024) {
@@ -591,13 +604,30 @@
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.className = 'w-full h-full object-cover object-center';
+                    // Make image fill its grid cell
+                    img.className = 'w-full h-full object-cover';
                     previewContainer.appendChild(img);
                 };
                 reader.readAsDataURL(file);
             });
         });
+
+        if (clearButton) {
+            clearButton.addEventListener('click', function(){
+                // Clear the preview container
+                previewContainer.innerHTML = '';
+                // Reset the file input
+                fileInput.value = '';
+                // Show default instructions
+                defaultContent.style.display = 'flex';
+                // Mark the hidden input for removal so the backend can process it
+                if (removedImagesInput) {
+                    removedImagesInput.value = '1';
+                }
+            });
+        }
     </script>
+
 
 
     {{-- For the comma of cost --}}
