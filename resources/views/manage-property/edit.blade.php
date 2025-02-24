@@ -560,12 +560,18 @@
             const files = event.target.files;
             const numFiles = files.length;
 
-            // If no files are selected, display default instructions
+            // If no files are selected, display default instructions and hide clear button
             if (numFiles === 0) {
                 defaultContent.style.display = 'flex';
+                if (clearButton) {
+                    clearButton.style.display = 'none';
+                }
                 return;
             } else {
                 defaultContent.style.display = 'none';
+                if (clearButton) {
+                    clearButton.style.display = 'block';
+                }
             }
 
             // Limit file count to 3
@@ -574,6 +580,9 @@
                 fileInput.value = ''; // Reset the input
                 previewContainer.innerHTML = '';
                 defaultContent.style.display = 'flex';
+                if (clearButton) {
+                    clearButton.style.display = 'none';
+                }
                 return;
             }
 
@@ -597,6 +606,9 @@
                     fileInput.value = '';
                     previewContainer.innerHTML = '';
                     defaultContent.style.display = 'flex';
+                    if (clearButton) {
+                        clearButton.style.display = 'none';
+                    }
                     return;
                 }
 
@@ -604,7 +616,6 @@
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    // Make image fill its grid cell
                     img.className = 'w-full h-full object-cover';
                     previewContainer.appendChild(img);
                 };
@@ -618,8 +629,9 @@
                 previewContainer.innerHTML = '';
                 // Reset the file input
                 fileInput.value = '';
-                // Show default instructions
+                // Show default instructions and hide clear button
                 defaultContent.style.display = 'flex';
+                clearButton.style.display = 'none';
                 // Mark the hidden input for removal so the backend can process it
                 if (removedImagesInput) {
                     removedImagesInput.value = '1';
