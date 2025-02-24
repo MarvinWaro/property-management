@@ -34,7 +34,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                                 {{-- Property Picture --}}
-                                <div class="md:col-span-2">
+                                <div class="md:col-span-2 relative">
                                     <label for="dropzone-file" id="dropzone-container" class="relative flex items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                         <!-- Default instructions -->
                                         <div id="default-content" class="flex flex-col items-center justify-center">
@@ -51,6 +51,11 @@
                                         <!-- File input -->
                                         <input id="dropzone-file" type="file" name="images[]" class="hidden" multiple accept="image/*" />
                                     </label>
+
+                                    <!-- Remove Images button (hidden initially) -->
+                                    <button type="button" id="clear-images" class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hidden">
+                                        Remove Images
+                                    </button>
                                 </div>
 
                                 <!-- 1. Item Name -->
@@ -543,6 +548,7 @@
         const fileInput = document.getElementById('dropzone-file');
         const previewContainer = document.getElementById('preview-container');
         const defaultContent = document.getElementById('default-content');
+        const clearButton = document.getElementById('clear-images');
 
         fileInput.addEventListener('change', function(event) {
             // Clear previous previews
@@ -551,12 +557,14 @@
             const files = event.target.files;
             const numFiles = files.length;
 
-            // If no files are selected, display default instructions
+            // If no files are selected, display default instructions and hide clear button
             if (numFiles === 0) {
                 defaultContent.style.display = 'flex';
+                clearButton.classList.add('hidden');
                 return;
             } else {
                 defaultContent.style.display = 'none';
+                clearButton.classList.remove('hidden');
             }
 
             // Limit file count to 3
@@ -565,6 +573,7 @@
                 fileInput.value = ''; // Reset the input
                 previewContainer.innerHTML = '';
                 defaultContent.style.display = 'flex';
+                clearButton.classList.add('hidden');
                 return;
             }
 
@@ -588,6 +597,7 @@
                     fileInput.value = '';
                     previewContainer.innerHTML = '';
                     defaultContent.style.display = 'flex';
+                    clearButton.classList.add('hidden');
                     return;
                 }
 
@@ -595,14 +605,25 @@
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    // Make image fill its grid cell
                     img.className = 'w-full h-full object-cover';
                     previewContainer.appendChild(img);
                 };
                 reader.readAsDataURL(file);
             });
         });
+
+        clearButton.addEventListener('click', function() {
+            // Clear the preview container and reset file input
+            previewContainer.innerHTML = '';
+            fileInput.value = '';
+            // Show default instructions
+            defaultContent.style.display = 'flex';
+            // Hide the clear button
+            clearButton.classList.add('hidden');
+        });
     </script>
+
+
 
     {{-- Comma on Acquisition Cost --}}
     <script>

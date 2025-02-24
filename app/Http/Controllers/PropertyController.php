@@ -51,7 +51,7 @@ class PropertyController extends Controller
 
     public function create()
     {
-        $locations = Location::all();
+        $locations = Location::where('excluded', 0)->get();
         // Only fetch active end users.
         $endUsers  = EndUser::where('excluded', 0)->get();
 
@@ -174,7 +174,7 @@ class PropertyController extends Controller
 
     public function edit(Property $property)
     {
-        $locations = Location::all();
+        $locations = Location::where('excluded', 0)->get();
         // Only fetch active end users.
         $endUsers  = EndUser::where('excluded', 0)->get();
 
@@ -208,6 +208,7 @@ class PropertyController extends Controller
             'images.*'                    => 'image|max:7168',
         ]);
 
+        // Update property details.
         $property->update([
             'property_number'             => $request->property_number,
             'item_name'                   => $request->item_name,
@@ -225,13 +226,17 @@ class PropertyController extends Controller
             'remarks'                     => $request->remarks,
         ]);
 
-        if ($request->hasFile('images')) {
-            // Remove existing images.
+        // Check if the user requested to remove existing images.
+        if ($request->remove_existing_images == '1') {
             foreach ($property->images as $image) {
                 Storage::disk('public')->delete($image->file_path);
                 $image->delete();
             }
-            // Store new images.
+        }
+
+        // Process new images if provided.
+        if ($request->hasFile('images')) {
+            // If you already cleared images above, this will simply add the new ones.
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path     = $image->storeAs('property_images', $filename, 'public');
@@ -244,6 +249,7 @@ class PropertyController extends Controller
         return redirect()->route('property.index')
             ->with('success', 'Property updated successfully!');
     }
+
 
     public function destroy(Property $property)
     {
