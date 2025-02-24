@@ -249,8 +249,7 @@ class PropertyController extends Controller
         return redirect()->route('property.index')
             ->with('success', 'Property updated successfully!');
     }
-
-
+    
     public function destroy(Property $property)
     {
         if ($property->excluded) {
