@@ -58,7 +58,6 @@
                                     </button>
                                 </div>
 
-
                                 <!-- 1. Item Name -->
                                 <div>
                                     <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -623,6 +622,7 @@
             clearButton.classList.add('hidden');
         });
     </script>
+
 
 
     {{-- Comma on Acquisition Cost --}}

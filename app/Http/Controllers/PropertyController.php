@@ -51,7 +51,7 @@ class PropertyController extends Controller
 
     public function create()
     {
-        $locations = Location::all();
+        $locations = Location::where('excluded', 0)->get();
         // Only fetch active end users.
         $endUsers  = EndUser::where('excluded', 0)->get();
 
@@ -174,7 +174,7 @@ class PropertyController extends Controller
 
     public function edit(Property $property)
     {
-        $locations = Location::all();
+        $locations = Location::where('excluded', 0)->get();
         // Only fetch active end users.
         $endUsers  = EndUser::where('excluded', 0)->get();
 
