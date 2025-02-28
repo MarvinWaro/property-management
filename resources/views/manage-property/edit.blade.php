@@ -404,18 +404,22 @@
                                                 <circle cx="12" cy="7" r="4"/>
                                             </svg>
                                         </div>
+                                        @php
+                                            $selectedUser = old('end_user_id', $property->end_user_id);
+                                            $activeUserIds = $endUsers->pluck('id')->toArray();
+                                        @endphp
+
                                         <select id="end_user_id" name="end_user_id"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('end_user_id') border-red-500 @enderror">
-                                            <option value="" disabled>
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                @error('end_user_id') border-red-500 @enderror"">
+                                            <option value="" disabled {{ !in_array($selectedUser, $activeUserIds) ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
                                             @foreach($endUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                    {{ old('end_user_id', $property->end_user_id) == $user->id ? 'selected' : '' }}>
+                                                <option value="{{ $user->id }}" {{ $selectedUser == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }} ({{ $user->department }})
                                                 </option>
                                             @endforeach

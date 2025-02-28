@@ -400,10 +400,10 @@
                                         </div>
                                         <select id="end_user_id" name="end_user_id"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('end_user_id') border-red-500 @enderror">
+                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                    @error('end_user_id') border-red-500 @enderror">
                                             <option value="" disabled {{ !old('end_user_id') ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
@@ -542,7 +542,6 @@
         </div>
     </div>
 
-
     {{-- Image Script --}}
     <script>
         const fileInput = document.getElementById('dropzone-file');
@@ -622,8 +621,6 @@
             clearButton.classList.add('hidden');
         });
     </script>
-
-
 
     {{-- Comma on Acquisition Cost --}}
     <script>
