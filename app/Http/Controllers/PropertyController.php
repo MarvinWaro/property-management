@@ -52,8 +52,8 @@ class PropertyController extends Controller
     public function create()
     {
         $locations = Location::where('excluded', 0)->get();
-        // Only fetch active end users.
-        $endUsers  = EndUser::where('excluded', 0)->get();
+        // Fetch all end users, so that the excluded ones are available.
+        $endUsers  = EndUser::all();
 
         return view('manage-property.create', compact('locations', 'endUsers'));
     }
@@ -102,6 +102,12 @@ class PropertyController extends Controller
         $excludedProperty = Property::where('excluded', 1)->first();
 
         if ($excludedProperty) {
+            // Remove old images before reactivating
+            foreach ($excludedProperty->images as $image) {
+                Storage::disk('public')->delete($image->file_path);
+                $image->delete();
+            }
+
             // Reactivate the excluded property with new details.
             $excludedProperty->update([
                 'property_number'             => $request->property_number,
@@ -122,7 +128,7 @@ class PropertyController extends Controller
                 'active'                      => 1,
             ]);
 
-            // Process image uploads if available.
+            // Process new images if available.
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -172,11 +178,12 @@ class PropertyController extends Controller
             ->with('success', 'Property created successfully.');
     }
 
+
     public function edit(Property $property)
     {
         $locations = Location::where('excluded', 0)->get();
-        // Only fetch active end users.
-        $endUsers  = EndUser::where('excluded', 0)->get();
+        // Fetch all end users.
+        $endUsers  = EndUser::all();
 
         return view('manage-property.edit', compact('property', 'locations', 'endUsers'));
     }
@@ -249,7 +256,7 @@ class PropertyController extends Controller
         return redirect()->route('property.index')
             ->with('success', 'Property updated successfully!');
     }
-    
+
     public function destroy(Property $property)
     {
         if ($property->excluded) {

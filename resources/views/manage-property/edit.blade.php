@@ -389,9 +389,13 @@
                                     @enderror
                                 </div>
 
-                                <!-- 10. End User -->
+                                <!-- 10. End User in Edit Form -->
+                                @php
+                                    $selectedUser = old('end_user_id', $property->end_user_id);
+                                @endphp
+
                                 <div>
-                                    <label for="item_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <label for="end_user_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         End-user <span class="text-red-500">*</span>
                                     </label>
                                     <div class="mb-4 relative">
@@ -405,18 +409,23 @@
                                             </svg>
                                         </div>
                                         <select id="end_user_id" name="end_user_id"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('end_user_id') border-red-500 @enderror">
-                                            <option value="" disabled>
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                    focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                    @error('end_user_id') border-red-500 @enderror"
+                                                onchange="removeHiddenEndUser()">
+                                            <option value="" disabled {{ !$selectedUser ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
                                             @foreach($endUsers as $user)
                                                 <option value="{{ $user->id }}"
-                                                    {{ old('end_user_id', $property->end_user_id) == $user->id ? 'selected' : '' }}>
+                                                        {{ $selectedUser == $user->id ? 'selected' : '' }}
+                                                        @if($user->excluded) disabled @endif>
                                                     {{ $user->name }} ({{ $user->department }})
+                                                    @if($user->excluded)
+                                                        (Excluded)
+                                                    @endif
                                                 </option>
                                             @endforeach
                                         </select>
@@ -424,6 +433,11 @@
                                     @error('end_user_id')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
+
+                                    {{-- Only add hidden input if the selected user is excluded --}}
+                                    @if($selectedUser && $endUsers->where('id', $selectedUser)->first()->excluded)
+                                        <input type="hidden" id="hidden_end_user_id" name="end_user_id" value="{{ $selectedUser }}">
+                                    @endif
                                 </div>
 
                                 <!-- 11. Condition -->
@@ -545,7 +559,7 @@
         </div>
     </div>
 
-
+    {{-- Image Dropzone File --}}
     <script>
         const fileInput = document.getElementById('dropzone-file');
         const previewContainer = document.getElementById('preview-container');
@@ -640,8 +654,6 @@
         }
     </script>
 
-
-
     {{-- For the comma of cost --}}
     <script>
         // Attach the event listener to reformat the cost as the user types
@@ -664,6 +676,16 @@
                 maximumFractionDigits: 2
             });
         });
+    </script>
+
+    {{-- End User script --}}
+    <script>
+        function removeHiddenEndUser() {
+            var hiddenInput = document.getElementById('hidden_end_user_id');
+            if (hiddenInput) {
+                hiddenInput.parentNode.removeChild(hiddenInput);
+            }
+        }
     </script>
 
 
