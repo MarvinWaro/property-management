@@ -52,8 +52,8 @@ class PropertyController extends Controller
     public function create()
     {
         $locations = Location::where('excluded', 0)->get();
-        // Only fetch active end users.
-        $endUsers  = EndUser::where('excluded', 0)->get();
+        // Fetch all end users, so that the excluded ones are available.
+        $endUsers  = EndUser::all();
 
         return view('manage-property.create', compact('locations', 'endUsers'));
     }
@@ -175,8 +175,8 @@ class PropertyController extends Controller
     public function edit(Property $property)
     {
         $locations = Location::where('excluded', 0)->get();
-        // Only fetch active end users.
-        $endUsers  = EndUser::where('excluded', 0)->get();
+        // Fetch all end users.
+        $endUsers  = EndUser::all();
 
         return view('manage-property.edit', compact('property', 'locations', 'endUsers'));
     }
