@@ -22,6 +22,10 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.all.min.js"></script>
 
+    <!-- In the head section -->
+    <link href="https://unpkg.com/filepond/dist/filepond.min.css" rel="stylesheet" />
+
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -95,6 +99,8 @@
     @livewireScripts
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>
+
 </body>
 
 {{-- for loader --}}
