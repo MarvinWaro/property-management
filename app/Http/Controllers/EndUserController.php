@@ -21,10 +21,12 @@ class EndUserController extends Controller
                             ->orWhere('email', 'like', "%{$search}%")
                             ->orWhere('phone_number', 'like', "%{$search}%");
             })
+            ->orderBy('created_at', 'desc') // Newest first
             ->paginate(5); // 5 items per page
 
         return view('manage-users.index', compact('endUsers'));
     }
+
 
     public function create()
     {

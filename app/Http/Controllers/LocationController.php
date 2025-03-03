@@ -12,11 +12,12 @@ class LocationController extends Controller
         // Get the search term from the request
         $search = $request->get('search');
 
-        // Fetch locations that are not excluded
+        // Fetch locations that are not excluded, ordering the newest first
         $locations = Location::where('excluded', 0)
             ->when($search, function ($query, $search) {
                 return $query->where('location_name', 'like', "%{$search}%");
             })
+            ->orderBy('created_at', 'desc')
             ->paginate(5);
 
         return view('manage-location.index', compact('locations'));
