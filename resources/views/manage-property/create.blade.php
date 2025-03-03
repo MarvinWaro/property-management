@@ -382,6 +382,16 @@
                                     @enderror
                                 </div>
 
+                                @php
+                                    // Separate active and excluded users
+                                    $activeUsers = $endUsers->filter(function ($user) {
+                                        return !$user->excluded;
+                                    });
+                                    $excludedUsers = $endUsers->filter(function ($user) {
+                                        return $user->excluded;
+                                    });
+                                @endphp
+
                                 <!-- 10. End User in Create Form -->
                                 <div>
                                     <label for="end_user_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -407,14 +417,18 @@
                                             <option value="" disabled {{ !old('end_user_id') ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
-                                            @foreach ($endUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                    {{ old('end_user_id') == $user->id ? 'selected' : '' }}
-                                                    @if($user->excluded) disabled @endif>
+
+                                            {{-- Display active users first --}}
+                                            @foreach ($activeUsers as $user)
+                                                <option value="{{ $user->id }}" {{ old('end_user_id') == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }} ({{ $user->department }})
-                                                    @if($user->excluded)
-                                                        (Excluded)
-                                                    @endif
+                                                </option>
+                                            @endforeach
+
+                                            {{-- Then display excluded users --}}
+                                            @foreach ($excludedUsers as $user)
+                                                <option value="{{ $user->id }}" {{ old('end_user_id') == $user->id ? 'selected' : '' }} disabled>
+                                                    {{ $user->name }} ({{ $user->department }}) (Excluded)
                                                 </option>
                                             @endforeach
                                         </select>

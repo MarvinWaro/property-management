@@ -389,11 +389,17 @@
                                     @enderror
                                 </div>
 
-                                <!-- 10. End User in Edit Form -->
+                                {{-- 10. For End-Users --}}
                                 @php
                                     $selectedUser = old('end_user_id', $property->end_user_id);
+                                    // Separate active and excluded users
+                                    $activeUsers = $endUsers->filter(function ($user) {
+                                        return !$user->excluded;
+                                    });
+                                    $excludedUsers = $endUsers->filter(function ($user) {
+                                        return $user->excluded;
+                                    });
                                 @endphp
-
                                 <div>
                                     <label for="end_user_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         End-user <span class="text-red-500">*</span>
@@ -402,8 +408,7 @@
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="#a6a6a6" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-user">
+                                                stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
                                                 <path d="M20 21c0-2.667-4-4-8-4s-8 1.333-8 4"/>
                                                 <circle cx="12" cy="7" r="4"/>
                                             </svg>
@@ -418,14 +423,18 @@
                                             <option value="" disabled {{ !$selectedUser ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
-                                            @foreach($endUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                        {{ $selectedUser == $user->id ? 'selected' : '' }}
-                                                        @if($user->excluded) disabled @endif>
+
+                                            {{-- Active users first --}}
+                                            @foreach($activeUsers as $user)
+                                                <option value="{{ $user->id }}" {{ $selectedUser == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }} ({{ $user->department }})
-                                                    @if($user->excluded)
-                                                        (Excluded)
-                                                    @endif
+                                                </option>
+                                            @endforeach
+
+                                            {{-- Excluded users at the bottom --}}
+                                            @foreach($excludedUsers as $user)
+                                                <option value="{{ $user->id }}" {{ $selectedUser == $user->id ? 'selected' : '' }} disabled>
+                                                    {{ $user->name }} ({{ $user->department }}) (Excluded)
                                                 </option>
                                             @endforeach
                                         </select>
