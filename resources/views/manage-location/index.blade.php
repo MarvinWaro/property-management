@@ -74,13 +74,11 @@
                     <div class="relative overflow-x-auto">
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <caption
-                                class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-                                CHED Respective Location
+                            <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                                CHED Respective Locations
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    These are CHED personnel responsible for managing institutional properties, ensuring
-                                    accountability and proper utilization before their transition or departure, allowing
-                                    seamless asset handover and continued operational efficiency.
+                                    This table displays a detailed list of CHED locations. It ensures efficient management and tracking of institutional properties, thereby
+                                    supporting seamless asset coordination and operational excellence across all CHED campuses.
                                 </p>
                             </caption>
                             <thead
@@ -165,7 +163,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <!-- On the left side (optional) -->

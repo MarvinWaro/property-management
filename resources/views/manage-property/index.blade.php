@@ -81,9 +81,12 @@
                             <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
                                 CHED Property Details
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    These are CHED personnel responsible for managing institutional properties, ensuring
-                                    accountability and proper utilization before their transition or departure, allowing
-                                    seamless asset handover and continued operational efficiency.
+                                    This section provides a comprehensive overview of institutional assets
+                                    managed by CHED. It includes essential information such as property numbers,
+                                    detailed descriptions, physical condition, and the assigned personnel.
+                                    Designed to ensure accountability, proper utilization, and seamless
+                                    asset handover, this system supports CHED’s commitment to operational
+                                    excellence and transparency.
                                 </p>
                             </caption>
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

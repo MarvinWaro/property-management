@@ -15,28 +15,24 @@ class PropertyController extends Controller
     {
         $search = $request->get('search');
 
-
         $properties = Property::where('excluded', 0)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    // Search multiple columns in the 'properties' table
                     $q->where('item_name', 'like', "%{$search}%")
-                        ->orWhere('item_description', 'like', "%{$search}%")
-                        ->orWhere('serial_no', 'like', "%{$search}%")
-                        ->orWhere('model_no', 'like', "%{$search}%")
-                        ->orWhere('acquisition_cost', 'like', "%{$search}%")
-                        ->orWhere('unit_of_measure', 'like', "%{$search}%")
-                        ->orWhere('fund', 'like', "%{$search}%")
-                        ->orWhere('condition', 'like', "%{$search}%")
-                        ->orWhere('remarks', 'like', "%{$search}%")
-                        ->orWhere('quantity_per_physical_count', 'like', "%{$search}%");
+                    ->orWhere('item_description', 'like', "%{$search}%")
+                    ->orWhere('serial_no', 'like', "%{$search}%")
+                    ->orWhere('model_no', 'like', "%{$search}%")
+                    ->orWhere('acquisition_cost', 'like', "%{$search}%")
+                    ->orWhere('unit_of_measure', 'like', "%{$search}%")
+                    ->orWhere('fund', 'like', "%{$search}%")
+                    ->orWhere('condition', 'like', "%{$search}%")
+                    ->orWhere('remarks', 'like', "%{$search}%")
+                    ->orWhere('quantity_per_physical_count', 'like', "%{$search}%");
 
-                    // Also search in related 'location' model
                     $q->orWhereHas('location', function ($subQ) use ($search) {
                         $subQ->where('location_name', 'like', "%{$search}%");
                     });
 
-                    // Also search in related 'endUser' model
                     $q->orWhereHas('endUser', function ($subQ) use ($search) {
                         $subQ->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
@@ -44,10 +40,12 @@ class PropertyController extends Controller
                     });
                 });
             })
+            ->orderBy('created_at', 'desc') // Newest first
             ->paginate(5);
 
         return view('manage-property.index', compact('properties'));
     }
+
 
     public function create()
     {
