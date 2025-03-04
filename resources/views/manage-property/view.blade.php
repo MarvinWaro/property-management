@@ -52,50 +52,45 @@
                     @endif
                 </div>
 
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                    Property Details
+                </h2>
+
                 <!-- Property Details Section (Middle) -->
                 <div class="mb-6 bg-white dark:bg-gray-700 p-4 rounded-md">
-                    <!-- End User Info (Photo + Name + Department) -->
-                    <div class="flex items-center mb-4">
-                        <img class="w-16 h-16 rounded-full mr-4 object-cover"
-                             src="{{ $property->endUser && $property->endUser->picture ? asset('storage/' . $property->endUser->picture) : asset('images/user-placeholder.png') }}"
-                             alt="End User Photo" />
-                        <div>
-                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                                {{ $property->endUser->name ?? 'No Assigned User' }}
-                            </h3>
-                            <p class="text-gray-600 dark:text-gray-300">
-                                {{ $property->endUser->department ?? 'No Department' }}
-                            </p>
-                        </div>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left Column: End User Info -->
 
-                    <!-- Detailed Property Information in 2 Columns -->
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Property Details</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- First Column -->
                         <div class="text-gray-600 dark:text-gray-300">
                             <p><strong>Property Number:</strong> {{ $property->property_number }}</p>
                             <p><strong>Item Name:</strong> {{ $property->item_name }}</p>
                             <p><strong>Serial Number:</strong> {{ $property->serial_no ?? 'N/A' }}</p>
                             <p><strong>Model Number:</strong> {{ $property->model_no ?? 'N/A' }}</p>
-                        </div>
-                        <!-- Second Column -->
-                        <div class="text-gray-600 dark:text-gray-300">
                             <p><strong>Acquisition Date:</strong> {{ $property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A' }}</p>
                             <p><strong>Acquisition Cost:</strong> {{ $property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A' }}</p>
                             <p><strong>Fund:</strong> {{ $property->fund ?? 'N/A' }}</p>
                             <p><strong>Location:</strong> {{ $property->location->location_name ?? 'N/A' }}</p>
                             <p><strong>Condition:</strong> {{ $property->condition }}</p>
+                            <div class="mt-4">
+                                <p><strong>Description:</strong> {{ $property->item_description ?? 'No description available.' }}</p>
+                                <p><strong>Remarks:</strong> {{ $property->remarks ?? 'No remarks.' }}</p>
+                            </div>
                         </div>
-                    </div>
+                        <!-- Right Column: Property Details & Description -->
+                        <div class="flex flex-col items-center justify-center">
+                            <img class="w-40 h-40 rounded-full object-cover"
+                                 src="{{ $property->endUser && $property->endUser->picture ? asset('storage/' . $property->endUser->picture) : asset('images/user-placeholder.png') }}"
+                                 alt="End User Photo" />
+                            <div class="mt-4 text-center">
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                                    {{ $property->endUser->name ?? 'No Assigned User' }}
+                                </h3>
+                                <p class="text-lg text-gray-600 dark:text-gray-300">
+                                    {{ $property->endUser->department ?? 'No Department' }}
+                                </p>
+                            </div>
+                        </div>
 
-                    <!-- Description / Remarks -->
-                    <div class="mt-4">
-                        <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Description / Remarks</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mt-1">
-                            <strong>Description:</strong> {{ $property->item_description ?? 'No description available.' }}<br>
-                            <strong>Remarks:</strong> {{ $property->remarks ?? 'No remarks.' }}
-                        </p>
                     </div>
                 </div>
 
