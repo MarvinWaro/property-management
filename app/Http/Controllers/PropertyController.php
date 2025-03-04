@@ -46,7 +46,6 @@ class PropertyController extends Controller
         return view('manage-property.index', compact('properties'));
     }
 
-
     public function create()
     {
         $locations = Location::where('excluded', 0)->get();
@@ -176,7 +175,6 @@ class PropertyController extends Controller
             ->with('success', 'Property created successfully.');
     }
 
-
     public function edit(Property $property)
     {
         $locations = Location::where('excluded', 0)->get();
@@ -273,6 +271,11 @@ class PropertyController extends Controller
 
     public function view(Property $property)
     {
+        // Eager load related images, endUser, and endUser's properties
+        $property->load('images', 'endUser.properties', 'location');
         return view('manage-property.view', compact('property'));
     }
+
+
+
 }

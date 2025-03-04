@@ -240,7 +240,14 @@
                     </nav>
 
                 </div>
+
             </div>
+
+            <!-- Footer / Copyright -->
+            <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
+                Copyright © CHED Property Management System
+            </div>
+            
         </div>
     </div>
 
