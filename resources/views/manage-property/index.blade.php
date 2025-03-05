@@ -115,21 +115,21 @@
                                             {{ $property->item_name }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            {{ $property->unit_of_measure ?? 'TBA' }}
+                                            {{ $property->unit_of_measure ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
                                             {{ $property->quantity_per_physical_count }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            {{ $property->fund ?? 'TBA' }}
+                                            {{ $property->fund ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            {{ $property->endUser->name ?? 'TBA' }}
+                                            {{ $property->endUser->name ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
                                             <span class="px-2 py-1 rounded-full
                                                 {{ strtolower($property->condition) == 'serviceable' ? 'bg-green-500 text-white' : (strtolower($property->condition) == 'unserviceable' ? 'bg-red-500 text-white' : '') }}">
-                                                {{ $property->condition ?: 'TBA/NA' }}
+                                                {{ $property->condition ?: 'TBD/NA' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
@@ -247,7 +247,7 @@
             <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
                 Copyright © CHED Property Management System
             </div>
-            
+
         </div>
     </div>
 
