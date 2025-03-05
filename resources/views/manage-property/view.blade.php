@@ -67,21 +67,36 @@
                     </div>
 
                     <!-- Right Column (4 of 12): Assigned User Info -->
-                    <div class="col-span-12 md:col-span-4 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-700 p-6 rounded">
-                        <img class="w-32 h-32 rounded-full object-cover"
+                    <div
+                        class="col-span-12 md:col-span-4 flex flex-col items-center justify-center p-6 rounded text-white"
+                        style="
+                            background: linear-gradient(
+                                rgba(37, 100, 237, 0.6),   /* a Tailwind-like 'bg-blue-600' in RGBA form */
+                                rgba(0, 34, 133, 1)   /* a Tailwind-like 'bg-indigo-900' in RGBA form */
+                            ),
+                            url('{{ asset('img/ched-building.jpg') }}');
+                            background-size: cover;
+                            background-position: center;
+                            background-repeat: no-repeat;
+                        "
+                        >
+                        <img
+                            class="w-32 h-32 rounded-full object-cover border-4 border-white"
                             src="{{ $property->endUser && $property->endUser->picture
                                     ? asset('storage/' . $property->endUser->picture)
                                     : asset('img/ched-logo.png') }}"
-                            alt="End User Photo" />
+                            alt="End User Photo"
+                        />
                         <div class="mt-4 text-center">
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">
+                            <h3 class="text-xl font-bold">
                                 {{ $property->endUser->name ?? 'No Assigned User' }}
                             </h3>
-                            <p class="text-gray-600 dark:text-gray-300">
+                            <p>
                                 {{ $property->endUser->department ?? 'No Department' }}
                             </p>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- More prominent heading: larger, bolder, darker text. -->
@@ -260,8 +275,8 @@
                                                 href="{{ route('property.view', $prop->id) }}"
                                                 class="mt-4 inline-block px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white
                                                     hover:bg-blue-700 transition-colors duration-300"
-                                            >
-                                                Read More
+                                                >
+                                                    Read More
                                             </a>
 
                                         </div>
