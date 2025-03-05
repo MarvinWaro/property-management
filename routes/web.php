@@ -41,5 +41,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
 
 
+
+
 });
 
