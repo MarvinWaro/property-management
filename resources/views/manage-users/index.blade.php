@@ -99,7 +99,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($endUsers as $endUser)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <tr class="{{ $endUser->excluded ? 'bg-red-200 dark:bg-red-900' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         <!-- Photo Column -->
                                         <td class="px-6 py-4">
                                             <img class="w-10 h-10 rounded-full object-cover"
@@ -120,7 +120,8 @@
                                                 data-dropdown-toggle="dropdownMenu{{ $endUser->id }}"
                                                 class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-1 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                                                 type="button">
-                                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                <svg class="w-5 h-5" aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                                     viewBox="0 0 16 3">
                                                     <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                                 </svg>
@@ -173,6 +174,7 @@
                                     </tr>
                                 @endforeach
                             </tbody>
+
                         </table>
                     </div>
 

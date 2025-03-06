@@ -14,18 +14,18 @@ class EndUserController extends Controller
         // Get the search term from the request
         $search = $request->get('search');
 
-        // Paginate the users with 5 users per page, applying the search filter
-        $endUsers = EndUser::where('excluded', 0) // Exclude users marked as deleted
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone_number', 'like', "%{$search}%");
-            })
-            ->orderBy('created_at', 'desc') // Newest first
-            ->paginate(5); // 5 items per page
+        // Paginate all users (active or excluded), applying the search filter.
+        $endUsers = EndUser::when($search, function ($query, $search) {
+                    return $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone_number', 'like', "%{$search}%");
+                })
+                ->orderBy('created_at', 'desc') // Newest first
+                ->paginate(5); // 5 items per page
 
         return view('manage-users.index', compact('endUsers'));
     }
+
 
 
     public function create()

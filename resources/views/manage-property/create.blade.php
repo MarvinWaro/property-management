@@ -561,7 +561,7 @@
         </div>
     </div>
 
-    {{-- Image Script --}}
+    <!-- Scripts for Images -->
     <script>
         const fileInput = document.getElementById('dropzone-file');
         const previewContainer = document.getElementById('preview-container');
@@ -585,9 +585,9 @@
                 clearButton.classList.remove('hidden');
             }
 
-            // Limit file count to 3
-            if (numFiles > 3) {
-                alert('You can upload a maximum of 3 images.');
+            // Limit file count to 4
+            if (numFiles > 4) {
+                alert('You can upload a maximum of 4 images.');
                 fileInput.value = ''; // Reset the input
                 previewContainer.innerHTML = '';
                 defaultContent.style.display = 'flex';
@@ -603,15 +603,17 @@
                 gridColsClass = 'grid-cols-2';
             } else if (numFiles === 3) {
                 gridColsClass = 'grid-cols-3';
+            } else if (numFiles === 4) {
+                gridColsClass = 'grid-cols-4';
             }
             // Update preview container classes
             previewContainer.className = `absolute inset-0 grid ${gridColsClass} gap-2 w-full h-full`;
 
             // Process each file
             Array.from(files).forEach(file => {
-                // Check file size (7MB = 7 * 1024 * 1024 bytes)
-                if (file.size > 7 * 1024 * 1024) {
-                    alert(`File "${file.name}" exceeds the 7MB size limit.`);
+                // Check file size (25MB = 25 * 1024 * 1024 bytes)
+                if (file.size > 25 * 1024 * 1024) {
+                    alert(`File "${file.name}" exceeds the 25MB size limit.`);
                     fileInput.value = '';
                     previewContainer.innerHTML = '';
                     defaultContent.style.display = 'flex';
