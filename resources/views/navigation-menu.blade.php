@@ -26,9 +26,9 @@
                             {{ __('Manage Users') }}
                         </x-nav-link>
 
-                        <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
+                        {{-- <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
                             {{ __('Manage Location') }}
-                        </x-nav-link>
+                        </x-nav-link> --}}
                     </div>
                 </div>
 
@@ -135,6 +135,10 @@
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
+                            <x-dropdown-link href="{{ route('location.index') }}">
+                                {{ __('Locations') }}
+                            </x-dropdown-link>
+
                             @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                                 <x-dropdown-link href="{{ route('api-tokens.index') }}">
                                     {{ __('API Tokens') }}
@@ -184,9 +188,9 @@
                 {{ __('Manage Users') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
+            {{-- <x-responsive-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
                 {{ __('Manage Location') }}
-            </x-responsive-nav-link>
+            </x-responsive-nav-link> --}}
         </div>
 
         <!-- Responsive Settings Options -->
