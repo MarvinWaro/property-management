@@ -78,8 +78,9 @@ class PropertyController extends Controller
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
-            'images'                      => 'nullable|array|max:3',
-            'images.*'                    => 'image|max:7168',
+            // CHANGED MAX IMAGES FROM 3 TO 4 AND SIZE FROM 7168 (7MB) TO 25600 (25MB)
+            'images'                      => 'nullable|array|max:4',
+            'images.*'                    => 'image|max:25600',
         ]);
 
         // Additional uniqueness check for serial_no among active properties.
@@ -207,8 +208,9 @@ class PropertyController extends Controller
             'end_user_id'                 => 'required|exists:end_users,id',
             'condition'                   => 'required|string',
             'remarks'                     => 'nullable|string',
-            'images'                      => 'nullable|array|max:3',
-            'images.*'                    => 'image|max:7168',
+            // CHANGED MAX IMAGES FROM 3 TO 4 AND SIZE FROM 7168 (7MB) TO 25600 (25MB)
+            'images'                      => 'nullable|array|max:4',
+            'images.*'                    => 'image|max:25600',
         ]);
 
         // Update property details.
@@ -275,7 +277,5 @@ class PropertyController extends Controller
         $property->load('images', 'endUser.properties', 'location');
         return view('manage-property.view', compact('property'));
     }
-
-
 
 }
