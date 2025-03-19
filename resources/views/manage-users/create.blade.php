@@ -57,7 +57,7 @@
                                 <!-- Name Field -->
                                 <div>
                                     <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Name
+                                        Full Name
                                     </label>
                                     <div class="mb-4 relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -84,7 +84,7 @@
                                 <!-- Email Field -->
                                 <div>
                                     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Email
+                                        Email
                                     </label>
                                     <div class="mb-4 relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -111,7 +111,7 @@
                                 <!-- Contact Number Field -->
                                 <div>
                                     <label for="contact-number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Contact Number
+                                        Contact Number
                                     </label>
                                     <div class="mb-4 relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">

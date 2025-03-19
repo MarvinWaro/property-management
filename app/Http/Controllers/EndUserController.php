@@ -26,8 +26,6 @@ class EndUserController extends Controller
         return view('manage-users.index', compact('endUsers'));
     }
 
-
-
     public function create()
     {
         return view('manage-users.create');
