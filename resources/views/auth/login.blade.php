@@ -15,33 +15,58 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
+            <!-- Email Address -->
             <div>
                 <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-input id="email" class="block mt-1 w-full h-10"
+                         type="email"
+                         name="email"
+                         :value="old('email')"
+                         required autofocus autocomplete="username" />
             </div>
 
+            <!-- Password -->
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+                <x-input id="password" class="block mt-1 w-full h-10"
+                         type="password"
+                         name="password"
+                         required autocomplete="current-password" />
             </div>
 
-            <div class="block mt-4">
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between mt-4">
                 <label for="remember_me" class="flex items-center">
                     <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        {{ __('Remember me') }}
+                    </span>
                 </label>
-            </div>
 
-            <div class="flex items-center justify-end mt-4">
                 @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
+                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                       href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
                     </a>
                 @endif
+            </div>
 
-                <x-button class="ms-4">
-                    {{ __('Log in') }}
+            <!-- Login Button -->
+            <div class="mt-4">
+                <x-button class="w-full h-10">
+                    <span class="block text-center w-full">{{ __('Log in') }}</span>
                 </x-button>
+            </div>
+
+            <!-- Signup Prompt -->
+            <div class="mt-4 text-center">
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ __("Don't have an account?") }}
+                </span>
+                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 ml-1"
+                   href="{{ route('register') }}">
+                    {{ __('Sign up here') }}
+                </a>
             </div>
         </form>
     </x-authentication-card>
