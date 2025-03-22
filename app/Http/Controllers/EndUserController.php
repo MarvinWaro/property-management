@@ -6,7 +6,6 @@ use App\Models\EndUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-
 class EndUserController extends Controller
 {
     public function index(Request $request)
@@ -17,16 +16,13 @@ class EndUserController extends Controller
         // Paginate all users (active or excluded), applying the search filter.
         $endUsers = EndUser::when($search, function ($query, $search) {
                     return $query->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%")
-                                ->orWhere('phone_number', 'like', "%{$search}%");
+                                 ->orWhere('email', 'like', "%{$search}%");
                 })
                 ->orderBy('created_at', 'desc') // Newest first
                 ->paginate(5); // 5 items per page
 
         return view('manage-users.index', compact('endUsers'));
     }
-
-
 
     public function create()
     {
@@ -36,12 +32,12 @@ class EndUserController extends Controller
     public function store(Request $request)
     {
         // Validate input including the picture file
+        // (Removed phone_number from validation)
         $request->validate([
-            'name'         => 'required|string|max:255',
-            'email'        => 'required|email',
-            'phone_number' => 'required|digits_between:1,15',
-            'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
-            'picture'      => 'nullable|image|max:10240', // 10MB max
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|email',
+            'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture'    => 'nullable|image|max:10240', // 10MB max
         ]);
 
         // Check if email is already taken by an active user
@@ -49,18 +45,12 @@ class EndUserController extends Controller
             ->where('email', $request->email)
             ->exists();
 
-        // Check if phone number is already taken by an active user
-        $phoneExists = EndUser::where('excluded', 0)
-            ->where('phone_number', $request->phone_number)
-            ->exists();
-
-        // If either is taken by an active user, show an error.
-        if ($emailExists || $phoneExists) {
+        // If email is taken by an active user, show an error.
+        if ($emailExists) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
-                    'email'        => $emailExists ? 'Email is already taken.' : null,
-                    'phone_number' => $phoneExists ? 'Phone number is already taken.' : null,
+                    'email' => 'Email is already taken.',
                 ]);
         }
 
@@ -80,13 +70,12 @@ class EndUserController extends Controller
         // If found, reactivate it with new info
         if ($excludedUser) {
             $excludedUser->update([
-                'name'         => $request->name,
-                'email'        => $request->email,
-                'phone_number' => $request->phone_number,
-                'department'   => $request->department,
-                'picture'      => $picturePath,
-                'excluded'     => 0, // Mark as active
-                'active'       => 1,
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'department' => $request->department,
+                'picture'  => $picturePath,
+                'excluded' => 0, // Mark as active
+                'active'   => 1,
             ]);
 
             return redirect()->route('end_users.index')
@@ -97,13 +86,12 @@ class EndUserController extends Controller
         // 2) Otherwise, create a brand-new user
         // ----------------------------------------------------------------
         EndUser::create([
-            'name'         => $request->name,
-            'email'        => $request->email,
-            'phone_number' => $request->phone_number,
-            'department'   => $request->department,
-            'picture'      => $picturePath,
-            'active'       => 1,
-            'excluded'     => 0,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'department' => $request->department,
+            'picture'    => $picturePath,
+            'active'     => 1,
+            'excluded'   => 0,
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User added successfully.');
@@ -119,12 +107,12 @@ class EndUserController extends Controller
     public function update(Request $request, EndUser $endUser)
     {
         // Validate input including the picture file
+        // (Removed phone_number from validation)
         $request->validate([
-            'name'         => 'required|string|max:255',
-            'email'        => 'required|email|unique:end_users,email,' . $endUser->id,
-            'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number,' . $endUser->id,
-            'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
-            'picture'      => 'nullable|image|max:10240', // 10MB max
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|email|unique:end_users,email,' . $endUser->id,
+            'department' => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'picture'    => 'nullable|image|max:10240', // 10MB max
         ]);
 
         // Start with the current picture path
@@ -145,13 +133,12 @@ class EndUserController extends Controller
             $picturePath = $request->file('picture')->store('pictures', 'public');
         }
 
-        // Update the user record
+        // Update the user record (Removed phone_number field)
         $endUser->update([
-            'name'         => $request->name,
-            'email'        => $request->email,
-            'phone_number' => $request->phone_number,
-            'department'   => $request->department,
-            'picture'      => $picturePath,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'department' => $request->department,
+            'picture'    => $picturePath,
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User updated successfully');
@@ -167,10 +154,9 @@ class EndUserController extends Controller
         // Mark the user as excluded and inactive
         $endUser->update([
             'excluded' => 1, // Mark user as excluded
-            'active' => 0    // Mark user as inactive
+            'active'   => 0  // Mark user as inactive
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User has been removed.');
     }
-
 }

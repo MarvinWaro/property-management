@@ -10,18 +10,17 @@ class EndUser extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'email', 'phone_number', 'department', 'active', 'excluded', 'picture'
+        'name',
+        'email',
+        'department',
+        'designation', // <--- ADD THIS
+        'active',
+        'excluded',
+        'picture',
     ];
-
-    // In App\Models\EndUser.php
 
     public function properties()
     {
         return $this->hasMany(Property::class, 'end_user_id');
     }
-
-
 }
-
-
-
