@@ -155,10 +155,10 @@
                                         <div class="relative">
                                             <select id="department" name="department"
                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                            focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                            @error('department') border-red-500 @enderror">
+                                                           focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                                           dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                           dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                           @error('department') border-red-500 @enderror">
                                                 <option value="" disabled>Select Department</option>
                                                 <option value="Admin Department"
                                                     {{ old('department', $endUser->department) == 'Admin Department' ? 'selected' : '' }}>
@@ -181,6 +181,42 @@
                                         @enderror
                                     </div>
                                 </div>
+
+                                <!-- Designation Dropdown -->
+                                <div>
+                                    <label for="designation" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Select Designation
+                                    </label>
+                                    <div class="mb-4">
+                                        <div class="relative">
+                                            <select id="designation" name="designation"
+                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                        @error('designation') border-red-500 @enderror">
+                                                <option value="" disabled>Select Designation</option>
+                                                <option value="PTS 1"
+                                                    {{ old('designation', $endUser->designation) == 'PTS 1' ? 'selected' : '' }}>
+                                                    PTS 1
+                                                </option>
+                                                <option value="PTS 2"
+                                                    {{ old('designation', $endUser->designation) == 'PTS 2' ? 'selected' : '' }}>
+                                                    PTS 2
+                                                </option>
+                                                <option value="PTS 3"
+                                                    {{ old('designation', $endUser->designation) == 'PTS 3' ? 'selected' : '' }}>
+                                                    PTS 3
+                                                </option>
+                                            </select>
+                                        </div>
+                                        @error('designation')
+                                            <p class="text-red-500 text-xs mt-1">
+                                                {{ $message }}
+                                            </p>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Form Buttons -->
@@ -195,6 +231,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>

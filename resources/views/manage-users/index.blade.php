@@ -49,8 +49,10 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                      class="size-5">
                                     <path fill-rule="evenodd"
-                                          d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452
-                                          4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+                                          d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5
+                                          5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452
+                                          4.391l3.328 3.329a.75.75 0 1 1-1.06
+                                          1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
                                           clip-rule="evenodd" />
                                 </svg>
                             </button>
@@ -64,10 +66,15 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                      class="size-5">
                                     <path
-                                        d="M10 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175
-                                           6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7
-                                           18a9.953 9.953 0 0 1-5.385-1.572ZM16.25 5.75a.75.75 0 0 0-1.5 0v2h-2a.75.75
-                                           0 0 0 0 1.5h2v2a.75.75 0 0 0 1.5 0v-2h2a.75.75
+                                        d="M10 5a3 3 0 1 1-6 0 3 3 0 0
+                                           1 6 0ZM1.615 16.428a1.224 1.224
+                                           0 0 1-.569-1.175 6.002 6.002
+                                           0 0 1 11.908 0c.058.467-.172.92-.57
+                                           1.174A9.953 9.953 0 0 1 7
+                                           18a9.953 9.953 0 0 1-5.385-1.572ZM16.25
+                                           5.75a.75.75 0 0 0-1.5 0v2h-2a.75.75
+                                           0 0 0 0 1.5h2v2a.75.75
+                                           0 0 0 1.5 0v-2h2a.75.75
                                            0 0 0 0-1.5h-2v-2Z" />
                                 </svg>
                             </span>
@@ -98,7 +105,9 @@
                                     <th scope="col" class="px-6 py-3">Name</th>
                                     <th scope="col" class="px-6 py-3">Email</th>
                                     <th scope="col" class="px-6 py-3">Department</th>
-                                    <!-- Removed the "Active Cell Phone Number" column -->
+                                    <!-- New designation column -->
+                                    <th scope="col" class="px-6 py-3">Designation</th>
+
                                     <th scope="col" class="px-6 py-3">Action</th>
                                 </tr>
                             </thead>
@@ -113,14 +122,27 @@
                                                  alt="{{ $endUser->name }}'s Profile Picture">
                                         </td>
 
+                                        <!-- ID -->
                                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $endUser->id }}
                                         </th>
-                                        <td class="px-6 py-4">{{ $endUser->name }}</td>
-                                        <td class="px-6 py-4">{{ $endUser->email }}</td>
-                                        <td class="px-6 py-4">{{ $endUser->department }}</td>
-                                        <!-- Removed the <td> that displayed $endUser->phone_number -->
 
+                                        <!-- Name -->
+                                        <td class="px-6 py-4">{{ $endUser->name }}</td>
+
+                                        <!-- Email -->
+                                        <td class="px-6 py-4">{{ $endUser->email }}</td>
+
+                                        <!-- Department -->
+                                        <td class="px-6 py-4">{{ $endUser->department }}</td>
+
+                                        <!-- Designation (New) -->
+                                        <td class="px-6 py-4">
+                                            {{ $endUser->designation ?? '—' }}
+                                            <!-- Fallback dash if no designation is set -->
+                                        </td>
+
+                                        <!-- Action Buttons -->
                                         <td class="px-2 py-4">
                                             <!-- Dropdown Button -->
                                             <button id="dropdownMenuButton{{ $endUser->id }}"
@@ -133,10 +155,11 @@
                                                 <svg class="w-5 h-5" aria-hidden="true"
                                                      xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                                                      viewBox="0 0 16 3">
-                                                    <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5
-                                                             1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14
-                                                             0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1
-                                                             0-3Z" />
+                                                    <path d="M2 0a1.5 1.5 0 1 1 0 3
+                                                             1.5 1.5 0 0 1 0-3Zm6.041 0a1.5
+                                                             1.5 0 1 1 0 3 1.5 1.5 0 0 1
+                                                             0-3ZM14 0a1.5 1.5 0 1 1 0 3
+                                                             1.5 1.5 0 0 1 0-3Z" />
                                                 </svg>
                                             </button>
 
@@ -148,15 +171,18 @@
                                                     <!-- Edit Action -->
                                                     <li>
                                                         <a href="{{ route('end_users.edit', $endUser->id) }}"
-                                                           class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                                                  dark:hover:text-white">
+                                                           class="flex items-center px-4 py-2 hover:bg-gray-100
+                                                                  dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
                                                                  stroke-linecap="round" stroke-linejoin="round"
                                                                  class="lucide lucide-pencil me-3">
-                                                                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842
-                                                                         16.174a2 2 0 0 0-.5.83l-1.321
-                                                                         4.352a.5.5 0 0 0 .623.622l4.353-1.32a2
+                                                                <path d="M21.174 6.812a1 1 0 0
+                                                                         0-3.986-3.987L3.842
+                                                                         16.174a2 2 0 0
+                                                                         0-.5.83l-1.321
+                                                                         4.352a.5.5 0 0 0
+                                                                         .623.622l4.353-1.32a2
                                                                          2 0 0 0 .83-.497z" />
                                                                 <path d="m15 5 4 4" />
                                                             </svg>
@@ -169,8 +195,8 @@
                                                         <form id="deleteForm{{ $endUser->id }}"
                                                               action="{{ route('end_users.destroy', $endUser->id) }}"
                                                               method="POST"
-                                                              class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600
-                                                                     dark:hover:text-white">
+                                                              class="flex items-center px-4 py-2 hover:bg-gray-100
+                                                                     dark:hover:bg-gray-600 dark:hover:text-white">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button"
@@ -180,21 +206,25 @@
                                                                      xmlns="http://www.w3.org/2000/svg"
                                                                      viewBox="0 0 16 16" fill="currentColor">
                                                                     <path fill-rule="evenodd"
-                                                                          d="M5 3.25V4H2.75a.75.75 0 0 0
-                                                                             0 1.5h.3l.815 8.15A1.5 1.5
-                                                                             0 0 0 5.357 15h5.285a1.5
-                                                                             1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75
+                                                                          d="M5 3.25V4H2.75a.75.75 0 0
+                                                                             0 0 1.5h.3l.815
+                                                                             8.15A1.5 1.5 0 0 0 5.357
+                                                                             15h5.285a1.5 1.5 0 0 0
+                                                                             1.493-1.35l.815-8.15h.3a.75.75
                                                                              0 0 0 0-1.5H11v-.75A2.25
                                                                              2.25 0 0 0 8.75 1h-1.5A2.25
                                                                              2.25 0 0 0 5
-                                                                             3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75
-                                                                             0 0 0-.75-.75h-1.5ZM6.05 6a.75.75
-                                                                             0 0 1 .787.713l.275 5.5a.75.75 0
-                                                                             0 1-1.498.075l-.275-5.5A.75.75 0
-                                                                             0 1 6.05 6Zm3.9 0a.75.75 0 0 1
-                                                                             .712.787l-.275 5.5a.75.75 0 0
-                                                                             1-1.498-.075l.275-5.5a.75.75 0
-                                                                             0 1 .786-.711Z"
+                                                                             3.25Zm2.25-.75a.75.75 0 0
+                                                                             0-.75.75V4h3v-.75a.75.75 0
+                                                                             0 0-.75-.75h-1.5ZM6.05 6a.75.75
+                                                                             0 0 1 .787.713l.275
+                                                                             5.5a.75.75 0 0
+                                                                             1-1.498.075l-.275-5.5A.75.75
+                                                                             0 0 1 6.05 6Zm3.9 0a.75.75 0
+                                                                             0 1 .712.787l-.275
+                                                                             5.5a.75.75 0 0
+                                                                             1-1.498-.075l.275-5.5a.75.75
+                                                                             0 0 1 .786-.711Z"
                                                                           clip-rule="evenodd" />
                                                                 </svg>
                                                                 Delete
@@ -214,7 +244,7 @@
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <!-- On the left side (optional) -->
                         <div class="text-sm text-gray-500">
-                            {{-- Put something like "Showing 1–5 of 20" if you want, or leave empty --}}
+                            <!-- e.g., "Showing 1–5 of 20" if desired -->
                         </div>
 
                         <!-- On the right side -->
@@ -255,14 +285,13 @@
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "OK"
                     });
-                }, 500); // Small delay to ensure the page fully loads
+                }, 500);
             @endif
         });
 
         function toggleEndUserClearButton() {
             const input = document.getElementById('endUserSearchInput');
             const clearBtn = document.getElementById('endUserClearBtn');
-
             // if user typed something, show X; otherwise hide
             if (input.value.trim().length > 0) {
                 clearBtn.style.display = 'flex';
@@ -279,7 +308,6 @@
             // document.querySelector('form.w-full.max-w-sm').submit();
         }
 
-        // On page load, see if we should show the X (user's old search might persist)
         document.addEventListener('DOMContentLoaded', () => {
             toggleEndUserClearButton();
         });
