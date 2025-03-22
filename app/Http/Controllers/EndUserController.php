@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\Storage;
 
 class EndUserController extends Controller
 {
+
+    public function dashboard()
+    {
+        // Count only active users (where 'excluded' is 0)
+        $totalUsers = EndUser::where('excluded', 0)->count();
+
+        // Retrieve the most recently updated employee record
+        $lastUpdatedRecord = EndUser::orderBy('updated_at', 'desc')->first();
+        $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
+
+        return view('dashboard', compact('totalUsers', 'lastUpdated'));
+    }
+
+
+
     public function index(Request $request)
     {
         // Get the search term from the request
