@@ -23,7 +23,7 @@
                         </x-nav-link>
 
                         <x-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
-                            {{ __('Manage Users') }}
+                            {{ __('Manage Employees') }}
                         </x-nav-link>
 
                         {{-- <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">

@@ -6,9 +6,23 @@ use App\Models\EndUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-
 class EndUserController extends Controller
 {
+
+    public function dashboard()
+    {
+        // Count only active users (where 'excluded' is 0)
+        $totalUsers = EndUser::where('excluded', 0)->count();
+
+        // Retrieve the most recently updated employee record
+        $lastUpdatedRecord = EndUser::orderBy('updated_at', 'desc')->first();
+        $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
+
+        return view('dashboard', compact('totalUsers', 'lastUpdated'));
+    }
+
+
+
     public function index(Request $request)
     {
         // Get the search term from the request
@@ -16,17 +30,14 @@ class EndUserController extends Controller
 
         // Paginate all users (active or excluded), applying the search filter.
         $endUsers = EndUser::when($search, function ($query, $search) {
-                    return $query->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%")
-                                ->orWhere('phone_number', 'like', "%{$search}%");
-                })
-                ->orderBy('created_at', 'desc') // Newest first
-                ->paginate(5); // 5 items per page
+                return $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc') // Newest first
+            ->paginate(5); // 5 items per page
 
         return view('manage-users.index', compact('endUsers'));
     }
-
-
 
     public function create()
     {
@@ -35,13 +46,16 @@ class EndUserController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input including the picture file
+        // Validate input including the picture file, with custom messages
         $request->validate([
             'name'         => 'required|string|max:255',
             'email'        => 'required|email',
-            'phone_number' => 'required|digits_between:1,15',
             'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'designation'  => 'required|string',
             'picture'      => 'nullable|image|max:10240', // 10MB max
+        ], [
+            'picture.max'   => 'The uploaded picture exceeds the maximum limit of 10MB.',
+            'picture.image' => 'Please upload a valid image file (jpeg, png, bmp, etc.).',
         ]);
 
         // Check if email is already taken by an active user
@@ -49,18 +63,12 @@ class EndUserController extends Controller
             ->where('email', $request->email)
             ->exists();
 
-        // Check if phone number is already taken by an active user
-        $phoneExists = EndUser::where('excluded', 0)
-            ->where('phone_number', $request->phone_number)
-            ->exists();
-
-        // If either is taken by an active user, show an error.
-        if ($emailExists || $phoneExists) {
+        // If email is taken by an active user, show an error.
+        if ($emailExists) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
-                    'email'        => $emailExists ? 'Email is already taken.' : null,
-                    'phone_number' => $phoneExists ? 'Phone number is already taken.' : null,
+                    'email' => 'Email is already taken.',
                 ]);
         }
 
@@ -70,9 +78,7 @@ class EndUserController extends Controller
             $picturePath = $request->file('picture')->store('pictures', 'public');
         }
 
-        // ----------------------------------------------------------------
-        // 1) Attempt to find an *excluded* user by matching email (case-insensitive)
-        // ----------------------------------------------------------------
+        // Attempt to find an *excluded* user by matching email (case-insensitive)
         $excludedUser = EndUser::where('excluded', 1)
             ->whereRaw('LOWER(email) = ?', [strtolower($request->email)])
             ->first();
@@ -82,8 +88,8 @@ class EndUserController extends Controller
             $excludedUser->update([
                 'name'         => $request->name,
                 'email'        => $request->email,
-                'phone_number' => $request->phone_number,
                 'department'   => $request->department,
+                'designation'  => $request->designation,
                 'picture'      => $picturePath,
                 'excluded'     => 0, // Mark as active
                 'active'       => 1,
@@ -93,14 +99,12 @@ class EndUserController extends Controller
                 ->with('success', 'User reactivated successfully.');
         }
 
-        // ----------------------------------------------------------------
-        // 2) Otherwise, create a brand-new user
-        // ----------------------------------------------------------------
+        // Otherwise, create a brand-new user
         EndUser::create([
             'name'         => $request->name,
             'email'        => $request->email,
-            'phone_number' => $request->phone_number,
             'department'   => $request->department,
+            'designation'  => $request->designation,
             'picture'      => $picturePath,
             'active'       => 1,
             'excluded'     => 0,
@@ -115,16 +119,18 @@ class EndUserController extends Controller
         return view('manage-users.edit', compact('endUser'));
     }
 
-    // Handle Update Request
     public function update(Request $request, EndUser $endUser)
     {
-        // Validate input including the picture file
+        // Validate input including the picture file, with custom messages
         $request->validate([
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|unique:end_users,email,' . $endUser->id,
-            'phone_number' => 'required|digits_between:1,15|unique:end_users,phone_number,' . $endUser->id,
             'department'   => 'required|string|in:Admin Department,Technical Department,UNIFAST',
+            'designation'  => 'required|string',
             'picture'      => 'nullable|image|max:10240', // 10MB max
+        ], [
+            'picture.max'   => 'The uploaded picture exceeds the maximum limit of 10MB.',
+            'picture.image' => 'Please upload a valid image file (jpeg, png, bmp, etc.).',
         ]);
 
         // Start with the current picture path
@@ -149,8 +155,8 @@ class EndUserController extends Controller
         $endUser->update([
             'name'         => $request->name,
             'email'        => $request->email,
-            'phone_number' => $request->phone_number,
             'department'   => $request->department,
+            'designation'  => $request->designation,
             'picture'      => $picturePath,
         ]);
 
@@ -167,10 +173,9 @@ class EndUserController extends Controller
         // Mark the user as excluded and inactive
         $endUser->update([
             'excluded' => 1, // Mark user as excluded
-            'active' => 0    // Mark user as inactive
+            'active'   => 0  // Mark user as inactive
         ]);
 
         return redirect()->route('end_users.index')->with('success', 'User has been removed.');
     }
-
 }

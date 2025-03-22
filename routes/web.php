@@ -10,10 +10,9 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+
     // Dashboard Route
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [EndUserController::class, 'dashboard'])->name('dashboard');
 
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
@@ -39,9 +38,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::put('/property/{property}', [PropertyController::class, 'update'])->name('property.update');
     Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
     Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
-
-
-
 
 });
 
