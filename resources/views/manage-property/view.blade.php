@@ -17,15 +17,26 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400">Property #: {{ $property->property_number }}</p>
                     </div>
 
-                    <!-- Small QR Code -->
+                    <!-- Small QR Code Section -->
                     <div class="mt-4 md:mt-0 flex items-center">
                         <div class="w-20 h-20">
                             <img src="{{ $qrCodeImage }}" alt="QR Code" class="w-full h-full">
                         </div>
                         <div class="ml-3">
-                            <button onclick="window.open('{{ $qrCodeImage }}', '_blank')" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <!-- Change the onclick handler from window.open to openModal() -->
+                            <button onclick="openModal()" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                                 Enlarge QR
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Enlarged QR Code -->
+                    <div id="qrModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
+                        <div class="bg-white p-4 rounded-lg relative" onclick="event.stopPropagation()">
+                            <!-- Close Button -->
+                            <button onclick="closeModal()" class="absolute top-0 right-0 p-2 text-xl font-bold">&times;</button>
+                            <!-- Enlarged QR Code Image -->
+                            <img src="{{ $qrCodeImage }}" alt="QR Code" class="w-96 h-96">
                         </div>
                     </div>
                 </div>
@@ -261,3 +272,15 @@
         </div>
     </div>
 </x-app-layout>
+
+
+<script>
+    // Function to open the modal
+    function openModal() {
+        document.getElementById('qrModal').classList.remove('hidden');
+    }
+    // Function to close the modal
+    function closeModal() {
+        document.getElementById('qrModal').classList.add('hidden');
+    }
+</script>
