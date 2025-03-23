@@ -39,5 +39,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
     Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
 
+
+
 });
 

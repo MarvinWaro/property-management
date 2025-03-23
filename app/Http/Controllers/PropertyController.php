@@ -8,8 +8,21 @@ use App\Models\Location;
 use App\Models\EndUser;
 use Illuminate\Support\Facades\Storage;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+
 class PropertyController extends Controller
 {
+
+    // public function showQrCode($propertyNumber)
+    // {
+    //     $property = Property::where('property_number', $propertyNumber)->firstOrFail();
+    //     $qrCode = new QrCode(route('property.show', $property->id));
+    //     $writer = new PngWriter();
+    //     $qrCodeImage = $writer->write($qrCode)->getDataUri();
+
+    //     return view('manage-property.qrcode', compact('property', 'qrCodeImage'));
+    // }
 
     public function index(Request $request)
     {
@@ -275,7 +288,26 @@ class PropertyController extends Controller
     {
         // Eager load related images, endUser, and endUser's properties
         $property->load('images', 'endUser.properties', 'location');
-        return view('manage-property.view', compact('property'));
+
+        // Generate QR code with property details
+        $propertyDetails = "Property Number: {$property->property_number}\n"
+            . "Item Name: {$property->item_name}\n"
+            . "Serial Number: {$property->serial_no}\n"
+            . "Model Number: {$property->model_no}\n"
+            . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
+            . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
+            . "Fund: {$property->fund}\n"
+            . "Location: {$property->location->location_name}\n"
+            . "Condition: {$property->condition}\n"
+            . "Description: {$property->item_description}\n"
+            . "Remarks: {$property->remarks}";
+
+        $qrCode = new QrCode($propertyDetails);
+        $writer = new PngWriter();
+        $qrCodeImage = $writer->write($qrCode)->getDataUri();
+
+        return view('manage-property.view', compact('property', 'qrCodeImage'));
     }
+
 
 }
