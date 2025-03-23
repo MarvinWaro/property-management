@@ -9,7 +9,7 @@
             height: 100vh; /* Full viewport height */
             /* Gradient: light blue at top, dark blue at bottom, over the background image */
             background: linear-gradient(to bottom, rgba(173,216,230, 0.7), rgba(0,0,139, 0.8)),
-                        url('{{ asset("assets/img/ched-building.jpg") }}') no-repeat center center;
+                        url('{{ asset("img/bg-login.jpg") }}') no-repeat center center;
             background-size: cover;
         }
         /* Particles.js container */
