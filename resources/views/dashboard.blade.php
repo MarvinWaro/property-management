@@ -10,7 +10,6 @@
             <!-- Dashboard Cards Section -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <section class="grid gap-6 md:grid-cols-4 p-4 md:p-8 w-full">
-
                     <!-- Users Card -->
                     <div class="p-6 bg-white shadow rounded-2xl dark:bg-gray-900 border-l-4 border-blue-500 transition-all duration-300 hover:shadow-lg hover:translate-y-1 hover:border-l-6 cursor-pointer">
                         <div class="flex justify-between">
@@ -36,7 +35,7 @@
                         <div class="flex justify-between">
                             <dl class="space-y-2">
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Properties</dt>
-                                <dd class="text-4xl font-light md:text-5xl dark:text-white">873</dd>
+                                <dd class="text-4xl font-light md:text-5xl dark:text-white">{{ $totalProperties }}</dd>
                                 <dd class="flex items-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
                                     <span>5% increase</span>
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -80,7 +79,7 @@
                         <div class="flex justify-between">
                             <dl class="space-y-2">
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Locations</dt>
-                                <dd class="text-4xl font-light md:text-5xl dark:text-white">42</dd>
+                                <dd class="text-4xl font-light md:text-5xl dark:text-white">{{ $totalLocations }}</dd>
                                 <dd class="flex items-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
                                     <span>2 new</span>
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

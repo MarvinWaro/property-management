@@ -14,6 +14,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // Dashboard Route
     Route::get('/dashboard', [EndUserController::class, 'dashboard'])->name('dashboard');
 
+
+
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
     Route::get('/end_users/create', [EndUserController::class, 'create'])->name('end_users.create');
