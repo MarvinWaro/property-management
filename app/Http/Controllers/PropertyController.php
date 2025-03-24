@@ -14,8 +14,6 @@ use Endroid\QrCode\Writer\PngWriter;
 class PropertyController extends Controller
 {
 
-
-
     public function index(Request $request)
     {
         $search = $request->get('search');
