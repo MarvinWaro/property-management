@@ -41,22 +41,27 @@
                     </div>
                 </div>
 
-                <!-- Carousel and User Info Side by Side -->
                 <div class="grid grid-cols-12 gap-6 mb-6">
                     <!-- Left Column (8 of 12): Image Carousel -->
                     <div class="col-span-12 lg:col-span-8">
                         <div class="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden h-full">
-                            @if($property->images->count() > 1)
-                                <!-- Carousel for multiple images -->
-                                <div id="propertyCarousel" class="relative h-full" data-carousel="slide">
-                                    <div class="overflow-hidden relative h-[28rem] lg:h-full rounded-lg">
+                            <div id="propertyCarousel" class="relative h-full" data-carousel="slide">
+                                <div class="overflow-hidden relative h-[28rem] lg:h-full rounded-lg">
+                                    @if($property->images->count() > 0)
                                         @foreach($property->images as $key => $image)
-                                            <div class="duration-700 ease-in-out absolute inset-0 transition-opacity {{ $key == 0 ? 'opacity-100' : 'opacity-0' }}" data-carousel-item="{{ $key == 0 ? 'active' : '' }}">
+                                            <div class="hidden duration-700 ease-in-out" data-carousel-item>
                                                 <img src="{{ asset('storage/' . $image->file_path) }}" alt="Property Image {{ $key + 1 }}" class="block w-full h-full object-cover">
                                             </div>
                                         @endforeach
-                                    </div>
+                                    @else
+                                        <!-- Default image if no images are uploaded -->
+                                        <div class="flex items-center justify-center bg-gray-200 dark:bg-gray-600 h-full">
+                                            <img src="{{ asset('img/default.png') }}" alt="Default Image" class="max-h-full max-w-full object-contain p-4">
+                                        </div>
+                                    @endif
+                                </div>
 
+                                @if($property->images->count() > 1)
                                     <!-- Carousel Controls -->
                                     <button type="button" class="absolute top-1/2 -translate-y-1/2 left-4 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-white/70 dark:bg-gray-800/70 shadow hover:bg-white/90 dark:hover:bg-gray-800/90" data-carousel-prev>
                                         <span class="inline-flex items-center justify-center w-8 h-8 text-gray-800 dark:text-white">&larr;</span>
@@ -71,18 +76,8 @@
                                             <button type="button" class="w-2 h-2 rounded-full {{ $key == 0 ? 'bg-white' : 'bg-white/50' }}" aria-current="{{ $key == 0 ? 'true' : 'false' }}" aria-label="Slide {{ $key + 1 }}" data-carousel-slide-to="{{ $key }}"></button>
                                         @endforeach
                                     </div>
-                                </div>
-                            @elseif($property->images->count() == 1)
-                                <!-- Single image display -->
-                                <div class="overflow-hidden relative h-[28rem] lg:h-full rounded-lg">
-                                    <img src="{{ asset('storage/' . $property->images->first()->file_path) }}" alt="Property Image" class="block w-full h-full object-cover">
-                                </div>
-                            @else
-                                <!-- Default image -->
-                                <div class="overflow-hidden relative h-[28rem] lg:h-full rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-600">
-                                    <img src="{{ asset('img/no-image.png') }}" alt="Default Image" class="max-h-full max-w-full object-contain p-4">
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -97,29 +92,39 @@
                                 </div>
                                 <div class="mt-4 text-center text-white">
                                     <h3 class="text-xl font-bold">{{ $property->endUser->name ?? 'No Assigned User' }}</h3>
-                                    <p class="text-blue-100">{{ $property->endUser->department ?? 'No Department' }}</p>
+                                    <p class="text-blue-100">
+                                        @if($property->endUser->designation && $property->endUser->department)
+                                            {{ $property->endUser->designation }} | {{ $property->endUser->department }}
+                                        @elseif($property->endUser->designation)
+                                            {{ $property->endUser->designation }}
+                                        @else
+                                            {{ $property->endUser->department ?? 'No Department' }}
+                                        @endif
+                                    </p>
                                 </div>
 
                                 @if($property->endUser)
-                                <div class="mt-6 w-full">
-                                    <div class="flex items-center justify-between text-sm text-white mb-2">
-                                        <span>Assigned Properties</span>
-                                        <span class="bg-white text-blue-800 rounded-full px-2 py-0.5">
-                                            {{ $property->endUser->properties->count() }}
-                                        </span>
+                                    <div class="mt-6 w-full">
+                                        <div class="flex items-center justify-between text-sm text-white mb-2">
+                                            <span>Assigned Properties</span>
+                                            <span class="bg-white text-blue-800 rounded-full px-2 py-0.5">
+                                                {{ $property->endUser->properties->count() }}
+                                            </span>
+                                        </div>
+                                        <div class="bg-blue-600/30 rounded p-3 text-sm text-white">
+                                            <p class="mb-1">Last Assignment:</p>
+                                            <p class="font-semibold truncate">
+                                                {{ $property->endUser->properties->sortByDesc('created_at')->first()->item_name ?? 'N/A' }}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="bg-blue-600/30 rounded p-3 text-sm text-white">
-                                        <p class="mb-1">Last Assignment:</p>
-                                        <p class="font-semibold truncate">
-                                            {{ $property->endUser->properties->sortByDesc('created_at')->first()->item_name ?? 'N/A' }}
-                                        </p>
-                                    </div>
-                                </div>
                                 @endif
                             </div>
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Property Details Section - Redesigned -->
                 <div class="mb-6">
@@ -284,3 +289,5 @@
         document.getElementById('qrModal').classList.add('hidden');
     }
 </script>
+
+

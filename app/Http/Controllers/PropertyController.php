@@ -14,8 +14,6 @@ use Endroid\QrCode\Writer\PngWriter;
 class PropertyController extends Controller
 {
 
-
-
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -281,7 +279,7 @@ class PropertyController extends Controller
         // Eager load related images, endUser, and endUser's properties
         $property->load('images', 'endUser.properties', 'location');
 
-        // Generate QR code with property details
+        // Generate QR code with property details including end user information
         $propertyDetails = "Property Number: {$property->property_number}\n"
             . "Item Name: {$property->item_name}\n"
             . "Serial Number: {$property->serial_no}\n"
@@ -292,7 +290,9 @@ class PropertyController extends Controller
             . "Condition: {$property->condition}\n"
             . "Location: {$property->location->location_name}\n"
             . "Description: {$property->item_description}\n"
-            . "Remarks: {$property->remarks}";
+            . "Remarks: {$property->remarks}\n"
+            . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
+            . "Department: " . ($property->endUser && $property->endUser->department ? $property->endUser->department : 'N/A');
 
         $qrCode = new QrCode($propertyDetails);
         $writer = new PngWriter();
@@ -300,6 +300,21 @@ class PropertyController extends Controller
 
         return view('manage-property.view', compact('property', 'qrCodeImage'));
     }
+
+
+    // public function validateEmail(Request $request, Property $property)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //     ]);
+
+    //     $email = $request->input('email');
+    //     if (strpos($email, '@ched.gov.ph') !== false) {
+    //         return redirect()->route('property.view', $property->id)->with('email_valid', true);
+    //     } else {
+    //         return redirect()->route('property.view', $property->id)->withErrors(['email' => 'Invalid email domain. Only @ched.gov.ph emails are allowed.']);
+    //     }
+    // }
 
 
 }
