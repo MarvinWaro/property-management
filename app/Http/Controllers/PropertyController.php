@@ -14,30 +14,93 @@ use Endroid\QrCode\Writer\PngWriter;
 use Barryvdh\DomPDF\Facade\Pdf; // Import the PDF facade
 use Illuminate\Support\Facades\File;
 
+use Endroid\QrCode\Logo\Logo; // For logo support
+
 class PropertyController extends Controller
 {
 
-    public function downloadQr($propertyId)
+    public function view(Property $property)
     {
-        $property = Property::with('endUser')->findOrFail($propertyId);
+        $property->load('images', 'endUser.properties', 'location');
 
-        // Define QR code path
-        $qrCodeContent = route('property.view', $property->id);
+        $propertyDetails = "Property Number: {$property->property_number}\n"
+            . "Item Name: {$property->item_name}\n"
+            . "Serial Number: {$property->serial_no}\n"
+            . "Model Number: {$property->model_no}\n"
+            . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
+            . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
+            . "Fund: {$property->fund}\n"
+            . "Condition: {$property->condition}\n"
+            . "Location: {$property->location->location_name}\n"
+            . "Description: {$property->item_description}\n"
+            . "Remarks: {$property->remarks}\n"
+            . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
+            . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
+
+        // Generate QR code with CHED logo
         $qrCodePath = storage_path('app/public/qrcodes/property_' . $property->id . '.png');
-
-        // Ensure the qrcodes directory exists
         $qrCodeDir = dirname($qrCodePath);
+
         if (!File::exists($qrCodeDir)) {
             File::makeDirectory($qrCodeDir, 0755, true);
         }
 
-        // Check if QR code exists; if not, generate it
         if (!file_exists($qrCodePath)) {
-            $qrCode = new QrCode($qrCodeContent);
+            $qrCode = new QrCode($propertyDetails);
             $writer = new PngWriter();
+
+            // Add CHED logo
+            $logoPath = public_path('img/ched-logo.png');
+            $logo = new Logo($logoPath, 50, 50); // 50x50px logo
+
             $result = $writer->write(
                 $qrCode,
+                $logo,
                 null,
+                ['size' => 200] // Consistent size
+            );
+            $result->saveToFile($qrCodePath);
+        }
+
+        $qrCodeImage = asset('storage/qrcodes/property_' . $property->id . '.png');
+
+        return view('manage-property.view', compact('property', 'qrCodeImage'));
+    }
+
+    public function downloadQr($propertyId)
+    {
+        $property = Property::with('endUser', 'location')->findOrFail($propertyId);
+
+        $propertyDetails = "Property Number: {$property->property_number}\n"
+            . "Item Name: {$property->item_name}\n"
+            . "Serial Number: {$property->serial_no}\n"
+            . "Model Number: {$property->model_no}\n"
+            . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
+            . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
+            . "Fund: {$property->fund}\n"
+            . "Condition: {$property->condition}\n"
+            . "Location: {$property->location->location_name}\n"
+            . "Description: {$property->item_description}\n"
+            . "Remarks: {$property->remarks}\n"
+            . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
+            . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
+
+        $qrCodePath = storage_path('app/public/qrcodes/property_' . $property->id . '.png');
+        $qrCodeDir = dirname($qrCodePath);
+
+        if (!File::exists($qrCodeDir)) {
+            File::makeDirectory($qrCodeDir, 0755, true);
+        }
+
+        if (!file_exists($qrCodePath)) {
+            $qrCode = new QrCode($propertyDetails);
+            $writer = new PngWriter();
+            $logoPath = public_path('img/ched-logo.png');
+            $logo = new Logo($logoPath, 50, 50);
+
+            $result = $writer->write(
+                $qrCode,
+                $logo,
                 null,
                 ['size' => 200]
             );
@@ -46,12 +109,11 @@ class PropertyController extends Controller
 
         $qrCodeImage = public_path('storage/qrcodes/property_' . $property->id . '.png');
 
-        // Prepare data for PDF
         $data = [
             'qrCodeImage' => $qrCodeImage,
             'itemName' => $property->item_name,
             'propertyNumber' => $property->property_number,
-            'employeeName' => $property->endUser->name ?? 'No Assigned User',
+            'employeeName' => $property->endUser->name ?? 'N/A',
             'designation' => $property->endUser->designation ?? 'N/A',
             'serialNo' => $property->serial_no ?? 'N/A',
             'modelNo' => $property->model_no ?? 'N/A',
@@ -322,32 +384,30 @@ class PropertyController extends Controller
             ->with('success', 'Property has been removed.');
     }
 
-    public function view(Property $property)
-    {
-        // Eager load related images, endUser, and endUser's properties
-        $property->load('images', 'endUser.properties', 'location');
+    // public function view(Property $property)
+    // {
+    //     $property->load('images', 'endUser.properties', 'location');
 
-        // Generate QR code with property details including end user information
-        $propertyDetails = "Property Number: {$property->property_number}\n"
-            . "Item Name: {$property->item_name}\n"
-            . "Serial Number: {$property->serial_no}\n"
-            . "Model Number: {$property->model_no}\n"
-            . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
-            . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
-            . "Fund: {$property->fund}\n"
-            . "Condition: {$property->condition}\n"
-            . "Location: {$property->location->location_name}\n"
-            . "Description: {$property->item_description}\n"
-            . "Remarks: {$property->remarks}\n"
-            . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
-            . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
+    //     $propertyDetails = "Property Number: {$property->property_number}\n"
+    //         . "Item Name: {$property->item_name}\n"
+    //         . "Serial Number: {$property->serial_no}\n"
+    //         . "Model Number: {$property->model_no}\n"
+    //         . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
+    //         . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
+    //         . "Fund: {$property->fund}\n"
+    //         . "Condition: {$property->condition}\n"
+    //         . "Location: {$property->location->location_name}\n"
+    //         . "Description: {$property->item_description}\n"
+    //         . "Remarks: {$property->remarks}\n"
+    //         . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
+    //         . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
 
-        $qrCode = new QrCode($propertyDetails);
-        $writer = new PngWriter();
-        $qrCodeImage = $writer->write($qrCode)->getDataUri();
+    //     $qrCode = new QrCode($propertyDetails);
+    //     $writer = new PngWriter();
+    //     $qrCodeImage = $writer->write($qrCode)->getDataUri();
 
-        return view('manage-property.view', compact('property', 'qrCodeImage'));
-    }
+    //     return view('manage-property.view', compact('property', 'qrCodeImage'));
+    // }
 
     // public function printQRCodes(Request $request)
     // {

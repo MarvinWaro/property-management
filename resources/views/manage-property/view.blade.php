@@ -20,32 +20,34 @@
                     </div>
 
                     <!-- Inside the QR Code Section -->
-<div class="mt-4 md:mt-0 flexed items-center">
-    <div class="w-20 h-20">
-        <img src="{{ $qrCodeImage }}" alt="QR Code" class="w-full h-full">
-    </div>
-    <div class="ml-3 flex space-x-2">
-        <!-- Enlarge QR Button -->
-        <button onclick="openModal()" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
-            Enlarge QR
-        </button>
-        <!-- Print QR Button -->
-        <a href="{{ route('property.download-qr', $property->id) }}" class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-            </svg>
-            Print Sticker
-        </a>
-    </div>
-</div>
+                    <div class="mt-4 md:mt-0 flex items-center">
+                        <div class="w-20 h-20">
+                            <img src="{{ $qrCodeImage }}" alt="QR Code" class="w-full h-full">
+                        </div>
+                        <div class="ml-3 flex space-x-2">
+                            <!-- Enlarge QR Button -->
+                            <button onclick="openModal()" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none">
+                                Enlarge QR
+                            </button>
+                            <!-- Print QR Button -->
+                            <a href="{{ route('property.download-qr', $property->id) }}" class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                                Print Sticker
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- Modal for Enlarged QR Code -->
-                    <div id="qrModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
-                        <div class="bg-white p-4 rounded-lg relative" onclick="event.stopPropagation()">
-                            <!-- Close Button -->
-                            <button onclick="closeModal()" class="absolute top-0 right-0 p-2 text-xl font-bold">&times;</button>
-                            <!-- Enlarged QR Code Image -->
-                            <img src="{{ $qrCodeImage }}" alt="QR Code" class="w-96 h-96">
+                    <div id="qrModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white p-4 rounded-lg shadow-lg relative">
+                            <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <img src="{{ $qrCodeImage }}" alt="Enlarged QR Code" class="w-64 h-64">
                         </div>
                     </div>
                 </div>
