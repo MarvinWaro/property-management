@@ -11,8 +11,56 @@ use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
+use Barryvdh\DomPDF\Facade\Pdf; // Import the PDF facade
+use Illuminate\Support\Facades\File;
+
 class PropertyController extends Controller
 {
+
+    public function downloadQr($propertyId)
+    {
+        $property = Property::with('endUser')->findOrFail($propertyId);
+
+        // Define QR code path
+        $qrCodeContent = route('property.view', $property->id);
+        $qrCodePath = storage_path('app/public/qrcodes/property_' . $property->id . '.png');
+
+        // Ensure the qrcodes directory exists
+        $qrCodeDir = dirname($qrCodePath);
+        if (!File::exists($qrCodeDir)) {
+            File::makeDirectory($qrCodeDir, 0755, true);
+        }
+
+        // Check if QR code exists; if not, generate it
+        if (!file_exists($qrCodePath)) {
+            $qrCode = new QrCode($qrCodeContent);
+            $writer = new PngWriter();
+            $result = $writer->write(
+                $qrCode,
+                null,
+                null,
+                ['size' => 200]
+            );
+            $result->saveToFile($qrCodePath);
+        }
+
+        $qrCodeImage = public_path('storage/qrcodes/property_' . $property->id . '.png');
+
+        // Prepare data for PDF
+        $data = [
+            'qrCodeImage' => $qrCodeImage,
+            'itemName' => $property->item_name,
+            'propertyNumber' => $property->property_number,
+            'employeeName' => $property->endUser->name ?? 'No Assigned User',
+            'designation' => $property->endUser->designation ?? 'N/A',
+            'serialNo' => $property->serial_no ?? 'N/A',
+            'modelNo' => $property->model_no ?? 'N/A',
+            'condition' => $property->condition ?? 'N/A',
+        ];
+
+        $pdf = Pdf::loadView('manage-property.qr_pdf', $data);
+        return $pdf->download('property_sticker_' . $property->property_number . '.pdf');
+    }
 
     public function index(Request $request)
     {
@@ -292,7 +340,7 @@ class PropertyController extends Controller
             . "Description: {$property->item_description}\n"
             . "Remarks: {$property->remarks}\n"
             . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
-            . "Department: " . ($property->endUser && $property->endUser->department ? $property->endUser->department : 'N/A');
+            . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
 
         $qrCode = new QrCode($propertyDetails);
         $writer = new PngWriter();
@@ -301,20 +349,26 @@ class PropertyController extends Controller
         return view('manage-property.view', compact('property', 'qrCodeImage'));
     }
 
-
-    // public function validateEmail(Request $request, Property $property)
+    // public function printQRCodes(Request $request)
     // {
-    //     $request->validate([
-    //         'email' => 'required|email',
-    //     ]);
-
-    //     $email = $request->input('email');
-    //     if (strpos($email, '@ched.gov.ph') !== false) {
-    //         return redirect()->route('property.view', $property->id)->with('email_valid', true);
-    //     } else {
-    //         return redirect()->route('property.view', $property->id)->withErrors(['email' => 'Invalid email domain. Only @ched.gov.ph emails are allowed.']);
+    //     $ids = $request->query('ids');
+    //     if (!$ids) {
+    //         abort(404, 'No property IDs were provided.');
     //     }
+
+    //     $propertyIds = explode(',', $ids);
+    //     $properties = Property::whereIn('id', $propertyIds)->get();
+
+    //     // You might want to generate or attach the QR code image to each property here.
+    //     // For example, if each Property has a method getQrCodeImage(), ensure it's available in the view.
+
+    //     $pdf = Pdf::loadView('manage-property.print', compact('properties'))
+    //         ->setPaper('a4', 'portrait'); // Set the paper size to A4
+
+    //     return $pdf->stream('qr-codes.pdf');
     // }
+
+
 
 
 }
