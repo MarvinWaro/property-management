@@ -39,8 +39,15 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::put('/property/{property}', [PropertyController::class, 'update'])->name('property.update');
     Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
     Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
-    // filepath: /Users/admin/Desktop/projects/property-management/routes/web.php
-    // Route::post('/property/{property}/validate-email', [PropertyController::class, 'validateEmail'])->name('property.validateEmail');
+
+    // Route::get('/property/print', [PropertyController::class, 'printQRCode'])->name('property.print');
+
+    // Route::get('/property/{property}/download-qr', [PropertyController::class, 'downloadQr'])->name('property.download-qr');
+
+
+    Route::get('/property/{property}/download-qr', [PropertyController::class, 'downloadQr'])->name('property.download-qr');
+
+
 
 
 });

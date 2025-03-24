@@ -35,44 +35,7 @@
 
 <body class="font-sans antialiased">
 
-    <!-- Loading Screen (Hidden by Default) -->
-        <!-- Loader HTML -->
-        {{-- <div id="loading-screen"
-        class="loader-container fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 hidden">
-        <!-- Loader 1 -->
-        <div class="loader">
-            <svg viewBox="0 0 80 80">
-                <circle r="32" cy="40" cx="40" id="test"></circle>
-            </svg>
-        </div>
-
-        <!-- Loader 2: Triangle -->
-        <div class="loader triangle">
-            <svg viewBox="0 0 86 80">
-                <polygon points="43 8 79 72 7 72"></polygon>
-            </svg>
-        </div>
-
-        <!-- Loader 3: Rectangle -->
-        <div class="loader">
-            <svg viewBox="0 0 80 80">
-                <rect height="64" width="64" y="8" x="8"></rect>
-            </svg>
-        </div>
-    </div> --}}
-
-    {{-- <!-- Loader Container -->
-    <div id="loading-screen" class="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 hidden">
-        <!-- Sharingan Loader -->
-        <div class="sharingon">
-            <div class="ring">
-                <div class="to"></div>
-                <div class="to"></div>
-                <div class="to"></div>
-                <div class="circle"></div>
-            </div>
-        </div>
-    </div> --}}
+    <x-loader />
 
     <x-banner />
 
@@ -103,24 +66,8 @@
 
 </body>
 
-{{-- for loader --}}
-{{-- <script>
-    // Show the loader
-    function showLoader() {
-        document.getElementById('loading-screen').classList.remove('hidden');
-    }
-
-    // Hide the loader
-    function hideLoader() {
-        document.getElementById('loading-screen').classList.add('hidden');
-    }
-
-    // Show loader when page loads and hide after 3 seconds
-    window.onload = function() {
-        showLoader();
-        setTimeout(hideLoader, 3000); // Adjust if needed
-    };
-</script> --}}
+{{-- chart js --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {{-- This is for the success message --}}
 <script>
@@ -136,27 +83,6 @@
         @endif
     });
 </script>
-
-
-{{-- <script>
-    // Show the loader
-    function showLoader() {
-        document.getElementById('loading-screen').classList.remove('hidden');
-    }
-
-    // Hide the loader
-    function hideLoader() {
-        document.getElementById('loading-screen').classList.add('hidden');
-    }
-
-    // Example: Show loader when the page is loading and hide it after 3 seconds
-    window.onload = function() {
-        showLoader(); // Show the loader when the page starts loading
-        setTimeout(function() {
-            hideLoader(); // Hide the loader after 3 seconds
-        }, 3000); // You can adjust this duration as per your need
-    };
-</script> --}}
 
 {{-- SCRIPT FOR DARK AND LIGHT MODE --}}
 <script>
@@ -191,7 +117,53 @@
     });
 </script>
 
+{{-- Loader Script --}}
+<script>
+    // Function to show the loader
+    function showLoader() {
+        const loader = document.getElementById('loader-container');
+        if (loader) {
+            loader.classList.add('show');
+        }
+    }
 
+    // Function to hide the loader
+    function hideLoader() {
+        const loader = document.getElementById('loader-container');
+        if (loader) {
+            loader.classList.remove('show');
+        }
+    }
 
+    // Show loader on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        showLoader();
+
+        // Hide loader after 2 seconds
+        setTimeout(function() {
+            hideLoader();
+        }, 2000);
+    });
+
+    // Show loader on page navigation (for Livewire)
+    document.addEventListener('livewire:navigating', function() {
+        showLoader();
+    });
+
+    document.addEventListener('livewire:navigated', function() {
+        // Hide after a short delay
+        setTimeout(function() {
+            hideLoader();
+        }, 800);
+    });
+
+    // For form submissions
+    document.addEventListener('submit', function(e) {
+        // Only show loader for non-AJAX forms
+        if (!e.target.hasAttribute('data-no-loader')) {
+            showLoader();
+        }
+    });
+</script>
 
 </html>

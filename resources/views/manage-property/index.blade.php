@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Manage Location') }}
+            {{ __('Manage Property') }}
         </h2>
     </x-slot>
 
@@ -94,8 +94,8 @@
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Property Number</th>
                                     <th scope="col" class="px-6 py-3">Item Name</th>
-                                    <th scope="col" class="px-6 py-3">Unit of Measure</th>
-                                    <th scope="col" class="px-6 py-3">Qty (Physical Count)</th>
+                                    {{-- <th scope="col" class="px-6 py-3">Unit of Measure</th> --}}
+                                    {{-- <th scope="col" class="px-6 py-3">Qty (Physical Count)</th> --}}
                                     <th scope="col" class="px-6 py-3">Fund</th>
                                     <th scope="col" class="px-6 py-3">End User</th>
                                     <th scope="col" class="px-6 py-3">Condition</th>
@@ -114,12 +114,12 @@
                                         <td class="px-6 py-4">
                                             {{ $property->item_name }}
                                         </td>
-                                        <td class="px-6 py-4">
+                                        {{-- <td class="px-6 py-4">
                                             {{ $property->unit_of_measure ?? 'TBD' }}
-                                        </td>
-                                        <td class="px-6 py-4">
+                                        </td> --}}
+                                        {{-- <td class="px-6 py-4">
                                             {{ $property->quantity_per_physical_count }}
-                                        </td>
+                                        </td> --}}
                                         <td class="px-6 py-4">
                                             {{ $property->fund ?? 'TBD' }}
                                         </td>
@@ -225,6 +225,8 @@
 
                         </table>
                     </div>
+
+
 
                     <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
