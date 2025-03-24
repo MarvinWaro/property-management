@@ -80,7 +80,7 @@
                             @else
                                 <!-- Default image -->
                                 <div class="overflow-hidden relative h-[28rem] lg:h-full rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-600">
-                                    <img src="{{ asset('img/no-image.png') }}" alt="Default Image" class="max-h-full max-w-full object-contain p-4">
+                                    <img src="{{ asset('img/default.png') }}" alt="Default Image" class="max-h-full max-w-full object-contain p-4">
                                 </div>
                             @endif
                         </div>
@@ -92,13 +92,22 @@
                             <div class="p-6 flex flex-col items-center justify-center flex-grow">
                                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
                                     <img class="w-full h-full object-cover"
-                                         src="{{ $property->endUser && $property->endUser->picture ? asset('storage/' . $property->endUser->picture) : asset('img/ched-logo.png') }}"
-                                         alt="End User Photo" />
+                                        src="{{ $property->endUser && $property->endUser->picture ? asset('storage/' . $property->endUser->picture) : asset('img/ched-logo.png') }}"
+                                        alt="End User Photo" />
                                 </div>
                                 <div class="mt-4 text-center text-white">
                                     <h3 class="text-xl font-bold">{{ $property->endUser->name ?? 'No Assigned User' }}</h3>
-                                    <p class="text-blue-100">{{ $property->endUser->department ?? 'No Department' }}</p>
+                                    <p class="text-blue-100">
+                                        @if($property->endUser->designation && $property->endUser->department)
+                                            {{ $property->endUser->designation }} | {{ $property->endUser->department }}
+                                        @elseif($property->endUser->designation)
+                                            {{ $property->endUser->designation }}
+                                        @else
+                                            {{ $property->endUser->department ?? 'No Department' }}
+                                        @endif
+                                    </p>
                                 </div>
+
 
                                 @if($property->endUser)
                                 <div class="mt-6 w-full">
@@ -284,3 +293,5 @@
         document.getElementById('qrModal').classList.add('hidden');
     }
 </script>
+
+
