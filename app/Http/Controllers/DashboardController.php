@@ -26,4 +26,13 @@ class DashboardController extends Controller
 
         return view('dashboard', compact('totalUsers', 'lastUpdated', 'totalProperties', 'totalLocations'));
     }
+
+    public function assets()
+    {
+        // Your assets dashboard logic here
+        return view('assets');
+    }
+
+
+
 }
