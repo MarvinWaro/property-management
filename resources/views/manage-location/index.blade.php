@@ -25,8 +25,8 @@
                                         dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
-                                <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;" class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none"
-                                    >
+                                <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
                                     <!-- X Icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -74,11 +74,14 @@
                     <div class="relative overflow-x-auto">
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                            <caption
+                                class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
                                 CHED Respective Locations
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    This table displays a detailed list of CHED locations. It ensures efficient management and tracking of institutional properties, thereby
-                                    supporting seamless asset coordination and operational excellence across all CHED campuses.
+                                    This table displays a detailed list of CHED locations. It ensures efficient
+                                    management and tracking of institutional properties, thereby
+                                    supporting seamless asset coordination and operational excellence across all CHED
+                                    campuses.
                                 </p>
                             </caption>
                             <thead
@@ -119,7 +122,7 @@
                                                     class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
                                                     <!-- Edit Action -->
                                                     <li>
-                                                        <a href="{{ route('location.edit', $location->id) }}"
+                                                        <a href="{{ route('location.edit', \Vinkla\Hashids\Facades\Hashids::encode($location->id)) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20"
                                                                 height="20" viewBox="0 0 24 24" fill="none"
@@ -132,6 +135,7 @@
                                                             </svg>
                                                             Edit
                                                         </a>
+
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Delete Action -->

@@ -28,7 +28,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/location', [LocationController::class, 'index'])->name('location.index');
     Route::get('/location/create', [LocationController::class, 'create'])->name('location.create');
     Route::post('/location', [LocationController::class, 'store'])->name('location.store');
-    Route::get('/location/{location}/edit', [LocationController::class, 'edit'])->name('location.edit');
+    Route::get('/location/{hashedId}/edit', [LocationController::class, 'edit'])->name('location.edit');
     Route::put('/location/{location}', [LocationController::class, 'update'])->name('location.update');
     Route::delete('/location/{location}', [LocationController::class, 'destroy'])->name('location.destroy');
 
@@ -36,15 +36,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/property', [PropertyController::class, 'index'])->name('property.index');
     Route::get('/property/create', [PropertyController::class, 'create'])->name('property.create');
     Route::post('/property', [PropertyController::class, 'store'])->name('property.store');
-    Route::get('/property/{property}/edit', [PropertyController::class, 'edit'])->name('property.edit');
+    Route::get('/property/{hashedId}/edit', [PropertyController::class, 'edit'])->name('property.edit');
     Route::put('/property/{property}', [PropertyController::class, 'update'])->name('property.update');
     Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
     Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
 
     // Route::get('/property/print', [PropertyController::class, 'printQRCode'])->name('property.print');
-
     // Route::get('/property/{property}/download-qr', [PropertyController::class, 'downloadQr'])->name('property.download-qr');
-
 
     Route::get('/property/{property}/download-qr', [PropertyController::class, 'downloadQr'])->name('property.download-qr');
 

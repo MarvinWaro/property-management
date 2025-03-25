@@ -75,10 +75,12 @@
                         </a>
                     </div>
 
+                    {{-- Table --}}
                     <div class="relative overflow-x-auto">
                         <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                            <caption
+                                class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
                                 CHED Property Details
                                 <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                                     This section provides a comprehensive overview of institutional assets
@@ -89,7 +91,8 @@
                                     excellence and transparency.
                                 </p>
                             </caption>
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <thead
+                                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Property Number</th>
@@ -104,8 +107,10 @@
                             </thead>
                             <tbody>
                                 @foreach ($properties as $property)
-                                    <tr class="{{ ($property->endUser && $property->endUser->excluded) ? 'bg-red-200 dark:bg-red-900' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <tr
+                                        class="{{ $property->endUser && $property->endUser->excluded ? 'bg-red-200 dark:bg-red-900' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <th scope="row"
+                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $property->id }}
                                         </th>
                                         <td class="px-6 py-4">
@@ -127,7 +132,8 @@
                                             {{ $property->endUser->name ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="px-2 py-1 rounded-full
+                                            <span
+                                                class="px-2 py-1 rounded-full
                                                 {{ strtolower($property->condition) == 'serviceable' ? 'bg-green-500 text-white' : (strtolower($property->condition) == 'unserviceable' ? 'bg-red-500 text-white' : '') }}">
                                                 {{ $property->condition ?: 'TBD/NA' }}
                                             </span>
@@ -149,16 +155,19 @@
                                             <!-- Dropdown Menu -->
                                             <div id="dropdownMenu{{ $property->id }}"
                                                 class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
-                                                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
+                                                <ul
+                                                    class="py-2 text-sm text-gray-700 dark:text-gray-200 shadow-xl sm:rounded-lg">
                                                     <!-- View Action -->
                                                     <li>
                                                         <a href="{{ route('property.view', $property->id) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                                                viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                                                height="20" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="1"
+                                                                stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-eye me-3">
-                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                                                <path
+                                                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                                                                 <circle cx="12" cy="12" r="3" />
                                                             </svg>
                                                             View
@@ -167,21 +176,20 @@
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Edit Action -->
                                                     <li>
-                                                        <a href="{{ route('property.edit', $property->id) }}"
+                                                        <a href="{{ route('property.edit', \Vinkla\Hashids\Facades\Hashids::encode($property->id)) }}"
                                                             class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20"
                                                                 height="20" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="1"
                                                                 stroke-linecap="round" stroke-linejoin="round"
                                                                 class="lucide lucide-pencil me-3">
-                                                                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987
-                                                                    L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352
-                                                                    a.5.5 0 0 0 .623.622l4.353-1.32
-                                                                    a2 2 0 0 0 .83-.497z" />
+                                                                <path
+                                                                    d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                                                                 <path d="m15 5 4 4" />
                                                             </svg>
                                                             Edit
                                                         </a>
+
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
                                                     <!-- Delete Action -->
@@ -225,8 +233,6 @@
 
                         </table>
                     </div>
-
-
 
                     <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
