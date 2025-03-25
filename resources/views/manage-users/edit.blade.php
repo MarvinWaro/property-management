@@ -87,7 +87,7 @@
                                 <!-- Name Field -->
                                 <div>
                                     <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Name
+                                        Name
                                     </label>
                                     <div class="mb-4">
                                         <div class="relative">
@@ -117,7 +117,7 @@
                                 <!-- Email Field -->
                                 <div>
                                     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Email
+                                        Email
                                     </label>
                                     <div class="mb-4">
                                         <div class="relative">
