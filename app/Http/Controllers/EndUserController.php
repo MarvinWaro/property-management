@@ -6,6 +6,8 @@ use App\Models\EndUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+use Vinkla\Hashids\Facades\Hashids;
+
 
 
 class EndUserController extends Controller
@@ -103,8 +105,13 @@ class EndUserController extends Controller
     }
 
     // Show Edit Form
-    public function edit(EndUser $endUser)
+    public function edit($hashedId)
     {
+        $decoded = Hashids::decode($hashedId);
+        if (empty($decoded)) {
+            abort(404);
+        }
+        $endUser = EndUser::findOrFail($decoded[0]);
         return view('manage-users.edit', compact('endUser'));
     }
 
