@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Location;
+use Vinkla\Hashids\Facades\Hashids;
 
 class LocationController extends Controller
 {
@@ -71,8 +72,13 @@ class LocationController extends Controller
         return redirect()->route('location.index')->with('success', 'Location created successfully.');
     }
 
-    public function edit(Location $location)
+    public function edit($hashedId)
     {
+        $decoded = Hashids::decode($hashedId);
+        if (empty($decoded)) {
+            abort(404);
+        }
+        $location = Location::findOrFail($decoded[0]);
         return view('manage-location.edit', compact('location'));
     }
 

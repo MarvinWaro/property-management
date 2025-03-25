@@ -8,6 +8,8 @@ use App\Models\Location;
 use App\Models\EndUser;
 use Illuminate\Support\Facades\Storage;
 
+use Vinkla\Hashids\Facades\Hashids;
+
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -289,10 +291,14 @@ class PropertyController extends Controller
             ->with('success', 'Property created successfully.');
     }
 
-    public function edit(Property $property)
+    public function edit($hashedId)
     {
+        $decoded = Hashids::decode($hashedId);
+        if (empty($decoded)) {
+            abort(404);
+        }
+        $property = Property::findOrFail($decoded[0]);
         $locations = Location::where('excluded', 0)->get();
-        // Fetch all end users.
         $endUsers  = EndUser::all();
 
         return view('manage-property.edit', compact('property', 'locations', 'endUsers'));
@@ -383,52 +389,5 @@ class PropertyController extends Controller
         return redirect()->route('property.index')
             ->with('success', 'Property has been removed.');
     }
-
-    // public function view(Property $property)
-    // {
-    //     $property->load('images', 'endUser.properties', 'location');
-
-    //     $propertyDetails = "Property Number: {$property->property_number}\n"
-    //         . "Item Name: {$property->item_name}\n"
-    //         . "Serial Number: {$property->serial_no}\n"
-    //         . "Model Number: {$property->model_no}\n"
-    //         . "Acquisition Date: " . ($property->acquisition_date ? $property->acquisition_date->format('F j, Y') : 'N/A') . "\n"
-    //         . "Acquisition Cost: " . ($property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A') . "\n"
-    //         . "Fund: {$property->fund}\n"
-    //         . "Condition: {$property->condition}\n"
-    //         . "Location: {$property->location->location_name}\n"
-    //         . "Description: {$property->item_description}\n"
-    //         . "Remarks: {$property->remarks}\n"
-    //         . "Assigned User: " . ($property->endUser ? $property->endUser->name : 'N/A') . "\n"
-    //         . "Designation: " . ($property->endUser && $property->endUser->designation ? $property->endUser->designation : 'N/A');
-
-    //     $qrCode = new QrCode($propertyDetails);
-    //     $writer = new PngWriter();
-    //     $qrCodeImage = $writer->write($qrCode)->getDataUri();
-
-    //     return view('manage-property.view', compact('property', 'qrCodeImage'));
-    // }
-
-    // public function printQRCodes(Request $request)
-    // {
-    //     $ids = $request->query('ids');
-    //     if (!$ids) {
-    //         abort(404, 'No property IDs were provided.');
-    //     }
-
-    //     $propertyIds = explode(',', $ids);
-    //     $properties = Property::whereIn('id', $propertyIds)->get();
-
-    //     // You might want to generate or attach the QR code image to each property here.
-    //     // For example, if each Property has a method getQrCodeImage(), ensure it's available in the view.
-
-    //     $pdf = Pdf::loadView('manage-property.print', compact('properties'))
-    //         ->setPaper('a4', 'portrait'); // Set the paper size to A4
-
-    //     return $pdf->stream('qr-codes.pdf');
-    // }
-
-
-
 
 }
