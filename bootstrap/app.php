@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\TrackAssetsMode; // Add this line
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,7 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Add TrackAssetsMode to the web middleware group
+        $middleware->web(append: [
+            TrackAssetsMode::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
