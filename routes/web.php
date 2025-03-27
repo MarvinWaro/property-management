@@ -10,10 +10,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     // Dashboard Routes
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
+
+    // Suplies Routes
+    Route::get('/supplies', function () {
+        return view('supplies.index');
+    })->name('supplies.index');
 
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');

@@ -24,6 +24,9 @@
                             <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                                 {{ __('Dashboard') }}
                             </x-nav-link>
+                            <x-nav-link href="{{ route('supplies.index') }}" :active="request()->routeIs('supplies.index')">
+                                {{ __('Supplies') }}
+                            </x-nav-link>
                         @endif
 
                         @if ($isAssetsMode)
