@@ -6,6 +6,7 @@
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
             <!-- Dashboard Cards Section -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <section class="grid gap-6 lg:grid-cols-3 p-4 lg:p-8 w-full">
