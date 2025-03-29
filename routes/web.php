@@ -22,6 +22,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('supplies.index');
     })->name('supplies.index');
 
+    Route::get('/supplier', function () {
+        return view('supplies.supplier.index');
+    })->name('supplier.index');
+
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
     Route::get('/end_users/create', [EndUserController::class, 'create'])->name('end_users.create');
