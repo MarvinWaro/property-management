@@ -186,7 +186,7 @@
     </div>
 
     <!-- Delete Confirmation -->
-    <script>
+    {{-- <script>
         function confirmDelete(locationId) {
             Swal.fire({
                 title: "Are you sure?",
@@ -217,7 +217,7 @@
                 }, 500); // Small delay to ensure the page fully loads
             @endif
         });
-    </script>
+    </script> --}}
 
     <!-- JavaScript to Show/Hide X button and Clear Input -->
     <script>

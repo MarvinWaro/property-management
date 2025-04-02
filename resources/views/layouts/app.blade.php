@@ -166,4 +166,39 @@
     });
 </script>
 
+<!-- Reusable SweetAlert Scripts -->
+{{-- <script>
+    // Generic Delete Confirmation
+    function confirmDelete(formId, itemName = 'this item') {
+        Swal.fire({
+            title: "Are you sure?",
+            text: `You won't be able to revert ${itemName}!`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
+        });
+    }
+
+    // Show Success Alert for Deletion or Other Messages
+    document.addEventListener("DOMContentLoaded", function() {
+        @if (session('success') || session('deleted'))
+            setTimeout(() => {
+                Swal.fire({
+                    title: "Success!",
+                    text: "{{ session('success') ?? session('deleted') }}",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "OK"
+                });
+            }, 500);
+        @endif
+    });
+</script> --}}
+
 </html>
