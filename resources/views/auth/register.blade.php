@@ -89,38 +89,48 @@
                     <div>
                         <x-label for="name" value="{{ __('Name') }}" />
                         <x-input id="name" class="block mt-1 w-full h-10 custom-input"
-                                 type="text"
-                                 name="name"
-                                 :value="old('name')"
-                                 required autofocus autocomplete="name" />
+                                type="text"
+                                name="name"
+                                :value="old('name')"
+                                required autofocus autocomplete="name" />
                     </div>
 
                     <!-- Email -->
                     <div class="mt-4">
                         <x-label for="email" value="{{ __('Email') }}" />
                         <x-input id="email" class="block mt-1 w-full h-10 custom-input"
-                                 type="email"
-                                 name="email"
-                                 :value="old('email')"
-                                 required autocomplete="username" />
+                                type="email"
+                                name="email"
+                                :value="old('email')"
+                                required autocomplete="username" />
+                    </div>
+
+                    <!-- Department -->
+                    <div class="mt-4">
+                        <x-label for="name" value="{{ __('Department') }}" />
+                        <x-input id="name" class="block mt-1 w-full h-10 custom-input"
+                                type="text"
+                                name="department"
+                                :value="old('department')"
+                                required autofocus autocomplete="department" />
                     </div>
 
                     <!-- Password -->
                     <div class="mt-4">
                         <x-label for="password" value="{{ __('Password') }}" />
                         <x-input id="password" class="block mt-1 w-full h-10 custom-input"
-                                 type="password"
-                                 name="password"
-                                 required autocomplete="new-password" />
+                                type="password"
+                                name="password"
+                                required autocomplete="new-password" />
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="mt-4">
                         <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
                         <x-input id="password_confirmation" class="block mt-1 w-full h-10 custom-input"
-                                 type="password"
-                                 name="password_confirmation"
-                                 required autocomplete="new-password" />
+                                type="password"
+                                name="password_confirmation"
+                                required autocomplete="new-password" />
                     </div>
 
                     @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
@@ -152,7 +162,7 @@
                             {{ __('Already registered?') }}
                         </span>
                         <a class="underline text-sm text-gray-600 hover:text-gray-900 ml-1"
-                           href="{{ route('login') }}">
+                            href="{{ route('login') }}">
                             {{ __('Sign in') }}
                         </a>
                     </div>
