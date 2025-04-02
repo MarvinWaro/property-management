@@ -14,19 +14,15 @@
 
     <link href="{{ asset('css/main.css') }}" rel="stylesheet">
 
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.min.css" rel="stylesheet">
-
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.all.min.js"></script>
-
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Styles -->
+    <!-- Livewire Styles -->
     @livewireStyles
 </head>
 
@@ -37,6 +33,7 @@
     <x-banner />
 
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <!-- This is the Jetstream navigation with profile and logout -->
         @livewire('navigation-menu')
 
         <!-- Page Heading -->
@@ -58,15 +55,14 @@
 
     @livewireScripts
 
+    <!-- Flowbite JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
-
-
 </body>
 
-{{-- chart js --}}
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-{{-- This is for the success message --}}
+<!-- Success Message Script -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         @if (session('success'))
@@ -81,14 +77,13 @@
     });
 </script>
 
-{{-- SCRIPT FOR DARK AND LIGHT MODE --}}
+<!-- Dark/Light Mode Toggle Script -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const themeToggle = document.getElementById('theme-toggle');
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-        // Check localStorage for theme preference
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
             themeToggleDarkIcon.classList.remove('hidden');
@@ -97,7 +92,6 @@
             themeToggleLightIcon.classList.remove('hidden');
         }
 
-        // Toggle theme when button is clicked
         themeToggle.addEventListener('click', function() {
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
@@ -114,9 +108,8 @@
     });
 </script>
 
-{{-- Loader Script --}}
+<!-- Loader Script -->
 <script>
-    // Function to show the loader
     function showLoader() {
         const loader = document.getElementById('loader-container');
         if (loader) {
@@ -124,7 +117,6 @@
         }
     }
 
-    // Function to hide the loader
     function hideLoader() {
         const loader = document.getElementById('loader-container');
         if (loader) {
@@ -132,70 +124,28 @@
         }
     }
 
-    // Show loader on page load
     document.addEventListener('DOMContentLoaded', function() {
         showLoader();
-
-        // Hide loader after 2 seconds
         setTimeout(function() {
             hideLoader();
         }, 2000);
     });
 
-    // Show loader on page navigation (for Livewire)
     document.addEventListener('livewire:navigating', function() {
         showLoader();
     });
 
     document.addEventListener('livewire:navigated', function() {
-        // Hide after a short delay
         setTimeout(function() {
             hideLoader();
         }, 800);
     });
 
-    // For form submissions
     document.addEventListener('submit', function(e) {
-        // Only show loader for non-AJAX forms
         if (!e.target.hasAttribute('data-no-loader')) {
             showLoader();
         }
     });
 </script>
-
-<!-- Reusable SweetAlert Scripts -->
-{{-- <script>
-    // Generic Delete Confirmation
-    function confirmDelete(formId, itemName = 'this item') {
-        Swal.fire({
-            title: "Are you sure?",
-            text: `You won't be able to revert ${itemName}!`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById(formId).submit();
-            }
-        });
-    }
-
-    // Show Success Alert for Deletion or Other Messages
-    document.addEventListener("DOMContentLoaded", function() {
-        @if (session('success') || session('deleted'))
-            setTimeout(() => {
-                Swal.fire({
-                    title: "Success!",
-                    text: "{{ session('success') ?? session('deleted') }}",
-                    icon: "success",
-                    confirmButtonColor: "#3085d6",
-                    confirmButtonText: "OK"
-                });
-            }, 500);
-        @endif
-    });
-</script> --}}
 
 </html>
