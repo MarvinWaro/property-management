@@ -78,7 +78,7 @@
                     <x-authentication-card-logo />
                 </div>
 
-                <h1 class="welcome-text mt-2">CIMS XII</h1>
+                <h1 class="welcome-text mt-2">CISMS XII</h1>
 
                 <x-validation-errors class="mb-4" />
 

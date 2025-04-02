@@ -5,6 +5,7 @@ use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SupplierController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,9 +23,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         return view('supplies.index');
     })->name('supplies.index');
 
-    Route::get('/supplier', function () {
-        return view('supplies.supplier.index');
-    })->name('supplier.index');
+    // Suppliers Routes
+    Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
+    Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
+    Route::post('/supplier', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::get('/supplier/{id}/edit', [SupplierController::class, 'edit'])->name('supplier.edit');
+    Route::put('/supplier/{id}', [SupplierController::class, 'update'])->name('supplier.update');
+    Route::delete('/supplier/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
 
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
