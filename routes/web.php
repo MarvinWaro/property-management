@@ -6,6 +6,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,6 +31,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/supplier/{id}/edit', [SupplierController::class, 'edit'])->name('supplier.edit');
     Route::put('/supplier/{id}', [SupplierController::class, 'update'])->name('supplier.update');
     Route::delete('/supplier/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+
+    // Categories Routes
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // End Users Routes
     Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
