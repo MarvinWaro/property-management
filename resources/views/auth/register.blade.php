@@ -89,38 +89,55 @@
                     <div>
                         <x-label for="name" value="{{ __('Name') }}" />
                         <x-input id="name" class="block mt-1 w-full h-10 custom-input"
-                                 type="text"
-                                 name="name"
-                                 :value="old('name')"
-                                 required autofocus autocomplete="name" />
+                                type="text"
+                                name="name"
+                                :value="old('name')"
+                                required autofocus autocomplete="name" />
                     </div>
 
                     <!-- Email -->
                     <div class="mt-4">
                         <x-label for="email" value="{{ __('Email') }}" />
                         <x-input id="email" class="block mt-1 w-full h-10 custom-input"
-                                 type="email"
-                                 name="email"
-                                 :value="old('email')"
-                                 required autocomplete="username" />
+                                type="email"
+                                name="email"
+                                :value="old('email')"
+                                required autocomplete="username" />
                     </div>
 
                     <!-- Password -->
                     <div class="mt-4">
                         <x-label for="password" value="{{ __('Password') }}" />
                         <x-input id="password" class="block mt-1 w-full h-10 custom-input"
-                                 type="password"
-                                 name="password"
-                                 required autocomplete="new-password" />
+                                type="password"
+                                name="password"
+                                required autocomplete="new-password" />
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="mt-4">
                         <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
                         <x-input id="password_confirmation" class="block mt-1 w-full h-10 custom-input"
-                                 type="password"
-                                 name="password_confirmation"
-                                 required autocomplete="new-password" />
+                                type="password"
+                                name="password_confirmation"
+                                required autocomplete="new-password" />
+                    </div>
+
+                    <!-- Department Dropdown -->
+                    <div class="mt-4">
+                        <x-label for="department_id" value="{{ __('Department') }}" />
+                        <select id="department_id" name="department_id" required
+                                class="block mt-1 w-full h-10 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                            <option value="">{{ __('Select Department') }}</option>
+                            @foreach(\App\Models\Department::all() as $department)
+                                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('department_id')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
@@ -152,7 +169,7 @@
                             {{ __('Already registered?') }}
                         </span>
                         <a class="underline text-sm text-gray-600 hover:text-gray-900 ml-1"
-                           href="{{ route('login') }}">
+                        href="{{ route('login') }}">
                             {{ __('Sign in') }}
                         </a>
                     </div>
@@ -160,6 +177,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Include particles.js via CDN -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
