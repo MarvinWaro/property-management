@@ -57,7 +57,7 @@
                         <!-- Staff-only links -->
                         @if (auth()->user()->role === 'staff')
                             <x-nav-link href="{{ route('staff.dashboard') }}" :active="request()->routeIs('staff.dashboard')">
-                                {{ __('Staff Dashboard') }}
+                                {{ __('Home') }}
                             </x-nav-link>
                             <!-- Add other staff links here, if needed -->
                         @endif

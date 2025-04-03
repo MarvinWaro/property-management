@@ -142,26 +142,35 @@
         }, 2000);
     });
 
-    // Show loader on page navigation (for Livewire)
+    // Show loader on Livewire route navigation
     document.addEventListener('livewire:navigating', function() {
         showLoader();
     });
 
+    // Hide loader when Livewire finishes route navigation
     document.addEventListener('livewire:navigated', function() {
-        // Hide after a short delay
         setTimeout(function() {
             hideLoader();
         }, 800);
     });
 
-    // For form submissions
+    // **NEW**: Hide loader after any Livewire AJAX request finishes,
+    // even if we did NOT navigate away
+    document.addEventListener('livewire:request-finished', function() {
+        setTimeout(function() {
+            hideLoader();
+        }, 500);
+    });
+
+    // Show loader on standard form submissions
     document.addEventListener('submit', function(e) {
-        // Only show loader for non-AJAX forms
+        // If a form has data-no-loader, skip showing loader
         if (!e.target.hasAttribute('data-no-loader')) {
             showLoader();
         }
     });
 </script>
+
 
 <!-- Reusable SweetAlert Scripts -->
 {{-- <script>
