@@ -78,7 +78,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      * ------------------
      */
     Route::middleware(['role:staff'])->group(function () {
-        Route::view('/staff-dashboard', 'staff-dashboard')->name('staff');
+        Route::view('/staff-dashboard', 'staff-dashboard')->name('staff.dashboard');
     });
 
 });
