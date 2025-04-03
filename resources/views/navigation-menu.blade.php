@@ -12,15 +12,18 @@
                         </a>
                     </div>
 
-                    <!-- Navigation Links -->
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        @php
-                            $isAssetsMode =
-                                request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-                                (request()->routeIs('profile.show') && session('from_assets_mode', false));
-                        @endphp
+                    @php
+                        // "Assets mode" vs. "Supplies mode" logic
+                        // Adjust route checks or session logic as needed for your app
+                        $isAssetsMode =
+                            request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+                            (request()->routeIs('profile.show') && session('from_assets_mode', false));
+                    @endphp
 
-                        @if (!$isAssetsMode)
+                    <!-- NAV BAR LINKS ONLY (for example within <nav> ... ) -->
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <!-- Admin: 'Supplies mode' -->
+                        @if (auth()->user()->role === 'admin' && !$isAssetsMode)
                             <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                                 {{ __('Dashboard') }}
                             </x-nav-link>
@@ -35,24 +38,32 @@
                             </x-nav-link>
                         @endif
 
-                        @if ($isAssetsMode)
+                        <!-- Admin: 'Assets mode' -->
+                        @if (auth()->user()->role === 'admin' && $isAssetsMode)
                             <x-nav-link href="{{ route('assets.dashboard') }}" :active="request()->routeIs('assets.dashboard')">
                                 {{ __('Assets Dashboard') }}
                             </x-nav-link>
-
                             <x-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
                                 {{ __('Property') }}
                             </x-nav-link>
-
                             <x-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
                                 {{ __('Employees') }}
                             </x-nav-link>
-
                             <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
                                 {{ __('Location') }}
                             </x-nav-link>
                         @endif
+
+                        <!-- Staff-only links -->
+                        @if (auth()->user()->role === 'staff')
+                            <x-nav-link href="{{ route('staff.dashboard') }}" :active="request()->routeIs('staff.dashboard')">
+                                {{ __('Home') }}
+                            </x-nav-link>
+                            <!-- Add other staff links here, if needed -->
+                        @endif
                     </div>
+
+
                 </div>
 
                 <!-- Right Side (Dark Mode Toggle Button) -->
@@ -135,7 +146,13 @@
                     </div>
                 @endif
 
-                <!-- Settings Dropdown -->
+                @php
+                    // Determine if we're in "Assets mode" vs. "Supplies mode"
+$isAssetsMode =
+    request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+    (request()->routeIs('profile.show') && session('from_assets_mode', false));
+                @endphp
+
                 <div class="ms-3 relative">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
@@ -148,7 +165,7 @@
                             @else
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                                         {{ Auth::user()->name }}
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
                                             fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -161,27 +178,33 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            <!-- Everyone sees this "Manage Account" label -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
                                 {{ __('Manage Account') }}
                             </div>
 
+                            <!-- Everyone sees their Profile -->
                             <x-dropdown-link href="{{ route('profile.show') }}">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
-                            <x-dropdown-link
-                                href="{{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? route('dashboard') : route('assets.dashboard') }}">
-                                {{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? __('Supplies') : __('Assets | Properties') }}
-                            </x-dropdown-link>
-
-                            @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                                <x-dropdown-link href="{{ route('api-tokens.index') }}">
-                                    {{ __('API Tokens') }}
+                            <!-- Only admins see the toggle to switch between "Supplies" and "Assets" -->
+                            @if (auth()->user()->role === 'admin')
+                                <x-dropdown-link
+                                    href="{{ $isAssetsMode ? route('dashboard') : route('assets.dashboard') }}">
+                                    {{ $isAssetsMode ? __('Supplies') : __('Assets | Properties') }}
                                 </x-dropdown-link>
+
+                                @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                                    <x-dropdown-link href="{{ route('api-tokens.index') }}">
+                                        {{ __('API Tokens') }}
+                                    </x-dropdown-link>
+                                @endif
                             @endif
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
+                            <!-- Everyone sees Logout -->
                             <form method="POST" action="{{ route('logout') }}" x-data>
                                 @csrf
                                 <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
