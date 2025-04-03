@@ -36,6 +36,9 @@
                             <x-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.index')">
                                 {{ __('Categories') }}
                             </x-nav-link>
+                            <x-nav-link href="{{ route('departments.index') }}" :active="request()->routeIs('departments.index')">
+                                {{ __('Departments') }}
+                            </x-nav-link>
                         @endif
 
                         <!-- Admin: 'Assets mode' -->

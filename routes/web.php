@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\DepartmentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,9 +26,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
 
         // Supplies
-        Route::get('/supplies', function () {
-            return view('supplies.index');
-        })->name('supplies.index');
+        Route::get('/supplies', function () {return view('supplies.index');})->name('supplies.index');
+
+        // Departments
+        Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+        Route::get('/departments/create', [DepartmentController::class, 'create'])->name('departments.create');
+        Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+        // Edit and Update
+        Route::get('/departments/{department}/edit', [DepartmentController::class, 'edit'])->name('departments.edit');
+        Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+        Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+
+
 
         // Suppliers
         Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
