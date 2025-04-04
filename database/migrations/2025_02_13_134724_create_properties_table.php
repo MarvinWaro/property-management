@@ -21,7 +21,8 @@ return new class extends Migration {
             $table->integer('quantity_per_physical_count')->default(1);
             $table->string('fund')->nullable();
             $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
-            $table->foreignId('end_user_id')->constrained('end_users')->onDelete('cascade');
+            // Changed foreign key: now referencing the users table using 'user_id'
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('condition');
             $table->text('remarks')->nullable();
             // Existing fields:
@@ -36,5 +37,3 @@ return new class extends Migration {
         Schema::dropIfExists('properties');
     }
 };
-
-
