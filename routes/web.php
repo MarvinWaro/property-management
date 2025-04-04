@@ -7,6 +7,7 @@ use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DesignationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,13 +33,20 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
         Route::get('/departments/create', [DepartmentController::class, 'create'])->name('departments.create');
         Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
-        // Edit and Update
         Route::get('/departments/{department}/edit', [DepartmentController::class, 'edit'])->name('departments.edit');
         Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
         Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+        Route::get('/departments/{department}', [DepartmentController::class, 'view'])->name('departments.view');
 
+        // Designations
+        Route::get('/designations', [DesignationController::class, 'index'])->name('designations.index');
+        Route::get('/designations/create', [DesignationController::class, 'create'])->name('designations.create');
+        Route::post('/designations', [DesignationController::class, 'store'])->name('designations.store');
+        Route::get('/designations/{designation}/edit', [DesignationController::class, 'edit'])->name('designations.edit');
+        Route::put('/designations/{designation}', [DesignationController::class, 'update'])->name('designations.update');
+        Route::delete('/designations/{designation}', [DesignationController::class, 'destroy'])->name('designations.destroy');
 
-
+        
         // Suppliers
         Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
         Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
