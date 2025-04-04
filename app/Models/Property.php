@@ -41,14 +41,6 @@ class Property extends Model
         return $this->belongsTo(Location::class);
     }
 
-    /**
-     * Relationship: Property belongs to an End User
-     */
-    public function endUser()
-    {
-        return $this->belongsTo(EndUser::class);
-    }
-
     public function images()
     {
         return $this->hasMany(PropertyImage::class);

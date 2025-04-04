@@ -52,9 +52,6 @@
                             <x-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
                                 {{ __('Property') }}
                             </x-nav-link>
-                            <x-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
-                                {{ __('Employees') }}
-                            </x-nav-link>
                             <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
                                 {{ __('Location') }}
                             </x-nav-link>
@@ -261,10 +258,6 @@ $isAssetsMode =
 
                 <x-responsive-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
                     {{ __('Manage Property') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link href="{{ route('end_users.index') }}" :active="request()->routeIs('end_users.index')">
-                    {{ __('Manage Users') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">

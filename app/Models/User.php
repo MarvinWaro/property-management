@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Property;
+
 
 class User extends Authenticatable
 {
@@ -79,5 +81,12 @@ class User extends Authenticatable
     {
         return $this->belongsTo(\App\Models\Designation::class);
     }
+
+    // In app/Models/User.php
+    public function properties()
+    {
+        return $this->hasMany(\App\Models\Property::class, 'user_id');
+    }
+
 
 }

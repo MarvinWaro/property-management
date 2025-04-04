@@ -6,7 +6,7 @@
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <!-- Dashboard Cards Section -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <section class="grid gap-6 lg:grid-cols-3 p-4 lg:p-8 w-full">
@@ -217,28 +217,28 @@
 <!-- Include Chart.js via CDN -->
 
 <script>
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function() {
         // Helper function to update chart text colors based on current mode
         function updateChartColors() {
             const isDark = document.documentElement.classList.contains('dark');
             const newLegendColor = isDark ? '#fff' : '#000';
             const newTickColor = isDark ? '#fff' : '#000';
 
-            if(lineChart) {
+            if (lineChart) {
                 lineChart.options.plugins.legend.labels.color = newLegendColor;
-                if(lineChart.options.scales.x) {
+                if (lineChart.options.scales.x) {
                     lineChart.options.scales.x.ticks.color = newTickColor;
                 }
-                if(lineChart.options.scales.y) {
+                if (lineChart.options.scales.y) {
                     lineChart.options.scales.y.ticks.color = newTickColor;
                 }
                 lineChart.update();
             }
-            if(doughnutChart) {
+            if (doughnutChart) {
                 doughnutChart.options.plugins.legend.labels.color = newLegendColor;
                 doughnutChart.update();
             }
-            if(pieChart) {
+            if (pieChart) {
                 pieChart.options.plugins.legend.labels.color = newLegendColor;
                 pieChart.update();
             }
@@ -353,6 +353,8 @@
                 }
             }
         });
-        observer.observe(document.documentElement, { attributes: true });
+        observer.observe(document.documentElement, {
+            attributes: true
+        });
     });
 </script>

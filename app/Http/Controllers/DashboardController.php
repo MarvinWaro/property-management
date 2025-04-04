@@ -5,43 +5,42 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Property;
 use App\Models\Location;
-use App\Models\EndUser;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
     public function dashboard()
     {
-        // Count active users (where 'excluded' is 0)
-        $totalUsers = EndUser::where('excluded', 0)->count();
+        // Count all users
+        $totalUsers = User::count();
 
-        // Retrieve the most recently updated employee record
-        $lastUpdatedRecord = EndUser::orderBy('updated_at', 'desc')->first();
+        // Retrieve the most recently updated user record
+        $lastUpdatedRecord = User::orderBy('updated_at', 'desc')->first();
         $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
 
-        // Count active properties (where 'excluded' is 0)
-        $totalProperties = Property::where('excluded', 0)->count();
+        // Count all properties
+        $totalProperties = Property::count();
 
-        // Count active locations (where 'excluded' is 0)
-        $totalLocations = Location::where('excluded', 0)->count();
+        // Count all locations
+        $totalLocations = Location::count();
 
         return view('dashboard', compact('totalUsers', 'lastUpdated', 'totalProperties', 'totalLocations'));
     }
 
     public function assets()
     {
+        // Count all users
+        $totalUsers = User::count();
 
-        // Count active users (where 'excluded' is 0)
-        $totalUsers = EndUser::where('excluded', 0)->count();
-
-        // Retrieve the most recently updated employee record
-        $lastUpdatedRecord = EndUser::orderBy('updated_at', 'desc')->first();
+        // Retrieve the most recently updated user record
+        $lastUpdatedRecord = User::orderBy('updated_at', 'desc')->first();
         $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
 
-        // Count active properties (where 'excluded' is 0)
-        $totalProperties = Property::where('excluded', 0)->count();
+        // Count all properties
+        $totalProperties = Property::count();
 
-        // Count active locations (where 'excluded' is 0)
-        $totalLocations = Location::where('excluded', 0)->count();
+        // Count all locations
+        $totalLocations = Location::count();
 
         return view('assets', compact('totalUsers', 'lastUpdated', 'totalProperties', 'totalLocations'));
     }
