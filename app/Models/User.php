@@ -66,4 +66,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // In App\Models\User.php
+    public function department()
+    {
+        return $this->belongsTo(\App\Models\Department::class);
+    }
+
 }
