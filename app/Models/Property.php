@@ -21,7 +21,7 @@ class Property extends Model
         'quantity_per_physical_count',
         'fund',
         'location_id',
-        'end_user_id',
+        'user_id',  // Changed from 'end_user_id'
         'condition',
         'remarks',
         'active',
@@ -41,17 +41,15 @@ class Property extends Model
         return $this->belongsTo(Location::class);
     }
 
-    /**
-     * Relationship: Property belongs to an End User
-     */
-    public function endUser()
-    {
-        return $this->belongsTo(EndUser::class);
-    }
-
     public function images()
     {
         return $this->hasMany(PropertyImage::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
 
 }

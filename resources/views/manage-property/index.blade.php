@@ -77,7 +77,6 @@
 
                     {{-- Table --}}
                     <div class="relative overflow-x-auto">
-                        <!-- Table with dynamic content -->
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <caption
                                 class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
@@ -97,10 +96,8 @@
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Property Number</th>
                                     <th scope="col" class="px-6 py-3">Item Name</th>
-                                    {{-- <th scope="col" class="px-6 py-3">Unit of Measure</th> --}}
-                                    {{-- <th scope="col" class="px-6 py-3">Qty (Physical Count)</th> --}}
                                     <th scope="col" class="px-6 py-3">Fund</th>
-                                    <th scope="col" class="px-6 py-3">End User</th>
+                                    <th scope="col" class="px-6 py-3">Assigned To</th>
                                     <th scope="col" class="px-6 py-3">Condition</th>
                                     <th scope="col" class="px-6 py-3">Actions</th>
                                 </tr>
@@ -108,7 +105,7 @@
                             <tbody>
                                 @foreach ($properties as $property)
                                     <tr
-                                        class="{{ $property->endUser && $property->endUser->excluded ? 'bg-red-200 dark:bg-red-900' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        class="{{ $property->user && $property->user->excluded ? 'bg-red-200 dark:bg-red-900' : 'bg-white dark:bg-gray-800' }} border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                         <th scope="row"
                                             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $property->id }}
@@ -119,17 +116,12 @@
                                         <td class="px-6 py-4">
                                             {{ $property->item_name }}
                                         </td>
-                                        {{-- <td class="px-6 py-4">
-                                            {{ $property->unit_of_measure ?? 'TBD' }}
-                                        </td> --}}
-                                        {{-- <td class="px-6 py-4">
-                                            {{ $property->quantity_per_physical_count }}
-                                        </td> --}}
                                         <td class="px-6 py-4">
                                             {{ $property->fund ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            {{ $property->endUser->name ?? 'TBD' }}
+                                            <!-- Display the assigned user’s name if available, otherwise TBD -->
+                                            {{ $property->user->name ?? 'TBD' }}
                                         </td>
                                         <td class="px-6 py-4">
                                             <span
@@ -277,7 +269,6 @@
             });
         }
 
-
         // Show success alert if session deleted exists
         document.addEventListener("DOMContentLoaded", function() {
             @if (session('deleted'))
@@ -289,7 +280,7 @@
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "OK"
                     });
-                }, 500); // Small delay to ensure the page fully loads
+                }, 500);
             @endif
         });
     </script>
@@ -299,8 +290,7 @@
         function togglePropertyClearButton() {
             const input = document.getElementById('propertySearchInput');
             const clearBtn = document.getElementById('propertyClearBtn');
-
-            // Show X if there's text; otherwise hide
+            // Show X if there's text
             if (input.value.trim().length > 0) {
                 clearBtn.style.display = 'flex';
             } else {
@@ -312,8 +302,7 @@
             const input = document.getElementById('propertySearchInput');
             input.value = '';
             document.getElementById('propertyClearBtn').style.display = 'none';
-
-            // If you want to auto-submit after clearing, uncomment:
+            // Auto-submit if desired:
             // document.querySelector('form.w-full.max-w-sm').submit();
         }
 
@@ -322,5 +311,4 @@
             togglePropertyClearButton();
         });
     </script>
-
 </x-app-layout>

@@ -3,7 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\EndUserController;
+// use App\Http\Controllers\EndUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DepartmentController;
@@ -46,7 +46,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/designations/{designation}', [DesignationController::class, 'update'])->name('designations.update');
         Route::delete('/designations/{designation}', [DesignationController::class, 'destroy'])->name('designations.destroy');
 
-        
+
         // Suppliers
         Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
         Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
@@ -64,12 +64,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
         // End Users
-        Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
-        Route::get('/end_users/create', [EndUserController::class, 'create'])->name('end_users.create');
-        Route::post('/end_users', [EndUserController::class, 'store'])->name('end_users.store');
-        Route::get('/end_users/{hashedId}/edit', [EndUserController::class, 'edit'])->name('end_users.edit');
-        Route::put('/end_users/{endUser}', [EndUserController::class, 'update'])->name('end_users.update');
-        Route::delete('/end_users/{endUser}', [EndUserController::class, 'destroy'])->name('end_users.destroy');
+        // Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
+        // Route::get('/end_users/create', [EndUserController::class, 'create'])->name('end_users.create');
+        // Route::post('/end_users', [EndUserController::class, 'store'])->name('end_users.store');
+        // Route::get('/end_users/{hashedId}/edit', [EndUserController::class, 'edit'])->name('end_users.edit');
+        // Route::put('/end_users/{endUser}', [EndUserController::class, 'update'])->name('end_users.update');
+        // Route::delete('/end_users/{endUser}', [EndUserController::class, 'destroy'])->name('end_users.destroy');
 
         // Location
         Route::get('/location', [LocationController::class, 'index'])->name('location.index');
