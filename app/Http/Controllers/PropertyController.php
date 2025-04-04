@@ -18,8 +18,8 @@ class PropertyController extends Controller
 {
     public function view(Property $property)
     {
-        // Load relationships: now load 'user' (instead of 'endUser')
-        $property->load('images', 'user.properties', 'location');
+        // Load relationships: now load 'user', 'images', and 'location'
+        $property->load('images', 'user', 'location');
 
         $propertyDetails = "Property Number: {$property->property_number}\n"
             . "Item Name: {$property->item_name}\n"
@@ -34,7 +34,7 @@ class PropertyController extends Controller
             . "Assigned User: " . ($property->user ? $property->user->name : 'N/A') . "\n"
             . "Designation: " . ($property->user && $property->user->designation ? optional($property->user->designation)->name : 'N/A');
 
-        // Generate QR code with CHED logo
+        // Generate QR code with CHED logo if it doesn't exist (or was deleted on update)
         $qrCodePath = storage_path('app/public/qrcodes/property_' . $property->id . '.png');
         $qrCodeDir = dirname($qrCodePath);
 
@@ -63,6 +63,8 @@ class PropertyController extends Controller
 
         return view('manage-property.view', compact('property', 'qrCodeImage'));
     }
+
+
 
     public function downloadQr($propertyId)
     {

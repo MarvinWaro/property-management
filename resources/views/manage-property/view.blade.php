@@ -61,6 +61,7 @@
                     </div>
                 </div>
 
+                <!-- Property Image Carousel and Assigned User Info -->
                 <div class="grid grid-cols-12 gap-6 mb-6">
                     <!-- Left Column (8 of 12): Image Carousel -->
                     <div class="col-span-12 lg:col-span-8">
@@ -118,23 +119,19 @@
                             <div class="p-6 flex flex-col items-center justify-center flex-grow">
                                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
                                     <img class="w-full h-full object-cover"
-                                         src="{{ $property->user && $property->user->picture ? asset('storage/' . $property->user->picture) : asset('img/ched-logo.png') }}"
-                                         alt="Assigned User Photo" />
+                                        src="{{ optional($property->user)->picture
+                                            ? asset('storage/' . optional($property->user)->picture)
+                                            : asset('img/ched-logo.png') }}"
+                                        alt="Assigned User Photo" />
                                 </div>
                                 <div class="mt-4 text-center text-white">
                                     <h3 class="text-xl font-bold">
-                                        {{ $property->user->name ?? 'No Assigned User' }}
+                                        {{ optional($property->user)->name ?? 'No Assigned User' }}
                                     </h3>
                                     <p class="text-blue-100">
-                                        @if($property->user && $property->user->designation && $property->user->department)
-                                            {{ $property->user->designation }} | {{ $property->user->department }}
-                                        @elseif($property->user && $property->user->designation)
-                                            {{ $property->user->designation }}
-                                        @elseif($property->user && $property->user->department)
-                                            {{ $property->user->department }}
-                                        @else
-                                            No Department/Designation
-                                        @endif
+                                        {{ optional($property->user->designation)->name }} <br>
+                                        {{ optional($property->user->department)->name }}
+
                                     </p>
                                 </div>
 
@@ -143,13 +140,13 @@
                                         <div class="flex items-center justify-between text-sm text-white mb-2">
                                             <span>Assigned Properties</span>
                                             <span class="bg-white text-blue-800 rounded-full px-2 py-0.5">
-                                                {{ $property->user->properties->count() }}
+                                                {{ optional($property->user)->properties->count() }}
                                             </span>
                                         </div>
                                         <div class="bg-blue-600/30 rounded p-3 text-sm text-white">
                                             <p class="mb-1">Last Assignment:</p>
                                             <p class="font-semibold truncate">
-                                                {{ optional($property->user->properties->sortByDesc('created_at')->first())->item_name ?? 'N/A' }}
+                                                {{ optional(optional($property->user)->properties->sortByDesc('created_at')->first())->item_name ?? 'N/A' }}
                                             </p>
                                         </div>
                                     </div>
@@ -158,6 +155,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Property Details Section - Redesigned -->
                 <div class="mb-6">
