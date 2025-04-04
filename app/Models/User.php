@@ -31,7 +31,9 @@ class User extends Authenticatable
         'password',
         'role',
         'department_id',
+        'designation_id',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -71,6 +73,11 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(\App\Models\Department::class);
+    }
+
+    public function designation()
+    {
+        return $this->belongsTo(\App\Models\Designation::class);
     }
 
 }

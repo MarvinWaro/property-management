@@ -6,13 +6,11 @@
         }
         .register-container {
             position: relative;
-            height: 100vh; /* Full viewport height */
-            /* Gradient: light blue at top, dark blue at bottom, over the background image */
+            height: 100vh;
             background: linear-gradient(to bottom, rgba(173,216,230, 0.7), rgba(0,0,139, 0.8)),
                         url('{{ asset("img/bg-login.jpg") }}') no-repeat center center;
             background-size: cover;
         }
-        /* Particles.js container */
         #particles-js {
             position: absolute;
             width: 100%;
@@ -21,7 +19,6 @@
             left: 0;
             z-index: 1;
         }
-        /* Center content above the particles */
         .content-container {
             position: relative;
             z-index: 2;
@@ -30,41 +27,72 @@
             align-items: center;
             height: 100%;
         }
-        /* Enhanced authentication card (glassmorphism style) */
         .authentication-card {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            border-radius: 1rem;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.92) !important;
+            box-shadow: 0 10px 35px rgba(31, 38, 135, 0.45);
+            border-radius: 1.25rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 700px;
         }
-        /* Input styling with focus effect */
         .custom-input {
             border: 1px solid #e2e8f0 !important;
             background-color: #f8fafc !important;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1rem !important;
+            transition: all 0.3s ease;
+            height: 3rem !important;
+            font-size: 0.95rem;
         }
         .custom-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+            transform: translateY(-1px);
         }
-        /* Enhanced button styling with gradient and hover effect */
+        .custom-select {
+            border: 1px solid #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1rem !important;
+            transition: all 0.3s ease;
+            height: 3rem !important;
+            font-size: 0.95rem;
+        }
+        .custom-select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+            transform: translateY(-1px);
+        }
         .register-button {
             background: linear-gradient(45deg, #3b82f6, #2563eb) !important;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem !important;
+            height: 3rem !important;
+            font-weight: 600;
         }
         .register-button:hover {
             background: linear-gradient(45deg, #2563eb, #1e40af) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
         }
-        /* Title text style */
         .title-text {
             color: #1e3a8a;
             text-align: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+            margin-bottom: 1.75rem;
+            font-size: 1.75rem;
             font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
         }
     </style>
 
@@ -73,82 +101,106 @@
         <div id="particles-js"></div>
 
         <div class="content-container">
-            <div class="w-full sm:max-w-md authentication-card">
+            <div class="authentication-card">
                 <div class="flex justify-center">
                     <x-authentication-card-logo />
                 </div>
 
-                <h1 class="title-text mt-2">Create Account</h1>
+                <h1 class="title-text mt-3">Create Account</h1>
 
                 <x-validation-errors class="mb-4" />
 
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
 
-                    <!-- Name -->
-                    <div>
-                        <x-label for="name" value="{{ __('Name') }}" />
-                        <x-input id="name" class="block mt-1 w-full h-10 custom-input"
-                                type="text"
-                                name="name"
-                                :value="old('name')"
-                                required autofocus autocomplete="name" />
-                    </div>
+                    <!-- Two-Column Grid for Form Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Name -->
+                        <div class="form-group">
+                            <x-label for="name" value="{{ __('Name') }}" class="form-label" />
+                            <x-input id="name" class="block w-full custom-input"
+                                     type="text"
+                                     name="name"
+                                     :value="old('name')"
+                                     required autofocus autocomplete="name"
+                                     placeholder="Enter your full name" />
+                        </div>
 
-                    <!-- Email -->
-                    <div class="mt-4">
-                        <x-label for="email" value="{{ __('Email') }}" />
-                        <x-input id="email" class="block mt-1 w-full h-10 custom-input"
-                                type="email"
-                                name="email"
-                                :value="old('email')"
-                                required autocomplete="username" />
-                    </div>
+                        <!-- Email -->
+                        <div class="form-group">
+                            <x-label for="email" value="{{ __('Email') }}" class="form-label" />
+                            <x-input id="email" class="block w-full custom-input"
+                                     type="email"
+                                     name="email"
+                                     :value="old('email')"
+                                     required autocomplete="username"
+                                     placeholder="your.email@example.com" />
+                        </div>
 
-                    <!-- Password -->
-                    <div class="mt-4">
-                        <x-label for="password" value="{{ __('Password') }}" />
-                        <x-input id="password" class="block mt-1 w-full h-10 custom-input"
-                                type="password"
-                                name="password"
-                                required autocomplete="new-password" />
-                    </div>
+                        <!-- Password -->
+                        <div class="form-group">
+                            <x-label for="password" value="{{ __('Password') }}" class="form-label" />
+                            <x-input id="password" class="block w-full custom-input"
+                                     type="password"
+                                     name="password"
+                                     required autocomplete="new-password"
+                                     placeholder="••••••••" />
+                        </div>
 
-                    <!-- Confirm Password -->
-                    <div class="mt-4">
-                        <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-                        <x-input id="password_confirmation" class="block mt-1 w-full h-10 custom-input"
-                                type="password"
-                                name="password_confirmation"
-                                required autocomplete="new-password" />
-                    </div>
+                        <!-- Confirm Password -->
+                        <div class="form-group">
+                            <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" class="form-label" />
+                            <x-input id="password_confirmation" class="block w-full custom-input"
+                                     type="password"
+                                     name="password_confirmation"
+                                     required autocomplete="new-password"
+                                     placeholder="••••••••" />
+                        </div>
 
-                    <!-- Department Dropdown -->
-                    <div class="mt-4">
-                        <x-label for="department_id" value="{{ __('Department') }}" />
-                        <select id="department_id" name="department_id" required
-                                class="block mt-1 w-full h-10 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                            <option value="">{{ __('Select Department') }}</option>
-                            @foreach(\App\Models\Department::all() as $department)
-                                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                                    {{ $department->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('department_id')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                        <!-- Department Dropdown -->
+                        <div class="form-group">
+                            <x-label for="department_id" value="{{ __('Department') }}" class="form-label" />
+                            <select id="department_id" name="department_id" required
+                                    class="block w-full custom-select">
+                                <option value="">{{ __('Select Department') }}</option>
+                                @foreach(\App\Models\Department::all() as $department)
+                                    <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                                        {{ $department->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('department_id')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Designation Dropdown -->
+                        <div class="form-group">
+                            <x-label for="designation_id" value="{{ __('Designation') }}" class="form-label" />
+                            <select id="designation_id" name="designation_id" required
+                                    class="block w-full custom-select">
+                                <option value="">{{ __('Select Designation') }}</option>
+                                @foreach(\App\Models\Designation::all() as $designation)
+                                    <option value="{{ $designation->id }}" {{ old('designation_id') == $designation->id ? 'selected' : '' }}>
+                                        {{ $designation->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('designation_id')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                        <div class="mt-4">
+                        <div class="mt-5">
                             <x-label for="terms">
                                 <div class="flex items-center">
                                     <x-checkbox name="terms" id="terms" required />
-                                    <div class="ml-2">
+                                    <div class="ml-2 text-sm text-gray-700">
                                         {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                                            'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="underline text-sm text-gray-600 hover:text-gray-900">'.__('Terms of Service').'</a>',
-                                            'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="underline text-sm text-gray-600 hover:text-gray-900">'.__('Privacy Policy').'</a>',
+                                            'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="underline text-blue-600 hover:text-blue-800">'.__('Terms of Service').'</a>',
+                                            'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="underline text-blue-600 hover:text-blue-800">'.__('Privacy Policy').'</a>',
                                         ]) !!}
                                     </div>
                                 </div>
@@ -158,7 +210,7 @@
 
                     <!-- Register Button -->
                     <div class="mt-6">
-                        <x-button class="w-full h-10 register-button">
+                        <x-button class="w-full register-button">
                             <span class="block text-center w-full">{{ __('Register') }}</span>
                         </x-button>
                     </div>
@@ -168,8 +220,8 @@
                         <span class="text-sm text-gray-600">
                             {{ __('Already registered?') }}
                         </span>
-                        <a class="underline text-sm text-gray-600 hover:text-gray-900 ml-1"
-                        href="{{ route('login') }}">
+                        <a class="text-sm text-blue-600 hover:text-blue-800 hover:underline ml-1 font-medium"
+                           href="{{ route('login') }}">
                             {{ __('Sign in') }}
                         </a>
                     </div>
@@ -177,7 +229,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Include particles.js via CDN -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
