@@ -15,7 +15,8 @@
                             <!-- Dynamic Profile Card -->
                             <div class="bg-white shadow rounded-lg p-6 mb-6">
                                 <div class="flex flex-col items-center">
-                                    <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"class="w-32 h-32 object-cover object-center bg-gray-300 rounded-full mb-4 shrink-0">
+                                    <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"
+                                         class="w-32 h-32 object-cover object-center bg-gray-300 rounded-full mb-4 shrink-0">
                                     <h1 class="text-xl font-bold">{{ Auth::user()->name }}</h1>
                                     <p class="text-gray-700">{{ optional(Auth::user()->designation)->name }}</p>
                                     <p class="text-gray-700">{{ optional(Auth::user()->department)->name }}</p>
@@ -75,8 +76,46 @@
                             <!-- Properties Section (initially hidden) -->
                             <div id="properties" class="content-section bg-white shadow rounded-lg p-6 hidden">
                                 <h2 class="text-xl font-bold mb-4">My Properties</h2>
-                                <!-- Replace the following content with your dynamic property data -->
-                                <p class="text-gray-700">List of properties goes here.</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @forelse(Auth::user()->properties as $property)
+                                        <a href="{{ route('property.view', $property->id) }}" class="block group">
+                                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transform transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
+                                                <div class="h-48 bg-gray-200 dark:bg-gray-700 relative">
+                                                    @if($property->images->isNotEmpty())
+                                                        <img src="{{ asset('storage/' . $property->images->first()->file_path) }}"
+                                                            alt="Property Image" class="w-full h-full object-cover" />
+                                                    @else
+                                                        <div class="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-700">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </div>
+                                                    @endif
+                                                    <div class="absolute top-2 right-2">
+                                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-600 text-white">
+                                                            {{ $property->property_number }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="p-4">
+                                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">{{ $property->item_name }}</h3>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                                        {{ \Illuminate\Support\Str::limit($property->item_description ?? 'No description available', 60) }}
+                                                    </p>
+                                                    <div class="flex items-center justify-between mt-3">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                            {{ $property->acquisition_date ? $property->acquisition_date->format('M Y') : 'Unknown date' }}
+                                                        </span>
+                                                        <span class="text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:underline">View Details</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @empty
+                                        <p class="text-gray-700">No properties assigned to you.</p>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
