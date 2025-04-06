@@ -66,6 +66,31 @@
 {{-- chart js --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Reusable SweetAlert Delete Confirmation -->
+    <script>
+        /**
+         * Show a delete confirmation alert and, if confirmed, submit the form.
+         * @param {string} formId - The id of the form to submit on confirmation.
+         * @param {string} [itemName='this item'] - Optional name of the item to be deleted.
+         */
+        function confirmDelete(formId, itemName = 'this item') {
+            Swal.fire({
+                title: "Are you sure?",
+                html: `<p style="color:red;">You won't be able to revert ${itemName}!</p>`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#FF2D20", // Red tone
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
+    </script>
+
+
 {{-- This is for the success message --}}
 <script>
     document.addEventListener("DOMContentLoaded", function () {

@@ -124,20 +124,26 @@
                                                     </a>
                                                 </li>
                                                 <hr class="border-gray-300 dark:border-gray-600">
-                                                <!-- Delete Action -->
                                                 <li>
-                                                    <form id="deleteForm{{ $supplier->id }}" action="{{ route('supplier.destroy', $supplier->id) }}" method="POST" class="inline">
+                                                    <form id="deleteForm{{ $supplier->id }}" action="{{ route('supplier.destroy', $supplier->id) }}" method="POST">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button" onclick="confirmDelete('deleteForm{{ $supplier->id }}', '{{ $supplier->name }}')"
-                                                            class="flex items-center px-4 py-2 text-red-500 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-red-400 w-full text-left">
-                                                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                                                                <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
+                                                        <button type="button"
+                                                                onclick="confirmDelete('deleteForm{{ $supplier->id }}', '{{ $supplier->name }}')"
+                                                                class="flex items-center px-4 py-2 text-red-500 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-red-400 w-full text-left">
+                                                            <svg class="w-5 h-5 mr-2"
+                                                                 xmlns="http://www.w3.org/2000/svg"
+                                                                 viewBox="0 0 16 16" fill="currentColor">
+                                                                <path fill-rule="evenodd"
+                                                                      d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
+                                                                      clip-rule="evenodd"/>
                                                             </svg>
                                                             Delete
                                                         </button>
                                                     </form>
                                                 </li>
+
+
                                             </ul>
                                         </div>
                                     </td>
@@ -165,40 +171,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Delete Confirmation -->
-    <script>
-        function confirmDelete(locationId) {
-            Swal.fire({
-                title: "Are you sure?",
-                text: "HINDI MO NA MAARING BALIKAN ANG MGA BAGAY NA TAPOS NA",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteForm' + locationId).submit();
-                }
-            });
-        }
-
-        // Show success alert if session deleted exists
-        document.addEventListener("DOMContentLoaded", function() {
-            @if (session('deleted'))
-                setTimeout(() => {
-                    Swal.fire({
-                        title: "Success!",
-                        text: "{{ session('deleted') }}",
-                        icon: "success",
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "OK"
-                    });
-                }, 500); // Small delay to ensure the page fully loads
-            @endif
-        });
-    </script>
 
     <!-- JavaScript to Show/Hide X button and Clear Input -->
     <script>
