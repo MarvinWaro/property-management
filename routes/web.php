@@ -55,6 +55,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/supplier/{id}', [SupplierController::class, 'update'])->name('supplier.update');
         Route::delete('/supplier/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
 
+
         // Categories
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');

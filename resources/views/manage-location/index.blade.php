@@ -138,16 +138,13 @@
 
                                                     </li>
                                                     <hr class="border-gray-300 dark:border-gray-600">
-                                                    <!-- Delete Action -->
                                                     <li>
-                                                        <form id="deleteForm{{ $location->id }}"
-                                                            action="{{ route('location.destroy', $location->id) }}"
-                                                            method="POST" class="inline">
+                                                        <form id="deleteForm{{ $location->id }}" action="{{ route('location.destroy', $location->id) }}" method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button"
-                                                                class="flex items-center px-4 py-2 text-red-500 hover:text-red-700"
-                                                                onclick="confirmDelete({{ $location->id }})">
+                                                                    onclick="confirmDelete('deleteForm{{ $location->id }}', '{{ $location->name }}')"
+                                                                    class="flex items-center px-4 py-2 text-red-500 hover:text-red-700">
                                                                 <svg class="w-5 h-5 mr-2"
                                                                     xmlns="http://www.w3.org/2000/svg"
                                                                     viewBox="0 0 16 16" fill="currentColor">
@@ -159,6 +156,7 @@
                                                             </button>
                                                         </form>
                                                     </li>
+
                                                 </ul>
                                             </div>
                                         </td>
@@ -184,40 +182,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Delete Confirmation -->
-    {{-- <script>
-        function confirmDelete(locationId) {
-            Swal.fire({
-                title: "Are you sure?",
-                text: "HINDI MO NA MAARING BALIKAN ANG MGA BAGAY NA TAPOS NA",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteForm' + locationId).submit();
-                }
-            });
-        }
-
-        // Show success alert if session deleted exists
-        document.addEventListener("DOMContentLoaded", function() {
-            @if (session('deleted'))
-                setTimeout(() => {
-                    Swal.fire({
-                        title: "Success!",
-                        text: "{{ session('deleted') }}",
-                        icon: "success",
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "OK"
-                    });
-                }, 500); // Small delay to ensure the page fully loads
-            @endif
-        });
-    </script> --}}
 
     <!-- JavaScript to Show/Hide X button and Clear Input -->
     <script>
