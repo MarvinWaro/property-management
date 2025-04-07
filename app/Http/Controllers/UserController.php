@@ -9,7 +9,6 @@ class UserController extends Controller
 {
     public function storeUser(Request $request)
     {
-        // Validate only what the admin actually fills out (no password fields needed):
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users',
@@ -18,22 +17,22 @@ class UserController extends Controller
             'designation_id'=> 'required|exists:designations,id',
         ]);
 
-        // Hardcode the default password
         $defaultPassword = '12345678';
 
-        // Create user with default hashed password
         User::create([
-            'name'          => $validated['name'],
-            'email'         => $validated['email'],
-            'password'      => \Illuminate\Support\Facades\Hash::make($defaultPassword),
-            'role'          => $validated['role'],
-            'department_id' => $validated['department_id'],
-            'designation_id'=> $validated['designation_id'],
-            'status'        => true, // Active if created by admin
+            'name'                 => $validated['name'],
+            'email'                => $validated['email'],
+            'password'             => \Illuminate\Support\Facades\Hash::make($defaultPassword),
+            'role'                 => $validated['role'],
+            'department_id'        => $validated['department_id'],
+            'designation_id'       => $validated['designation_id'],
+            'status'               => true,
+            'needs_password_change'=> true, // <— Force them to change at next login
         ]);
 
         return redirect()->back()->with('success', 'User created successfully!');
     }
+
 
 
 
