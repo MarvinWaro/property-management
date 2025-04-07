@@ -19,6 +19,7 @@ class RegisterResponse implements RegisterResponseContract
         auth()->logout();
 
         // Redirect to the login page with a status message.
-        return redirect()->route('login')->with('status', 'Registration successful. Please log in.');
+        return redirect()->route('login')->with('status', 'Registration successful, but your account is currently inactive. Please contact the admin.');
+
     }
 }
