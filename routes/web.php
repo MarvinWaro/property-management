@@ -10,6 +10,9 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\UserController;
 
+use App\Http\Controllers\StaffDashboardController;
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -102,8 +105,17 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      * ------------------
      */
     Route::middleware(['role:staff'])->group(function () {
-        Route::view('/staff-dashboard', 'staff-dashboard')->name('staff.dashboard');
+        Route::get('/staff-dashboard', [StaffDashboardController::class, 'index'])
+            ->name('staff.dashboard');
+
+        Route::get('/force-change-password', [StaffDashboardController::class, 'showChangePasswordForm'])
+            ->name('user.force-change-password');
+
+        Route::post('/force-change-password', [StaffDashboardController::class, 'updatePassword'])
+            ->name('user.force-change-password.update');
     });
+
+
 
 });
 

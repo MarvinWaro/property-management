@@ -10,6 +10,26 @@
             <div class="bg-gray-100">
                 <div class="container mx-auto py-8">
                     <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+
+
+                        @if ($forceChangePassword)
+                            <script>
+                                Swal.fire({
+                                    title: 'Change Your Password',
+                                    text: 'You still have the default password (12345678). Please change it now.',
+                                    icon: 'warning',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'Change Password'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // Redirect them to the password change page
+                                        window.location.href = "{{ route('user.force-change-password') }}";
+                                    }
+                                });
+                            </script>
+                        @endif
+
+
                         <!-- Left sidebar with profile and navigation -->
                         <div class="col-span-4 sm:col-span-3">
                             <!-- Dynamic Profile Card -->

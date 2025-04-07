@@ -34,8 +34,16 @@ class User extends Authenticatable
         'role',
         'department_id',
         'designation_id',
-        'status', // <— Include this
+        'status',
+        'needs_password_change', // <— Add here
     ];
+
+    // protected $casts = [
+    //     'email_verified_at' => 'datetime',
+    //     'password' => 'hashed',
+    //     'needs_password_change' => 'boolean',
+    // ];
+
 
 
     /**
@@ -69,6 +77,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'needs_password_change' => 'boolean',
         ];
     }
 
