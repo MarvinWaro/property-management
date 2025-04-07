@@ -466,6 +466,17 @@
                 </table>
             </div>
 
+            @if ($errors->any())
+                <div class="text-red-500">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+
             <!-- CREATE USER MODAL -->
             <div id="createUserModal" tabindex="-1" aria-hidden="true"
                 class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full justify-center items-center">
@@ -595,21 +606,6 @@
                                 @error('designation_id')
                                     <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
                                 @enderror
-                            </div>
-
-                            <!-- Status -->
-                            <div>
-                                <label for="status"
-                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                    Status
-                                </label>
-                                <select name="status" id="status"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm
-                              focus:ring-blue-500 focus:border-blue-500
-                              dark:bg-gray-800 dark:text-white dark:border-gray-600">
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
                             </div>
 
                             <!-- Modal Footer -->

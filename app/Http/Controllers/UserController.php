@@ -7,9 +7,6 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-
-
-
     public function storeUser(Request $request)
     {
         $validated = $request->validate([
@@ -19,18 +16,19 @@ class UserController extends Controller
             'role'          => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'designation_id'=> 'required|exists:designations,id',
-            'status'        => 'required|boolean',
         ]);
 
-        \App\Models\User::create([
+        // This will save the user, then debug-dump the created record
+        $user = \App\Models\User::create([
             'name'          => $validated['name'],
             'email'         => $validated['email'],
             'password'      => \Illuminate\Support\Facades\Hash::make($validated['password']),
             'role'          => $validated['role'],
             'department_id' => $validated['department_id'],
             'designation_id'=> $validated['designation_id'],
-            'status'        => $validated['status'],
+            'status'        => true,
         ]);
+
 
         return redirect()->back()->with('success', 'User created successfully!');
     }
@@ -48,10 +46,4 @@ class UserController extends Controller
         // Redirect back with a success message
         return redirect()->back()->with('success', 'User updated successfully!');
     }
-
-
-
-
-
-
 }
