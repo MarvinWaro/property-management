@@ -8,6 +8,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,6 +26,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
+
+        // Example route, adjusting the URI as you see fit:
+        Route::post('/users', [UserController::class, 'storeUser'])->name('users.store');
+        Route::put('/users/{id}', [UserController::class, 'updateUser'])->name('users.update');
+        // routes/web.php
+
 
         // Supplies
         Route::get('/supplies', function () {return view('supplies.index');})->name('supplies.index');
