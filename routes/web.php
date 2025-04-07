@@ -32,7 +32,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/users/{id}', [UserController::class, 'updateUser'])->name('users.update');
         // routes/web.php
 
-
         // Supplies
         Route::get('/supplies', function () {return view('supplies.index');})->name('supplies.index');
 

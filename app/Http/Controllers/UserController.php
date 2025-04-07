@@ -7,33 +7,34 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-
-
-
     public function storeUser(Request $request)
     {
+        // Validate only what the admin actually fills out (no password fields needed):
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users',
-            'password'      => 'required|string|min:8|confirmed',
             'role'          => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'designation_id'=> 'required|exists:designations,id',
-            'status'        => 'required|boolean',
         ]);
 
-        \App\Models\User::create([
+        // Hardcode the default password
+        $defaultPassword = '12345678';
+
+        // Create user with default hashed password
+        User::create([
             'name'          => $validated['name'],
             'email'         => $validated['email'],
-            'password'      => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'password'      => \Illuminate\Support\Facades\Hash::make($defaultPassword),
             'role'          => $validated['role'],
             'department_id' => $validated['department_id'],
             'designation_id'=> $validated['designation_id'],
-            'status'        => $validated['status'],
+            'status'        => true, // Active if created by admin
         ]);
 
         return redirect()->back()->with('success', 'User created successfully!');
     }
+
 
 
     public function updateUser(Request $request, $id)
@@ -48,10 +49,4 @@ class UserController extends Controller
         // Redirect back with a success message
         return redirect()->back()->with('success', 'User updated successfully!');
     }
-
-
-
-
-
-
 }
