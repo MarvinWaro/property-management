@@ -9,7 +9,8 @@
 
             <!-- Floating Cards Section -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
-                <!-- Employees Average Request per Month (Purple) -->
+                
+                <!-- Employees Card (Purple) -->
                 <div
                     class="p-3 sm:p-4 lg:p-6 bg-white shadow-xl rounded-2xl dark:bg-gray-800 border-l-4 border-purple-500
                     transition-all duration-300 hover:shadow-2xl hover:translate-y-1 hover:border-l-6 cursor-pointer group">
@@ -19,11 +20,15 @@
                                 Employees
                             </dt>
                             <dd class="text-2xl sm:text-3xl lg:text-4xl font-light dark:text-white">
-                                30
+                                {{ $totalUsers }}
                             </dd>
                             @if ($lastUpdated)
                                 <dd
                                     class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-green-500 dark:text-green-400">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
                                     <span>Updated {{ $lastUpdated->diffForHumans() }}</span>
                                 </dd>
                             @endif
@@ -31,14 +36,11 @@
                         <div
                             class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-purple-100 dark:bg-purple-800 h-fit
                             transition-all duration-300 group-hover:bg-purple-200 dark:group-hover:bg-purple-700">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-300"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.75h4.5m0 0c.621 0 1.125.504 1.125 1.125m-5.625-.75v.75c0
-                                .621-.504 1.125-1.125 1.125H4.125C3.504 6 3 6.504 3
-                                7.125v10.125c0 .621.504 1.125 1.125 1.125h15.75c.621
-                                0 1.125-.504 1.125-1.125V7.125c0-.621-.504-1.125-1.125-1.125h-4.125a1.125
-                                1.125 0 01-1.125-1.125V3.75M9 12h6m-6 3h3" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-300">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                             </svg>
                         </div>
                     </div>
