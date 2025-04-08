@@ -221,11 +221,13 @@
                         <button type="button" data-modal-target="createUserModal"
                             data-modal-toggle="createUserModal"
                             class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <line x1="19" x2="19" y1="8" y2="14"/>
-                                <line x1="22" x2="16" y1="11" y2="11"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <line x1="19" x2="19" y1="8" y2="14" />
+                                <line x1="22" x2="16" y1="11" y2="11" />
                             </svg>
                         </button>
                     </div>
@@ -245,27 +247,29 @@
                 @endif
 
                 <!-- Filters and Bulk Actions -->
-                <div class="flex flex-wrap gap-3 mb-4">
-                    <select id="role-filter"
+                <div class="flex flex-wrap gap-3 mt-6 mb-6">
+                    <select id="role-filter" onchange="filterTable()"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">Filter by Role</option>
                         <option value="admin">Admin</option>
                         <option value="staff">Staff</option>
                     </select>
 
-                    <select id="status-filter"
+                    <select id="status-filter" onchange="filterTable()"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">Filter by Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
 
-                    <select id="department-filter"
+                    <select id="department-filter" onchange="filterTable()"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">Filter by Department</option>
-                        @foreach ($departments as $dept)
-                            <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                        @endforeach
+                        @if (isset($departments))
+                            @foreach ($departments as $dept)
+                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
 
@@ -289,7 +293,9 @@
                                 </thead>
                                 <tbody>
                                     @forelse($users as $user)
-                                        <tr
+                                        <tr data-role="{{ strtolower($user->role) }}"
+                                            data-status="{{ $user->status ? 'active' : 'inactive' }}"
+                                            data-department="{{ $user->department ? $user->department->id : '' }}"
                                             class="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                                             <td
                                                 class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -297,43 +303,48 @@
                                             </td>
                                             <td class="px-6 py-4 font-medium">
                                                 <div class="flex items-center">
-                                                    <!-- User avatar placeholder - replace with actual avatar if available -->
-                                                    <div
-                                                        class="w-8 h-8 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
-                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                    </div>
+                                                    <!-- Display user profile photo or a fallback letter -->
+                                                    @if ($user->profile_photo_url)
+                                                        <img src="{{ $user->profile_photo_url }}"
+                                                            alt="{{ $user->name }}"
+                                                            class="w-8 h-8 mr-3 rounded-full object-cover">
+                                                    @else
+                                                        <div
+                                                            class="w-8 h-8 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
+                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                        </div>
+                                                    @endif
                                                     <div>
                                                         <div class="text-gray-900 dark:text-white">{{ $user->name }}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4">{{ $user->email }}</td>
+
+                                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $user->email }}</td>
                                             <td class="px-6 py-4">
                                                 @if ($user->role === 'admin')
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                                                        <svg class="w-3 h-3 mr-1" fill="currentColor"
-                                                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd"
-                                                                d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                                clip-rule="evenodd"></path>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                                                            <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
+                                                            <circle cx="12" cy="11" r="4"/>
                                                         </svg>
                                                         Admin
                                                     </span>
                                                 @else
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                                        <svg class="w-3 h-3 mr-1" fill="currentColor"
-                                                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
-                                                            </path>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                            <circle cx="9" cy="7" r="4"/>
+                                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                                         </svg>
                                                         Staff
                                                     </span>
                                                 @endif
                                             </td>
+
                                             <td class="px-6 py-4">
                                                 @if ($user->department)
                                                     <span
@@ -400,7 +411,7 @@
                                                         </svg>
                                                     </button>
 
-                                                    <!-- Dropdown for More Actions -->
+                                                    <!-- More Actions Dropdown (example) -->
                                                     <div class="relative inline-block text-left">
                                                         <button id="dropdownButton-{{ $user->id }}"
                                                             data-dropdown-toggle="dropdown-{{ $user->id }}"
@@ -416,6 +427,7 @@
                                                                 <circle cx="5" cy="12" r="1" />
                                                             </svg>
                                                         </button>
+                                                        <!-- Dropdown menu markup goes here -->
                                                         <!-- Dropdown menu -->
                                                         <div id="dropdown-{{ $user->id }}"
                                                             class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
@@ -453,32 +465,17 @@
                                                                         Reset Password
                                                                     </a>
                                                                 </li>
-                                                                <li>
-                                                                    <a href="#"
-                                                                        class="block px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30">
-                                                                        <svg class="w-4 h-4 mr-2 inline-block"
-                                                                            fill="none" stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                                            </path>
-                                                                        </svg>
-                                                                        Delete User
-                                                                    </a>
-                                                                </li>
                                                             </ul>
                                                         </div>
+
                                                     </div>
                                                 </div>
 
-                                                <!-- Edit User Modal (Same as in your original code) -->
+                                                <!-- Edit User Modal and other related modals go here -->
                                                 <div id="editUserModal{{ $user->id }}" tabindex="-1"
                                                     aria-hidden="true"
                                                     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
-                                                                    justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                                                                    justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                                     <div class="relative p-4 w-full max-w-2xl max-h-full">
                                                         <!-- Modal content -->
                                                         <div
@@ -486,7 +483,7 @@
                                                             <!-- Modal header -->
                                                             <div
                                                                 class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
-                                                                dark:border-gray-600 border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800">
+                                                                                                dark:border-gray-600 border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800">
                                                                 <h3
                                                                     class="text-xl font-semibold text-white flex items-center">
                                                                     <svg class="w-5 h-5 mr-2" fill="currentColor"
@@ -500,7 +497,7 @@
                                                                 </h3>
                                                                 <button type="button"
                                                                     class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                                                    dark:hover:bg-gray-600 transition-all duration-200"
+                                                                                                    dark:hover:bg-gray-600 transition-all duration-200"
                                                                     data-modal-hide="editUserModal{{ $user->id }}">
                                                                     <svg class="w-5 h-5"
                                                                         xmlns="http://www.w3.org/2000/svg"
@@ -521,42 +518,71 @@
                                                                 @csrf
                                                                 @method('PUT')
 
+                                                                <!-- Improved User Information Section -->
+                                                                <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
+                                                                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
+                                                                        <svg class="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        User Information
+                                                                    </h4>
+
+                                                                    <div class="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 dark:border-gray-600 pb-3 mb-3">
+                                                                        <!-- User profile photo column -->
+                                                                        <div class="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 flex justify-center">
+                                                                            @if ($user->profile_photo_url)
+                                                                                <img src="{{ $user->profile_photo_url }}"
+                                                                                    alt="{{ $user->name }}"
+                                                                                    class="w-16 h-16 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900">
+                                                                            @else
+                                                                                <div
+                                                                                    class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl">
+                                                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
+
+                                                                        <!-- User details column -->
+                                                                        <div class="flex-grow">
+                                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->email }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">User ID</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ $user->id }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Created</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                                        {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- QR Code Warning Notice -->
+                                                                    <div class="flex items-start bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+                                                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        <div>
+                                                                            <p class="text-xs text-blue-700 dark:text-blue-400">
+                                                                                <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
                                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                     <!-- Left Column -->
                                                                     <div>
-                                                                        <!-- User Basic Info (Readonly) -->
-                                                                        <div
-                                                                            class="mb-4 p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700">
-                                                                            <h4
-                                                                                class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                                                                                User Information
-                                                                            </h4>
-
-                                                                            <div class="flex items-center mb-3">
-                                                                                <!-- Avatar placeholder -->
-                                                                                <div
-                                                                                    class="w-10 h-10 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
-                                                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p
-                                                                                        class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                                        {{ $user->name }}</p>
-                                                                                    <p
-                                                                                        class="text-xs text-gray-500 dark:text-gray-400">
-                                                                                        {{ $user->email }}</p>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div
-                                                                                class="text-xs text-gray-500 dark:text-gray-400">
-                                                                                <p>User ID: #{{ $user->id }}</p>
-                                                                                <p>Created:
-                                                                                    {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-
                                                                         <!-- Role -->
                                                                         <div class="mb-4">
                                                                             <label for="role_{{ $user->id }}"
@@ -578,9 +604,9 @@
                                                                                 <select id="role_{{ $user->id }}"
                                                                                     name="role"
                                                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                                     <option value="admin"
                                                                                         {{ $user->role === 'admin' ? 'selected' : '' }}>
                                                                                         Admin</option>
@@ -590,10 +616,7 @@
                                                                                 </select>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
 
-                                                                    <!-- Right Column -->
-                                                                    <div>
                                                                         <!-- Department -->
                                                                         <div class="mb-4">
                                                                             <label
@@ -617,9 +640,9 @@
                                                                                     id="department_id_{{ $user->id }}"
                                                                                     name="department_id"
                                                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                                     @foreach ($departments as $dept)
                                                                                         <option
                                                                                             value="{{ $dept->id }}"
@@ -630,7 +653,10 @@
                                                                                 </select>
                                                                             </div>
                                                                         </div>
+                                                                    </div>
 
+                                                                    <!-- Right Column -->
+                                                                    <div>
                                                                         <!-- Designation -->
                                                                         <div class="mb-4">
                                                                             <label
@@ -654,9 +680,9 @@
                                                                                     id="designation_id_{{ $user->id }}"
                                                                                     name="designation_id"
                                                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                                     @foreach ($designations as $desig)
                                                                                         <option
                                                                                             value="{{ $desig->id }}"
@@ -690,9 +716,9 @@
                                                                                     id="status_{{ $user->id }}"
                                                                                     name="status"
                                                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                                     <option value="1"
                                                                                         {{ $user->status ? 'selected' : '' }}>
                                                                                         Active</option>
@@ -705,7 +731,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Notes -->
+                                                                <!-- Important Notice -->
                                                                 <div
                                                                     class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-900">
                                                                     <div class="flex items-center mb-2">
@@ -735,19 +761,19 @@
                                                                         data-modal-hide="editUserModal{{ $user->id }}"
                                                                         type="button"
                                                                         class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                                                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                                                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                                                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                                                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
                                                                         Cancel
                                                                     </button>
                                                                     <button
                                                                         data-modal-hide="editUserModal{{ $user->id }}"
                                                                         type="submit"
                                                                         class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                                    focus:ring-4 focus:outline-none focus:ring-blue-300
-                                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                                                                                    focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                                                                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
                                                                         <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                             viewBox="0 0 20 20"
                                                                             xmlns="http://www.w3.org/2000/svg">
@@ -763,11 +789,13 @@
                                                     </div>
                                                 </div>
                                                 <!-- End of Edit Modal -->
+
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
                                             <td colspan="8" class="px-6 py-8 text-center">
+                                                <!-- Empty state content -->
                                                 <div class="flex flex-col items-center justify-center">
                                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24"
@@ -797,6 +825,7 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
@@ -1248,7 +1277,6 @@
             </div>
 
             <!-- ... your existing dashboard code above ... -->
-
         </div>
     </div>
 </x-app-layout>
@@ -1397,4 +1425,134 @@
             attributes: true
         });
     });
+</script>
+
+<script>
+    // Client-side filtering function
+    function filterTable() {
+        const roleFilter = document.getElementById('role-filter').value.toLowerCase();
+        const statusFilter = document.getElementById('status-filter').value.toLowerCase();
+        const departmentFilter = document.getElementById('department-filter').value;
+
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const roleValue = row.getAttribute('data-role').toLowerCase();
+            const statusValue = row.getAttribute('data-status').toLowerCase();
+            const departmentValue = row.getAttribute('data-department');
+
+            const roleMatch = !roleFilter || roleValue === roleFilter;
+            const statusMatch = !statusFilter || statusValue === statusFilter;
+            const departmentMatch = !departmentFilter || departmentValue === departmentFilter;
+
+            if (roleMatch && statusMatch && departmentMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+<script>
+    // Data Filter
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize filter functionality
+        const roleFilter = document.getElementById('role-filter');
+        const statusFilter = document.getElementById('status-filter');
+        const departmentFilter = document.getElementById('department-filter');
+
+        // Add event listeners to filter dropdowns
+        if (roleFilter) roleFilter.addEventListener('change', filterTable);
+        if (statusFilter) statusFilter.addEventListener('change', filterTable);
+        if (departmentFilter) departmentFilter.addEventListener('change', filterTable);
+
+        function filterTable() {
+            const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
+            const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
+            const departmentValue = departmentFilter ? departmentFilter.value : '';
+
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                // Skip if this is an empty state row (has colspan)
+                if (row.querySelector('td[colspan]')) return;
+
+                const roleData = row.getAttribute('data-role') ? row.getAttribute('data-role')
+                    .toLowerCase() : '';
+                const statusData = row.getAttribute('data-status') ? row.getAttribute('data-status')
+                    .toLowerCase() : '';
+                const departmentData = row.getAttribute('data-department') || '';
+
+                const roleMatch = !roleValue || roleValue === '' || roleData === roleValue;
+                const statusMatch = !statusValue || statusValue === '' || statusData === statusValue;
+                const departmentMatch = !departmentValue || departmentValue === '' || departmentData ===
+                    departmentValue;
+
+                if (roleMatch && statusMatch && departmentMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Check if all rows are hidden, show empty state if needed
+            let allHidden = true;
+            rows.forEach(row => {
+                if (row.style.display !== 'none' && !row.querySelector('td[colspan]')) {
+                    allHidden = false;
+                }
+            });
+
+            // Find or create empty state row
+            let emptyStateRow = document.querySelector('tr.empty-state-row');
+            if (allHidden) {
+                if (!emptyStateRow) {
+                    emptyStateRow = document.createElement('tr');
+                    emptyStateRow.className = 'empty-state-row';
+                    emptyStateRow.innerHTML = `
+                        <td colspan="8" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No matching users found</p>
+                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Try changing your filters</p>
+                                <button type="button" onclick="clearFilters()" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Clear Filters
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    document.querySelector('tbody').appendChild(emptyStateRow);
+                } else {
+                    emptyStateRow.style.display = '';
+                }
+            } else if (emptyStateRow) {
+                emptyStateRow.style.display = 'none';
+            }
+        }
+    });
+
+    // Function to clear all filters
+    function clearFilters() {
+        const roleFilter = document.getElementById('role-filter');
+        const statusFilter = document.getElementById('status-filter');
+        const departmentFilter = document.getElementById('department-filter');
+
+        if (roleFilter) roleFilter.value = '';
+        if (statusFilter) statusFilter.value = '';
+        if (departmentFilter) departmentFilter.value = '';
+
+        // Trigger filter update
+        filterTable();
+    }
+
+    // Function for the search clear button
+    function clearSearch() {
+        window.location.href = window.location.pathname;
+    }
 </script>
