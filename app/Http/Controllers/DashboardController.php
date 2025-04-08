@@ -11,8 +11,11 @@ use App\Models\Designation;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        // Get search query if exists
+        $search = $request->get('search');
+
         // Stats for the page
         $totalUsers = User::count();
         $lastUpdatedRecord = User::latest('updated_at')->first();
@@ -20,8 +23,27 @@ class DashboardController extends Controller
         $totalProperties = Property::count();
         $totalLocations = Location::count();
 
-        // For user listing (if you display them on the dashboard)
-        $users = User::with('department', 'designation')->get();
+        // For user listing with search functionality
+        $users = User::with('department', 'designation')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('role', 'like', "%{$search}%");
+
+                    // Search in department relationship
+                    $q->orWhereHas('department', function ($subQuery) use ($search) {
+                        $subQuery->where('name', 'like', "%{$search}%");
+                    });
+
+                    // Search in designation relationship
+                    $q->orWhereHas('designation', function ($subQuery) use ($search) {
+                        $subQuery->where('name', 'like', "%{$search}%");
+                    });
+                });
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         // For the create form
         $departments = Department::all();
@@ -34,11 +56,10 @@ class DashboardController extends Controller
             'totalLocations',
             'users',
             'departments',
-            'designations'
+            'designations',
+            'search' // Pass the search query to the view
         ));
     }
-
-
 
     public function assets()
     {
