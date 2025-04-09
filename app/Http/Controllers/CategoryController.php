@@ -39,18 +39,24 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Instead of returning views, return JSON responses for AJAX requests
     public function store(Request $request)
     {
-        // Validate the request data
         $validated = $request->validate([
             'name' => 'required|string|unique:categories,name',
             'description' => 'nullable|string',
         ]);
 
-        // Create a new category record
-        Category::create($validated);
+        $category = Category::create($validated);
 
-        // Redirect to the index with a success message
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Category created successfully',
+                'category' => $category
+            ]);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
 
