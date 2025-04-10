@@ -103,10 +103,14 @@ class SupplierController extends Controller
      * Remove the specified resource from storage.
      */
 
-     public function destroy(Supplier $supplier)
-     {
-         $supplier->delete();
-         return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
-     }
+    public function destroy($id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        $supplier->delete();
+
+    return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully.');
+    }
 
 }
+
+
