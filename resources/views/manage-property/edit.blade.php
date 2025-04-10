@@ -390,7 +390,7 @@
 
                                 <!-- 9. Location -->
                                 <div>
-                                    <label for="item_name"
+                                    <label for="location_id"
                                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Location / Whereabouts <span class="text-red-500">*</span>
                                     </label>
@@ -406,12 +406,9 @@
                                                 <circle cx="12" cy="10" r="3" />
                                             </svg>
                                         </div>
-                                        <select id="location_id" name="location_id"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                   focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                   dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                                   @error('location_id') border-red-500 @enderror">
+
+                                        <!-- Hidden actual select element for form submission -->
+                                        <select id="location_id" name="location_id" class="hidden">
                                             <option value="" disabled>
                                                 -- Select Location --
                                             </option>
@@ -422,6 +419,63 @@
                                                 </option>
                                             @endforeach
                                         </select>
+
+                                        <!-- Custom dropdown button -->
+                                        <button type="button" id="location-dropdown-button"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                @error('location_id') border-red-500 @enderror flex items-center justify-between">
+                                            <span id="selected-location-text">
+                                                @if(old('location_id', $property->location_id))
+                                                    {{ $locations->where('id', old('location_id', $property->location_id))->first()->location_name ?? '-- Select Location --' }}
+                                                @else
+                                                    -- Select Location --
+                                                @endif
+                                            </span>
+                                            <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown menu -->
+                                        <div id="location-dropdown-menu"
+                                            class="hidden absolute z-10 w-full bg-white rounded-lg shadow-lg dark:bg-gray-700 mt-1">
+                                            <!-- Search input -->
+                                            <div class="p-2">
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="text" id="location-search"
+                                                        class="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-gray-50
+                                                            focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500
+                                                            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        placeholder="Search location...">
+                                                </div>
+                                            </div>
+
+                                            <!-- Dropdown items container with max height and scrollbar -->
+                                            <ul id="location-options" class="py-1 text-sm text-gray-700 dark:text-gray-200 max-h-60 overflow-y-auto">
+                                                @foreach ($locations as $loc)
+                                                    <li>
+                                                        <a href="#" data-value="{{ $loc->id }}"
+                                                        class="location-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white
+                                                                {{ old('location_id', $property->location_id) == $loc->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
+                                                            {{ $loc->location_name }}
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+
+                                            <!-- No results message -->
+                                            <p id="location-no-results" class="hidden p-4 text-sm text-gray-500 dark:text-gray-400">
+                                                No locations found.
+                                            </p>
+                                        </div>
                                     </div>
                                     @error('location_id')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -462,13 +516,9 @@
                                                 <circle cx="12" cy="7" r="4" />
                                             </svg>
                                         </div>
-                                        <select id="user_id" name="user_id"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                               focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
-                                               dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                               dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-                                               @error('user_id') border-red-500 @enderror"
-                                            onchange="removeHiddenEndUser()">
+
+                                        <!-- Hidden actual select element for form submission -->
+                                        <select id="user_id" name="user_id" class="hidden" onchange="removeHiddenEndUser()">
                                             <option value="" disabled {{ !$selectedUser ? 'selected' : '' }}>
                                                 -- Select User --
                                             </option>
@@ -490,6 +540,83 @@
                                                 </option>
                                             @endforeach
                                         </select>
+
+                                        <!-- Custom dropdown button -->
+                                        <button type="button" id="user-dropdown-button"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+                                                @error('user_id') border-red-500 @enderror flex items-center justify-between">
+                                            <span id="selected-user-text">
+                                                @if($selectedUser && $allUsers->where('id', $selectedUser)->first())
+                                                    {{ $allUsers->where('id', $selectedUser)->first()->name }}
+                                                    ({{ optional($allUsers->where('id', $selectedUser)->first()->department)->name }})
+                                                    @if(optional($allUsers->where('id', $selectedUser)->first())->excluded) (Excluded) @endif
+                                                @else
+                                                    -- Select User --
+                                                @endif
+                                            </span>
+                                            <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown menu -->
+                                        <div id="user-dropdown-menu"
+                                            class="hidden absolute z-10 w-full bg-white rounded-lg shadow-lg dark:bg-gray-700 mt-1">
+                                            <!-- Search input -->
+                                            <div class="p-2">
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="text" id="user-search"
+                                                        class="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-gray-50
+                                                            focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500
+                                                            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        placeholder="Search user...">
+                                                </div>
+                                            </div>
+
+                                            <!-- Dropdown items container with max height and scrollbar -->
+                                            <ul id="user-options" class="py-1 text-sm text-gray-700 dark:text-gray-200 max-h-60 overflow-y-auto">
+                                                <!-- Active Users -->
+                                                @if($activeUsers->count() > 0)
+                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">Active Users</li>
+                                                    @foreach ($activeUsers as $user)
+                                                        <li>
+                                                            <a href="#" data-value="{{ $user->id }}" data-is-excluded="0"
+                                                            class="user-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white
+                                                                    {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
+                                                                {{ $user->name }} ({{ optional($user->department)->name }})
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                @endif
+
+                                                <!-- Excluded Users -->
+                                                @if($excludedUsers->count() > 0)
+                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">Excluded Users</li>
+                                                    @foreach ($excludedUsers as $user)
+                                                        <li>
+                                                            <a href="#" data-value="{{ $user->id }}" data-is-excluded="1"
+                                                            class="user-option-disabled block px-4 py-2 text-gray-400 cursor-not-allowed
+                                                                    {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
+                                                                {{ $user->name }} ({{ optional($user->department)->name }}) (Excluded)
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                @endif
+                                            </ul>
+
+                                            <!-- No results message -->
+                                            <p id="user-no-results" class="hidden p-4 text-sm text-gray-500 dark:text-gray-400">
+                                                No users found.
+                                            </p>
+                                        </div>
                                     </div>
                                     @error('user_id')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -497,12 +624,9 @@
 
                                     {{-- If the selected user is excluded, add a hidden input to submit its value --}}
                                     @if ($selectedUser && optional($allUsers->where('id', $selectedUser)->first())->excluded)
-                                        <input type="hidden" id="hidden_user_id" name="user_id"
-                                            value="{{ $selectedUser }}">
+                                        <input type="hidden" id="hidden_user_id" name="user_id" value="{{ $selectedUser }}">
                                     @endif
                                 </div>
-
-
 
                                 <!-- 11. Condition -->
                                 <div>
@@ -752,15 +876,249 @@
         });
     </script>
 
-    {{-- End User script --}}
-    <script>
-        function removeHiddenEndUser() {
-            var hiddenInput = document.getElementById('hidden_end_user_id');
-            if (hiddenInput) {
-                hiddenInput.parentNode.removeChild(hiddenInput);
-            }
+<!-- SCRIPT FOR EDIT.BLADE.PHP -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Location Dropdown
+        const locationButton = document.getElementById('location-dropdown-button');
+        const locationMenu = document.getElementById('location-dropdown-menu');
+        const locationOptions = document.querySelectorAll('.location-option');
+        const locationSearch = document.getElementById('location-search');
+        const locationSelect = document.getElementById('location_id');
+        const selectedLocationText = document.getElementById('selected-location-text');
+        const locationNoResults = document.getElementById('location-no-results');
+
+        // User Dropdown
+        const userButton = document.getElementById('user-dropdown-button');
+        const userMenu = document.getElementById('user-dropdown-menu');
+        const userOptions = document.querySelectorAll('.user-option');
+        const userSearch = document.getElementById('user-search');
+        const userSelect = document.getElementById('user_id');
+        const selectedUserText = document.getElementById('selected-user-text');
+        const userNoResults = document.getElementById('user-no-results');
+
+        // =============== LOCATION DROPDOWN FUNCTIONS ===============
+
+        // Toggle location dropdown
+        if (locationButton) {
+            locationButton.addEventListener('click', function() {
+                locationMenu.classList.toggle('hidden');
+                if (!locationMenu.classList.contains('hidden')) {
+                    locationSearch.focus();
+                    // Close user dropdown if open
+                    if (userMenu) userMenu.classList.add('hidden');
+                }
+            });
         }
-    </script>
+
+        // Close location dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (locationMenu && !locationMenu.classList.contains('hidden') &&
+                locationButton && !locationButton.contains(event.target) &&
+                !locationMenu.contains(event.target)) {
+                locationMenu.classList.add('hidden');
+            }
+        });
+
+        // Handle location option selection
+        if (locationOptions) {
+            locationOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent.trim();
+
+                    // Update hidden select
+                    locationSelect.value = value;
+
+                    // Update button text
+                    selectedLocationText.textContent = text;
+
+                    // Close dropdown
+                    locationMenu.classList.add('hidden');
+
+                    // Trigger change event on select
+                    const event = new Event('change', { bubbles: true });
+                    locationSelect.dispatchEvent(event);
+                });
+            });
+        }
+
+        // Filter location options on search
+        if (locationSearch) {
+            locationSearch.addEventListener('input', function() {
+                const searchValue = this.value.toLowerCase().trim();
+                let hasVisibleOptions = false;
+
+                locationOptions.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    const parent = option.parentElement;
+
+                    if (text.includes(searchValue)) {
+                        parent.classList.remove('hidden');
+                        hasVisibleOptions = true;
+                    } else {
+                        parent.classList.add('hidden');
+                    }
+                });
+
+                // Show/hide no results message
+                if (locationNoResults) {
+                    if (hasVisibleOptions) {
+                        locationNoResults.classList.add('hidden');
+                    } else {
+                        locationNoResults.classList.remove('hidden');
+                    }
+                }
+            });
+        }
+
+        // =============== USER DROPDOWN FUNCTIONS ===============
+
+        // Toggle user dropdown
+        if (userButton) {
+            userButton.addEventListener('click', function() {
+                userMenu.classList.toggle('hidden');
+                if (!userMenu.classList.contains('hidden')) {
+                    userSearch.focus();
+                    userSearch.value = ''; // Clear search on open
+
+                    // Reset visibility of all user options
+                    const userItems = document.querySelectorAll('#user-options li:not(.uppercase)');
+                    userItems.forEach(item => {
+                        item.classList.remove('hidden');
+                    });
+
+                    // Show all category headers
+                    const sectionHeaders = document.querySelectorAll('#user-options li.uppercase');
+                    sectionHeaders.forEach(header => header.classList.remove('hidden'));
+
+                    // Hide no results message
+                    if (userNoResults) userNoResults.classList.add('hidden');
+
+                    // Close location dropdown if open
+                    if (locationMenu) locationMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // Close user dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (userMenu && !userMenu.classList.contains('hidden') &&
+                userButton && !userButton.contains(event.target) &&
+                !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // Handle user option selection
+        if (userOptions) {
+            userOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isInactive = this.getAttribute('data-is-inactive') === '1';
+                    const isExcluded = this.getAttribute('data-is-excluded') === '1';
+
+                    // Skip action for inactive or excluded users
+                    if (isInactive || isExcluded) {
+                        return;
+                    }
+
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent.trim();
+
+                    // Update hidden select
+                    userSelect.value = value;
+
+                    // Update button text
+                    selectedUserText.textContent = text;
+
+                    // Remove hidden input for active/non-excluded users
+                    removeHiddenEndUser();
+
+                    // Close dropdown
+                    userMenu.classList.add('hidden');
+
+                    // Trigger change event on select
+                    const event = new Event('change', { bubbles: true });
+                    userSelect.dispatchEvent(event);
+                });
+            });
+        }
+
+        // Filter user options on search
+        if (userSearch) {
+            userSearch.addEventListener('input', function() {
+                const searchValue = this.value.toLowerCase().trim();
+                let hasVisibleOptions = false;
+                let visibleActiveUsers = 0;
+                let visibleInactiveOrExcludedUsers = 0;
+
+                // Get all user list items (skip the section headers)
+                const userItems = document.querySelectorAll('#user-options li:not(.uppercase)');
+
+                // Check each option
+                userItems.forEach(item => {
+                    const option = item.querySelector('a');
+                    if (!option) return;
+
+                    const text = option.textContent.toLowerCase();
+                    const isInactive = option.getAttribute('data-is-inactive') === '1';
+                    const isExcluded = option.getAttribute('data-is-excluded') === '1';
+
+                    if (text.includes(searchValue)) {
+                        item.classList.remove('hidden');
+                        hasVisibleOptions = true;
+
+                        // Count visible users in each section
+                        if (isInactive || isExcluded) {
+                            visibleInactiveOrExcludedUsers++;
+                        } else {
+                            visibleActiveUsers++;
+                        }
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+
+                // Hide/show section headers based on search results
+                const sectionHeaders = document.querySelectorAll('#user-options li.uppercase');
+                if (sectionHeaders.length >= 2) {
+                    // Active users header
+                    if (visibleActiveUsers === 0) {
+                        sectionHeaders[0].classList.add('hidden');
+                    } else {
+                        sectionHeaders[0].classList.remove('hidden');
+                    }
+
+                    // Inactive/Excluded users header
+                    if (visibleInactiveOrExcludedUsers === 0) {
+                        sectionHeaders[1].classList.add('hidden');
+                    } else {
+                        sectionHeaders[1].classList.remove('hidden');
+                    }
+                }
+
+                // Show/hide no results message
+                if (userNoResults) {
+                    if (hasVisibleOptions) {
+                        userNoResults.classList.add('hidden');
+                    } else {
+                        userNoResults.classList.remove('hidden');
+                    }
+                }
+            });
+        }
+    });
+
+    // Function to remove hidden user input
+    function removeHiddenEndUser() {
+        const hiddenInput = document.getElementById('hidden_user_id');
+        if (hiddenInput) {
+            hiddenInput.remove();
+        }
+    }
+</script>
 
 
 
