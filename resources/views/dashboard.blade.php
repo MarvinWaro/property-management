@@ -167,7 +167,7 @@
             <!-- New Section: List of Registered Users -->
             <div class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
                 <!-- Table Header with Search and Add Button -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div id="users-table" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 dark:text-white inline-flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20"
