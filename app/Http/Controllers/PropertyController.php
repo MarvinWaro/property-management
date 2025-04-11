@@ -297,7 +297,8 @@ class PropertyController extends Controller
         }
         $property = Property::findOrFail($decoded[0]);
         $locations = Location::where('excluded', 0)->get();
-        // Fetch users from the users table
+
+        // Fetch all users from the users table.
         $users = \App\Models\User::all();
 
         $activeUsers = $users->filter(function ($user) {
@@ -307,8 +308,9 @@ class PropertyController extends Controller
             return $user->excluded;
         });
 
-        return view('manage-property.edit', compact('property', 'locations', 'activeUsers', 'excludedUsers'));
+        return view('manage-property.edit', compact('property', 'locations', 'users', 'activeUsers', 'excludedUsers'));
     }
+
 
     public function update(Request $request, Property $property)
     {
