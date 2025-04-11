@@ -472,17 +472,18 @@
 
                                 <!-- 10. Users -->
                                 @php
-                                    // Filter out admin users for active and inactive users
+                                    // Filter active and inactive users based on status and exclude admin users
                                     $activeUsers = $users->filter(function ($user) {
-                                        return !$user->excluded && $user->role !== 'admin';
+                                        return $user->status && $user->role !== 'admin';
                                     });
-                                    $excludedUsers = $users->filter(function ($user) {
-                                        return $user->excluded && $user->role !== 'admin';
+                                    $inactiveUsers = $users->filter(function ($user) {
+                                        return !$user->status && $user->role !== 'admin';
                                     });
 
                                     // Define selected user for the dropdown display
                                     $selectedUser = old('user_id');
                                 @endphp
+
                                 <div>
                                     <label for="user_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         User <span class="text-red-500">*</span>
@@ -504,20 +505,17 @@
                                                 -- Select User --
                                             </option>
 
-                                            {{-- Display active users first --}}
+                                            {{-- Active users options --}}
                                             @foreach ($activeUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                    {{ $selectedUser == $user->id ? 'selected' : '' }}>
+                                                <option value="{{ $user->id }}" {{ $selectedUser == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }} ({{ optional($user->department)->name }})
                                                 </option>
                                             @endforeach
 
-                                            {{-- Display excluded users last (disabled) --}}
-                                            @foreach ($excludedUsers as $user)
-                                                <option value="{{ $user->id }}"
-                                                    {{ $selectedUser == $user->id ? 'selected' : '' }} disabled>
-                                                    {{ $user->name }} ({{ optional($user->department)->name }})
-                                                    (Excluded)
+                                            {{-- Inactive users options (disabled) --}}
+                                            @foreach ($inactiveUsers as $user)
+                                                <option value="{{ $user->id }}" {{ $selectedUser == $user->id ? 'selected' : '' }} disabled>
+                                                    {{ $user->name }} ({{ optional($user->department)->name }}) (Inactive)
                                                 </option>
                                             @endforeach
                                         </select>
@@ -533,13 +531,17 @@
                                                 @if($selectedUser && $users->where('id', $selectedUser)->first())
                                                     {{ $users->where('id', $selectedUser)->first()->name }}
                                                     ({{ optional($users->where('id', $selectedUser)->first()->department)->name }})
-                                                    @if(optional($users->where('id', $selectedUser)->first())->excluded) (Excluded) @endif
+                                                    @if(!$users->where('id', $selectedUser)->first()->status)
+                                                        (Inactive)
+                                                    @endif
                                                 @else
                                                     -- Select User --
                                                 @endif
                                             </span>
-                                            <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7"></path>
                                             </svg>
                                         </button>
 
@@ -550,26 +552,31 @@
                                             <div class="p-2">
                                                 <div class="relative">
                                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                                         </svg>
                                                     </div>
                                                     <input type="text" id="user-search"
                                                         class="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-gray-50
-                                                            focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500
-                                                            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                                focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500
+                                                                dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                         placeholder="Search user...">
                                                 </div>
                                             </div>
 
                                             <!-- Dropdown items container with max height and scrollbar -->
                                             <ul id="user-options" class="py-1 text-sm text-gray-700 dark:text-gray-200 max-h-60 overflow-y-auto">
-                                                <!-- Active Users -->
+                                                <!-- Active Users Header -->
                                                 @if($activeUsers->count() > 0)
-                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">Active Users</li>
+                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">
+                                                        Active Users
+                                                    </li>
                                                     @foreach ($activeUsers as $user)
                                                         <li>
-                                                            <a href="#" data-value="{{ $user->id }}" data-is-excluded="0"
+                                                            <a href="#" data-value="{{ $user->id }}" data-is-inactive="0"
                                                             class="user-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
                                                                 {{ $user->name }} ({{ optional($user->department)->name }})
@@ -578,15 +585,17 @@
                                                     @endforeach
                                                 @endif
 
-                                                <!-- Excluded Users -->
-                                                @if($excludedUsers->count() > 0)
-                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">Excluded Users</li>
-                                                    @foreach ($excludedUsers as $user)
+                                                <!-- Inactive Users Header -->
+                                                @if($inactiveUsers->count() > 0)
+                                                    <li class="px-3 py-2 uppercase text-xs font-semibold bg-gray-100 dark:bg-gray-600">
+                                                        Inactive Users
+                                                    </li>
+                                                    @foreach ($inactiveUsers as $user)
                                                         <li>
-                                                            <a href="#" data-value="{{ $user->id }}" data-is-excluded="1"
-                                                            class="user-option-disabled block px-4 py-2 text-gray-400 cursor-not-allowed
+                                                            <a href="#" data-value="{{ $user->id }}" data-is-inactive="1"
+                                                            class="user-option user-option-disabled block px-4 py-2 text-gray-400 cursor-not-allowed
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
-                                                                {{ $user->name }} ({{ optional($user->department)->name }}) (Excluded)
+                                                                {{ $user->name }} ({{ optional($user->department)->name }}) (Inactive)
                                                             </a>
                                                         </li>
                                                     @endforeach
@@ -599,14 +608,15 @@
                                             </p>
                                         </div>
                                     </div>
+
+                                    {{-- If the selected user is inactive, add a hidden input to submit its value --}}
+                                    @if ($selectedUser && ! optional($users->where('id', $selectedUser)->first())->status)
+                                        <input type="hidden" id="hidden_user_id" name="user_id" value="{{ $selectedUser }}">
+                                    @endif
+
                                     @error('user_id')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
-
-                                    {{-- If the selected user is excluded, add a hidden input to submit its value --}}
-                                    @if ($selectedUser && optional($users->where('id', $selectedUser)->first())->excluded)
-                                        <input type="hidden" id="hidden_user_id" name="user_id" value="{{ $selectedUser }}">
-                                    @endif
                                 </div>
 
                                 <!-- 11. Condition -->
