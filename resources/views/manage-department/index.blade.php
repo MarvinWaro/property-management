@@ -91,14 +91,11 @@
 
                     <!-- Table Description Caption -->
                     <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Property Details</h3>
+                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Departments</h3>
                         <p>
-                            This section provides a comprehensive overview of institutional assets
-                            managed by CHED. It includes essential information such as property numbers,
-                            detailed descriptions, physical condition, and the assigned personnel.
-                            Designed to ensure accountability, proper utilization, and seamless
-                            asset handover, this system supports CHED's commitment to operational
-                            excellence and transparency.
+                            This section lists CHED's departments responsible for policy formulation,
+                            program implementation, quality assurance, and institutional management,
+                                supporting effective governance and higher education excellence.
                         </p>
                     </div>
 

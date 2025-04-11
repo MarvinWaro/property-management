@@ -8,24 +8,82 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Floating Cards Section -->
+            <div class="relative w-full mb-8 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-900 rounded-xl shadow-xl">
+                <!-- Wave SVG Decorations - Top -->
+                <div class="absolute top-0 left-0 right-0 h-20 overflow-hidden">
+                    <svg class="absolute bottom-0 w-full h-20 text-white/10 fill-current" viewBox="0 0 1440 120" preserveAspectRatio="none">
+                        <path d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,85.3C672,75,768,85,864,96C960,107,1056,117,1152,112C1248,107,1344,85,1392,74.7L1440,64L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
+                    </svg>
+                </div>
+
+                <!-- Wave SVG Decorations - Bottom -->
+                <div class="absolute bottom-0 left-0 right-0 h-20 overflow-hidden">
+                    <svg class="absolute bottom-0 w-full h-20 text-white/10 fill-current transform rotate-180" viewBox="0 0 1440 120" preserveAspectRatio="none">
+                        <path d="M0,64L60,69.3C120,75,240,85,360,90.7C480,96,600,96,720,96C840,96,960,96,1080,85.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+                    </svg>
+                </div>
+
+                <!-- Floating Decorative Elements - Responsive sizes -->
+                <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                    <!-- Box/Package Icon - Responsive sizing and positioning -->
+                    <div class="absolute top-1/4 right-5 sm:right-8 lg:right-12 w-10 h-10 sm:w-16 sm:h-16 text-white/20 dark:text-white/10 transform transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375z" />
+                            <path fill-rule="evenodd" d="M3.087 9l.54 9.176A3 3 0 006.62 21h10.757a3 3 0 002.995-2.824L20.913 9H3.087zM12 10.5a.75.75 0 01.75.75v4.94l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72v-4.94a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+
+                    <!-- Barcode Icon - Responsive sizing and positioning -->
+                    <div class="absolute bottom-1/4 left-4 sm:left-8 lg:left-12 w-12 h-12 sm:w-16 sm:h-16 text-white/15 dark:text-white/5 transform transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+                            <path d="M4 5h2v14H4V5zm4 0h1v14H8V5zm2 0h3v14h-3V5zm4 0h1v14h-1V5zm3 0h2v14h-2V5zm3 0h1v14h-1V5z"/>
+                        </svg>
+                    </div>
+
+                    <!-- Clipboard/Inventory Icon - Only visible on larger screens -->
+                    <div class="hidden sm:block absolute top-1/2 right-1/3 transform -translate-y-1/2 w-10 h-10 lg:w-14 lg:h-14 text-white/10 dark:text-white/5 transition-all duration-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+                            <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V9.375zM6 12a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V12zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V15zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 18a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V18zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+
+                    <!-- Additional decorative shapes that hide/show based on screen size -->
+                    <div class="hidden md:block absolute bottom-1/3 right-1/4 w-20 h-20 bg-blue-300 rounded-full opacity-10 blur-xl"></div>
+                    <div class="absolute top-1/3 left-1/3 w-12 h-12 sm:w-24 sm:h-24 bg-blue-200 rounded-full opacity-10 blur-2xl"></div>
+                </div>
+
+                <!-- Admin Welcome Message -->
+                <div class="relative text-center z-10">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">Welcome, Admin</h1>
+                    <p class="text-blue-100 max-w-2xl mx-auto">Your inventory management dashboard is ready. Track stock levels, monitor transactions, and manage your inventory with ease.</p>
+                </div>
+            </div>
+
+            <!-- Floating Cards Section (Separate) - Unchanged -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
 
                 <!-- Employees Card (Purple) - Staff Only Count -->
                 <div
-                    class="p-3 sm:p-4 lg:p-6 bg-white shadow-xl rounded-2xl dark:bg-gray-800 border-l-4 border-purple-500
-                    transition-all duration-300 hover:shadow-2xl hover:translate-y-1 hover:border-l-6 cursor-pointer group">
-                    <div class="flex justify-between">
+                    class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-purple-300 dark:bg-purple-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-purple-400 dark:bg-purple-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                                 Employees
                             </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light dark:text-white">
+                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
                                 {{ App\Models\User::where('role', 'staff')->count() }}
                             </dd>
                             @if ($lastUpdated)
                                 <dd
-                                    class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-green-500 dark:text-green-400">
+                                    class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                                         <circle cx="12" cy="12" r="10"/>
                                         <polyline points="12 6 12 12 16 14"/>
                                     </svg>
@@ -34,9 +92,9 @@
                             @endif
                         </dl>
                         <div
-                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-purple-100 dark:bg-purple-800 h-fit
-                            transition-all duration-300 group-hover:bg-purple-200 dark:group-hover:bg-purple-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-300">
+                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
+                            transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white dark:group-hover:bg-purple-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-400 group-hover:text-white">
                                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                 <circle cx="9" cy="7" r="4"/>
                                 <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
@@ -48,18 +106,23 @@
 
                 <!-- Requests per Month (Blue) -->
                 <div
-                    class="p-3 sm:p-4 lg:p-6 bg-white shadow-xl rounded-2xl dark:bg-gray-800 border-l-4 border-blue-500
-                    transition-all duration-300 hover:shadow-2xl hover:translate-y-1 hover:border-l-6 cursor-pointer group">
-                    <div class="flex justify-between">
+                    class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-blue-300 dark:bg-blue-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-blue-400 dark:bg-blue-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                                 Requests per Month
                             </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light dark:text-white">
+                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
                                 1,205
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">
                                 <span>3% decrease</span>
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -69,9 +132,9 @@
                             </dd>
                         </dl>
                         <div
-                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-blue-100 dark:bg-blue-800 h-fit
-                            transition-all duration-300 group-hover:bg-blue-200 dark:group-hover:bg-blue-700">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500 dark:text-blue-300"
+                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
+                            transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white dark:group-hover:bg-blue-600">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500 dark:text-blue-400 group-hover:text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 4.5h17.25c.621 0 1.125.504
@@ -87,18 +150,23 @@
 
                 <!-- Total Transaction Cost (Teal) -->
                 <div
-                    class="p-3 sm:p-4 lg:p-6 bg-white shadow-xl rounded-2xl dark:bg-gray-800 border-l-4 border-teal-500
-                    transition-all duration-300 hover:shadow-2xl hover:translate-y-1 hover:border-l-6 cursor-pointer group">
-                    <div class="flex justify-between">
+                    class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-100 to-teal-200 dark:from-teal-900 dark:to-teal-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-teal-300 dark:bg-teal-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-teal-400 dark:bg-teal-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                                 Total Transaction Cost
                             </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light dark:text-white">
+                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
                                 9,789
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-500 dark:text-green-400">
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
                                 <span>2 new</span>
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -108,9 +176,9 @@
                             </dd>
                         </dl>
                         <div
-                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-teal-100 dark:bg-teal-800 h-fit
-                            transition-all duration-300 group-hover:bg-teal-200 dark:group-hover:bg-teal-700">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-teal-500 dark:text-teal-300"
+                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
+                            transition-all duration-300 group-hover:bg-teal-500 group-hover:text-white dark:group-hover:bg-teal-600">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-teal-500 dark:text-teal-400 group-hover:text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 12c0-1.657-1.343-3-3-3H6c-1.657
@@ -126,18 +194,23 @@
 
                 <!-- Requests per Month (Orange) -->
                 <div
-                    class="p-3 sm:p-4 lg:p-6 bg-white shadow-xl rounded-2xl dark:bg-gray-800 border-l-4 border-orange-500
-                    transition-all duration-300 hover:shadow-2xl hover:translate-y-1 hover:border-l-6 cursor-pointer group">
-                    <div class="flex justify-between">
+                    class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-orange-300 dark:bg-orange-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-orange-400 dark:bg-orange-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                                 Requests per Month
                             </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light dark:text-white">
+                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
                                 1,205
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">
                                 <span>3% decrease</span>
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -147,9 +220,9 @@
                             </dd>
                         </dl>
                         <div
-                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-orange-100 dark:bg-orange-800 h-fit
-                            transition-all duration-300 group-hover:bg-orange-200 dark:group-hover:bg-orange-700">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-orange-500 dark:text-orange-300"
+                            class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
+                            transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white dark:group-hover:bg-orange-600">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-orange-500 dark:text-orange-400 group-hover:text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 4.5h17.25c.621 0 1.125.504
