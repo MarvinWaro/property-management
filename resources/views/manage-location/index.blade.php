@@ -104,14 +104,11 @@
 
                     <!-- Table Description Caption -->
                     <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Property Details</h3>
+                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Property Locations</h3>
                         <p>
-                            This section provides a comprehensive overview of institutional assets
-                            managed by CHED. It includes essential information such as property numbers,
-                            detailed descriptions, physical condition, and the assigned personnel.
-                            Designed to ensure accountability, proper utilization, and seamless
-                            asset handover, this system supports CHED's commitment to operational
-                            excellence and transparency.
+                            This section provides details of locations where CHED properties are situated,
+                            enabling efficient tracking, accountability, and streamlined management
+                            of institutional assets across various operational sites.
                         </p>
                     </div>
 
