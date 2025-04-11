@@ -530,7 +530,7 @@
                                             <span id="selected-user-text">
                                                 @if($selectedUser && $users->where('id', $selectedUser)->first())
                                                     {{ $users->where('id', $selectedUser)->first()->name }}
-                                                    ({{ optional($users->where('id', $selectedUser)->first()->department)->name }})
+                                                    <span class="text-blue-500 italic">({{ optional($users->where('id', $selectedUser)->first()->department)->name }})</span>
                                                     @if(!$users->where('id', $selectedUser)->first()->status)
                                                         (Inactive)
                                                     @endif
@@ -579,7 +579,7 @@
                                                             <a href="#" data-value="{{ $user->id }}" data-is-inactive="0"
                                                             class="user-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
-                                                                {{ $user->name }} ({{ optional($user->department)->name }})
+                                                                {{ $user->name }} <span class="text-blue-500 italic">({{ optional($user->department)->name }})</span>
                                                             </a>
                                                         </li>
                                                     @endforeach
@@ -595,7 +595,7 @@
                                                             <a href="#" data-value="{{ $user->id }}" data-is-inactive="1"
                                                             class="user-option user-option-disabled block px-4 py-2 text-gray-400 cursor-not-allowed
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
-                                                                {{ $user->name }} ({{ optional($user->department)->name }}) (Inactive)
+                                                                {{ $user->name }} <span class="text-blue-500 italic">({{ optional($user->department)->name }})</span> (Inactive)
                                                             </a>
                                                         </li>
                                                     @endforeach

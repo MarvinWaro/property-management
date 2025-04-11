@@ -126,16 +126,16 @@
                                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $property->id }}
                                                 </th>
-                                                <td class="px-6 py-4 font-medium">
+                                                <td class="px-6 py-4 font-medium dark:text-gray-200">
                                                     {{ $property->property_number }}
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4 dark:text-gray-200">
                                                     {{ $property->item_name }}
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4 dark:text-gray-200">
                                                     {{ $property->fund ?? 'TBD' }}
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4 dark:text-gray-200">
                                                     {{ $property->user->name ?? 'TBD' }}
                                                 </td>
                                                 <td class="px-6 py-4">

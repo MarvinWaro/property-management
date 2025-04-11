@@ -27,8 +27,8 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('property.update', $property->id) }}" method="POST"
-                            onsubmit="showLoader()" enctype="multipart/form-data">
+                        <form action="{{ route('property.update', $property->id) }}" method="POST" onsubmit="return confirmUpdate()" enctype="multipart/form-data">
+
                             @csrf
                             @method('PUT')
 
@@ -545,7 +545,7 @@
                                             <span id="selected-user-text">
                                                 @if($selectedUser && $allUsers->where('id', $selectedUser)->first())
                                                     {{ $allUsers->where('id', $selectedUser)->first()->name }}
-                                                    ({{ optional($allUsers->where('id', $selectedUser)->first()->department)->name }})
+                                                    <span class="text-blue-500 italic">({{ optional($allUsers->where('id', $selectedUser)->first()->department)->name }})</span>
                                                     @if(!$allUsers->where('id', $selectedUser)->first()->status)
                                                         (Inactive)
                                                     @endif
@@ -594,7 +594,7 @@
                                                             <a href="#" data-value="{{ $user->id }}" data-is-inactive="0"
                                                             class="user-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
-                                                                {{ $user->name }} ({{ optional($user->department)->name }})
+                                                                {{ $user->name }} <span class="text-blue-500 italic">({{ optional($user->department)->name }})</span>
                                                             </a>
                                                         </li>
                                                     @endforeach
@@ -610,7 +610,7 @@
                                                             <a href="#" data-value="{{ $user->id }}" data-is-inactive="1"
                                                             class="user-option block px-4 py-2 text-gray-400 cursor-not-allowed
                                                                     {{ $selectedUser == $user->id ? 'bg-gray-100 dark:bg-gray-600' : '' }}">
-                                                                {{ $user->name }} ({{ optional($user->department)->name }}) (Inactive)
+                                                                {{ $user->name }} <span class="text-blue-500 italic">({{ optional($user->department)->name }})</span> (Inactive)
                                                             </a>
                                                         </li>
                                                     @endforeach
@@ -1125,6 +1125,59 @@
                 hiddenInput.remove();
             }
         }
+    </script>
+
+    <script>
+        // Function to show the loader/spinner.
+        function showLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.classList.remove('hidden');
+            } else {
+                console.error("Loader element with ID 'loader' not found.");
+            }
+        }
+
+        // Function to hide the loader/spinner.
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Confirmation function used in the form submission.
+        function confirmUpdate() {
+            const message = "Are you sure you want to update this property? This might cause the QR code to regenerate.";
+            if (confirm(message)) {
+                // Only show the spinner if confirmed.
+                showLoader();
+                return true; // Allow submission.
+            } else {
+                // If cancelled, ensure that the loader is hidden.
+                hideLoader();
+                return false; // Block submission.
+            }
+        }
+
+        // Option 1: Using the form's onsubmit attribute.
+        // Ensure your form tag includes: onsubmit="return confirmUpdate()"
+        // Example:
+        // <form action="{{ route('property.update', $property->id) }}" method="POST" onsubmit="return confirmUpdate()" enctype="multipart/form-data">
+
+        // Option 2: If you prefer to attach the event on DOMContentLoaded:
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector("form");
+            if (form) {
+                form.addEventListener('submit', function(event){
+                    // Call the confirmation function and if it returns false, prevent submission.
+                    if (!confirmUpdate()) {
+                        event.preventDefault();
+                        // Optionally, you could use your own logic here to reset form state if needed.
+                    }
+                });
+            }
+        });
     </script>
 
 
