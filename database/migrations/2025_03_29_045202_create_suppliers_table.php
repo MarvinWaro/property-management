@@ -12,6 +12,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable()->unique();
             $table->string('contact_number');
+            // Add the new columns below
+            $table->string('address')->nullable();
+            $table->string('contact_person')->nullable();
             $table->timestamps();
         });
     }

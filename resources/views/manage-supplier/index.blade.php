@@ -54,7 +54,7 @@
                             </button>
                         </form>
 
-                        <!-- Changed to flat icon button for adding supplier -->
+                        <!-- Flat Icon Button for Adding Supplier -->
                         <button data-modal-target="createSupplierModal" data-modal-toggle="createSupplierModal"
                             type="button"
                             class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ml-2 inline-flex items-center">
@@ -90,7 +90,7 @@
                         </p>
                     </div>
 
-                    {{-- sUPPLIER tABLE Enhanced table --}}
+                    {{-- SUPPLIER TABLE --}}
                     <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
                             <div class="overflow-y-auto max-h-[500px]">
@@ -100,6 +100,7 @@
                                         <tr>
                                             <th scope="col" class="px-6 py-3">ID</th>
                                             <th scope="col" class="px-6 py-3">Name / Email</th>
+                                            <th scope="col" class="px-6 py-3">Contact Person</th>
                                             <th scope="col" class="px-6 py-3">Contact No</th>
                                             <th scope="col" class="px-6 py-3 text-center">Actions</th>
                                         </tr>
@@ -118,6 +119,8 @@
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $supplier->email ?? 'No email provided' }}</div>
                                                 </td>
+                                                <td class="px-6 py-4 text-gray-900 dark:text-white">
+                                                    {{ $supplier->contact_person }}</td>
                                                 <td class="px-6 py-4 text-gray-900 dark:text-white">
                                                     {{ $supplier->contact_number }}</td>
                                                 <td class="px-2 py-4">
@@ -165,26 +168,20 @@
                                                                 <path d="M3 6h18" />
                                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                <line x1="10" x2="10" y1="11"
-                                                                    y2="17" />
-                                                                <line x1="14" x2="14" y1="11"
-                                                                    y2="17" />
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
                                                             </svg>
                                                         </button>
                                                     </div>
 
-                                                    <!-- View Modal (keep as is) -->
-                                                    <div id="viewSupplierModal{{ $supplier->id }}" tabindex="-1"
-                                                        aria-hidden="true"
+                                                    <!-- View Modal (updated with Contact Person) -->
+                                                    <div id="viewSupplierModal{{ $supplier->id }}" tabindex="-1" aria-hidden="true"
                                                         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                        <!-- Modal content (unchanged) -->
+                                                        <!-- Modal content -->
                                                         <div class="relative p-4 w-full max-w-md max-h-full">
-                                                            <!-- Modal content -->
-                                                            <div
-                                                                class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                                                                 <!-- Modal header -->
-                                                                <div
-                                                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-blue-500 to-blue-700">
+                                                                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-blue-500 to-blue-700">
                                                                     <h3 class="text-lg font-semibold text-white">
                                                                         Supplier Details
                                                                     </h3>
@@ -192,138 +189,109 @@
                                                                         class="text-white bg-transparent hover:bg-blue-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600"
                                                                         data-modal-hide="viewSupplierModal{{ $supplier->id }}">
                                                                         <svg class="w-3 h-3" aria-hidden="true"
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            fill="none" viewBox="0 0 14 14">
-                                                                            <path stroke="currentColor"
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                                                stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                                                                         </svg>
                                                                         <span class="sr-only">Close modal</span>
                                                                     </button>
                                                                 </div>
                                                                 <!-- Modal body -->
                                                                 <div class="p-4 md:p-5 space-y-4">
+                                                                    <!-- Supplier Name -->
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                width="20" height="20"
-                                                                                viewBox="0 0 24 24" fill="none"
-                                                                                stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                class="text-blue-500 mr-2">
-                                                                                <path
-                                                                                    d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2">
-                                                                                </path>
-                                                                                <circle cx="12" cy="7"
-                                                                                    r="4">
-                                                                                </circle>
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                                                <circle cx="12" cy="7" r="4"></circle>
                                                                             </svg>
-                                                                            <p
-                                                                                class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                                                Name</p>
+                                                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
                                                                         </div>
-                                                                        <p
-                                                                            class="text-base font-semibold text-gray-900 dark:text-white">
-                                                                            {{ $supplier->name }}</p>
+                                                                        <p class="text-base font-semibold text-gray-900 dark:text-white">
+                                                                            {{ $supplier->name }}
+                                                                        </p>
                                                                     </div>
-
+                                                                    <!-- Supplier Email -->
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                width="20" height="20"
-                                                                                viewBox="0 0 24 24" fill="none"
-                                                                                stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                class="text-blue-500 mr-2">
-                                                                                <rect width="20" height="16"
-                                                                                    x="2" y="4" rx="2"></rect>
-                                                                                <path
-                                                                                    d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7">
-                                                                                </path>
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                                                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                                                                             </svg>
-                                                                            <p
-                                                                                class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                                                Email</p>
+                                                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
                                                                         </div>
-                                                                        <p
-                                                                            class="text-base font-semibold text-gray-900 dark:text-white">
+                                                                        <p class="text-base font-semibold text-gray-900 dark:text-white">
                                                                             {{ $supplier->email ?? 'Not provided' }}
                                                                         </p>
                                                                     </div>
-
+                                                                    <!-- New: Supplier Contact Person -->
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                width="20" height="20"
-                                                                                viewBox="0 0 24 24" fill="none"
-                                                                                stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                class="text-blue-500 mr-2">
-                                                                                <path
-                                                                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                                                                                </path>
+                                                                            <!-- A generic user icon for contact person -->
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                <path d="M16 21v-2a4 4 0 0 0-4-4H12a4 4 0 0 0-4 4v2"></path>
+                                                                                <circle cx="12" cy="7" r="4"></circle>
                                                                             </svg>
-                                                                            <p
-                                                                                class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                                                Contact Number</p>
+                                                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Person</p>
                                                                         </div>
-                                                                        <p
-                                                                            class="text-base font-semibold text-gray-900 dark:text-white">
-                                                                            {{ $supplier->contact_number }}</p>
+                                                                        <p class="text-base font-semibold text-gray-900 dark:text-white">
+                                                                            {{ $supplier->contact_person ?? 'Not provided' }}
+                                                                        </p>
                                                                     </div>
-
+                                                                    <!-- Supplier Contact Number -->
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                width="20" height="20"
-                                                                                viewBox="0 0 24 24" fill="none"
-                                                                                stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                class="text-blue-500 mr-2">
-                                                                                <circle cx="12" cy="12"
-                                                                                    r="10">
-                                                                                </circle>
-                                                                                <polyline points="12 6 12 12 16 14">
-                                                                                </polyline>
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                                                             </svg>
-                                                                            <p
-                                                                                class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                                                Created On</p>
+                                                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Number</p>
                                                                         </div>
-                                                                        <p
-                                                                            class="text-base font-semibold text-gray-900 dark:text-white">
+                                                                        <p class="text-base font-semibold text-gray-900 dark:text-white">
+                                                                            {{ $supplier->contact_number }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <!-- Supplier Created On -->
+                                                                    <div class="space-y-2">
+                                                                        <div class="flex items-center">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                <circle cx="12" cy="12" r="10"></circle>
+                                                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                                                            </svg>
+                                                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Created On</p>
+                                                                        </div>
+                                                                        <p class="text-base font-semibold text-gray-900 dark:text-white">
                                                                             {{ $supplier->created_at->format('M d, Y') }}
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                                 <!-- Modal footer -->
-                                                                <div
-                                                                    class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                                                                    <button
-                                                                        data-modal-hide="viewSupplierModal{{ $supplier->id }}"
-                                                                        type="button"
-                                                                        class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Close</button>
+                                                                <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                                                    <button data-modal-hide="viewSupplierModal{{ $supplier->id }}" type="button"
+                                                                        class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                                        Close
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <!-- Edit Modal (keep as is) -->
+                                                    <!-- Edit Modal -->
                                                     <div id="editSupplierModal{{ $supplier->id }}" tabindex="-1"
                                                         aria-hidden="true"
                                                         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                        <!-- Modal content (unchanged) -->
                                                         <div class="relative p-4 w-full max-w-md max-h-full">
-                                                            <!-- Modal content -->
                                                             <div
                                                                 class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                                                                <!-- Modal header -->
                                                                 <div
                                                                     class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-yellow-400 to-yellow-600">
                                                                     <h3 class="text-lg font-semibold text-white">
@@ -344,7 +312,7 @@
                                                                         <span class="sr-only">Close modal</span>
                                                                     </button>
                                                                 </div>
-                                                                <!-- Modal body -->
+                                                                <!-- Edit Form -->
                                                                 <form
                                                                     action="{{ route('supplier.update', $supplier->id) }}"
                                                                     method="POST">
@@ -361,8 +329,7 @@
                                                                                 required>
                                                                         </div>
                                                                         <div>
-                                                                            <label
-                                                                                for="edit-email-{{ $supplier->id }}"
+                                                                            <label for="edit-email-{{ $supplier->id }}"
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
                                                                             <input type="email" name="email"
                                                                                 id="edit-email-{{ $supplier->id }}"
@@ -370,8 +337,7 @@
                                                                                 value="{{ $supplier->email }}">
                                                                         </div>
                                                                         <div>
-                                                                            <label
-                                                                                for="edit-contact-{{ $supplier->id }}"
+                                                                            <label for="edit-contact-{{ $supplier->id }}"
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact
                                                                                 Number</label>
                                                                             <input type="text" name="contact_no"
@@ -379,6 +345,26 @@
                                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                                                                 value="{{ $supplier->contact_number }}"
                                                                                 required>
+                                                                        </div>
+                                                                        <!-- New Field: Address -->
+                                                                        <div>
+                                                                            <label for="edit-address-{{ $supplier->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
+                                                                            <input type="text" name="address"
+                                                                                id="edit-address-{{ $supplier->id }}"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                value="{{ $supplier->address }}"
+                                                                                placeholder="Enter address">
+                                                                        </div>
+                                                                        <!-- New Field: Contact Person -->
+                                                                        <div>
+                                                                            <label for="edit-contact-person-{{ $supplier->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact Person</label>
+                                                                            <input type="text" name="contact_person"
+                                                                                id="edit-contact-person-{{ $supplier->id }}"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                value="{{ $supplier->contact_person }}"
+                                                                                placeholder="Enter contact person">
                                                                         </div>
                                                                     </div>
                                                                     <!-- Modal footer -->
@@ -400,10 +386,8 @@
                                                     <!-- Delete Modal (keep as is) -->
                                                     <div id="deleteSupplierModal{{ $supplier->id }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                                         <div class="relative p-4 w-full max-w-md max-h-full">
-                                                            <!-- Modal content -->
                                                             <div
                                                                 class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                                                                <!-- Modal header -->
                                                                 <div
                                                                     class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-red-500 to-red-700">
                                                                     <h3
@@ -443,8 +427,6 @@
                                                                         <span class="sr-only">Close modal</span>
                                                                     </button>
                                                                 </div>
-
-                                                                <!-- Modal body -->
                                                                 <div class="p-6">
                                                                     <div class="mb-5 text-center">
                                                                         <div
@@ -624,6 +606,22 @@
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                 placeholder="Enter contact number" required>
                         </div>
+                        <!-- New Field: Address -->
+                        <div>
+                            <label for="address"
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
+                            <input type="text" name="address" id="address"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                placeholder="Enter address">
+                        </div>
+                        <!-- New Field: Contact Person -->
+                        <div>
+                            <label for="contact_person"
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact Person</label>
+                            <input type="text" name="contact_person" id="contact_person"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                placeholder="Enter contact person">
+                        </div>
                     </div>
                     <!-- Modal footer -->
                     <div
@@ -666,5 +664,4 @@
             toggleClearButton();
         });
     </script>
-
 </x-app-layout>

@@ -18,15 +18,14 @@ class SupplierController extends Controller
         // Fetch suppliers from the database with optional search functionality
         $suppliers = Supplier::when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('contact_number', 'like', "%{$search}%");
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('contact_number', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(5);
 
         return view('manage-supplier.index', compact('suppliers'));
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -41,31 +40,33 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the form inputs
+        // Validate the form inputs with the new fields
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',                         // 'name' is required
-            'email' => 'nullable|email|max:255|unique:suppliers,email',  // 'email' is optional (nullable)
-            'contact_no' => 'required|string|max:15|unique:suppliers,contact_number', // 'contact_no' must be unique
+            'name'           => 'required|string|max:255',
+            'email'          => 'nullable|email|max:255|unique:suppliers,email',
+            'contact_no'     => 'required|string|max:15|unique:suppliers,contact_number',
+            'address'        => 'nullable|string|max:255',          // New field: address
+            'contact_person' => 'nullable|string|max:255',          // New field: contact person
         ]);
 
-        // Store the validated data into the database
+        // Create a new supplier with the validated data
         Supplier::create([
-            'name' => $validatedData['name'],              // Store supplier's name
-            'email' => $validatedData['email'],            // Store email (even if it's null)
-            'contact_number' => $validatedData['contact_no'], // Store contact number
+            'name'           => $validatedData['name'],
+            'email'          => $validatedData['email'],
+            'contact_number' => $validatedData['contact_no'],
+            'address'        => $validatedData['address'] ?? null,
+            'contact_person' => $validatedData['contact_person'] ?? null,
         ]);
 
-        // Redirect back to the index with a success message
         return redirect()->route('supplier.index')->with('success', 'Supplier added successfully.');
     }
-
 
     /**
      * Display the specified resource.
      */
     public function show(Supplier $supplier)
     {
-        //
+        // Optional: Return a view to show supplier details
     }
 
     /**
@@ -84,16 +85,22 @@ class SupplierController extends Controller
     {
         $supplier = Supplier::findOrFail($id);
 
+        // Validate the updated data including the new fields
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:suppliers,email,' . $supplier->id,
-            'contact_no' => 'required|string|max:15|unique:suppliers,contact_number,' . $supplier->id,
+            'name'           => 'required|string|max:255',
+            'email'          => 'nullable|email|max:255|unique:suppliers,email,' . $supplier->id,
+            'contact_no'     => 'required|string|max:15|unique:suppliers,contact_number,' . $supplier->id,
+            'address'        => 'nullable|string|max:255',          // New field: address
+            'contact_person' => 'nullable|string|max:255',          // New field: contact person
         ]);
 
+        // Update the supplier record
         $supplier->update([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
+            'name'           => $validatedData['name'],
+            'email'          => $validatedData['email'],
             'contact_number' => $validatedData['contact_no'],
+            'address'        => $validatedData['address'] ?? null,
+            'contact_person' => $validatedData['contact_person'] ?? null,
         ]);
 
         return redirect()->route('supplier.index')->with('success', 'Supplier updated successfully.');
@@ -102,15 +109,13 @@ class SupplierController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-
     public function destroy($id)
     {
         $supplier = Supplier::findOrFail($id);
         $supplier->delete();
 
-    return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully.');
+        return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully.');
     }
-
 }
 
 
