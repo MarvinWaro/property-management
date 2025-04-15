@@ -9,6 +9,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SupplyController;
 
 use App\Http\Controllers\StaffDashboardController;
 
@@ -36,7 +37,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // routes/web.php
 
         // Supplies
-        Route::get('/supplies', function () {return view('supplies.index');})->name('supplies.index');
+        Route::get('/supplies', [SupplyController::class, 'index'])->name('supplies.index');
+        Route::post('/supplies', [SupplyController::class, 'store'])->name('supplies.store');
+
+
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
