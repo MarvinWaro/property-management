@@ -4,72 +4,661 @@
             {{ __('Supplies') }}
         </h2>
     </x-slot>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <!-- Category Section - Now in its own card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="section-container p-7">
-                    <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-                        <div class="mb-4 flex items-center justify-between gap-4 md:mb-8">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Select by
-                                category</h2>
+                <div class="p-6">
+                    <div class="mx-auto">
+                        <div class="mb-4 flex items-center justify-between gap-4">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                                Select by category
+                            </h2>
                         </div>
 
                         <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                            <a href="#"
-                                class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-                                <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 15v5m-3 0h6M4 11h16M5 15h14a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1Z">
-                                    </path>
+                            @foreach ($categories as $category)
+                                <a href="#"
+                                    class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-3
+                                          hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700
+                                          transition-colors duration-200">
+                                    <span
+                                        class="text-sm font-medium text-gray-900 dark:text-white">{{ $category->name }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Supplies Section - Now in its own card -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="p-6">
+                    <!-- Button and Search Bar Container -->
+                    <div class="flex items-center justify-between mb-4 mt-2 space-x-2 w-full">
+                        <!-- Search Bar Container -->
+                        <form method="GET" action="{{ route('supplies.index') }}" class="w-full max-w-sm flex items-center space-x-2">
+                            <div class="relative flex-grow">
+                                <input type="text" name="search" id="search-input"
+                                    value="{{ request()->get('search') }}" oninput="toggleClearButton()"
+                                    placeholder="Search..."
+                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
+                                              focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                              dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                              dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+
+                                <!-- The 'X' Button (hidden by default) -->
+                                <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                        <line x1="18" x2="6" y1="6" y2="18" />
+                                        <line x1="6" x2="18" y1="6" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Separate Search Button -->
+                            <button type="submit"
+                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
+                                           hover:bg-blue-800 focus:ring-1 focus:outline-none
+                                           focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
+                                           dark:focus:ring-blue-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="size-5">
+                                    <path fill-rule="evenodd"
+                                        d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+                                        clip-rule="evenodd" />
                                 </svg>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">Computer &amp;
-                                    Technology</span>
-                            </a>
-                            <a href="#"
-                                class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-                                <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M16.872 9.687 20 6.56 17.44 4 4 17.44 6.56 20 16.873 9.687Zm0 0-2.56-2.56M6 7v2m0 0v2m0-2H4m2 0h2m7 7v2m0 0v2m0-2h-2m2 0h2M8 4h.01v.01H8V4Zm2 2h.01v.01H10V6Zm2-2h.01v.01H12V4Zm8 8h.01v.01H20V12Zm-2 2h.01v.01H18V14Zm2 2h.01v.01H20V16Z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">Furnitures</span>
-                            </a>
-                            <a href="#"
-                                class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-                                <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">Papers</span>
-                            </a>
-                            <a href="#"
-                                class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-                                <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">Office Supplies</span>
-                            </a>
+                            </button>
+                        </form>
+
+                        <!-- Updated Create New Item Button -->
+                        <button data-modal-target="createSupplyModal" data-modal-toggle="createSupplyModal" type="button"
+                            class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ml-2 inline-flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span class="hidden sm:inline-block">Create New Item</span>
+                        </button>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    @if (session()->has('success'))
+                        <div id="flashMessage"
+                            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+                            role="alert">
+                            <span class="font-medium">Success!</span> {{ session('success') }}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('flashMessage').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    @endif
+
+                    @if (session()->has('deleted'))
+                        <div id="flashMessage"
+                            class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                            role="alert">
+                            <span class="font-medium">Success!</span> {{ session('deleted') }}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('flashMessage').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    @endif
+
+                    @if (session()->has('error'))
+                        <div id="flashMessage"
+                            class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                            role="alert">
+                            <span class="font-medium">Error!</span> {{ session('error') }}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('flashMessage').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    @endif
+
+                    <!-- Table Description Caption -->
+                    <div
+                        class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Supplies</h3>
+                        <p>
+                            This section provides a comprehensive overview of CHED supplies,
+                            detailing current stock levels, item specifications, and
+                            inventory management information to support efficient
+                            procurement and resource allocation.
+                        </p>
+                    </div>
+
+                    <!-- Supply Table - Enhanced table -->
+                    <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="overflow-x-auto">
+                            <div class="overflow-y-auto max-h-[500px]">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">ID</th>
+                                            <th scope="col" class="px-6 py-3">Stock No</th>
+                                            <th scope="col" class="px-6 py-3">Item Name</th>
+                                            <th scope="col" class="px-6 py-3">Category</th>
+                                            <th scope="col" class="px-6 py-3">Unit</th>
+                                            <th scope="col" class="px-6 py-3">Reorder Point</th>
+                                            <th scope="col" class="px-6 py-3">Cost</th>
+                                            <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($supplies as $supply)
+                                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                <!-- Supply ID -->
+                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                    {{ $supply->supply_id }}
+                                                </td>
+                                                <!-- Stock No -->
+                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                    {{ $supply->stock_no }}
+                                                </td>
+                                                <!-- Item Name -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ $supply->item_name }}
+                                                </td>
+                                                <!-- Category -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ $supply->category->name ?? 'Uncategorized' }}
+                                                </td>
+                                                <!-- Unit -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ $supply->unit_of_measurement }}
+                                                </td>
+                                                <!-- Reorder Point -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ $supply->reorder_point }}
+                                                </td>
+                                                <!-- Acquisition Cost -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ number_format($supply->acquisition_cost, 2) }}
+                                                </td>
+                                                <!-- Actions -->
+                                                <td class="px-6 py-4 text-center dark:text-white">
+                                                    <div class="flex items-center justify-center space-x-2">
+                                                        <!-- Edit Button -->
+                                                        <button type="button"
+                                                        class="edit-supply-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
+                                                        data-supply-id="{{ $supply->supply_id }}"
+                                                        data-stock-no="{{ $supply->stock_no }}"
+                                                        data-item-name="{{ $supply->item_name }}"
+                                                        data-description="{{ $supply->description }}"
+                                                        data-unit="{{ $supply->unit_of_measurement }}"
+                                                        data-category-id="{{ $supply->category->id }}"
+                                                        data-reorder-point="{{ $supply->reorder_point }}"
+                                                        data-acquisition-cost="{{ number_format($supply->acquisition_cost, 2) }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                            <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/>
+                                                        </svg>
+                                                    </button>
+
+
+
+                                                        <!-- Delete Button -->
+                                                        <button type="button"
+                                                                class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18"/>
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                                <line x1="10" x2="10" y1="11" y2="17"/>
+                                                                <line x1="14" x2="14" y1="11" y2="17"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="8" class="px-6 py-8 text-center">
+                                                    <div class="flex flex-col items-center justify-center">
+                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
+                                                            </path>
+                                                        </svg>
+                                                        <p class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                            No Supply found</p>
+                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                            Get started by adding a new Item/Supply</p>
+                                                        <button type="button" data-modal-target="" data-modal-toggle=""
+                                                                class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                                 viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd"
+                                                                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                                      clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Add Items/Supply
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Supply Table -->
+
+                    <!-- Pagination -->
+                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            pagination here
+                        </div>
+                        <div class="mt-2 sm:mt-0">
+                            pagination here
+                        </div>
+                    </nav>
+
+                    <!-- CREATE SUPPLY MODAL -->
+                    <div id="createSupplyModal" tabindex="-1" aria-hidden="true"
+                            class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+
+                        <div class="relative w-full max-w-3xl max-h-full">
+                            <!-- Modal content -->
+                            <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+                                <!-- Modal header -->
+                                <div
+                                    class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
+                                    <h3 class="text-2xl font-bold text-white flex items-center">
+                                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm9 4a1 1 0 10-2 0v6a1 1 0 102 0V7zm-3 2a1 1 0 10-2 0v4a1 1 0 102 0V9zm-3 3a1 1 0 10-2 0v1a1 1 0 102 0v-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Create New Supply
+                                    </h3>
+                                    <button type="button"
+                                        class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                        dark:hover:bg-gray-600 transition-all duration-200"
+                                        data-modal-hide="createSupplyModal">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                </div>
+
+                                <!-- Modal body -> Form -->
+                                <form action="{{ route('supplies.store') }}" method="POST"
+                                    class="p-6 bg-gray-50 dark:bg-gray-800">
+                                    @csrf
+                                    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information below to
+                                        create a new supply item in the inventory.</p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Left Column -->
+                                        <div class="space-y-5">
+                                            <!-- Basic Information Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4
+                                                    class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Basic Information
+                                                </h4>
+
+                                                <!-- Stock No -->
+                                                <div class="mb-4">
+                                                    <label for="stock_no"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Stock No <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <input type="text" name="stock_no" id="stock_no"
+                                                            placeholder="Enter Stock No"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                            required />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Item Name -->
+                                                <div class="mb-4">
+                                                    <label for="item_name"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Item Name <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <input type="text" name="item_name" id="item_name"
+                                                            placeholder="Enter Item Name"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                            required />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Description -->
+                                                <div class="mb-4">
+                                                    <label for="description"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Description
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute top-3 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <textarea name="description" id="description"
+                                                            placeholder="Enter Description" rows="3"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Measurement & Category Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4
+                                                    class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Classification
+                                                </h4>
+
+                                                <!-- Unit of Measurement -->
+                                                <div class="mb-4">
+                                                    <label for="unit_of_measurement"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Unit of Measurement <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="unit_of_measurement" id="unit_of_measurement" required
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled selected>Select unit</option>
+                                                            <option value="PCS">Pieces (pcs)</option>
+                                                            <option value="BOX">Box</option>
+                                                            <option value="REAM">Ream</option>
+                                                            <option value="KG">Kilogram (kg)</option>
+                                                            <option value="LITRE">Litre (L)</option>
+                                                            <option value="PACK">Pack</option>
+                                                            <option value="PAIR">Pair</option>
+                                                            <option value="CARTON">Carton</option>
+                                                            <option value="SET">Set</option>
+                                                            <option value="DOZEN">Dozen</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Category -->
+                                                <div class="mb-4">
+                                                    <label for="category_id"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Category <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="category_id" id="category_id" required
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled selected>Select Category</option>
+                                                            @foreach($categories as $category)
+                                                                <option value="{{ $category->id }}">
+                                                                    {{ $category->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @error('category_id')
+                                                        <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column -->
+                                        <div class="space-y-5">
+                                            <!-- Inventory Management Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4
+                                                    class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Inventory Management
+                                                </h4>
+
+                                                <!-- Reorder Point -->
+                                                <div class="mb-4">
+                                                    <label for="reorder_point"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Reorder Point <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <input type="number" name="reorder_point" id="reorder_point"
+                                                            value="0" min="0" required
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    </div>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum quantity before reordering is required</p>
+                                                </div>
+
+                                                <!-- Acquisition Cost -->
+                                                <div class="mb-4">
+                                                    <label for="acquisition_cost"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Acquisition Cost <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <input type="text" id="acquisition_cost" name="acquisition_cost"
+                                                            value="{{ old('acquisition_cost', '0.00') }}"
+                                                            placeholder="0.00"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    </div>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per unit in your local currency</p>
+                                                    @error('acquisition_cost')
+                                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
+                                            <!-- Notes & Tips -->
+                                            <div
+                                                class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-blue-900">
+                                                <h4
+                                                    class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Important Information
+                                                </h4>
+                                                <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-6 list-disc">
+                                                    <li>All fields marked with <span class="text-red-500">*</span> are required</li>
+                                                    <li>Stock numbers should be unique to avoid confusion</li>
+                                                    <li>Set appropriate reorder points to avoid stockouts</li>
+                                                    <li>Acquisition costs help track budget and inventory value</li>
+                                                </ul>
+                                            </div>
+
+                                            <!-- Space for future components -->
+                                            <div class="hidden md:block">
+                                                <!-- This div creates space to match the height of the two columns -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Footer -->
+                                    <div
+                                        class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <button type="button" data-modal-hide="createSupplyModal"
+                                            class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
+                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                                focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                                dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                                dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
+                                                focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                            Save Supply
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
                 </div>
             </div>
         </div>
-
     </div>
+
+    <!-- JavaScript for Search Input -->
+    <script>
+        function toggleClearButton() {
+            const input = document.getElementById('search-input');
+            const clearBtn = document.getElementById('clearButton');
+            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            document.getElementById('clearButton').style.display = 'none';
+            // Optional: Trigger form submission to refresh results with empty search
+            // input.form.submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleClearButton();
+        });
+    </script>
+
+    {{-- Comma on Acquisition Cost --}}
+    <script>
+        const acqCostInput = document.getElementById('acquisition_cost');
+
+        acqCostInput.addEventListener('input', function() {
+            // 1) Remove all non-digit characters
+            let digits = this.value.replace(/\D/g, '');
+            if (digits === '') {
+                digits = '0';
+            }
+
+            // 2) Interpret as cents: parse integer, then divide by 100
+            let intValue = parseInt(digits, 10);
+            let amount = intValue / 100;
+
+            // 3) Format with commas + always 2 decimals
+            this.value = amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        });
+    </script>
+
+
+
+
 </x-app-layout>
