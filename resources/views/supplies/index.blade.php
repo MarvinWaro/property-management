@@ -714,6 +714,14 @@
                                 <form id="editSupplyForm" method="POST" class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
                                     @method('PUT')
+
+                                        <!-- Validation Errors Alert -->
+                                        @if ($errors->any() && session('show_edit_modal'))
+                                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                                                <div class="font-medium">Oops! There were some problems with your input:</div>
+                                            </div>
+                                        @endif
+
                                     <input type="hidden" id="edit_supply_id" name="supply_id">
                                     <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Update the information below to modify this supply item.</p>
 
@@ -754,6 +762,9 @@
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                             required />
                                                     </div>
+                                                    @error('stock_no')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Item Name -->
@@ -779,6 +790,9 @@
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                             required />
                                                     </div>
+                                                    @error('item_name')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Description -->
@@ -803,6 +817,9 @@
                                                                 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
                                                     </div>
+                                                    @error('description')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
 
@@ -850,6 +867,9 @@
                                                             <option value="DOZEN">Dozen</option>
                                                         </select>
                                                     </div>
+                                                    @error('unit_of_measurement')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Category -->
@@ -880,6 +900,9 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    @error('category_id')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -921,6 +944,9 @@
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum quantity before reordering is required</p>
+                                                    @error('reorder_point')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Acquisition Cost -->
@@ -948,6 +974,9 @@
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per unit in your local currency</p>
                                                 </div>
+                                                @error('acquisition_cost')
+                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                @enderror
                                             </div>
 
                                             <!-- Update Information -->
