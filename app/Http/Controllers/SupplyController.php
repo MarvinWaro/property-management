@@ -41,57 +41,70 @@ class SupplyController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $request->merge([
-            'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : '0.00',
-        ]);
+        try {
+            $request->merge([
+                'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : '0.00',
+            ]);
 
-        $validated = $request->validate([
-            'stock_no'            => 'required|string|unique:supplies,stock_no',
-            'item_name'           => 'required|string|max:255',
-            'description'         => 'nullable|string',
-            'unit_of_measurement' => 'required|string|max:50',
-            'category_id'         => 'required|exists:categories,id',
-            'reorder_point'       => 'required|integer|min:0',
-            'acquisition_cost'    => 'nullable|numeric',
-        ]);
+            $validated = $request->validate([
+                'stock_no'            => 'required|string|unique:supplies,stock_no',
+                'item_name'           => 'required|string|max:255',
+                'description'         => 'nullable|string',
+                'unit_of_measurement' => 'required|string|max:50',
+                'category_id'         => 'required|exists:categories,id',
+                'reorder_point'       => 'required|integer|min:0',
+                'acquisition_cost'    => 'nullable|numeric',
+            ]);
 
-        Supply::create(array_merge($validated, ['is_active' => true]));
+            Supply::create(array_merge($validated, ['is_active' => true]));
 
-        return redirect()->route('supplies.index')->with('success', 'Supply created successfully.');
+            return redirect()->route('supplies.index')->with('success', 'Supply created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('supplies.index')
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('show_create_modal', true); // This flag will be used to reopen the modal
+        }
     }
 
-
-    public function show(Supply $supply)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Supply $supply)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Supply $supply)
     {
-        //
+        try {
+            $request->merge([
+                'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : '0.00',
+            ]);
+
+            $validated = $request->validate([
+                'stock_no'            => 'required|string|unique:supplies,stock_no,'.$supply->supply_id.',supply_id',
+                'item_name'           => 'required|string|max:255',
+                'description'         => 'nullable|string',
+                'unit_of_measurement' => 'required|string|max:50',
+                'category_id'         => 'required|exists:categories,id',
+                'reorder_point'       => 'required|integer|min:0',
+                'acquisition_cost'    => 'nullable|numeric',
+            ]);
+
+            $supply->update($validated);
+
+            return redirect()->route('supplies.index')->with('success', 'Supply updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('supplies.index')
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('show_edit_modal', $supply->supply_id); // This flag will be used to reopen the modal
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Supply $supply)
     {
-        //
+        try {
+            $supply->delete();
+            return redirect()->route('supplies.index')->with('deleted', 'Supply deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('supplies.index')->with('error', 'Error deleting supply: ' . $e->getMessage());
+        }
     }
 }
