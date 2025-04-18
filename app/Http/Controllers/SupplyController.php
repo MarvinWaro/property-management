@@ -84,7 +84,23 @@ class SupplyController extends Controller
      */
     public function update(Request $request, Supply $supply)
     {
-        //
+        $request->merge([
+            'acquisition_cost' => $request->acquisition_cost ? str_replace(',', '', $request->acquisition_cost) : '0.00',
+        ]);
+
+        $validated = $request->validate([
+            'stock_no'            => 'required|string|unique:supplies,stock_no,'.$supply->supply_id.',supply_id',
+            'item_name'           => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'unit_of_measurement' => 'required|string|max:50',
+            'category_id'         => 'required|exists:categories,id',
+            'reorder_point'       => 'required|integer|min:0',
+            'acquisition_cost'    => 'nullable|numeric',
+        ]);
+
+        $supply->update($validated);
+
+        return redirect()->route('supplies.index')->with('success', 'Supply updated successfully.');
     }
 
     /**
@@ -92,6 +108,11 @@ class SupplyController extends Controller
      */
     public function destroy(Supply $supply)
     {
-        //
+        try {
+            $supply->delete();
+            return redirect()->route('supplies.index')->with('deleted', 'Supply deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('supplies.index')->with('error', 'Error deleting supply: ' . $e->getMessage());
+        }
     }
 }

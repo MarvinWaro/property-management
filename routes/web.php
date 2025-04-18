@@ -39,7 +39,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // Supplies
         Route::get('/supplies', [SupplyController::class, 'index'])->name('supplies.index');
         Route::post('/supplies', [SupplyController::class, 'store'])->name('supplies.store');
-
+        Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
+        Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
 
         // Departments
