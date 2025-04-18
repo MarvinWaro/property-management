@@ -325,6 +325,14 @@
                                 <form action="{{ route('supplies.store') }}" method="POST"
                                     class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
+
+                                        <!-- Validation Errors Alert -->
+                                        @if ($errors->any() && session('show_create_modal'))
+                                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                                            <div class="font-medium">Oops! There were some problems with your input:</div>
+                                        </div>
+                                        @endif
+
                                     <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information
                                         below to
                                         create a new supply item in the inventory.</p>
@@ -368,8 +376,11 @@
                                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                            required />
+                                                            />
                                                     </div>
+                                                    @error('stock_no')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Item Name -->
@@ -395,8 +406,11 @@
                                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                            required />
+                                                            />
                                                     </div>
+                                                    @error('item_name')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Description -->
@@ -423,6 +437,9 @@
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
                                                     </div>
                                                 </div>
+                                                @error('description')
+                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                @enderror
                                             </div>
 
                                             <!-- Measurement & Category Section -->
@@ -456,7 +473,7 @@
                                                             </svg>
                                                         </div>
                                                         <select name="unit_of_measurement" id="unit_of_measurement"
-                                                            required
+
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                                     focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                     dark:bg-gray-700 dark:border-gray-600 dark:text-white
@@ -475,6 +492,9 @@
                                                             <option value="DOZEN">Dozen</option>
                                                         </select>
                                                     </div>
+                                                    @error('unit_of_measurement')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Category -->
@@ -494,7 +514,7 @@
                                                                 </path>
                                                             </svg>
                                                         </div>
-                                                        <select name="category_id" id="category_id" required
+                                                        <select name="category_id" id="category_id"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                                     focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                     dark:bg-gray-700 dark:border-gray-600 dark:text-white
@@ -509,7 +529,7 @@
                                                         </select>
                                                     </div>
                                                     @error('category_id')
-                                                        <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -559,6 +579,9 @@
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum
                                                         quantity before reordering is required</p>
+                                                        @error('reorder_point')
+                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        @enderror
                                                 </div>
 
                                                 <!-- Acquisition Cost -->
@@ -593,7 +616,7 @@
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per
                                                         unit in your local currency</p>
                                                     @error('acquisition_cost')
-                                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -1113,14 +1136,37 @@
     </script>
 
 
-<!-- JavaScript for Edit & Delete Supply Modals -->
+<!-- JavaScript for Supply Modals -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Format acquisition cost input in the edit modal
-        const editAcqCostInput = document.getElementById('edit_acquisition_cost');
+        // Format acquisition cost inputs
+        formatAcquisitionCost('acquisition_cost');
+        formatAcquisitionCost('edit_acquisition_cost');
 
-        if (editAcqCostInput) {
-            editAcqCostInput.addEventListener('input', function() {
+        // Setup modal toggling
+        setupModalToggles();
+
+        // Check for validation errors and show modals if needed
+        @if(session('show_create_modal'))
+            document.getElementById('createSupplyModal').classList.remove('hidden');
+        @endif
+
+        @if(session('show_edit_modal'))
+            // Find the edit button with the matching supply ID and trigger click
+            const supplyId = {{ session('show_edit_modal') }};
+            const editButtons = document.querySelectorAll('.edit-supply-btn');
+            editButtons.forEach(button => {
+                if (button.getAttribute('data-supply-id') == supplyId) {
+                    button.click();
+                }
+            });
+        @endif
+    });
+
+    function formatAcquisitionCost(inputId) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function() {
                 // Remove all non-digit characters
                 let digits = this.value.replace(/\D/g, '');
                 if (digits === '') {
@@ -1138,7 +1184,9 @@
                 });
             });
         }
+    }
 
+    function setupModalToggles() {
         // Handle edit button clicks
         const editButtons = document.querySelectorAll('.edit-supply-btn');
         editButtons.forEach(button => {
@@ -1183,62 +1231,43 @@
             });
         });
 
-        // Generic function to handle modal toggling
-        function setupModalToggles(buttonSelector, modalIdPrefix) {
-            const buttons = document.querySelectorAll(buttonSelector);
-            buttons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const action = this.getAttribute('data-modal-toggle') || this.getAttribute('data-modal-target');
-                    const modalId = action.startsWith(modalIdPrefix) ? action : modalIdPrefix + action;
-                    const modal = document.getElementById(modalId);
+        // Add event listeners for all modal toggle buttons
+        const toggleButtons = document.querySelectorAll('[data-modal-toggle]');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal-toggle');
+                const modal = document.getElementById(modalId);
 
-                    if (modal) {
-                        modal.classList.remove('hidden');
-                    }
-                });
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
             });
-        }
+        });
 
         // Add event listeners for all modal close buttons
-        function setupModalCloseButtons(prefix) {
-            const closeButtons = document.querySelectorAll(`[data-modal-hide^="${prefix}"]`);
+        const closeButtons = document.querySelectorAll('[data-modal-hide]');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal-hide');
+                const modal = document.getElementById(modalId);
 
-            closeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal-hide');
-                    const modal = document.getElementById(modalId);
-
-                    if (modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
             });
-        }
-
-        // Setup toggle functionality for delete buttons
-        setupModalToggles('[data-modal-toggle^="deleteSupplyModal"]', '');
-
-        // Setup close buttons for both edit and delete modals
-        setupModalCloseButtons('editSupplyModal');
-        setupModalCloseButtons('deleteSupplyModal');
+        });
 
         // Add click event listener for clicking outside modals to close them
         document.addEventListener('click', function(event) {
-            // Check if we clicked directly on an element with the modal class
-            const editModal = document.getElementById('editSupplyModal');
-            if (editModal && event.target === editModal) {
-                editModal.classList.add('hidden');
-            }
-
-            // Do the same for delete modals (there could be many)
-            const deleteModals = document.querySelectorAll('[id^="deleteSupplyModal"]');
-            deleteModals.forEach(modal => {
+            // Check if we clicked directly on modal background
+            const modals = document.querySelectorAll('.fixed.flex.justify-center.items-center');
+            modals.forEach(modal => {
                 if (event.target === modal) {
                     modal.classList.add('hidden');
                 }
             });
         });
-    });
+    }
 </script>
 
 
