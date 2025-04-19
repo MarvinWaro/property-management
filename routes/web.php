@@ -10,6 +10,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplyController;
+use App\Http\Controllers\SupplyStockController;
 
 use App\Http\Controllers\StaffDashboardController;
 
@@ -42,6 +43,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
         Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
+        // Supplies Stocks
+        Route::get('/stocks', [SupplyStockController::class, 'index'])->name('stocks.index');
+        Route::post('/stocks', [SupplyStockController::class, 'store'])->name('stocks.store');
+        Route::put('/stocks/{id}', [SupplyStockController::class, 'update'])->name('stocks.update');
+        
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
