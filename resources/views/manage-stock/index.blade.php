@@ -38,9 +38,9 @@
                             <!-- Separate Search Button -->
                             <button type="submit"
                                 class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                           hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                           focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                           dark:focus:ring-blue-800 flex items-center">
+                                            hover:bg-blue-800 focus:ring-1 focus:outline-none
+                                            focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
+                                            dark:focus:ring-blue-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -186,8 +186,7 @@
                                                         <!-- Edit Button -->
                                                         <!-- Edit Button -->
                                                         <!-- Edit Button -->
-                                                        <button type="button"
-                                                            data-modal-target="editStockModal"
+                                                        <button type="button" data-modal-target="editStockModal"
                                                             data-modal-toggle="editStockModal"
                                                             class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
@@ -217,14 +216,17 @@
                                                             data-modal-target="deleteStockModal{{ $stock->stock_id }}"
                                                             data-modal-toggle="deleteStockModal{{ $stock->stock_id }}"
                                                             class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M3 6h18"/>
-                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                                            <line x1="10" x2="10" y1="11" y2="17"/>
-                                                            <line x1="14" x2="14" y1="11" y2="17"/>
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11"
+                                                                    y2="17" />
+                                                                <line x1="14" x2="14" y1="11"
+                                                                    y2="17" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -284,255 +286,148 @@
 
                     <!-- Create Stock Modal -->
                     <div id="createStockModal" tabindex="-1" aria-hidden="true"
-                        class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
-
-                        <div class="relative w-full max-w-2xl max-h-full">
-                            <!-- Modal content -->
-                            <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
-                                <!-- Modal header -->
+                        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+                        <div class="relative w-full max-w-2xl max-h-full overflow-auto">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
                                 <div
-                                    class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
-                                    <h3 class="text-2xl font-bold text-white flex items-center">
-                                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd"
-                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
-                                        Add New Stock
-                                    </h3>
-                                    <button type="button"
-                                        class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                        dark:hover:bg-gray-600 transition-all duration-200"
-                                        data-modal-hide="createStockModal">
-                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        <span class="sr-only">Close modal</span>
-                                    </button>
+                                    class="flex items-center justify-between p-5 bg-gradient-to-r from-blue-600 to-blue-800 border-b">
+                                    <h3 class="text-2xl font-bold text-white">Add New Stock</h3>
+                                    <button type="button" data-modal-hide="createStockModal"
+                                        class="text-white">✕</button>
                                 </div>
 
-                                <!-- Modal body -> Form -->
                                 <form action="{{ route('stocks.store') }}" method="POST"
                                     class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
 
-                                    <!-- Validation Errors Alert -->
                                     @if ($errors->any() && session('show_create_modal'))
-                                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
-                                            role="alert">
-                                            <div class="font-medium">Oops! There were some problems with your input:
-                                            </div>
-                                            <ul class="mt-1.5 ml-4 list-disc list-inside">
-                                                @foreach ($errors->all() as $error)
-                                                    <li>{{ $error }}</li>
+                                        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                                            <ul class="list-disc list-inside">
+                                                @foreach ($errors->all() as $e)
+                                                    <li>{{ $e }}</li>
                                                 @endforeach
                                             </ul>
                                         </div>
                                     @endif
 
-                                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                                        Add a new stock entry to the inventory. Fields marked with
-                                        <span class="text-red-500">*</span> are required.
-                                    </p>
-
-                                    <div class="grid gap-4 mb-6">
+                                    <div class="grid gap-4">
                                         <!-- Supply Selection -->
-                                        <div class="col-span-2">
+                                        <div>
                                             <label for="supply_id"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Supply Item <span class="text-red-500">*</span>
                                             </label>
                                             <select name="supply_id" id="supply_id" required
-                                                class="bg-gray-50 border @error('supply_id') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                                                 <option value="">Select a supply</option>
-                                                @foreach ($supplies as $supply)
-                                                    <option value="{{ $supply->supply_id }}"
-                                                        {{ old('supply_id') == $supply->supply_id ? 'selected' : '' }}>
-                                                        {{ $supply->item_name }} ({{ $supply->stock_no }})
+                                                @foreach ($supplies as $s)
+                                                    <option value="{{ $s->supply_id }}"
+                                                        data-cost="{{ $s->acquisition_cost }}"
+                                                        {{ old('supply_id') == $s->supply_id ? 'selected' : '' }}>
+                                                        {{ $s->item_name }} ({{ $s->stock_no }})
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            @error('supply_id')
-                                                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}
-                                                </p>
-                                            @enderror
                                         </div>
 
-                                        <!-- Quantity and Unit Cost row -->
+                                        <!-- Quantity & Unit Cost -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <!-- Quantity -->
                                             <div>
                                                 <label for="quantity_on_hand"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Quantity <span class="text-red-500">*</span>
                                                 </label>
                                                 <input type="number" name="quantity_on_hand" id="quantity_on_hand"
-                                                    value="{{ old('quantity_on_hand', 0) }}" min="0" required
-                                                    class="bg-gray-50 border @error('quantity_on_hand') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                @error('quantity_on_hand')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
+                                                    min="1" required value="{{ old('quantity_on_hand', 0) }}"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
                                             </div>
-
-                                            <!-- Unit Cost -->
                                             <div>
                                                 <label for="unit_cost"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Unit Cost <span class="text-red-500">*</span>
                                                 </label>
-                                                <input type="text" name="unit_cost" id="unit_cost"
-                                                    value="{{ old('unit_cost', '0.00') }}" required
-                                                    class="bg-gray-50 border @error('unit_cost') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                @error('unit_cost')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
+                                                <input type="text" name="unit_cost" id="unit_cost" required
+                                                    value="{{ old('unit_cost', '0.00') }}"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
                                             </div>
                                         </div>
 
-                                        <!-- Status and Expiry Date row -->
+                                        <!-- Status & Expiry Date -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <!-- Status -->
                                             <div>
                                                 <label for="status"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Status <span class="text-red-500">*</span>
                                                 </label>
                                                 <select name="status" id="status" required
-                                                    class="bg-gray-50 border @error('status') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                                                     <option value="available"
                                                         {{ old('status') == 'available' ? 'selected' : '' }}>Available
                                                     </option>
                                                     <option value="reserved"
-                                                        {{ old('status') == 'reserved' ? 'selected' : '' }}>Reserved
-                                                    </option>
+                                                        {{ old('status') == 'reserved' ? 'selected' : '' }}>Reserved</option>
                                                     <option value="expired"
-                                                        {{ old('status') == 'expired' ? 'selected' : '' }}>Expired
-                                                    </option>
+                                                        {{ old('status') == 'expired' ? 'selected' : '' }}>Expired</option>
                                                     <option value="depleted"
-                                                        {{ old('status') == 'depleted' ? 'selected' : '' }}>Depleted
-                                                    </option>
+                                                        {{ old('status') == 'depleted' ? 'selected' : '' }}>Depleted</option>
                                                 </select>
-                                                @error('status')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
                                             </div>
-
-                                            <!-- Expiry Date -->
                                             <div>
                                                 <label for="expiry_date"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Expiry Date
                                                 </label>
                                                 <input type="date" name="expiry_date" id="expiry_date"
                                                     value="{{ old('expiry_date') }}"
-                                                    class="bg-gray-50 border @error('expiry_date') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                @error('expiry_date')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
                                             </div>
                                         </div>
 
-                                        <!-- Fund Cluster and Days to Consume row -->
+                                        <!-- Fund Cluster & Days to Consume -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <!-- Fund Cluster -->
                                             <div>
                                                 <label for="fund_cluster"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    Fund Cluster
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Fund Cluster <span class="text-red-500">*</span>
                                                 </label>
-                                                <input type="text" name="fund_cluster" id="fund_cluster"
-                                                    value="{{ old('fund_cluster') }}"
-                                                    class="bg-gray-50 border @error('fund_cluster') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                @error('fund_cluster')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
+                                                <select name="fund_cluster" id="fund_cluster" required
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                                                    <option value="101"
+                                                        {{ old('fund_cluster') == '101' ? 'selected' : '' }}>101</option>
+                                                    <option value="151"
+                                                        {{ old('fund_cluster') == '151' ? 'selected' : '' }}>151</option>
+                                                </select>
                                             </div>
-
-                                            <!-- Days to Consume -->
                                             <div>
                                                 <label for="days_to_consume"
-                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Days to Consume
                                                 </label>
                                                 <input type="number" name="days_to_consume" id="days_to_consume"
-                                                    value="{{ old('days_to_consume') }}" min="0"
-                                                    class="bg-gray-50 border @error('days_to_consume') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                @error('days_to_consume')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
-                                                        {{ $message }}</p>
-                                                @enderror
+                                                    min="0" value="{{ old('days_to_consume') }}"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
                                             </div>
                                         </div>
 
                                         <!-- Remarks -->
-                                        <div class="col-span-2">
+                                        <div>
                                             <label for="remarks"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Remarks
                                             </label>
                                             <textarea name="remarks" id="remarks" rows="3"
-                                                class="bg-gray-50 border @error('remarks') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg
-                                                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">{{ old('remarks') }}</textarea>
-                                            @error('remarks')
-                                                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}
-                                                </p>
-                                            @enderror
+                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">{{ old('remarks') }}</textarea>
                                         </div>
                                     </div>
 
                                     <!-- Modal Footer -->
-                                    <div
-                                        class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-center justify-end mt-6 space-x-3 border-t pt-4">
                                         <button type="button" data-modal-hide="createStockModal"
-                                            class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                                focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                            class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-100">
                                             Cancel
                                         </button>
                                         <button type="submit"
-                                            class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                focus:ring-4 focus:outline-none focus:ring-blue-300
-                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
-                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
+                                            class="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg">
                                             Save Stock
                                         </button>
                                     </div>
@@ -777,7 +672,7 @@
                     </div>
 
                     <!-- Delete Stock Modals -->
-                    @foreach($stocks as $stock)
+                    @foreach ($stocks as $stock)
                         <div id="deleteStockModal{{ $stock->stock_id }}" tabindex="-1" aria-hidden="true"
                             class="hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full flex bg-gray-900 bg-opacity-50">
                             <div class="relative p-4 w-full max-w-md max-h-full">
@@ -832,13 +727,14 @@
                                             <div class="mt-2 text-gray-600 dark:text-gray-400">
                                                 <p>Are you sure you want to delete this stock item:</p>
                                                 <p class="font-semibold text-gray-800 dark:text-white mt-1">
-                                                    "{{ $stock->supply->item_name }}" ({{ $stock->quantity_on_hand }} {{ $stock->supply->unit_of_measurement }})</p>
+                                                    "{{ $stock->supply->item_name }}" ({{ $stock->quantity_on_hand }}
+                                                    {{ $stock->supply->unit_of_measurement }})</p>
                                             </div>
                                             <p class="mt-3 text-sm text-red-500">This action cannot be undone.</p>
                                         </div>
 
-                                        <form action="{{ route('stocks.destroy', $stock->stock_id) }}"
-                                            method="POST" class="mt-6">
+                                        <form action="{{ route('stocks.destroy', $stock->stock_id) }}" method="POST"
+                                            class="mt-6">
                                             @csrf
                                             @method('DELETE')
                                             <div class="flex items-center justify-center space-x-4">
@@ -865,10 +761,6 @@
                             </div>
                         </div>
                     @endforeach
-
-
-
-
 
                 </div><!-- End .section-container -->
             </div>
@@ -1089,6 +981,57 @@
             // Make these functions globally available
             window.toggleClearButton = toggleClearButton;
             window.clearSearch = clearSearch;
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal toggles
+            document.querySelectorAll('[data-modal-toggle]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById(btn.getAttribute('data-modal-toggle'))
+                        .classList.toggle('hidden');
+                });
+            });
+            document.querySelectorAll('[data-modal-hide]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById(btn.getAttribute('data-modal-hide'))
+                        .classList.add('hidden');
+                });
+            });
+
+            // Re‑open on validation error
+            @if ($errors->any() && session('show_create_modal'))
+                document.getElementById('createStockModal').classList.remove('hidden');
+            @endif
+
+            // Auto‑fill & format Unit Cost
+            const supplySelect = document.getElementById('supply_id');
+            const unitCostInput = document.getElementById('unit_cost');
+
+            function formatMoney(val) {
+                const digits = val.replace(/\D/g, '') || '0';
+                const amount = parseInt(digits, 10) / 100;
+                return amount.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            if (supplySelect && unitCostInput) {
+                // on supply change, set default cost
+                function setDefault() {
+                    const opt = supplySelect.options[supplySelect.selectedIndex];
+                    if (opt.dataset.cost) unitCostInput.value = formatMoney(opt.dataset.cost.replace('.', ''));
+                }
+                supplySelect.addEventListener('change', setDefault);
+                setDefault();
+
+                // format on input
+                unitCostInput.addEventListener('input', e => {
+                    e.target.value = formatMoney(e.target.value);
+                });
+            }
         });
     </script>
 

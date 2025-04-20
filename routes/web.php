@@ -13,6 +13,7 @@ use App\Http\Controllers\SupplyController;
 use App\Http\Controllers\SupplyStockController;
 use App\Http\Controllers\SupplyTransactionController;
 
+
 use App\Http\Controllers\StaffDashboardController;
 
 
@@ -44,11 +45,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
         Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
-        // Supplies Stocks
-        Route::get('/stocks', [SupplyStockController::class, 'index'])->name('stocks.index');
-        Route::post('/stocks', [SupplyStockController::class, 'store'])->name('stocks.store');
-        Route::put('/stocks/{id}', [SupplyStockController::class, 'update'])->name('stocks.update');
-        Route::delete('/stocks/{id}', [SupplyStockController::class, 'destroy'])->name('stocks.destroy');
+        // Supply Stocks CRUD (index + transactional store)
+        Route::get   ('/supply-stocks',           [SupplyStockController::class,'index'])  ->name('stocks.index');
+        Route::post  ('/supply-stocks',           [SupplyStockController::class,'store'])  ->name('stocks.store');
+        Route::put   ('/supply-stocks/{id}',      [SupplyStockController::class,'update']) ->name('stocks.update');
+        Route::delete('/supply-stocks/{id}',      [SupplyStockController::class,'destroy'])->name('stocks.destroy');
+
 
         // Supplies Transactions
         Route::get('supply-transactions', [SupplyTransactionController::class, 'index'])->name('supply-transactions.index');
