@@ -35,7 +35,9 @@
                             <x-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')">
                                 {{ __('Supply Stocks') }}
                             </x-nav-link>
-
+                            <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
+                                {{ __('Transactions') }}
+                            </x-nav-link>
                             <!-- Management Dropdown -->
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true"
                                 @mouseleave="open = false">
