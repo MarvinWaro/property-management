@@ -3,50 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupplyStock;
+use App\Models\SupplyTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SupplyStockController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-/**
- * Display a listing of the resource.
- */
     public function index(Request $request)
     {
-        // Get search and filter parameters
         $search = $request->get('search');
         $status = $request->get('status');
 
-        // Query with relationships
         $stocksQuery = SupplyStock::with('supply');
 
-        // Apply search filter if provided
         if ($search) {
-            $stocksQuery->whereHas('supply', function ($query) use ($search) {
-                $query->where('item_name', 'like', "%{$search}%")
-                    ->orWhere('stock_no', 'like', "%{$search}%");
+            $stocksQuery->whereHas('supply', function($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                  ->orWhere('stock_no',   'like', "%{$search}%");
             });
         }
 
-        // Apply status filter if provided
         if ($status) {
             $stocksQuery->where('status', $status);
         }
 
-        // Get supplies for adding new stock
         $supplies = \App\Models\Supply::all();
-
-        // Execute the query and paginate
-        $stocks = $stocksQuery->paginate(10);
+        $stocks   = $stocksQuery->paginate(10);
 
         return view('manage-stock.index', compact('stocks', 'supplies'));
-    }
-
-    public function create()
-    {
-        //
     }
 
     /**
@@ -54,34 +41,57 @@ class SupplyStockController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $request->merge([
-                'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : '0.00',
+        $validated = $request->validate([
+            'supply_id'        => 'required|exists:supplies,supply_id',
+            'quantity_on_hand' => 'required|integer|min:1',
+            'unit_cost'        => 'required|numeric|min:0',
+            'expiry_date'      => 'nullable|date',
+            'status'           => 'required|in:available,reserved,expired,depleted',
+            'fund_cluster'     => 'required|in:101,151',
+            'days_to_consume'  => 'nullable|integer|min:0',
+            'remarks'          => 'nullable|string',
+        ]);
+
+        DB::transaction(function() use ($validated, $request) {
+            // 1) Find or create the stock summary row
+            $stock = SupplyStock::firstOrNew([
+                'supply_id'    => $validated['supply_id'],
+                'fund_cluster' => $validated['fund_cluster'],
+                'unit_cost'    => $validated['unit_cost'],
             ]);
 
-            $validated = $request->validate([
-                'supply_id' => 'required|exists:supplies,supply_id',
-                'quantity_on_hand' => 'required|integer|min:0',
-                'unit_cost' => 'required|numeric|min:0',
-                'expiry_date' => 'nullable|date',
-                'status' => 'required|in:available,reserved,expired,depleted',
-                'fund_cluster' => 'nullable|string|max:255',
-                'days_to_consume' => 'nullable|integer|min:0',
-                'remarks' => 'nullable|string',
+            // 2) Compute new on‑hand and total cost
+            $oldQty = $stock->exists ? $stock->quantity_on_hand : 0;
+            $newQty = $oldQty + $validated['quantity_on_hand'];
+
+            // 3) Update the summary record
+            $stock->quantity_on_hand = $newQty;
+            $stock->total_cost       = $newQty * $validated['unit_cost'];
+            $stock->expiry_date      = $validated['expiry_date'];
+            $stock->status           = $validated['status'];
+            $stock->days_to_consume  = $validated['days_to_consume'];
+            $stock->remarks          = $validated['remarks'];
+            $stock->save();
+
+            // 4) Write the transaction log
+            SupplyTransaction::create([
+                'supply_id'        => $validated['supply_id'],
+                'transaction_type' => 'receipt',
+                'transaction_date' => now()->toDateString(),
+                'reference_no'     => $request->input('reference_no','Manual Stocking'),
+                'quantity'         => $validated['quantity_on_hand'],
+                'unit_cost'        => $validated['unit_cost'],
+                'total_cost'       => $validated['quantity_on_hand'] * $validated['unit_cost'],
+                'balance_quantity' => $newQty,
+                'department_id'    => auth()->user()->department_id,
+                'user_id'          => auth()->id(),
+                'remarks'          => $validated['remarks'],
             ]);
+        });
 
-            // Calculate total cost
-            $validated['total_cost'] = $validated['quantity_on_hand'] * $validated['unit_cost'];
-
-            SupplyStock::create($validated);
-
-            return redirect()->route('stocks.index')->with('success', 'Stock added successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->route('stocks.index')
-                ->withErrors($e->validator)
-                ->withInput()
-                ->with('show_create_modal', true);
-        }
+        return redirect()
+            ->route('stocks.index')
+            ->with('success', 'Stock received and transaction logged.');
     }
 
     /**
@@ -89,51 +99,40 @@ class SupplyStockController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $request->merge([
-                'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : '0.00',
-            ]);
+        $request->merge([
+            'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
+        ]);
 
-            $stock = SupplyStock::findOrFail($id);
+        $validated = $request->validate([
+            'quantity_on_hand' => 'required|integer|min:0',
+            'unit_cost'        => 'required|numeric|min:0',
+            'expiry_date'      => 'nullable|date',
+            'status'           => 'required|in:available,reserved,expired,depleted',
+            'fund_cluster'     => 'required|in:101,151',
+            'days_to_consume'  => 'nullable|integer|min:0',
+            'remarks'          => 'nullable|string',
+        ]);
 
-            $validated = $request->validate([
-                'quantity_on_hand' => 'required|integer|min:0',
-                'unit_cost' => 'required|numeric|min:0',
-                'expiry_date' => 'nullable|date',
-                'status' => 'required|in:available,reserved,expired,depleted',
-                'fund_cluster' => 'nullable|string|max:255',
-                'days_to_consume' => 'nullable|integer|min:0',
-                'remarks' => 'nullable|string',
-            ]);
+        $stock = SupplyStock::findOrFail($id);
+        $validated['total_cost'] = $validated['quantity_on_hand'] * $validated['unit_cost'];
 
-            // Calculate total cost
-            $validated['total_cost'] = $validated['quantity_on_hand'] * $validated['unit_cost'];
+        $stock->update($validated);
 
-            $stock->update($validated);
-
-            return redirect()->route('stocks.index')->with('success', 'Stock updated successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->route('stocks.index')
-                ->withErrors($e->validator)
-                ->withInput()
-                ->with('show_edit_modal', $id);
-        } catch (\Exception $e) {
-            return redirect()->route('stocks.index')->with('error', 'Error updating stock: ' . $e->getMessage());
-        }
+        return redirect()
+            ->route('stocks.index')
+            ->with('success', 'Stock updated successfully.');
     }
 
-/**
- * Remove the specified resource from storage.
- */
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy($id)
     {
-        try {
-            $stock = SupplyStock::findOrFail($id);
-            $stock->delete();
+        $stock = SupplyStock::findOrFail($id);
+        $stock->delete();
 
-            return redirect()->route('stocks.index')->with('deleted', 'Stock deleted successfully.');
-        } catch (\Exception $e) {
-            return redirect()->route('stocks.index')->with('error', 'Error deleting stock: ' . $e->getMessage());
-        }
+        return redirect()
+            ->route('stocks.index')
+            ->with('deleted', 'Stock deleted successfully.');
     }
 }
