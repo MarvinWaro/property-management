@@ -197,7 +197,10 @@
                                                 <td class="px-6 py-4 text-center dark:text-white">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- Edit Button -->
+                                                        <!-- Edit Button -->
                                                         <button type="button"
+                                                            data-modal-target="editSupplyModal"
+                                                            data-modal-toggle="editSupplyModal"
                                                             class="edit-supply-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
                                                             data-supply-id="{{ $supply->supply_id }}"
                                                             data-stock-no="{{ $supply->stock_no }}"
@@ -217,7 +220,6 @@
                                                                     d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                             </svg>
                                                         </button>
-
 
 
                                                         <!-- Delete Button -->

@@ -47,7 +47,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/stocks', [SupplyStockController::class, 'index'])->name('stocks.index');
         Route::post('/stocks', [SupplyStockController::class, 'store'])->name('stocks.store');
         Route::put('/stocks/{id}', [SupplyStockController::class, 'update'])->name('stocks.update');
-        
+        Route::delete('/stocks/{id}', [SupplyStockController::class, 'destroy'])->name('stocks.destroy');
+
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
