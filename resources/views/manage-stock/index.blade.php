@@ -185,7 +185,10 @@
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- Edit Button -->
                                                         <!-- Edit Button -->
+                                                        <!-- Edit Button -->
                                                         <button type="button"
+                                                            data-modal-target="editStockModal"
+                                                            data-modal-toggle="editStockModal"
                                                             class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
                                                             data-supply-id="{{ $stock->supply_id }}"
@@ -211,19 +214,18 @@
                                                         <!-- Delete Button -->
                                                         <!-- Delete Button -->
                                                         <button type="button"
-                                                        class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                            viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M3 6h18" />
-                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                            <line x1="10" x2="10" y1="11"
-                                                                y2="17" />
-                                                            <line x1="14" x2="14" y1="11"
-                                                                y2="17" />
-                                                        </svg>
+                                                            data-modal-target="deleteStockModal{{ $stock->stock_id }}"
+                                                            data-modal-toggle="deleteStockModal{{ $stock->stock_id }}"
+                                                            class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M3 6h18"/>
+                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                            <line x1="10" x2="10" y1="11" y2="17"/>
+                                                            <line x1="14" x2="14" y1="11" y2="17"/>
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -773,6 +775,96 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Delete Stock Modals -->
+                    @foreach($stocks as $stock)
+                        <div id="deleteStockModal{{ $stock->stock_id }}" tabindex="-1" aria-hidden="true"
+                            class="hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full flex bg-gray-900 bg-opacity-50">
+                            <div class="relative p-4 w-full max-w-md max-h-full">
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                    <!-- Modal header -->
+                                    <div
+                                        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-red-500 to-red-700">
+                                        <h3 class="text-lg font-semibold text-white flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="mr-2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                <line x1="10" y1="11" x2="10" y2="17">
+                                                </line>
+                                                <line x1="14" y1="11" x2="14" y2="17">
+                                                </line>
+                                            </svg>
+                                            Delete Stock
+                                        </h3>
+                                        <button type="button"
+                                            class="text-white bg-transparent hover:bg-red-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                            data-modal-hide="deleteStockModal{{ $stock->stock_id }}">
+                                            <svg class="w-3 h-3" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2"
+                                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            </svg>
+                                            <span class="sr-only">Close modal</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal body -->
+                                    <div class="p-6">
+                                        <div class="mb-5 text-center">
+                                            <div
+                                                class="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">
+                                                Confirm Deletion</h3>
+                                            <div class="mt-2 text-gray-600 dark:text-gray-400">
+                                                <p>Are you sure you want to delete this stock item:</p>
+                                                <p class="font-semibold text-gray-800 dark:text-white mt-1">
+                                                    "{{ $stock->supply->item_name }}" ({{ $stock->quantity_on_hand }} {{ $stock->supply->unit_of_measurement }})</p>
+                                            </div>
+                                            <p class="mt-3 text-sm text-red-500">This action cannot be undone.</p>
+                                        </div>
+
+                                        <form action="{{ route('stocks.destroy', $stock->stock_id) }}"
+                                            method="POST" class="mt-6">
+                                            @csrf
+                                            @method('DELETE')
+                                            <div class="flex items-center justify-center space-x-4">
+                                                <button data-modal-hide="deleteStockModal{{ $stock->stock_id }}"
+                                                    type="button"
+                                                    class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit"
+                                                    class="py-2.5 px-5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                        height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" class="mr-2">
+                                                        <path d="M3 6h18"></path>
+                                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    </svg>
+                                                    Delete Permanently
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
 
 
 

@@ -122,8 +122,18 @@ class SupplyStockController extends Controller
         }
     }
 
-    public function destroy(SupplyStock $supplyStock)
+/**
+ * Remove the specified resource from storage.
+ */
+    public function destroy($id)
     {
-        //
+        try {
+            $stock = SupplyStock::findOrFail($id);
+            $stock->delete();
+
+            return redirect()->route('stocks.index')->with('deleted', 'Stock deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('stocks.index')->with('error', 'Error deleting stock: ' . $e->getMessage());
+        }
     }
 }
