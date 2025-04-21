@@ -6,18 +6,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+use App\Models\Department;
+use App\Models\Supply;
+use App\Models\RisSlip;
+
+use App\Models\SupplyStock;
+use App\Models\RisItem;
+
 class StaffDashboardController extends Controller
 {
     public function index()
     {
-        $forceChangePassword = false;
+        $user = Auth::user();
 
-        // Check if the currently logged in user still has '12345678' as their password
-        if (Hash::check('12345678', Auth::user()->password)) {
-            $forceChangePassword = true;
-        }
+        // 1. force‑change‑password banner
+        $forceChangePassword = Hash::check('12345678', $user->password);
 
-        return view('staff-dashboard', compact('forceChangePassword'));
+        // 2. dropdown data for the modal
+        $departments = Department::orderBy('name')->get(['id','name']);
+        $stocks = SupplyStock::with('supply')
+            ->where('status', 'available')
+            ->where('quantity_on_hand', '>', 0)
+            ->get();
+
+        // 3. the staff member's own slips
+        $myRequests = RisSlip::where('requested_by', $user->id)
+            ->latest('ris_date')
+            ->get();
+
+        return view('staff-dashboard', compact(
+            'forceChangePassword',
+            'departments',
+            'stocks', // Changed from 'supplies'
+            'myRequests'
+        ));
     }
 
 

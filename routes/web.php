@@ -15,6 +15,7 @@ use App\Http\Controllers\SupplyTransactionController;
 
 
 use App\Http\Controllers\StaffDashboardController;
+use App\Http\Controllers\RisSlipController;
 
 
 Route::get('/', function () {
@@ -23,6 +24,14 @@ Route::get('/', function () {
 
 // Combine admin + staff under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+
+
+    // Shared routes (accessible by both admin and staff)
+    Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
+    Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store');
+    Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
+    Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
+    Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
 
     /**
      * ------------------
@@ -50,6 +59,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get  ('supply-transactions',         [SupplyTransactionController::class,'index'])->name('supply-transactions.index');
         Route::post ('supply-transactions',         [SupplyTransactionController::class,'store'])->name('supply-transactions.store');
         Route::get  ('supply-transactions/{txn}',   [SupplyTransactionController::class,'show'])->name('supply-transactions.show');
+
+        // RIS
+        Route::post('/ris/{risSlip}/approve', [RisSlipController::class, 'approve'])->name('ris.approve');
+        Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
 
 
         // Departments
@@ -127,6 +140,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
         Route::post('/force-change-password', [StaffDashboardController::class, 'updatePassword'])
             ->name('user.force-change-password.update');
+
+
+            // ────────── RIS (Requisition & Issue Slip) ──────────
+        Route::resource('ris-slips', RisSlipController::class)
+        ->only(['index', 'create', 'store', 'show'])
+        ->names('ris-slips');                       // ris-slips.index, ris-slips.create, …
+
     });
 
 });
