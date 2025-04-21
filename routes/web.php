@@ -45,17 +45,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
         Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
-        // Supply Stocks CRUD (index + transactional store)
-        Route::get   ('/supply-stocks',           [SupplyStockController::class,'index'])  ->name('stocks.index');
-        Route::post  ('/supply-stocks',           [SupplyStockController::class,'store'])  ->name('stocks.store');
-        Route::put   ('/supply-stocks/{id}',      [SupplyStockController::class,'update']) ->name('stocks.update');
-        Route::delete('/supply-stocks/{id}',      [SupplyStockController::class,'destroy'])->name('stocks.destroy');
+        Route::resource('supply-stocks', SupplyStockController::class)->except(['create','show']);
 
+        Route::get  ('supply-transactions',         [SupplyTransactionController::class,'index'])->name('supply-transactions.index');
+        Route::post ('supply-transactions',         [SupplyTransactionController::class,'store'])->name('supply-transactions.store');
+        Route::get  ('supply-transactions/{txn}',   [SupplyTransactionController::class,'show'])->name('supply-transactions.show');
 
-        // Supplies Transactions
-        Route::get('supply-transactions', [SupplyTransactionController::class, 'index'])->name('supply-transactions.index');
-        Route::post('supply-transactions', [SupplyTransactionController::class, 'store'])->name('supply-transactions.store');
-        Route::get('supply-transactions/{supplyTransaction}', [SupplyTransactionController::class, 'show'])->name('supply-transactions.show');
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');

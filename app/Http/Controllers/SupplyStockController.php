@@ -37,7 +37,8 @@ class SupplyStockController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created receipt in storage,
+     * update weighted‑average summary, and log transaction.
      */
     public function store(Request $request)
     {
@@ -53,27 +54,33 @@ class SupplyStockController extends Controller
         ]);
 
         DB::transaction(function() use ($validated, $request) {
-            // 1) Find or create the stock summary row
+            // 1) Pull or init the summary row (group only by supply+cluster)
             $stock = SupplyStock::firstOrNew([
                 'supply_id'    => $validated['supply_id'],
                 'fund_cluster' => $validated['fund_cluster'],
-                'unit_cost'    => $validated['unit_cost'],
             ]);
 
-            // 2) Compute new on‑hand and total cost
-            $oldQty = $stock->exists ? $stock->quantity_on_hand : 0;
-            $newQty = $oldQty + $validated['quantity_on_hand'];
+            // 2) Compute previous totals
+            $oldQty       = $stock->exists ? $stock->quantity_on_hand : 0;
+            $oldTotalCost = $stock->exists ? $stock->total_cost       : 0;
 
-            // 3) Update the summary record
+            // 3) Add the new lot
+            $newQty        = $oldQty + $validated['quantity_on_hand'];
+            $newLotCost    = $validated['quantity_on_hand'] * $validated['unit_cost'];
+            $newTotalCost  = $oldTotalCost + $newLotCost;
+            $newAvgCost    = $newTotalCost / $newQty;
+
+            // 4) Update summary row
             $stock->quantity_on_hand = $newQty;
-            $stock->total_cost       = $newQty * $validated['unit_cost'];
+            $stock->total_cost       = $newTotalCost;
+            $stock->unit_cost        = $newAvgCost;
             $stock->expiry_date      = $validated['expiry_date'];
             $stock->status           = $validated['status'];
             $stock->days_to_consume  = $validated['days_to_consume'];
             $stock->remarks          = $validated['remarks'];
             $stock->save();
 
-            // 4) Write the transaction log
+            // 5) Log this receipt transaction
             SupplyTransaction::create([
                 'supply_id'        => $validated['supply_id'],
                 'transaction_type' => 'receipt',
@@ -81,7 +88,7 @@ class SupplyStockController extends Controller
                 'reference_no'     => $request->input('reference_no','Manual Stocking'),
                 'quantity'         => $validated['quantity_on_hand'],
                 'unit_cost'        => $validated['unit_cost'],
-                'total_cost'       => $validated['quantity_on_hand'] * $validated['unit_cost'],
+                'total_cost'       => $newLotCost,
                 'balance_quantity' => $newQty,
                 'department_id'    => auth()->user()->department_id,
                 'user_id'          => auth()->id(),
@@ -95,7 +102,8 @@ class SupplyStockController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update only metadata on the summary row.
+     * We do NOT touch historical lots here.
      */
     public function update(Request $request, $id)
     {
@@ -104,7 +112,7 @@ class SupplyStockController extends Controller
         ]);
 
         $validated = $request->validate([
-            'quantity_on_hand' => 'required|integer|min:0',
+            // Only allow editing of metadata/valuation fields:
             'unit_cost'        => 'required|numeric|min:0',
             'expiry_date'      => 'nullable|date',
             'status'           => 'required|in:available,reserved,expired,depleted',
@@ -114,7 +122,10 @@ class SupplyStockController extends Controller
         ]);
 
         $stock = SupplyStock::findOrFail($id);
-        $validated['total_cost'] = $validated['quantity_on_hand'] * $validated['unit_cost'];
+
+        // We keep the same quantity but re‑value at the new unit_cost
+        $currentQty          = $stock->quantity_on_hand;
+        $validated['total_cost'] = $currentQty * $validated['unit_cost'];
 
         $stock->update($validated);
 
@@ -124,7 +135,8 @@ class SupplyStockController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified summary row (and implicitly its trace is gone;
+     * you could also choose to archive rather than delete).
      */
     public function destroy($id)
     {

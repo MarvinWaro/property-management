@@ -161,10 +161,10 @@
                                                 <td class="px-6 py-4">
                                                     <span
                                                         class="px-2 py-1 text-xs font-medium rounded-full
-                                                @if ($stock->status == 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                                @elseif($stock->status == 'reserved')  bg-blue-100  text-blue-800  dark:bg-blue-900  dark:text-blue-300
-                                                @elseif($stock->status == 'expired')   bg-red-100   text-red-800   dark:bg-red-900   dark:text-red-300
-                                                @else                                 bg-gray-100  text-gray-800 dark:bg-gray-900 dark:text-gray-300 @endif">
+                                                        @if ($stock->status == 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                                        @elseif($stock->status == 'reserved')  bg-blue-100  text-blue-800  dark:bg-blue-900  dark:text-blue-300
+                                                        @elseif($stock->status == 'expired')   bg-red-100   text-red-800   dark:bg-red-900   dark:text-red-300
+                                                        @else                                 bg-gray-100  text-gray-800 dark:bg-gray-900 dark:text-gray-300 @endif">
                                                         {{ ucfirst($stock->status) }}
                                                     </span>
                                                 </td>
@@ -182,13 +182,14 @@
                                                 <!-- Actions -->
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex items-center justify-center space-x-2">
-                                                        <!-- Add Stock (+) -->
-                                                        <button type="button"
-                                                            class="add-stock-btn p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
-                                                            data-supply-id="{{ $stock->supply_id }}"
-                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
+                                                        <!-- + Add Stock -->
+                                                        <button type="button" data-modal-target="createStockModal"
+                                                            data-modal-toggle="createStockModal"
+                                                            class="add-stock-btn inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
+                                                            data-supply-id  ="{{ $stock->supply_id }}"
+                                                            data-unit-cost  ="{{ number_format($stock->unit_cost, 2) }}"
                                                             data-fund-cluster="{{ $stock->fund_cluster }}"
-                                                            title="Add stock">
+                                                            title="Add stock to {{ $stock->supply->item_name }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
                                                                 fill="currentColor" viewBox="0 0 20 20">
                                                                 <path
@@ -196,19 +197,23 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- Edit Stock -->
+                                                        <!-- Edit Stock (Adjustment/Re‑value) -->
                                                         <button type="button"
-                                                            class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
-                                                            data-stock-id="{{ $stock->stock_id }}"
-                                                            data-supply-id="{{ $stock->supply_id }}"
-                                                            data-supply-name="{{ $stock->supply->item_name }}"
-                                                            data-quantity="{{ $stock->quantity_on_hand }}"
-                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
-                                                            data-status="{{ $stock->status }}"
-                                                            data-expiry-date="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
-                                                            data-fund-cluster="{{ $stock->fund_cluster }}"
+                                                            class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200
+                                                                focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900
+                                                                dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
+                                                            data-stock-id       ="{{ $stock->stock_id }}"
+                                                            data-supply-id      ="{{ $stock->supply_id }}"
+                                                            data-supply-name    ="{{ $stock->supply->item_name }}"
+                                                            data-quantity       ="{{ $stock->quantity_on_hand }}"
+                                                            data-unit-cost      ="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-status         ="{{ $stock->status }}"
+                                                            data-expiry-date    ="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
+                                                            data-fund-cluster   ="{{ $stock->fund_cluster }}"
                                                             data-days-to-consume="{{ $stock->days_to_consume }}"
-                                                            data-remarks="{{ $stock->remarks }}" title="Edit stock">
+                                                            data-remarks        ="{{ $stock->remarks }}"
+                                                            data-modal-target="editStockModal"
+                                                            data-modal-toggle="editStockModal" title="Re‑value stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -220,11 +225,12 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- Delete Stock -->
+                                                        <!-- Delete Stock (no data-modal- attributes) -->
                                                         <button type="button"
                                                             class="delete-stock-btn p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
                                                             title="Delete stock">
+                                                            <!-- your delete icon SVG here -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -245,31 +251,17 @@
                                             <tr>
                                                 <td colspan="8" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0
-                                                           00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z" />
-                                                        </svg>
+                                                        <!-- empty‑state SVG + copy -->
+                                                        <svg class="w-12 h-12 text-gray-400 mb-4" ...>…</svg>
                                                         <p
                                                             class="text-lg font-medium text-gray-500 dark:text-gray-400">
-                                                            No stock entries found
-                                                        </p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-                                                            Get started by adding new stock items
-                                                        </p>
-                                                        <button type="button"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300"
-                                                            data-modal-toggle="createStockModal">
-                                                            <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                viewBox="0 0 20 20"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1
-                                                             0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                    clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Add Stock
+                                                            No stock entries found</p>
+                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
+                                                            started by adding new stock items</p>
+                                                        <button type="button" data-modal-target="createStockModal"
+                                                            data-modal-toggle="createStockModal"
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            <svg class="w-4 h-4 mr-2" ...>…</svg> Add Stock
                                                         </button>
                                                     </div>
                                                 </td>
@@ -277,9 +269,76 @@
                                         @endforelse
                                     </tbody>
 
-
-
                                 </table>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', () => {
+
+                                        /* ---------- Flowbite helpers ---------- */
+                                        const modals = {
+                                            editStockModal: document.getElementById('editStockModal')
+                                        };
+
+                                        const show = id => {
+                                            if (!modals[id]) return;
+                                            if (window.Flowbite?.Modal) {
+                                                new window.Flowbite.Modal(modals[id], {
+                                                    backdrop: 'static',
+                                                    placement: 'center',
+                                                    backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
+                                                }).show();
+                                            } else {
+                                                modals[id].classList.remove('hidden');
+                                            }
+                                        };
+                                        const hide = id => {
+                                            if (!modals[id]) return;
+                                            if (window.Flowbite?.Modal) {
+                                                new window.Flowbite.Modal(modals[id]).hide();
+                                            } else {
+                                                modals[id].classList.add('hidden');
+                                            }
+                                        };
+                                        document.querySelectorAll('[data-modal-hide]').forEach(btn =>
+                                            btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
+                                        );
+
+                                        /* ---------- Edit‑stock (re‑value) ---------- */
+                                        document.querySelectorAll('.edit-stock-btn').forEach(btn => {
+                                            btn.addEventListener('click', () => {
+
+                                                /* pull dataset */
+                                                const d = btn.dataset;
+
+                                                /* hidden fields required by controller */
+                                                document.getElementById('edit_supply_id').value  = d.supplyId;
+
+                                                /* visible fields */
+                                                document.getElementById('edit_supply_name').value = d.supplyName;
+                                                document.getElementById('edit_unit_cost').value  = d.unitCost;
+                                                document.getElementById('edit_status').value     = d.status;
+                                                document.getElementById('edit_expiry_date').value= d.expiryDate;
+                                                document.getElementById('edit_fund_cluster').value = d.fundCluster;
+                                                document.getElementById('edit_days_to_consume').value = d.daysToConsume;
+                                                document.getElementById('edit_remarks').value    = d.remarks;
+
+                                                show('editStockModal');
+                                            });
+                                        });
+
+                                        /* ---------- money formatting helper ---------- */
+                                        const formatMoney = el => {
+                                            let digits = (el.value || '').replace(/\D/g, '') || '0';
+                                            el.value = (parseInt(digits, 10) / 100).toLocaleString('en-US', {
+                                                minimumFractionDigits: 2, maximumFractionDigits: 2
+                                            });
+                                        };
+                                        const uc = document.getElementById('edit_unit_cost');
+                                        if (uc) uc.addEventListener('input', () => formatMoney(uc));
+                                    });
+                                    </script>
+
+
                             </div>
                         </div>
                     </div>
@@ -454,6 +513,149 @@
                         </div>
                     </div>
 
+                    <!-- Edit / Re‑value Stock Modal -->
+                    <div id="editStockModal" tabindex="-1" aria-hidden="true"
+                        class="hidden fixed inset-0 z-50 flex items-center justify-center
+                                bg-gray-900 bg-opacity-50 p-4"
+                        data-modal-backdrop="static" data-modal-placement="center">
+
+                        <div class="relative w-full max-w-2xl max-h-full overflow-auto">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+
+                                <!-- Header -->
+                                <div class="flex items-center justify-between p-5
+                                            bg-gradient-to-r from-yellow-600 to-yellow-800 border-b">
+                                    <h3 class="text-2xl font-bold text-white">Re‑value Stock</h3>
+                                    <button type="button" data-modal-hide="editStockModal"
+                                            class="text-white text-2xl leading-none">×</button>
+                                </div>
+
+                                <!-- FORM posts an ADJUSTMENT transaction -->
+                                <form id="editStockForm"
+                                    method="POST"
+                                    action="{{ route('supply-transactions.store') }}"
+                                    class="p-6 bg-gray-50 dark:bg-gray-800">
+                                    @csrf
+
+                                    <!-- fixed values for an ADJUSTMENT -->
+                                    <input type="hidden" name="transaction_type" value="adjustment">
+                                    <input type="hidden" name="supply_id"      id="edit_supply_id">
+                                    <input type="hidden" name="quantity"       value="0"> <!-- qty 0 -->
+                                    <input type="hidden" name="department_id"
+                                        value="{{ auth()->user()->department_id }}">
+
+                                    <!-- you may expose these fields or keep hidden defaults -->
+                                    <input type="hidden" name="transaction_date"
+                                        value="{{ now()->toDateString() }}">
+                                    <input type="hidden" name="reference_no" value="Re‑valuation">
+
+                                    <div class="grid gap-4">
+                                        <!-- Supply (read‑only) -->
+                                        <div>
+                                            <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Supply Item
+                                            </label>
+                                            <input type="text" id="edit_supply_name" disabled
+                                                class="mt-1 block w-full rounded-lg border-gray-300
+                                                        bg-gray-100 dark:bg-gray-700"/>
+                                        </div>
+
+                                        <!-- New Unit Cost -->
+                                        <div>
+                                            <label for="edit_unit_cost"
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                New Unit Cost <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" name="unit_cost" id="edit_unit_cost" required
+                                                class="mt-1 block w-full rounded-lg border-gray-300
+                                                        focus:ring-yellow-500 focus:border-yellow-500"/>
+                                        </div>
+
+                                        <!-- Optional metadata you still want editable -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="edit_status"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Status <span class="text-red-500">*</span>
+                                                </label>
+                                                <select name="status" id="edit_status" required
+                                                        class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500">
+                                                    <option value="available">Available</option>
+                                                    <option value="reserved">Reserved</option>
+                                                    <option value="expired">Expired</option>
+                                                    <option value="depleted">Depleted</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="edit_expiry_date"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Expiry Date
+                                                </label>
+                                                <input type="date" name="expiry_date" id="edit_expiry_date"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="edit_fund_cluster"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Fund Cluster <span class="text-red-500">*</span>
+                                                </label>
+                                                <select name="fund_cluster" id="edit_fund_cluster" required
+                                                        class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500">
+                                                    <option value="101">101</option>
+                                                    <option value="151">151</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="edit_days_to_consume"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Days to Consume
+                                                </label>
+                                                <input type="number" name="days_to_consume"
+                                                    id="edit_days_to_consume" min="0"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Remarks -->
+                                        <div>
+                                            <label for="edit_remarks"
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Remarks
+                                            </label>
+                                            <textarea name="remarks" id="edit_remarks" rows="3"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer -->
+                                    <div class="flex items-center justify-end mt-6 space-x-3 border-t pt-4">
+                                        <button type="button" data-modal-hide="editStockModal"
+                                                class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-100">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                                class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700
+                                                    text-white rounded-lg">
+                                            Save Re‑valuation
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
                 </div><!-- End .section-container -->
             </div>
         </div>
@@ -530,16 +732,50 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const show = id => document.getElementById(id)?.classList.remove('hidden');
-            const hide = id => document.getElementById(id)?.classList.add('hidden');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Flowbite modals
+            const modals = {
+                createStockModal: document.getElementById('createStockModal'),
+                editStockModal: document.getElementById('editStockModal')
+            };
 
-            // Close any modal via its [data-modal-hide] button
-            document.querySelectorAll('[data-modal-hide]').forEach(btn => {
-                btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')));
-            });
+            // Manual modal control functions
+            const show = id => {
+                if (modals[id]) {
+                    const options = {
+                        backdrop: 'static',
+                        placement: 'center',
+                        backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
+                    };
 
-            // + Add‑Stock per row
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id], options);
+                        modal.show();
+                    } else {
+                        modals[id].classList.remove('hidden');
+                    }
+                }
+            };
+
+            const hide = id => {
+                if (modals[id]) {
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id]);
+                        modal.hide();
+                    } else {
+                        modals[id].classList.add('hidden');
+                    }
+                }
+            };
+
+            // Close modals
+            document.querySelectorAll('[data-modal-hide]').forEach(btn =>
+                btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
+            );
+
+            // + Add‑Stock button
             document.querySelectorAll('.add-stock-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const {
@@ -554,32 +790,41 @@
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
                         });
-                    document.getElementById('supply_id').dispatchEvent(new Event('change'));
+                    // reset other fields
+                    document.getElementById('quantity_on_hand').value = 0;
+                    document.getElementById('status').value = 'available';
+                    document.getElementById('expiry_date').value = '';
+                    document.getElementById('days_to_consume').value = '';
+                    document.getElementById('remarks').value = '';
                     show('createStockModal');
                     document.getElementById('quantity_on_hand').focus();
                 });
             });
 
-            // Populate Edit modal
+            // === Edit‑Stock button (fixed) ===
             document.querySelectorAll('.edit-stock-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const d = btn.dataset;
+                    // populate the modal fields
                     document.getElementById('edit_stock_id').value = d.stockId;
                     document.getElementById('edit_supply_id').value = d.supplyId;
                     document.getElementById('edit_supply_name').value = d.supplyName;
-                    document.getElementById('edit_quantity_on_hand').value = d.quantity;
                     document.getElementById('edit_unit_cost').value = d.unitCost;
                     document.getElementById('edit_status').value = d.status;
                     document.getElementById('edit_expiry_date').value = d.expiryDate;
                     document.getElementById('edit_fund_cluster').value = d.fundCluster;
                     document.getElementById('edit_days_to_consume').value = d.daysToConsume;
                     document.getElementById('edit_remarks').value = d.remarks;
+
+                    // point the form at the correct route: PUT /supply-stocks/{id}
                     document.getElementById('editStockForm').action = `/supply-stocks/${d.stockId}`;
+
+                    // show the modal
                     show('editStockModal');
                 });
             });
 
-            // Delete handler (example with confirm)
+            // Delete‑Stock button
             document.querySelectorAll('.delete-stock-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (!confirm('Are you sure you want to delete this stock?')) return;
@@ -594,43 +839,40 @@
                 });
             });
 
-            // Format money input helper
-            function formatMoneyInput(el) {
+            // format money fields
+            const formatMoney = el => {
                 let digits = (el.value || '').replace(/\D/g, '') || '0';
                 let amt = parseInt(digits, 10) / 100;
                 el.value = amt.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
-            }
-            // Wire up create & edit unit_cost fields
-            const cCost = document.getElementById('unit_cost'),
-                eCost = document.getElementById('edit_unit_cost');
-            if (cCost) cCost.addEventListener('input', () => formatMoneyInput(cCost));
-            if (eCost) eCost.addEventListener('input', () => formatMoneyInput(eCost));
+            };
+            ['unit_cost', 'edit_unit_cost'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.addEventListener('input', () => formatMoney(input));
+            });
 
-            // Search clear button
+            // search clear
             const inp = document.getElementById('search-input'),
                 clr = document.getElementById('clearButton');
-
-            function toggleClr() {
-                clr && (clr.style.display = inp.value.trim() ? 'flex' : 'none');
-            }
+            const toggleClr = () => clr && (clr.style.display = inp.value.trim() ? 'flex' : 'none');
             if (inp && clr) {
                 inp.addEventListener('input', toggleClr);
                 toggleClr();
+                window.clearSearch = () => {
+                    inp.value = '';
+                    toggleClr();
+                    inp.form.submit();
+                }
             }
-            window.clearSearch = () => {
-                inp.value = '';
-                toggleClr();
-                inp.form.submit();
-            };
 
-            // Re‑open on validation errors
+            // re‑open on validation errors
             @if ($errors->any() && session('show_create_modal'))
                 show('createStockModal');
             @endif
             @if ($errors->any() && session('show_edit_modal'))
+                // find the button for this edit and trigger it
                 const editId = {{ session('show_edit_modal') }};
                 document.querySelectorAll('.edit-stock-btn').forEach(b => {
                     if (b.dataset.stockId == editId) b.click();
@@ -638,10 +880,5 @@
             @endif
         });
     </script>
-
-
-
-
-
 
 </x-app-layout>
