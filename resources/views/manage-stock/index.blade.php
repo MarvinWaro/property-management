@@ -161,10 +161,10 @@
                                                 <td class="px-6 py-4">
                                                     <span
                                                         class="px-2 py-1 text-xs font-medium rounded-full
-                                                  @if ($stock->status == 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                                  @elseif($stock->status == 'reserved')  bg-blue-100  text-blue-800  dark:bg-blue-900  dark:text-blue-300
-                                                  @elseif($stock->status == 'expired')   bg-red-100   text-red-800   dark:bg-red-900   dark:text-red-300
-                                                  @else                                 bg-gray-100  text-gray-800 dark:bg-gray-900 dark:text-gray-300 @endif">
+                                                        @if ($stock->status == 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                                        @elseif($stock->status == 'reserved')  bg-blue-100  text-blue-800  dark:bg-blue-900  dark:text-blue-300
+                                                        @elseif($stock->status == 'expired')   bg-red-100   text-red-800   dark:bg-red-900   dark:text-red-300
+                                                        @else                                 bg-gray-100  text-gray-800 dark:bg-gray-900 dark:text-gray-300 @endif">
                                                         {{ ucfirst($stock->status) }}
                                                     </span>
                                                 </td>
@@ -197,23 +197,23 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- Edit Stock (no data-modal- attributes) -->
-                                                        <!-- Edit Stock (with data-modal attributes) -->
+                                                        <!-- Edit Stock (Adjustment/Re‑value) -->
                                                         <button type="button"
-                                                            class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
-                                                            data-stock-id      ="{{ $stock->stock_id }}"
-                                                            data-supply-id     ="{{ $stock->supply_id }}"
-                                                            data-supply-name   ="{{ $stock->supply->item_name }}"
-                                                            data-quantity      ="{{ $stock->quantity_on_hand }}"
-                                                            data-unit-cost     ="{{ number_format($stock->unit_cost, 2) }}"
-                                                            data-status        ="{{ $stock->status }}"
-                                                            data-expiry-date   ="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
-                                                            data-fund-cluster  ="{{ $stock->fund_cluster }}"
+                                                            class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200
+                                                                focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900
+                                                                dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
+                                                            data-stock-id       ="{{ $stock->stock_id }}"
+                                                            data-supply-id      ="{{ $stock->supply_id }}"
+                                                            data-supply-name    ="{{ $stock->supply->item_name }}"
+                                                            data-quantity       ="{{ $stock->quantity_on_hand }}"
+                                                            data-unit-cost      ="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-status         ="{{ $stock->status }}"
+                                                            data-expiry-date    ="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
+                                                            data-fund-cluster   ="{{ $stock->fund_cluster }}"
                                                             data-days-to-consume="{{ $stock->days_to_consume }}"
-                                                            data-remarks       ="{{ $stock->remarks }}"
+                                                            data-remarks        ="{{ $stock->remarks }}"
                                                             data-modal-target="editStockModal"
-                                                            data-modal-toggle="editStockModal" title="Edit stock">
-                                                            <!-- your edit icon SVG here -->
+                                                            data-modal-toggle="editStockModal" title="Re‑value stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -270,6 +270,75 @@
                                     </tbody>
 
                                 </table>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', () => {
+
+                                        /* ---------- Flowbite helpers ---------- */
+                                        const modals = {
+                                            editStockModal: document.getElementById('editStockModal')
+                                        };
+
+                                        const show = id => {
+                                            if (!modals[id]) return;
+                                            if (window.Flowbite?.Modal) {
+                                                new window.Flowbite.Modal(modals[id], {
+                                                    backdrop: 'static',
+                                                    placement: 'center',
+                                                    backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
+                                                }).show();
+                                            } else {
+                                                modals[id].classList.remove('hidden');
+                                            }
+                                        };
+                                        const hide = id => {
+                                            if (!modals[id]) return;
+                                            if (window.Flowbite?.Modal) {
+                                                new window.Flowbite.Modal(modals[id]).hide();
+                                            } else {
+                                                modals[id].classList.add('hidden');
+                                            }
+                                        };
+                                        document.querySelectorAll('[data-modal-hide]').forEach(btn =>
+                                            btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
+                                        );
+
+                                        /* ---------- Edit‑stock (re‑value) ---------- */
+                                        document.querySelectorAll('.edit-stock-btn').forEach(btn => {
+                                            btn.addEventListener('click', () => {
+
+                                                /* pull dataset */
+                                                const d = btn.dataset;
+
+                                                /* hidden fields required by controller */
+                                                document.getElementById('edit_supply_id').value  = d.supplyId;
+
+                                                /* visible fields */
+                                                document.getElementById('edit_supply_name').value = d.supplyName;
+                                                document.getElementById('edit_unit_cost').value  = d.unitCost;
+                                                document.getElementById('edit_status').value     = d.status;
+                                                document.getElementById('edit_expiry_date').value= d.expiryDate;
+                                                document.getElementById('edit_fund_cluster').value = d.fundCluster;
+                                                document.getElementById('edit_days_to_consume').value = d.daysToConsume;
+                                                document.getElementById('edit_remarks').value    = d.remarks;
+
+                                                show('editStockModal');
+                                            });
+                                        });
+
+                                        /* ---------- money formatting helper ---------- */
+                                        const formatMoney = el => {
+                                            let digits = (el.value || '').replace(/\D/g, '') || '0';
+                                            el.value = (parseInt(digits, 10) / 100).toLocaleString('en-US', {
+                                                minimumFractionDigits: 2, maximumFractionDigits: 2
+                                            });
+                                        };
+                                        const uc = document.getElementById('edit_unit_cost');
+                                        if (uc) uc.addEventListener('input', () => formatMoney(uc));
+                                    });
+                                    </script>
+
+
                             </div>
                         </div>
                     </div>
@@ -444,56 +513,66 @@
                         </div>
                     </div>
 
-                    <!-- Edit Stock Modal -->
+                    <!-- Edit / Re‑value Stock Modal -->
                     <div id="editStockModal" tabindex="-1" aria-hidden="true"
-                        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4"
+                        class="hidden fixed inset-0 z-50 flex items-center justify-center
+                                bg-gray-900 bg-opacity-50 p-4"
                         data-modal-backdrop="static" data-modal-placement="center">
+
                         <div class="relative w-full max-w-2xl max-h-full overflow-auto">
                             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-                                <div
-                                    class="flex items-center justify-between p-5 bg-gradient-to-r from-yellow-600 to-yellow-800 border-b">
-                                    <h3 class="text-2xl font-bold text-white">Edit Stock</h3>
+
+                                <!-- Header -->
+                                <div class="flex items-center justify-between p-5
+                                            bg-gradient-to-r from-yellow-600 to-yellow-800 border-b">
+                                    <h3 class="text-2xl font-bold text-white">Re‑value Stock</h3>
                                     <button type="button" data-modal-hide="editStockModal"
-                                        class="text-white text-2xl leading-none">×</button>
+                                            class="text-white text-2xl leading-none">×</button>
                                 </div>
 
-                                <form id="editStockForm" method="POST" class="p-6 bg-gray-50 dark:bg-gray-800">
+                                <!-- FORM posts an ADJUSTMENT transaction -->
+                                <form id="editStockForm"
+                                    method="POST"
+                                    action="{{ route('supply-transactions.store') }}"
+                                    class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="stock_id" id="edit_stock_id">
 
-                                    @if ($errors->any() && session('show_edit_modal'))
-                                        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
-                                            <ul class="list-disc list-inside">
-                                                @foreach ($errors->all() as $e)
-                                                    <li>{{ $e }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
+                                    <!-- fixed values for an ADJUSTMENT -->
+                                    <input type="hidden" name="transaction_type" value="adjustment">
+                                    <input type="hidden" name="supply_id"      id="edit_supply_id">
+                                    <input type="hidden" name="quantity"       value="0"> <!-- qty 0 -->
+                                    <input type="hidden" name="department_id"
+                                        value="{{ auth()->user()->department_id }}">
+
+                                    <!-- you may expose these fields or keep hidden defaults -->
+                                    <input type="hidden" name="transaction_date"
+                                        value="{{ now()->toDateString() }}">
+                                    <input type="hidden" name="reference_no" value="Re‑valuation">
 
                                     <div class="grid gap-4">
-                                        <!-- Supply Item (read‑only) -->
+                                        <!-- Supply (read‑only) -->
                                         <div>
                                             <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">Supply
-                                                Item</label>
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Supply Item
+                                            </label>
                                             <input type="text" id="edit_supply_name" disabled
-                                                class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 dark:bg-gray-700" />
-                                            <input type="hidden" name="supply_id" id="edit_supply_id" />
+                                                class="mt-1 block w-full rounded-lg border-gray-300
+                                                        bg-gray-100 dark:bg-gray-700"/>
                                         </div>
 
-                                        <!-- Unit Cost -->
+                                        <!-- New Unit Cost -->
                                         <div>
                                             <label for="edit_unit_cost"
                                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Unit Cost <span class="text-red-500">*</span>
+                                                New Unit Cost <span class="text-red-500">*</span>
                                             </label>
                                             <input type="text" name="unit_cost" id="edit_unit_cost" required
-                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                                class="mt-1 block w-full rounded-lg border-gray-300
+                                                        focus:ring-yellow-500 focus:border-yellow-500"/>
                                         </div>
 
-                                        <!-- Status & Expiry Date -->
+                                        <!-- Optional metadata you still want editable -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label for="edit_status"
@@ -501,7 +580,8 @@
                                                     Status <span class="text-red-500">*</span>
                                                 </label>
                                                 <select name="status" id="edit_status" required
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500">
+                                                        class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500">
                                                     <option value="available">Available</option>
                                                     <option value="reserved">Reserved</option>
                                                     <option value="expired">Expired</option>
@@ -514,11 +594,11 @@
                                                     Expiry Date
                                                 </label>
                                                 <input type="date" name="expiry_date" id="edit_expiry_date"
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"/>
                                             </div>
                                         </div>
 
-                                        <!-- Fund Cluster & Days to Consume -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label for="edit_fund_cluster"
@@ -526,7 +606,8 @@
                                                     Fund Cluster <span class="text-red-500">*</span>
                                                 </label>
                                                 <select name="fund_cluster" id="edit_fund_cluster" required
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500">
+                                                        class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500">
                                                     <option value="101">101</option>
                                                     <option value="151">151</option>
                                                 </select>
@@ -538,7 +619,8 @@
                                                 </label>
                                                 <input type="number" name="days_to_consume"
                                                     id="edit_days_to_consume" min="0"
-                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"/>
                                             </div>
                                         </div>
 
@@ -549,25 +631,28 @@
                                                 Remarks
                                             </label>
                                             <textarea name="remarks" id="edit_remarks" rows="3"
-                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
+                                                    class="mt-1 block w-full rounded-lg border-gray-300
+                                                            focus:ring-yellow-500 focus:border-yellow-500"></textarea>
                                         </div>
                                     </div>
 
-                                    <!-- Modal Footer -->
+                                    <!-- Footer -->
                                     <div class="flex items-center justify-end mt-6 space-x-3 border-t pt-4">
                                         <button type="button" data-modal-hide="editStockModal"
-                                            class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-100">
+                                                class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-100">
                                             Cancel
                                         </button>
                                         <button type="submit"
-                                            class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white rounded-lg">
-                                            Save Changes
+                                                class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700
+                                                    text-white rounded-lg">
+                                            Save Re‑valuation
                                         </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
+
 
 
 

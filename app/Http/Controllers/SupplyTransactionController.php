@@ -1,5 +1,5 @@
 <?php
-// Controller: app/Http/Controllers/SupplyTransactionController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\SupplyTransaction;
@@ -14,15 +14,9 @@ class SupplyTransactionController extends Controller
         $query = SupplyTransaction::with(['supply', 'department', 'user'])
                     ->orderBy('transaction_date', 'desc');
 
-        if ($request->filled('from')) {
-            $query->whereDate('transaction_date', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $query->whereDate('transaction_date', '<=', $request->to);
-        }
-        if ($request->filled('type')) {
-            $query->where('transaction_type', $request->type);
-        }
+        if ($request->filled('from')) $query->whereDate('transaction_date', '>=', $request->from);
+        if ($request->filled('to'))   $query->whereDate('transaction_date', '<=', $request->to);
+        if ($request->filled('type')) $query->where('transaction_type', $request->type);
 
         $txns = $query->paginate(25)->withQueryString();
         return view('supply-transaction.index', compact('txns'));
@@ -35,29 +29,62 @@ class SupplyTransactionController extends Controller
 
     public function store(Request $request)
     {
+        /* 1 ▸ Validate input */
         $data = $request->validate([
             'supply_id'        => 'required|exists:supplies,supply_id',
             'transaction_type' => 'required|in:receipt,issue,adjustment',
             'transaction_date' => 'required|date',
             'reference_no'     => 'required|string',
-            'quantity'         => 'required|integer|min:1',
+            'quantity'         => 'required|integer|min:0',   // qty 0 allowed for adjustment
             'unit_cost'        => 'required|numeric|min:0',
             'department_id'    => 'required|exists:departments,id',
             'remarks'          => 'nullable|string',
         ]);
 
-        $stock = SupplyStock::where('supply_id', $data['supply_id'])->firstOrFail();
-        $data['total_cost'] = $data['unit_cost'] * $data['quantity'];
-        $data['balance_quantity'] = $stock->quantity_on_hand + ($data['transaction_type'] === 'receipt' ? $data['quantity'] : -$data['quantity']);
+        /* ▲ NEW: record who performed the transaction */
+        $data['user_id'] = auth()->id();
 
-        DB::transaction(function() use ($data, $stock) {
-            SupplyTransaction::create($data);
+        /* 2 ▸ Lock summary row */
+        $stock = SupplyStock::where('supply_id', $data['supply_id'])
+                 ->lockForUpdate()
+                 ->firstOrFail();
+
+        /* 3 ▸ Derived values */
+        $data['total_cost'] = $data['unit_cost'] * $data['quantity'];
+
+        $deltaQty = match ($data['transaction_type']) {
+            SupplyTransaction::RECEIPT    =>  $data['quantity'],
+            SupplyTransaction::ISSUE      => -$data['quantity'],
+            SupplyTransaction::ADJUSTMENT =>  0,
+        };
+
+        $newQty = $stock->quantity_on_hand + $deltaQty;
+        if ($newQty < 0) {
+            return back()->withErrors('Issuance would make quantity negative.');
+        }
+
+        $newUnitCost = match ($data['transaction_type']) {
+            SupplyTransaction::RECEIPT =>
+                $newQty ? ($stock->total_cost + $data['total_cost']) / $newQty
+                        : $stock->unit_cost,
+            SupplyTransaction::ISSUE      => $stock->unit_cost,
+            SupplyTransaction::ADJUSTMENT => $data['unit_cost'],
+        };
+
+        /* 4 ▸ Atomic save */
+        DB::transaction(function () use ($data, $stock, $newQty, $newUnitCost) {
+
+            $data['balance_quantity'] = $newQty;
+            SupplyTransaction::create($data);   // now includes user_id
+
             $stock->update([
-                'quantity_on_hand' => $data['balance_quantity'],
-                'unit_cost'        => $data['unit_cost'],
+                'quantity_on_hand' => $newQty,
+                'unit_cost'        => $newUnitCost,
+                'total_cost'       => $newQty * $newUnitCost,
             ]);
         });
 
         return back()->with('success', 'Transaction recorded successfully.');
     }
+
 }
