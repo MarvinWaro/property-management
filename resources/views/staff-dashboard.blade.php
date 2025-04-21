@@ -47,9 +47,6 @@
                             <div class="bg-white shadow rounded-lg overflow-hidden">
                                 <h3 class="text-md font-semibold px-6 py-3 border-b border-gray-200">Profile Navigation</h3>
                                 <nav id="profile-nav" class="flex flex-col">
-                                    <a href="#" class="profile-nav-link px-6 py-3 text-gray-700 hover:bg-gray-50 border-l-4 border-transparent transition duration-300 ease-in-out" data-target="about">
-                                        About Me
-                                    </a>
                                     <a href="#" class="profile-nav-link px-6 py-3 text-gray-700 hover:bg-gray-50 border-l-4 border-transparent transition duration-300 ease-in-out" data-target="requests">
                                         Requests
                                     </a>
@@ -62,18 +59,15 @@
 
                         <!-- Main content area -->
                         <div class="details col-span-4 sm:col-span-9">
-                            <!-- About Me Section -->
-                            <div id="about" class="content-section bg-white shadow rounded-lg p-6">
-                                <h2 class="text-xl font-bold mb-4">About Me</h2>
-                                <p class="text-gray-700">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est vitae tortor ullamcorper, ut vestibulum velit convallis.
-                                </p>
-                            </div>
-
                             <!-- Requests Section (initially hidden) -->
                             <div id="requests" class="content-section bg-white shadow rounded-lg p-6 hidden">
-                                <h2 class="text-xl font-bold mb-4">My Requests</h2>
+
+                                <a href="#" type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Request Supply</a>
+
+                                <h2 class="text-xl font-bold my-4">My Requests</h2>
                                 <!-- Replace the following table with your dynamic request data -->
+
+
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead>
                                         <tr>
