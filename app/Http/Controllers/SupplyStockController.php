@@ -104,7 +104,7 @@ class SupplyStockController extends Controller
         ]);
 
         $validated = $request->validate([
-            'quantity_on_hand' => 'required|integer|min:0',
+            // Metadata fields that are allowed to be edited
             'unit_cost'        => 'required|numeric|min:0',
             'expiry_date'      => 'nullable|date',
             'status'           => 'required|in:available,reserved,expired,depleted',
@@ -114,7 +114,12 @@ class SupplyStockController extends Controller
         ]);
 
         $stock = SupplyStock::findOrFail($id);
-        $validated['total_cost'] = $validated['quantity_on_hand'] * $validated['unit_cost'];
+
+        // Keep the existing quantity, only update the validated fields
+        $originalQuantity = $stock->quantity_on_hand;
+
+        // Recalculate total cost based on new unit cost and existing quantity
+        $validated['total_cost'] = $originalQuantity * $validated['unit_cost'];
 
         $stock->update($validated);
 

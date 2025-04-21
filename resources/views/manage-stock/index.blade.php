@@ -198,6 +198,7 @@
                                                         </button>
 
                                                         <!-- Edit Stock (no data-modal- attributes) -->
+                                                        <!-- Edit Stock (with data-modal attributes) -->
                                                         <button type="button"
                                                             class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
                                                             data-stock-id      ="{{ $stock->stock_id }}"
@@ -210,7 +211,8 @@
                                                             data-fund-cluster  ="{{ $stock->fund_cluster }}"
                                                             data-days-to-consume="{{ $stock->days_to_consume }}"
                                                             data-remarks       ="{{ $stock->remarks }}"
-                                                            title="Edit stock">
+                                                            data-modal-target="editStockModal"
+                                                            data-modal-toggle="editStockModal" title="Edit stock">
                                                             <!-- your edit icon SVG here -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
@@ -230,17 +232,17 @@
                                                             title="Delete stock">
                                                             <!-- your delete icon SVG here -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                            height="16" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M3 6h18" />
-                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                            <line x1="10" x2="10" y1="11"
-                                                                y2="17" />
-                                                            <line x1="14" x2="14" y1="11"
-                                                                y2="17" />
-                                                        </svg>
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11"
+                                                                    y2="17" />
+                                                                <line x1="14" x2="14" y1="11"
+                                                                    y2="17" />
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -266,10 +268,6 @@
                                             </tr>
                                         @endforelse
                                     </tbody>
-
-
-
-
 
                                 </table>
                             </div>
@@ -446,6 +444,133 @@
                         </div>
                     </div>
 
+                    <!-- Edit Stock Modal -->
+                    <div id="editStockModal" tabindex="-1" aria-hidden="true"
+                        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 p-4"
+                        data-modal-backdrop="static" data-modal-placement="center">
+                        <div class="relative w-full max-w-2xl max-h-full overflow-auto">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+                                <div
+                                    class="flex items-center justify-between p-5 bg-gradient-to-r from-yellow-600 to-yellow-800 border-b">
+                                    <h3 class="text-2xl font-bold text-white">Edit Stock</h3>
+                                    <button type="button" data-modal-hide="editStockModal"
+                                        class="text-white text-2xl leading-none">×</button>
+                                </div>
+
+                                <form id="editStockForm" method="POST" class="p-6 bg-gray-50 dark:bg-gray-800">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="stock_id" id="edit_stock_id">
+
+                                    @if ($errors->any() && session('show_edit_modal'))
+                                        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                                            <ul class="list-disc list-inside">
+                                                @foreach ($errors->all() as $e)
+                                                    <li>{{ $e }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    <div class="grid gap-4">
+                                        <!-- Supply Item (read‑only) -->
+                                        <div>
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">Supply
+                                                Item</label>
+                                            <input type="text" id="edit_supply_name" disabled
+                                                class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 dark:bg-gray-700" />
+                                            <input type="hidden" name="supply_id" id="edit_supply_id" />
+                                        </div>
+
+                                        <!-- Unit Cost -->
+                                        <div>
+                                            <label for="edit_unit_cost"
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Unit Cost <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" name="unit_cost" id="edit_unit_cost" required
+                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                        </div>
+
+                                        <!-- Status & Expiry Date -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="edit_status"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Status <span class="text-red-500">*</span>
+                                                </label>
+                                                <select name="status" id="edit_status" required
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500">
+                                                    <option value="available">Available</option>
+                                                    <option value="reserved">Reserved</option>
+                                                    <option value="expired">Expired</option>
+                                                    <option value="depleted">Depleted</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="edit_expiry_date"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Expiry Date
+                                                </label>
+                                                <input type="date" name="expiry_date" id="edit_expiry_date"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Fund Cluster & Days to Consume -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="edit_fund_cluster"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Fund Cluster <span class="text-red-500">*</span>
+                                                </label>
+                                                <select name="fund_cluster" id="edit_fund_cluster" required
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500">
+                                                    <option value="101">101</option>
+                                                    <option value="151">151</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="edit_days_to_consume"
+                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Days to Consume
+                                                </label>
+                                                <input type="number" name="days_to_consume"
+                                                    id="edit_days_to_consume" min="0"
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Remarks -->
+                                        <div>
+                                            <label for="edit_remarks"
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Remarks
+                                            </label>
+                                            <textarea name="remarks" id="edit_remarks" rows="3"
+                                                class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Footer -->
+                                    <div class="flex items-center justify-end mt-6 space-x-3 border-t pt-4">
+                                        <button type="button" data-modal-hide="editStockModal"
+                                            class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-100">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white rounded-lg">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+
                 </div><!-- End .section-container -->
             </div>
         </div>
@@ -523,8 +648,42 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const show = id => document.getElementById(id)?.classList.remove('hidden');
-            const hide = id => document.getElementById(id)?.classList.add('hidden');
+            // Initialize Flowbite modals
+            const modals = {
+                createStockModal: document.getElementById('createStockModal'),
+                editStockModal: document.getElementById('editStockModal')
+            };
+
+            // Manual modal control functions
+            const show = id => {
+                if (modals[id]) {
+                    const options = {
+                        backdrop: 'static',
+                        placement: 'center',
+                        backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
+                    };
+
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id], options);
+                        modal.show();
+                    } else {
+                        modals[id].classList.remove('hidden');
+                    }
+                }
+            };
+
+            const hide = id => {
+                if (modals[id]) {
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id]);
+                        modal.hide();
+                    } else {
+                        modals[id].classList.add('hidden');
+                    }
+                }
+            };
 
             // Close modals
             document.querySelectorAll('[data-modal-hide]').forEach(btn =>
@@ -557,10 +716,26 @@
                 });
             });
 
-            // Edit‑Stock button (you’ll wire up your own edit modal later)
+            // === Edit‑Stock button (fixed) ===
             document.querySelectorAll('.edit-stock-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // your custom edit‑modal logic here...
+                    const d = btn.dataset;
+                    // populate the modal fields
+                    document.getElementById('edit_stock_id').value = d.stockId;
+                    document.getElementById('edit_supply_id').value = d.supplyId;
+                    document.getElementById('edit_supply_name').value = d.supplyName;
+                    document.getElementById('edit_unit_cost').value = d.unitCost;
+                    document.getElementById('edit_status').value = d.status;
+                    document.getElementById('edit_expiry_date').value = d.expiryDate;
+                    document.getElementById('edit_fund_cluster').value = d.fundCluster;
+                    document.getElementById('edit_days_to_consume').value = d.daysToConsume;
+                    document.getElementById('edit_remarks').value = d.remarks;
+
+                    // point the form at the correct route: PUT /supply-stocks/{id}
+                    document.getElementById('editStockForm').action = `/supply-stocks/${d.stockId}`;
+
+                    // show the modal
+                    show('editStockModal');
                 });
             });
 
@@ -612,16 +787,13 @@
                 show('createStockModal');
             @endif
             @if ($errors->any() && session('show_edit_modal'))
-                // trigger your edit logic here...
+                // find the button for this edit and trigger it
+                const editId = {{ session('show_edit_modal') }};
+                document.querySelectorAll('.edit-stock-btn').forEach(b => {
+                    if (b.dataset.stockId == editId) b.click();
+                });
             @endif
         });
     </script>
-
-
-
-
-
-
-
 
 </x-app-layout>
