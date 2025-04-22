@@ -22,7 +22,7 @@ class SupplyStockController extends Controller
         if ($search) {
             $stocksQuery->whereHas('supply', function($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
-                  ->orWhere('stock_no',   'like', "%{$search}%");
+                ->orWhere('stock_no',   'like', "%{$search}%");
             });
         }
 

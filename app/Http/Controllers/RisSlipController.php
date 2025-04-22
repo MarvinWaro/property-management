@@ -13,15 +13,29 @@ use Illuminate\Support\Facades\Auth;
 
 class RisSlipController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $risSlips = RisSlip::with(['division', 'requester'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
 
+    
+
+    public function index(Request $request)
+    {
+        $query = RisSlip::with(['division', 'requester'])
+                    ->orderBy('created_at', 'desc');
+
+        // Add search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('ris_no', 'like', "%{$search}%")
+                ->orWhereHas('requester', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('division', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $risSlips = $query->paginate(10)->withQueryString();
         return view('ris.index', compact('risSlips'));
     }
 
