@@ -1,4 +1,4 @@
-```html
+
 <!-- resources/views/ris/index.blade.php -->
 <x-app-layout>
     <x-slot name="header">
@@ -90,4 +90,3 @@
         </div>
     </div>
 </x-app-layout>
-```

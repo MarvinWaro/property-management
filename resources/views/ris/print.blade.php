@@ -1,4 +1,4 @@
-```html
+
 <!-- resources/views/ris/print.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
