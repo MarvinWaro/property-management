@@ -65,58 +65,225 @@
                         <!-- Main content area -->
                         <div class="details col-span-4 sm:col-span-9">
                             <!-- Requests Section (initially hidden) -->
-
                             @if (session('success'))
-                                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+                                    role="alert">
                                     <span class="block sm:inline">{{ session('success') }}</span>
                                 </div>
                             @endif
 
+                            <!-- Enhanced My Requests Section -->
                             <div id="requests" class="content-section bg-white shadow rounded-lg p-6 hidden">
+                                <!-- Alert Messages -->
+                                @if (session('success'))
+                                    <div id="flashMessage"
+                                        class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+                                        role="alert">
+                                        <span class="font-medium">Success!</span> {{ session('success') }}
+                                    </div>
+                                    <script>
+                                        setTimeout(() => {
+                                            document.getElementById('flashMessage').style.display = 'none';
+                                        }, 3000);
+                                    </script>
+                                @endif
 
-                                <!-- ... inside #requests section -->
-                                <button id="openRequestModal"
-                                    class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br
-                                    focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800
-                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-4">
-                                    Request Supply
-                                </button>
+                                <!-- Header with Button and Search -->
+                                <div
+                                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+                                    <h2 class="text-xl font-bold">My Requests</h2>
 
-                                <h2 class="text-xl font-bold my-4">My Requests</h2>
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead>
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RIS NO</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        @forelse($myRequests as $request)
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $request->ris_no }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">{{ $request->ris_date->format('M d, Y') }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    @if($request->status === 'draft')
-                                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">Pending</span>
-                                                    @elseif($request->status === 'approved')
-                                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-200 text-blue-800">Approved</span>
-                                                    @elseif($request->status === 'posted')
-                                                        <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">Issued</span>
-                                                    @endif
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <a href="{{ route('ris.show', $request->ris_id) }}" class="text-blue-600 hover:text-blue-900">View</a>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4" class="px-6 py-4 text-center text-gray-500">No requests found.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                    <button id="openRequestModal"
+                                        class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br
+                                            focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800
+                                            font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Request Supply
+                                    </button>
+                                </div>
+
+                                <!-- Filter & Search Section -->
+                                <div
+                                    class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-600">
+                                    <div class="flex flex-wrap gap-4 items-center justify-between">
+                                        <!-- Status Filters -->
+                                        <div class="flex flex-wrap gap-2">
+                                            <button type="button"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 active-filter"
+                                                data-status="all">
+                                                All
+                                            </button>
+                                            <button type="button"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:text-yellow-800 dark:hover:text-yellow-300"
+                                                data-status="draft">
+                                                <span
+                                                    class="w-2 h-2 mr-1 inline-block rounded-full bg-yellow-400"></span>
+                                                Pending
+                                            </button>
+                                            <button type="button"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-300"
+                                                data-status="approved">
+                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-blue-400"></span>
+                                                Approved
+                                            </button>
+                                            <button type="button"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg hover:bg-green-100 dark:hover:bg-green-900 hover:text-green-800 dark:hover:text-green-300"
+                                                data-status="posted">
+                                                <span
+                                                    class="w-2 h-2 mr-1 inline-block rounded-full bg-green-400"></span>
+                                                Issued
+                                            </button>
+                                        </div>
+
+                                        <!-- Search Form -->
+                                        <div class="relative w-full max-w-sm">
+                                            <div class="relative flex-grow">
+                                                <input type="text" id="request-search-input"
+                                                    oninput="toggleClearRequestButton()"
+                                                    placeholder="Search by RIS number..."
+                                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
+                                                        focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                                        dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                                        dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+
+                                                <!-- The 'X' Button (hidden by default) -->
+                                                <button type="button" id="clearRequestButton"
+                                                    onclick="clearRequestSearch()" style="display: none;"
+                                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                        height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" class="lucide lucide-x">
+                                                        <line x1="18" x2="6" y1="6"
+                                                            y2="18" />
+                                                        <line x1="6" x2="18" y1="6"
+                                                            y2="18" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Table Description Caption -->
+                                <div
+                                    class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Supply
+                                        Requisition Management</h3>
+                                    <p>
+                                        Track and manage your supply requisition requests. You can filter by status,
+                                        search for specific requisitions,
+                                        and view detailed information about each request.
+                                    </p>
+                                </div>
+
+                                <!-- Requests Table -->
+                                <div
+                                    class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                                    <div class="overflow-x-auto">
+                                        <div class="overflow-y-auto max-h-[500px]">
+                                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                                <thead
+                                                    class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
+                                                        <th class="px-6 py-3 text-left tracking-wider">DATE</th>
+                                                        <th class="px-6 py-3 text-left tracking-wider">PURPOSE</th>
+                                                        <th class="px-6 py-3 text-left tracking-wider">STATUS</th>
+                                                        <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody
+                                                    class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700"
+                                                    id="requests-table-body">
+                                                    @forelse($myRequests as $request)
+                                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row"
+                                                            data-status="{{ $request->status }}">
+                                                            <td
+                                                                class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                                {{ $request->ris_no }}</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                {{ $request->ris_date->format('M d, Y') }}</td>
+                                                            <td class="px-6 py-4">
+                                                                <span
+                                                                    class="line-clamp-1">{{ $request->purpose }}</span>
+                                                            </td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                @if ($request->status === 'draft')
+                                                                    <span
+                                                                        class="px-2.5 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-medium inline-flex items-center">
+                                                                        <span class="relative flex h-2 w-2 mr-1">
+                                                                            <span
+                                                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
+                                                                            <span
+                                                                                class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                                                                        </span>
+                                                                        Pending
+                                                                    </span>
+                                                                @elseif($request->status === 'approved')
+                                                                    <span
+                                                                        class="px-2.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium inline-flex items-center">
+                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor"
+                                                                            viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        Approved
+                                                                    </span>
+                                                                @elseif($request->status === 'posted')
+                                                                    <span
+                                                                        class="px-2.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 font-medium inline-flex items-center">
+                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor"
+                                                                            viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd"
+                                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                                                clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        Issued
+                                                                    </span>
+                                                                @endif
+                                                            </td>
+                                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                                <a href="{{ route('ris.show', $request->ris_id) }}"
+                                                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                                    View Details
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr id="no-requests-row">
+                                                            <td colspan="5" class="px-6 py-8 text-center">
+                                                                <!-- Empty state content -->
+                                                                <div
+                                                                    class="flex flex-col items-center justify-center py-8">
+                                                                    <svg class="w-12 h-12 text-gray-400 mb-4"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="1.5"
+                                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                                                        </path>
+                                                                    </svg>
+                                                                    <p
+                                                                        class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                                        No requisitions found</p>
+                                                                    <p
+                                                                        class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                                        Get started by clicking the "Request Supply"
+                                                                        button</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <!-- RIS Request Modal -->
                                 <div id="requestModal"
@@ -152,7 +319,8 @@
                                                     </div>
 
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fund
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-1">Fund
                                                             Cluster</label>
                                                         <select name="fund_cluster"
                                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -230,18 +398,21 @@
                                                                 class="divide-y divide-gray-200">
                                                                 <!-- Item rows will be added here -->
                                                                 <tr class="item-row">
-                                                                    <select name="supplies[0][supply_id]"
-                                                                        class="w-full px-2 py-1 border border-gray-300 rounded"
-                                                                        required>
-                                                                        <option value="">Select an item</option>
-                                                                        @foreach ($stocks as $stock)
-                                                                            <option value="{{ $stock->supply_id }}">
-                                                                                {{ $stock->supply->item_name }}
-                                                                                ({{ $stock->quantity_on_hand }}
-                                                                                available)
+                                                                    <td class="px-4 py-2">
+                                                                        <select name="supplies[0][supply_id]"
+                                                                            class="w-full px-2 py-1 border border-gray-300 rounded"
+                                                                            required>
+                                                                            <option value="">Select an item
                                                                             </option>
-                                                                        @endforeach
-                                                                    </select>
+                                                                            @foreach ($stocks as $stock)
+                                                                                <option
+                                                                                    value="{{ $stock->supply_id }}">
+                                                                                    {{ $stock->supply->item_name }}
+                                                                                    ({{ $stock->quantity_on_hand }}
+                                                                                    available)
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </td>
                                                                     <td class="px-4 py-2">
                                                                         <input type="number"
@@ -315,28 +486,28 @@
                                             const newRow = document.createElement('tr');
                                             newRow.className = 'item-row';
                                             newRow.innerHTML = `
-                                                <td class="px-4 py-2">
-                                                    <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                        <option value="">Select an item</option>
-                                                        @foreach($stocks as $stock)
-                                                            <option value="{{ $stock->supply_id }}">
-                                                                {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td class="px-4 py-2">
-                                                    <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
-                                                        class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                </td>
-                                                <td class="px-4 py-2">
-                                                    <button type="button" class="text-red-500 hover:text-red-700 remove-item">
-                                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                        </svg>
-                                                    </button>
-                                                </td>
-                                            `;
+                                                    <td class="px-4 py-2">
+                                                        <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                            <option value="">Select an item</option>
+                                                            @foreach ($stocks as $stock)
+                                                                <option value="{{ $stock->supply_id }}">
+                                                                    {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td class="px-4 py-2">
+                                                        <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
+                                                            class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                    </td>
+                                                    <td class="px-4 py-2">
+                                                        <button type="button" class="text-red-500 hover:text-red-700 remove-item">
+                                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                `;
 
                                             itemsContainer.appendChild(newRow);
 
@@ -376,10 +547,89 @@
                                         document.querySelector('.remove-item').addEventListener('click', function() {
                                             removeItem(this);
                                         });
+
+                                        // Search and Filter Functionality
+                                        const searchInput = document.getElementById('request-search-input');
+                                        const statusFilters = document.querySelectorAll('.status-filter');
+                                        const requestRows = document.querySelectorAll('.request-row');
+                                        const noRequestsRow = document.getElementById('no-requests-row');
+
+                                        // Handle status filter clicks
+                                        statusFilters.forEach(filter => {
+                                            filter.addEventListener('click', function() {
+                                                // Remove active class from all filters
+                                                statusFilters.forEach(f => {
+                                                    f.classList.remove('bg-blue-100', 'dark:bg-blue-900',
+                                                        'text-blue-800', 'dark:text-blue-300', 'active-filter');
+                                                });
+
+                                                // Add active class to clicked filter
+                                                this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-800',
+                                                    'dark:text-blue-300', 'active-filter');
+
+                                                // Apply filters
+                                                applyFilters();
+                                            });
+                                        });
+
+                                        // Handle search input
+                                        searchInput.addEventListener('input', function() {
+                                            applyFilters();
+                                        });
+
+                                        // Function to apply both search and status filters
+                                        function applyFilters() {
+                                            const searchValue = searchInput.value.toLowerCase().trim();
+                                            const activeFilter = document.querySelector('.status-filter.active-filter');
+                                            const statusFilter = activeFilter.getAttribute('data-status');
+
+                                            let visibleCount = 0;
+
+                                            requestRows.forEach(row => {
+                                                const rowStatus = row.getAttribute('data-status');
+                                                const rowText = row.textContent.toLowerCase();
+                                                const statusMatch = statusFilter === 'all' || rowStatus === statusFilter;
+                                                const searchMatch = searchValue === '' || rowText.includes(searchValue);
+
+                                                if (statusMatch && searchMatch) {
+                                                    row.classList.remove('hidden');
+                                                    visibleCount++;
+                                                } else {
+                                                    row.classList.add('hidden');
+                                                }
+                                            });
+
+                                            // Show/hide "no requests" message
+                                            if (visibleCount === 0 && noRequestsRow) {
+                                                noRequestsRow.classList.remove('hidden');
+                                            } else if (noRequestsRow) {
+                                                noRequestsRow.classList.add('hidden');
+                                            }
+                                        }
                                     });
+
+                                    // Functions for search input
+                                    function toggleClearRequestButton() {
+                                        const input = document.getElementById('request-search-input');
+                                        const clearBtn = document.getElementById('clearRequestButton');
+                                        if (input && clearBtn) {
+                                            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+                                        }
+                                    }
+
+                                    function clearRequestSearch() {
+                                        const input = document.getElementById('request-search-input');
+                                        if (input) {
+                                            input.value = '';
+                                            document.getElementById('clearRequestButton').style.display = 'none';
+                                            // Trigger input event to update the filters
+                                            const event = new Event('input', {
+                                                bubbles: true
+                                            });
+                                            input.dispatchEvent(event);
+                                        }
+                                    }
                                 </script>
-
-
                             </div>
 
                             <!-- Properties Section (initially hidden) -->
@@ -414,11 +664,9 @@
                                                     </div>
                                                 </div>
                                                 <div class="p-4">
-                                                    <h3
-                                                        class="text-lg font-medium text-gray-900 dark:text-white truncate">
+                                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">
                                                         {{ $property->item_name }}</h3>
-                                                    <p
-                                                        class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                                                         {{ \Illuminate\Support\Str::limit($property->item_description ?? 'No description available', 60) }}
                                                     </p>
                                                     <div class="flex items-center justify-between mt-3">
@@ -442,6 +690,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- JavaScript for Tab Navigation -->
