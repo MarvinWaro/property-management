@@ -63,6 +63,4 @@ class DepartmentController extends Controller
         return redirect()->route('departments.index')->with('deleted', 'Department deleted successfully.');
     }
 
-
 }
-

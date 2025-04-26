@@ -1,4 +1,3 @@
-
 <!-- resources/views/ris/print.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
@@ -150,7 +149,8 @@
             </div>
             <div>
                 <label>Division :</label>
-                <span>{{ $risSlip->division->name ?? 'N/A' }}</span>
+                <!-- changed from division->name to department->name -->
+                <span>{{ $risSlip->department->name ?? 'N/A' }}</span>
             </div>
             <div>
                 <label>Responsibility Center Code :</label>

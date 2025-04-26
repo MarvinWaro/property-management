@@ -79,7 +79,7 @@
 
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Division</p>
-                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $risSlip->division->name ?? 'N/A' }}</p>
+                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $risSlip->department->name ?? 'N/A' }}</p>
                         </div>
 
                         <div>
