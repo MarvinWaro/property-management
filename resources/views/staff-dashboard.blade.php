@@ -65,12 +65,12 @@
                         <!-- Main content area -->
                         <div class="details col-span-4 sm:col-span-9">
                             <!-- Requests Section (initially hidden) -->
-                            @if (session('success'))
+                            {{-- @if (session('success'))
                                 <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
                                     role="alert">
                                     <span class="block sm:inline">{{ session('success') }}</span>
                                 </div>
-                            @endif
+                            @endif --}}
 
                             <!-- Enhanced My Requests Section -->
                             <div id="requests" class="content-section bg-white shadow rounded-lg p-6 hidden">

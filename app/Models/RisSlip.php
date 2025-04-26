@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Department;
+use App\Models\User;
+use App\Models\RisItem;
 
 class RisSlip extends Model
 {
@@ -39,10 +41,21 @@ class RisSlip extends Model
         'received_at'   => 'datetime',
     ];
 
-    // In RisSlip.php model
+    /**
+     * Original division relationship (returns the FK value if you call $ris->division)
+     */
     public function division()
     {
-        return $this->belongsTo(Department::class, 'division', 'id');
+        return $this->belongsTo(Department::class, 'division');
+    }
+
+    /**
+     * Alias to fetch the related Department model without
+     * colliding with the 'division' attribute.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'division');
     }
 
     public function requester(): BelongsTo
@@ -50,7 +63,6 @@ class RisSlip extends Model
         return $this->belongsTo(User::class, 'requested_by');
     }
 
-    // Add this to your RisSlip model
     public function items()
     {
         return $this->hasMany(RisItem::class, 'ris_id', 'ris_id');
@@ -70,6 +82,4 @@ class RisSlip extends Model
     {
         return $this->belongsTo(User::class, 'received_by');
     }
-
-    // …add approvedBy(), issuedBy(), receivedBy() relations as needed
 }

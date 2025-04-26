@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Auth;
 
 class RisSlipController extends Controller
 {
-
-    
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $query = RisSlip::with(['division', 'requester'])
+        $query = RisSlip::with(['department', 'requester'])
                     ->orderBy('created_at', 'desc');
 
         // Add search functionality
@@ -26,12 +26,12 @@ class RisSlipController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('ris_no', 'like', "%{$search}%")
-                ->orWhereHas('requester', function($subQuery) use ($search) {
-                    $subQuery->where('name', 'like', "%{$search}%");
-                })
-                ->orWhereHas('division', function($subQuery) use ($search) {
-                    $subQuery->where('name', 'like', "%{$search}%");
-                });
+                  ->orWhereHas('requester', function($subQuery) use ($search) {
+                      $subQuery->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('department', function($subQuery) use ($search) {
+                      $subQuery->where('name', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -59,7 +59,12 @@ class RisSlipController extends Controller
 
         // Generate RIS number
         $latestRis = RisSlip::latest('ris_id')->first();
-        $newRisNumber = 'RIS-' . date('Ym') . '-' . str_pad(($latestRis ? ($latestRis->ris_id + 1) : 1), 4, '0', STR_PAD_LEFT);
+        $newRisNumber = 'RIS-' . date('Ym') . '-' . str_pad(
+            ($latestRis ? ($latestRis->ris_id + 1) : 1),
+            4,
+            '0',
+            STR_PAD_LEFT
+        );
 
         // Begin transaction
         return DB::transaction(function() use ($validated, $newRisNumber) {
@@ -79,7 +84,6 @@ class RisSlipController extends Controller
 
             // Create RIS Items
             foreach ($validated['supplies'] as $item) {
-                // Check stock availability
                 $stockAvailable = SupplyStock::where('supply_id', $item['supply_id'])
                     ->where('status', 'available')
                     ->where('quantity_on_hand', '>=', $item['quantity'])
@@ -93,7 +97,8 @@ class RisSlipController extends Controller
                 ]);
             }
 
-            return redirect()->back()->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
+            return redirect()->back()
+                             ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
         });
     }
 
@@ -102,7 +107,7 @@ class RisSlipController extends Controller
      */
     public function show(RisSlip $risSlip)
     {
-        $risSlip->load(['division', 'requester', 'items.supply']);
+        $risSlip->load(['department', 'requester', 'items.supply']);
         return view('ris.show', compact('risSlip'));
     }
 
@@ -145,31 +150,28 @@ class RisSlipController extends Controller
             foreach ($validated['items'] as $item) {
                 $risItem = RisItem::findOrFail($item['item_id']);
 
-                // Only process items that have quantities to issue
                 if ($item['quantity_issued'] > 0) {
-                    // Update the item with issued quantity
                     $risItem->update([
                         'quantity_issued' => $item['quantity_issued'],
                         'remarks' => $item['remarks'] ?? null,
                     ]);
 
-                    // Find the stock
                     $stock = SupplyStock::where('supply_id', $risItem->supply_id)
-                                ->where('status', 'available')
-                                ->first();
+                                        ->where('status', 'available')
+                                        ->first();
 
                     if ($stock) {
-                        // Create issue transaction
-                        app(SupplyTransactionController::class)->store(new Request([
-                            'supply_id' => $risItem->supply_id,
-                            'transaction_type' => 'issue',
-                            'transaction_date' => now()->toDateString(),
-                            'reference_no' => $risSlip->ris_no,
-                            'quantity' => $item['quantity_issued'],
-                            'unit_cost' => $stock->unit_cost,
-                            'department_id' => $risSlip->division,
-                            'remarks' => "Issued via RIS #{$risSlip->ris_no}",
-                        ]));
+                        app(SupplyTransactionController::class)
+                            ->store(new Request([
+                                'supply_id' => $risItem->supply_id,
+                                'transaction_type' => 'issue',
+                                'transaction_date' => now()->toDateString(),
+                                'reference_no' => $risSlip->ris_no,
+                                'quantity' => $item['quantity_issued'],
+                                'unit_cost' => $stock->unit_cost,
+                                'department_id' => $risSlip->division,
+                                'remarks' => "Issued via RIS #{$risSlip->ris_no}",
+                            ]));
                     }
                 }
             }
@@ -183,15 +185,17 @@ class RisSlipController extends Controller
                 'received_at' => $request->received_by ? now() : null,
             ]);
 
-            return redirect()->route('ris.show', $risSlip)->with('success', 'Supplies issued successfully.');
+            return redirect()->route('ris.show', $risSlip)
+                             ->with('success', 'Supplies issued successfully.');
         });
     }
+
     /**
-     * Print the RIS form
+     * Print the RIS form.
      */
     public function print(RisSlip $risSlip)
     {
-        $risSlip->load(['division', 'requester', 'approver', 'issuer', 'receiver', 'items.supply']);
+        $risSlip->load(['department', 'requester', 'approver', 'issuer', 'receiver', 'items.supply']);
         return view('ris.print', compact('risSlip'));
     }
 }
