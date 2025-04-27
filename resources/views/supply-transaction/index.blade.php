@@ -117,15 +117,16 @@
                                     <th scope="col" class="px-6 py-3 text-right">Balance</th>
                                     <th scope="col" class="px-6 py-3">Ref No</th>
                                     <th scope="col" class="px-6 py-3">Department</th>
-                                    <th scope="col" class="px-6 py-3">User</th>
+                                    <th scope="col" class="px-6 py-3">User/Staffs</th>
+                                    <th scope="col" class="px-6 py-3">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($txns as $txn)
                                     <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700
-                                              {{ $txn->transaction_type === 'receipt' ? 'bg-green-50 dark:bg-green-900/20' : '' }}
-                                              {{ $txn->transaction_type === 'issue' ? 'bg-red-50 dark:bg-red-900/20' : '' }}
-                                              {{ $txn->transaction_type === 'adjustment' ? 'bg-yellow-50 dark:bg-yellow-900/20' : '' }}">
+                                            {{ $txn->transaction_type === 'receipt' ? 'bg-green-50 dark:bg-green-900/20' : '' }}
+                                            {{ $txn->transaction_type === 'issue' ? 'bg-red-50 dark:bg-red-900/20' : '' }}
+                                            {{ $txn->transaction_type === 'adjustment' ? 'bg-yellow-50 dark:bg-yellow-900/20' : '' }}">
                                         <td class="px-6 py-4">{{ $txn->transaction_date->format('M d, Y') }}</td>
                                         <td class="px-6 py-4">
                                             @if($txn->transaction_type === 'receipt')
@@ -157,10 +158,24 @@
                                         <td class="px-6 py-4">{{ $txn->reference_no }}</td>
                                         <td class="px-6 py-4">{{ $txn->department->name }}</td>
                                         <td class="px-6 py-4">{{ $txn->user->name }}</td>
+                                        <td class="px-6 py-4 max-w-xs">
+                                            @if($txn->remarks)
+                                                <div class="relative group">
+                                                    <div class="truncate">{{ $txn->remarks }}</div>
+                                                    @if(strlen($txn->remarks) > 30)
+                                                        <div class="absolute z-10 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 w-72 right-0">
+                                                            {{ $txn->remarks }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400 dark:text-gray-500 italic">No remarks</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td colspan="9" class="px-6 py-12 text-center">
+                                        <td colspan="10" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center">
                                                 <svg class="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>

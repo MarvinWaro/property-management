@@ -138,11 +138,12 @@ class RisSlipController extends Controller
             return back()->with('error', 'This RIS cannot be issued.');
         }
 
-        // Validate the quantities
+        // Validate the quantities and remarks
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:ris_items,item_id',
             'items.*.quantity_issued' => 'required|integer|min:0',
+            'items.*.remarks' => 'nullable|string', // Added validation for remarks
         ]);
 
         return DB::transaction(function() use ($validated, $risSlip, $request) {

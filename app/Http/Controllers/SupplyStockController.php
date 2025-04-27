@@ -6,6 +6,7 @@ use App\Models\SupplyStock;
 use App\Models\SupplyTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SupplyStockController extends Controller
 {
@@ -107,6 +108,9 @@ class SupplyStockController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Log the incoming data for debugging
+        Log::debug('Update stock request data:', $request->all());
+
         $request->merge([
             'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
         ]);
@@ -121,13 +125,32 @@ class SupplyStockController extends Controller
             'remarks'          => 'nullable|string',
         ]);
 
+        // Log the validated data for debugging
+        Log::debug('Validated update data:', $validated);
+
         $stock = SupplyStock::findOrFail($id);
 
         // We keep the same quantity but re‑value at the new unit_cost
-        $currentQty          = $stock->quantity_on_hand;
+        $currentQty = $stock->quantity_on_hand;
         $validated['total_cost'] = $currentQty * $validated['unit_cost'];
 
+        // Update stock with all validated fields, including remarks
         $stock->update($validated);
+
+        // Create an adjustment transaction to log this change
+        SupplyTransaction::create([
+            'supply_id'        => $stock->supply_id,
+            'transaction_type' => 'adjustment',
+            'transaction_date' => now()->toDateString(),
+            'reference_no'     => 'Re-valuation',
+            'quantity'         => 0, // Zero quantity for re-valuation
+            'unit_cost'        => $validated['unit_cost'],
+            'total_cost'       => 0, // Zero cost impact
+            'balance_quantity' => $stock->quantity_on_hand,
+            'department_id'    => auth()->user()->department_id,
+            'user_id'          => auth()->id(),
+            'remarks'          => $validated['remarks'] ?? 'Stock re-valued', // Make sure we capture remarks
+        ]);
 
         return redirect()
             ->route('stocks.index')
