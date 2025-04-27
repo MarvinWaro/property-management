@@ -118,7 +118,7 @@
                                     <th scope="col" class="px-6 py-3">Ref No</th>
                                     <th scope="col" class="px-6 py-3">Department</th>
                                     <th scope="col" class="px-6 py-3">User/Staffs</th>
-                                    <th scope="col" class="px-6 py-3">Remarks</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -158,19 +158,29 @@
                                         <td class="px-6 py-4">{{ $txn->reference_no }}</td>
                                         <td class="px-6 py-4">{{ $txn->department->name }}</td>
                                         <td class="px-6 py-4">{{ $txn->user->name }}</td>
-                                        <td class="px-6 py-4 max-w-xs">
-                                            @if($txn->remarks)
-                                                <div class="relative group">
-                                                    <div class="truncate">{{ $txn->remarks }}</div>
-                                                    @if(strlen($txn->remarks) > 30)
-                                                        <div class="absolute z-10 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-lg p-3 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 w-72 right-0">
-                                                            {{ $txn->remarks }}
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="text-gray-400 dark:text-gray-500 italic">No remarks</span>
-                                            @endif
+                                        <td class="px-6 py-4 text-center">
+                                            <button type="button"
+                                                class="view-transaction-btn p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
+                                                data-transaction-id="{{ $txn->id }}"
+                                                data-transaction-date="{{ $txn->transaction_date->format('M d, Y') }}"
+                                                data-transaction-type="{{ $txn->transaction_type }}"
+                                                data-supply-name="{{ $txn->supply->item_name }}"
+                                                data-stock-no="{{ $txn->supply->stock_no }}"
+                                                data-quantity="{{ $txn->quantity }}"
+                                                data-unit-cost="{{ number_format($txn->unit_cost, 2) }}"
+                                                data-total-cost="{{ number_format($txn->total_cost, 2) }}"
+                                                data-balance="{{ $txn->balance_quantity }}"
+                                                data-reference="{{ $txn->reference_no }}"
+                                                data-department="{{ $txn->department->name }}"
+                                                data-user="{{ $txn->user->name }}"
+                                                data-remarks="{{ $txn->remarks }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="lucide lucide-eye">
+                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
@@ -194,6 +204,258 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Transaction Details Modal -->
+                    <div id="viewTransactionModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+                        <div class="relative w-full max-w-2xl max-h-full">
+                            <!-- Modal content -->
+                            <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+                                <!-- Modal header -->
+                                <div id="modal-header" class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
+                                    <h3 class="text-2xl font-bold text-white flex items-center">
+                                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span id="modal-title">Transaction Details</span>
+                                    </h3>
+                                    <button type="button" data-modal-hide="viewTransactionModal"
+                                        class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                        dark:hover:bg-gray-600 transition-all duration-200">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                </div>
+
+                                <!-- Modal body -->
+                                <div class="p-6 bg-gray-50 dark:bg-gray-800">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Left Column -->
+                                        <div class="space-y-5">
+                                            <!-- Transaction Information Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Transaction Information
+                                                </h4>
+
+                                                <div class="grid grid-cols-1 gap-3">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Transaction Date</span>
+                                                        <span id="tx-date" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Type</span>
+                                                        <div id="tx-type-container"></div>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Reference No.</span>
+                                                        <span id="tx-reference" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Supply Information Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Supply Information
+                                                </h4>
+
+                                                <div class="grid grid-cols-1 gap-3">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Item Name</span>
+                                                        <span id="tx-item-name" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Stock No.</span>
+                                                        <span id="tx-stock-no" class="font-mono font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column -->
+                                        <div class="space-y-5">
+                                            <!-- Quantity & Cost Information -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Quantity & Cost
+                                                </h4>
+
+                                                <div class="grid grid-cols-1 gap-3">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Quantity</span>
+                                                        <span id="tx-quantity" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Unit Cost</span>
+                                                        <span id="tx-unit-cost" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Total Cost</span>
+                                                        <span id="tx-total-cost" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Balance After Transaction</span>
+                                                        <span id="tx-balance" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Personnel Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Personnel Information
+                                                </h4>
+
+                                                <div class="grid grid-cols-1 gap-3">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Department</span>
+                                                        <span id="tx-department" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">User/Staff</span>
+                                                        <span id="tx-user" class="font-medium text-gray-900 dark:text-white"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Remarks Section -->
+                                    <div class="mt-6 p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Remarks
+                                        </h4>
+
+                                        <div id="tx-remarks-container" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                                            <p id="tx-remarks" class="text-gray-600 dark:text-gray-400"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Footer -->
+                                    <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <button type="button" data-modal-hide="viewTransactionModal"
+                                            class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
+                                                focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center
+                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JavaScript for modal functionality -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Get all view buttons
+                            const viewButtons = document.querySelectorAll('.view-transaction-btn');
+                            const modal = document.getElementById('viewTransactionModal');
+                            const modalHeader = document.getElementById('modal-header');
+
+                            // Close modal functionality
+                            const closeButtons = document.querySelectorAll('[data-modal-hide="viewTransactionModal"]');
+                            closeButtons.forEach(button => {
+                                button.addEventListener('click', () => {
+                                    modal.classList.add('hidden');
+                                });
+                            });
+
+                            // Add click event to all view buttons
+                            viewButtons.forEach(button => {
+                                button.addEventListener('click', function() {
+                                    // Get transaction data from data attributes
+                                    const data = this.dataset;
+
+                                    // Update modal title based on transaction type
+                                    const typeTitle = data.transactionType.charAt(0).toUpperCase() + data.transactionType.slice(1);
+                                    document.getElementById('modal-title').textContent = typeTitle + ' Transaction Details';
+
+                                    // Change header color based on transaction type
+                                    modalHeader.className = 'flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r';
+                                    if (data.transactionType === 'receipt') {
+                                        modalHeader.classList.add('from-green-600', 'to-green-800');
+                                    } else if (data.transactionType === 'issue') {
+                                        modalHeader.classList.add('from-red-600', 'to-red-800');
+                                    } else {
+                                        modalHeader.classList.add('from-yellow-600', 'to-yellow-800');
+                                    }
+
+                                    // Populate transaction type badge
+                                    const typeContainer = document.getElementById('tx-type-container');
+                                    let typeBadge = '';
+                                    if (data.transactionType === 'receipt') {
+                                        typeBadge = '<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">Receipt</span>';
+                                    } else if (data.transactionType === 'issue') {
+                                        typeBadge = '<span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">Issue</span>';
+                                    } else {
+                                        typeBadge = '<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-yellow-900 dark:text-yellow-300">Adjustment</span>';
+                                    }
+                                    typeContainer.innerHTML = typeBadge;
+
+                                    // Format quantity display
+                                    let qtyDisplay = data.quantity;
+                                    if (data.transactionType === 'receipt') {
+                                        qtyDisplay = '<span class="font-semibold text-green-600 dark:text-green-400">+' + data.quantity + '</span>';
+                                    } else if (data.transactionType === 'issue') {
+                                        qtyDisplay = '<span class="font-semibold text-red-600 dark:text-red-400">-' + data.quantity + '</span>';
+                                    } else {
+                                        qtyDisplay = '<span class="font-semibold text-yellow-600 dark:text-yellow-400">' + data.quantity + '</span>';
+                                    }
+
+                                    // Set other transaction details
+                                    document.getElementById('tx-date').textContent = data.transactionDate;
+                                    document.getElementById('tx-reference').textContent = data.reference;
+                                    document.getElementById('tx-item-name').textContent = data.supplyName;
+                                    document.getElementById('tx-stock-no').textContent = data.stockNo;
+                                    document.getElementById('tx-quantity').innerHTML = qtyDisplay;
+                                    document.getElementById('tx-unit-cost').textContent = '₱ ' + data.unitCost;
+                                    document.getElementById('tx-total-cost').textContent = '₱ ' + data.totalCost;
+                                    document.getElementById('tx-balance').textContent = data.balance;
+                                    document.getElementById('tx-department').textContent = data.department;
+                                    document.getElementById('tx-user').textContent = data.user;
+
+                                    // Set remarks or display "No remarks" message
+                                    if (data.remarks && data.remarks.trim() !== '') {
+                                        document.getElementById('tx-remarks').textContent = data.remarks;
+                                    } else {
+                                        document.getElementById('tx-remarks').innerHTML = '<span class="italic text-gray-400 dark:text-gray-500">No remarks provided</span>';
+                                    }
+
+                                    // Show the modal
+                                    modal.classList.remove('hidden');
+                                });
+                            });
+
+                            // Close modal when clicking outside
+                            modal.addEventListener('click', function(event) {
+                                if (event.target === modal) {
+                                    modal.classList.add('hidden');
+                                }
+                            });
+                        });
+                    </script>
 
                     <!-- Pagination -->
                     <div class="mt-4">
