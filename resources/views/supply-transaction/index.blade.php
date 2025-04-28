@@ -167,28 +167,30 @@
                                         <td class="px-6 py-4">{{ $txn->user->name }}</td>
                                         <td class="px-6 py-4 text-center">
                                             <button type="button"
-                                                class="view-transaction-btn p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
-                                                data-transaction-id="{{ $txn->transaction_id }}"
-                                                data-transaction-date="{{ $txn->transaction_date->format('M d, Y') }}"
-                                                data-transaction-time="{{ $txn->created_at->format('h:i A') }}"
-                                                data-transaction-type="{{ $txn->transaction_type }}"
-                                                data-supply-name="{{ $txn->supply->item_name }}"
-                                                data-stock-no="{{ $txn->supply->stock_no }}"
-                                                data-quantity="{{ $txn->quantity }}"
-                                                data-unit-cost="{{ number_format($txn->unit_cost, 2) }}"
-                                                data-total-cost="{{ number_format($txn->total_cost, 2) }}"
-                                                data-balance="{{ $txn->balance_quantity }}"
-                                                data-reference="{{ $txn->reference_no }}"
-                                                data-department="{{ $txn->department->name }}"
-                                                data-user="{{ $txn->user->name }}"
-                                                data-remarks="{{ $txn->remarks }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    class="lucide lucide-eye">
-                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                    <circle cx="12" cy="12" r="3" />
-                                                </svg>
-                                            </button>
+                                            class="view-transaction-btn p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
+                                            data-modal-target="viewTransactionModal"
+                                            data-modal-toggle="viewTransactionModal"
+                                            data-transaction-id="{{ $txn->transaction_id }}"
+                                            data-transaction-date="{{ $txn->transaction_date->format('M d, Y') }}"
+                                            data-transaction-time="{{ $txn->created_at->format('h:i A') }}"
+                                            data-transaction-type="{{ $txn->transaction_type }}"
+                                            data-supply-name="{{ $txn->supply->item_name }}"
+                                            data-stock-no="{{ $txn->supply->stock_no }}"
+                                            data-quantity="{{ $txn->quantity }}"
+                                            data-unit-cost="{{ number_format($txn->unit_cost, 2) }}"
+                                            data-total-cost="{{ number_format($txn->total_cost, 2) }}"
+                                            data-balance="{{ $txn->balance_quantity }}"
+                                            data-reference="{{ $txn->reference_no }}"
+                                            data-department="{{ $txn->department->name }}"
+                                            data-user="{{ $txn->user->name }}"
+                                            data-remarks="{{ $txn->remarks }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-eye">
+                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </button>
                                         </td>
                                     </tr>
                                 @empty
