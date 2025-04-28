@@ -109,7 +109,8 @@
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-white uppercase bg-blue-600 dark:bg-blue-700">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Date</th>
+                                    <th scope="col" class="px-6 py-3">ID</th>
+                                    <th scope="col" class="px-6 py-3">Date & Time</th>
                                     <th scope="col" class="px-6 py-3">Type</th>
                                     <th scope="col" class="px-6 py-3">Stock No</th>
                                     <th scope="col" class="px-6 py-3">Item Name</th>
@@ -127,7 +128,13 @@
                                             {{ $txn->transaction_type === 'receipt' ? 'bg-green-50 dark:bg-green-900/20' : '' }}
                                             {{ $txn->transaction_type === 'issue' ? 'bg-red-50 dark:bg-red-900/20' : '' }}
                                             {{ $txn->transaction_type === 'adjustment' ? 'bg-yellow-50 dark:bg-yellow-900/20' : '' }}">
-                                        <td class="px-6 py-4">{{ $txn->transaction_date->format('M d, Y') }}</td>
+                                        <td class="px-6 py-4 font-medium">{{ $txn->transaction_id }}</td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex flex-col">
+                                                <span>{{ $txn->transaction_date->format('M d, Y') }}</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $txn->created_at->format('h:i A') }}</span>
+                                            </div>
+                                        </td>
                                         <td class="px-6 py-4">
                                             @if($txn->transaction_type === 'receipt')
                                                 <span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
@@ -161,8 +168,9 @@
                                         <td class="px-6 py-4 text-center">
                                             <button type="button"
                                                 class="view-transaction-btn p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
-                                                data-transaction-id="{{ $txn->id }}"
+                                                data-transaction-id="{{ $txn->transaction_id }}"
                                                 data-transaction-date="{{ $txn->transaction_date->format('M d, Y') }}"
+                                                data-transaction-time="{{ $txn->created_at->format('h:i A') }}"
                                                 data-transaction-type="{{ $txn->transaction_type }}"
                                                 data-supply-name="{{ $txn->supply->item_name }}"
                                                 data-stock-no="{{ $txn->supply->stock_no }}"
@@ -185,7 +193,7 @@
                                     </tr>
                                 @empty
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td colspan="10" class="px-6 py-12 text-center">
+                                        <td colspan="11" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center">
                                                 <svg class="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
@@ -246,8 +254,11 @@
 
                                                 <div class="grid grid-cols-1 gap-3">
                                                     <div class="flex flex-col">
-                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Transaction Date</span>
-                                                        <span id="tx-date" class="font-medium text-gray-900 dark:text-white"></span>
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">Transaction Date & Time</span>
+                                                        <div class="font-medium text-gray-900 dark:text-white">
+                                                            <span id="tx-date"></span>
+                                                            <span class="text-sm ml-2 text-gray-600 dark:text-gray-400" id="tx-time"></span>
+                                                        </div>
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <span class="text-xs text-gray-500 dark:text-gray-400">Type</span>
@@ -426,6 +437,7 @@
 
                                     // Set other transaction details
                                     document.getElementById('tx-date').textContent = data.transactionDate;
+                                    document.getElementById('tx-time').textContent = data.transactionTime;
                                     document.getElementById('tx-reference').textContent = data.reference;
                                     document.getElementById('tx-item-name').textContent = data.supplyName;
                                     document.getElementById('tx-stock-no').textContent = data.stockNo;

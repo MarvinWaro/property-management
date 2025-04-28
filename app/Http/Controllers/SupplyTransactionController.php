@@ -12,7 +12,7 @@ class SupplyTransactionController extends Controller
     public function index(Request $request)
     {
         $query = SupplyTransaction::with(['supply', 'department', 'user'])
-                    ->orderBy('transaction_date', 'desc');
+                    ->orderBy('created_at', 'desc'); // Changed from transaction_date to created_at
 
         if ($request->filled('from')) $query->whereDate('transaction_date', '>=', $request->from);
         if ($request->filled('to'))   $query->whereDate('transaction_date', '<=', $request->to);
@@ -86,5 +86,4 @@ class SupplyTransactionController extends Controller
 
         return back()->with('success', 'Transaction recorded successfully.');
     }
-
 }
