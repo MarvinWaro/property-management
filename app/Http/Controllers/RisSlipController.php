@@ -172,6 +172,8 @@ class RisSlipController extends Controller
                                 'unit_cost' => $stock->unit_cost,
                                 'department_id' => $risSlip->division,
                                 'remarks' => "Issued via RIS #{$risSlip->ris_no}",
+                                'requested_by' => $risSlip->requested_by, // Add requester ID
+                                'received_by' => $request->received_by ?? null, // Add receiver ID
                             ]));
                     }
                 }

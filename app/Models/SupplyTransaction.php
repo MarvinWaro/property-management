@@ -38,4 +38,23 @@ class SupplyTransaction extends Model
     public function supply()     { return $this->belongsTo(Supply::class, 'supply_id'); }
     public function department() { return $this->belongsTo(Department::class, 'department_id'); }
     public function user()       { return $this->belongsTo(User::class, 'user_id'); }
+
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_transactions', 'transaction_id', 'user_id')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
+    public function requesters()
+    {
+        return $this->users()->wherePivot('role', 'requester');
+    }
+
+    public function receivers()
+    {
+        return $this->users()->wherePivot('role', 'receiver');
+    }
+
 }

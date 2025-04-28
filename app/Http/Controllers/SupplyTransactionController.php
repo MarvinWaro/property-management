@@ -39,6 +39,8 @@ class SupplyTransactionController extends Controller
             'unit_cost'        => 'required|numeric|min:0',
             'department_id'    => 'required|exists:departments,id',
             'remarks'          => 'nullable|string',
+            'requested_by'     => 'nullable|exists:users,id',  // Added for requester
+            'received_by'      => 'nullable|exists:users,id',  // Added for receiver
         ]);
 
         /* ▲ NEW: record who performed the transaction */
@@ -73,9 +75,20 @@ class SupplyTransactionController extends Controller
 
         /* 4 ▸ Atomic save */
         DB::transaction(function () use ($data, $stock, $newQty, $newUnitCost) {
-
             $data['balance_quantity'] = $newQty;
-            SupplyTransaction::create($data);   // now includes user_id
+
+            // Create the transaction
+            $transaction = SupplyTransaction::create($data);   // now includes user_id
+
+            // Link transaction to requester if provided
+            if (!empty($data['requested_by'])) {
+                $transaction->users()->attach($data['requested_by'], ['role' => 'requester']);
+            }
+
+            // Link transaction to receiver if provided
+            if (!empty($data['received_by'])) {
+                $transaction->users()->attach($data['received_by'], ['role' => 'receiver']);
+            }
 
             $stock->update([
                 'quantity_on_hand' => $newQty,
