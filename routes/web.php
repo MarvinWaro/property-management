@@ -54,8 +54,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
         Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
+        // Supplies Stocks
         Route::resource('stocks', SupplyStockController::class)->except(['create','show']);
 
+        // Supplies transactions
         Route::get  ('supply-transactions',         [SupplyTransactionController::class,'index'])->name('supply-transactions.index');
         Route::post ('supply-transactions',         [SupplyTransactionController::class,'store'])->name('supply-transactions.store');
         Route::get  ('supply-transactions/{txn}',   [SupplyTransactionController::class,'show'])->name('supply-transactions.show');
@@ -63,7 +65,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // RIS
         Route::post('/ris/{risSlip}/approve', [RisSlipController::class, 'approve'])->name('ris.approve');
         Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
-
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');

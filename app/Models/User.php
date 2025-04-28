@@ -104,4 +104,21 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
+    public function transactions()
+    {
+        return $this->belongsToMany(SupplyTransaction::class, 'user_transactions', 'user_id', 'transaction_id')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
+    public function requestedTransactions()
+    {
+        return $this->transactions()->wherePivot('role', 'requester');
+    }
+
+    public function receivedTransactions()
+    {
+        return $this->transactions()->wherePivot('role', 'receiver');
+    }
+
 }
