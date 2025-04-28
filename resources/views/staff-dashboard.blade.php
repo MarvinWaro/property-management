@@ -202,6 +202,10 @@
                                                 <tbody
                                                     class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700"
                                                     id="requests-table-body">
+                                                    @php
+                                                        // Sort requests by created_at in descending order
+                                                        $myRequests = $myRequests->sortByDesc('created_at');
+                                                    @endphp
                                                     @forelse($myRequests as $request)
                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row"
                                                             data-status="{{ $request->status }}">
@@ -209,7 +213,11 @@
                                                                 class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                                                 {{ $request->ris_no }}</td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ $request->ris_date->format('M d, Y') }}</td>
+                                                                <div class="flex flex-col">
+                                                                    <span>{{ $request->ris_date->format('M d, Y') }}</span>
+                                                                    <span class="text-xs text-gray-500">{{ $request->created_at->format('h:i A') }}</span>
+                                                                </div>
+                                                            </td>
                                                             <td class="px-6 py-4">
                                                                 <span
                                                                     class="line-clamp-1">{{ $request->purpose }}</span>
@@ -633,6 +641,7 @@
                                         }
                                     }
                                 </script>
+
                             </div>
 
                             <!-- Received Supplies Section (initially hidden) -->
@@ -684,7 +693,8 @@
                                                                     'transaction_date' => $risSlip->ris_date,
                                                                     'purpose' => $risSlip->purpose ?? 'N/A',
                                                                     'requester_name' => optional($risSlip->requester)->name ?? 'N/A',
-                                                                    'ris_id' => $risSlip->ris_id
+                                                                    'ris_id' => $risSlip->ris_id,
+                                                                    'created_at' => $risSlip->created_at
                                                                 ];
                                                             } else {
                                                                 // Fallback to transaction info if RIS not found
@@ -699,11 +709,17 @@
                                                                         'transaction_date' => $transaction->transaction_date,
                                                                         'purpose' => 'N/A',
                                                                         'requester_name' => optional($requester)->name ?? 'N/A',
-                                                                        'ris_id' => null
+                                                                        'ris_id' => null,
+                                                                        'created_at' => $transaction->created_at
                                                                     ];
                                                                 }
                                                             }
                                                         }
+
+                                                        // Sort by created_at in descending order (newest first)
+                                                        usort($receivedRequisitions, function($a, $b) {
+                                                            return $b['created_at']->timestamp - $a['created_at']->timestamp;
+                                                        });
                                                     @endphp
 
                                                     @forelse($receivedRequisitions as $requisition)
@@ -712,7 +728,10 @@
                                                                 {{ $requisition['reference_no'] }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ $requisition['transaction_date']->format('M d, Y') }}
+                                                                <div class="flex flex-col">
+                                                                    <span>{{ $requisition['transaction_date']->format('M d, Y') }}</span>
+                                                                    <span class="text-xs text-gray-500">{{ $requisition['created_at']->format('h:i A') }}</span>
+                                                                </div>
                                                             </td>
                                                             <td class="px-6 py-4">
                                                                 <span class="line-clamp-1">{{ $requisition['purpose'] }}</span>
@@ -814,14 +833,30 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navLinks = document.querySelectorAll('#profile-nav a.profile-nav-link');
-            // If no link is active by default, activate the first one
+
+            // Get the last active tab from session storage or default to the first tab
+            const lastActiveTab = sessionStorage.getItem('activeTab') || navLinks[0].getAttribute('data-target');
+
+            // If no link is active by default, activate the saved one or the first one
             if (navLinks.length && !document.querySelector('#profile-nav a.profile-nav-link.active')) {
-                navLinks[0].classList.add('active', 'text-blue-600', 'border-blue-600', 'bg-blue-50',
-                    'font-medium');
-                navLinks[0].classList.remove('text-gray-700');
-                const defaultTarget = navLinks[0].getAttribute('data-target');
-                if (defaultTarget) {
-                    document.getElementById(defaultTarget).classList.remove('hidden');
+                // Find the link that matches the last active tab
+                let activeLink = document.querySelector(`#profile-nav a[data-target="${lastActiveTab}"]`);
+                if (!activeLink) {
+                    activeLink = navLinks[0]; // Fallback to first tab if saved tab doesn't exist
+                }
+
+                activeLink.classList.add('active', 'text-blue-600', 'border-blue-600', 'bg-blue-50', 'font-medium');
+                activeLink.classList.remove('text-gray-700');
+
+                // Show the associated content section
+                const targetSection = document.getElementById(lastActiveTab);
+                if (targetSection) {
+                    // Hide all sections first
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+                    // Show the target section
+                    targetSection.classList.remove('hidden');
                 }
             }
 
@@ -851,8 +886,12 @@
                     if (targetSection) {
                         targetSection.classList.remove('hidden');
                     }
+
+                    // Save the active tab to session storage
+                    sessionStorage.setItem('activeTab', targetId);
                 });
             });
         });
     </script>
+
 </x-app-layout>

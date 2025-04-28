@@ -143,7 +143,10 @@
                                                     {{ $ris->ris_no }}
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    {{ $ris->ris_date->format('M d, Y') }}
+                                                    <div class="flex flex-col">
+                                                        <span>{{ $ris->ris_date->format('M d, Y') }}</span>
+                                                        <span class="text-xs text-gray-500">{{ $ris->created_at->format('h:i A') }}</span>
+                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     {{-- changed from division->name --}}
