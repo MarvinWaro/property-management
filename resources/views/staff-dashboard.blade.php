@@ -643,7 +643,7 @@
                                 <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
                                     <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received Supplies Management</h3>
                                     <p>
-                                        View and manage supplies that have been issued to you. Track all supplies you've received across different departments.
+                                        View and manage supplies that have been issued to you. Track all requisitions you've received across different departments.
                                     </p>
                                 </div>
 
@@ -656,32 +656,72 @@
                                                     <tr>
                                                         <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
                                                         <th class="px-6 py-3 text-left tracking-wider">DATE</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">ITEM</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">QUANTITY</th>
+                                                        <th class="px-6 py-3 text-left tracking-wider">PURPOSE</th>
                                                         <th class="px-6 py-3 text-left tracking-wider">REQUESTED BY</th>
                                                         <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                                    @forelse(Auth::user()->receivedTransactions as $transaction)
+                                                    @php
+                                                        // Get an array of distinct RIS numbers the user received supplies for
+                                                        $risNumbers = DB::table('supply_transactions')
+                                                            ->join('user_transactions', 'supply_transactions.transaction_id', '=', 'user_transactions.transaction_id')
+                                                            ->where('user_transactions.user_id', Auth::id())
+                                                            ->where('user_transactions.role', 'receiver')
+                                                            ->select('reference_no')
+                                                            ->distinct()
+                                                            ->pluck('reference_no')
+                                                            ->toArray();
+
+                                                        // Get detailed information for each RIS
+                                                        $receivedRequisitions = [];
+                                                        foreach ($risNumbers as $risNo) {
+                                                            $risSlip = \App\Models\RisSlip::where('ris_no', $risNo)->first();
+
+                                                            if ($risSlip) {
+                                                                $receivedRequisitions[] = [
+                                                                    'reference_no' => $risNo,
+                                                                    'transaction_date' => $risSlip->ris_date,
+                                                                    'purpose' => $risSlip->purpose ?? 'N/A',
+                                                                    'requester_name' => optional($risSlip->requester)->name ?? 'N/A',
+                                                                    'ris_id' => $risSlip->ris_id
+                                                                ];
+                                                            } else {
+                                                                // Fallback to transaction info if RIS not found
+                                                                $transaction = \App\Models\SupplyTransaction::where('reference_no', $risNo)
+                                                                    ->first();
+
+                                                                if ($transaction) {
+                                                                    $requester = $transaction->requesters()->first();
+
+                                                                    $receivedRequisitions[] = [
+                                                                        'reference_no' => $risNo,
+                                                                        'transaction_date' => $transaction->transaction_date,
+                                                                        'purpose' => 'N/A',
+                                                                        'requester_name' => optional($requester)->name ?? 'N/A',
+                                                                        'ris_id' => null
+                                                                    ];
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @forelse($receivedRequisitions as $requisition)
                                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                                {{ $transaction->reference_no }}
+                                                                {{ $requisition['reference_no'] }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ $transaction->transaction_date->format('M d, Y') }}
+                                                                {{ $requisition['transaction_date']->format('M d, Y') }}
                                                             </td>
                                                             <td class="px-6 py-4">
-                                                                {{ $transaction->supply->item_name }}
+                                                                <span class="line-clamp-1">{{ $requisition['purpose'] }}</span>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ $transaction->quantity }}
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ optional($transaction->requesters()->first())->name ?? 'N/A' }}
+                                                                {{ $requisition['requester_name'] }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                                <a href="{{ route('ris.show', $transaction->reference_no) }}"
+                                                                <a href="{{ $requisition['ris_id'] ? route('ris.show', $requisition['ris_id']) : '#' }}"
                                                                 class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                                                     View Details
                                                                 </a>
@@ -689,7 +729,7 @@
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="6" class="px-6 py-8 text-center">
+                                                            <td colspan="5" class="px-6 py-8 text-center">
                                                                 <!-- Empty state content -->
                                                                 <div class="flex flex-col items-center justify-center py-8">
                                                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
