@@ -32,12 +32,9 @@
                         </a>
 
                         @if(auth()->user()->hasRole('admin') && $risSlip->status === 'draft')
-                            <form action="{{ route('ris.approve', $risSlip) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Approve Request
-                                </button>
-                            </form>
+                            <button id="openApproveModal" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Approve Request
+                            </button>
                         @endif
 
                         @if(auth()->user()->hasRole('admin') && $risSlip->status === 'approved')
@@ -46,6 +43,44 @@
                             </button>
                         @endif
                     </div>
+
+                    <!-- Approve Modal -->
+                    @if(auth()->user()->hasRole('admin'))
+                        <div id="approveModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+                                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                        Approve RIS #{{ $risSlip->ris_no }}
+                                    </h3>
+                                    <button id="closeApproveModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <form action="{{ route('ris.approve', $risSlip) }}" method="POST">
+                                    @csrf
+                                    <div class="p-6">
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                            <select name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                                <option value="101" {{ $risSlip->fund_cluster == "101" ? 'selected' : '' }}>101</option>
+                                                <option value="151" {{ $risSlip->fund_cluster == "151" ? 'selected' : '' }}>151</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                                        <button type="button" id="cancelApprove" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            Approve Request
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="p-6">
                         @if (session('success'))
@@ -317,4 +352,57 @@
                 });
             </script>
         @endif
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const issueModal      = document.getElementById('issueModal');
+                const openIssueBtn    = document.getElementById('openIssueModal');
+                const closeIssueBtn   = document.getElementById('closeIssueModal');
+                const cancelIssueBtn  = document.getElementById('cancelIssue');
+
+                if (openIssueBtn) {
+                    openIssueBtn.addEventListener('click', function() {
+                        issueModal.classList.remove('hidden');
+                    });
+                }
+
+                const hideIssueModal = () => issueModal.classList.add('hidden');
+
+                closeIssueBtn?.addEventListener('click', hideIssueModal);
+                cancelIssueBtn?.addEventListener('click', hideIssueModal);
+            });
+        </script>
+
+        <!-- Approve Modal Controls (fixed) -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const approveModal      = document.getElementById('approveModal');
+                const openApproveBtn    = document.getElementById('openApproveModal');
+                const closeApproveBtn   = document.getElementById('closeApproveModal');
+                const cancelApproveBtn  = document.getElementById('cancelApprove');
+
+                // Open the modal
+                if (openApproveBtn) {
+                    openApproveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        approveModal.classList.remove('hidden');
+                    });
+                }
+
+                // Helper to hide
+                const hideApproveModal = () => approveModal.classList.add('hidden');
+
+                // Close buttons
+                closeApproveBtn?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    hideApproveModal();
+                });
+                cancelApproveBtn?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    hideApproveModal();
+                });
+            });
+        </script>
+
     </x-app-layout>
