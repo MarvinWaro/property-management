@@ -296,10 +296,10 @@
                                     </div>
                                 </div>
 
-                                <!-- RIS Request Modal -->
-                                <div id="requestModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
-                                    <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-screen overflow-y-auto">
-                                        <div class="flex items-center justify-between p-4 border-b">
+                                <!-- RIS Request Modal with Only Items Section Scrollable -->
+                                <div id="requestModal" class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden">
+                                    <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl h-[90vh] flex flex-col">
+                                        <div class="flex items-center justify-between p-4 border-b shrink-0">
                                             <h3 class="text-xl font-semibold text-gray-900">
                                                 Create Requisition and Issue Slip
                                             </h3>
@@ -310,9 +310,10 @@
                                             </button>
                                         </div>
 
-                                        <form action="{{ route('ris.store') }}" method="POST">
+                                        <form action="{{ route('ris.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                                             @csrf
-                                            <div class="p-6">
+                                            <!-- Fixed Upper Section -->
+                                            <div class="p-6 pb-0 shrink-0">
                                                 <!-- Header Information -->
                                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                                     <div>
@@ -358,31 +359,35 @@
                                                     </div>
                                                 </div>
 
+                                                <!-- Items Header (Also Fixed) -->
+                                                <div class="flex justify-between items-center mb-4">
+                                                    <h4 class="text-lg font-semibold text-gray-900">Select Items to Request</h4>
+
+                                                    <div class="flex items-center">
+                                                        <div class="relative mr-2">
+                                                            <input type="text" id="item-search" placeholder="Search items..."
+                                                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button" id="viewCartBtn" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center shadow-sm">
+                                                            <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                            </svg>
+                                                            View Selected (<span id="itemCount">0</span>)
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Scrollable Items Section -->
+                                            <div class="px-6 overflow-y-auto flex-1">
                                                 <!-- Supply Items -->
                                                 <div class="mb-6">
-                                                    <div class="flex justify-between items-center mb-4">
-                                                        <h4 class="text-lg font-semibold text-gray-900">Select Items to Request</h4>
-
-                                                        <div class="flex items-center">
-                                                            <div class="relative mr-2">
-                                                                <input type="text" id="item-search" placeholder="Search items..."
-                                                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                                                    </svg>
-                                                                </div>
-                                                            </div>
-
-                                                            <button type="button" id="viewCartBtn" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center shadow-sm">
-                                                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                                </svg>
-                                                                View Selected (<span id="itemCount">0</span>)
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
                                                     <!-- Product Grid View -->
                                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="products-grid">
                                                         @foreach ($stocks as $stock)
@@ -456,7 +461,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="px-6 py-3 border-t flex justify-end">
+                                            <div class="px-6 py-3 border-t flex justify-end shrink-0">
                                                 <button type="button" id="cancelRequest"
                                                     class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 mr-2">
                                                     Cancel

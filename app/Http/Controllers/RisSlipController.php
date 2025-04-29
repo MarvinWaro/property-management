@@ -7,6 +7,7 @@ use App\Models\RisItem;
 use App\Models\Supply;
 use App\Models\Department;
 use App\Models\SupplyStock;
+use App\Models\SupplyTransaction; // Add this import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -84,10 +85,10 @@ class RisSlipController extends Controller
 
             // Create RIS Items
             foreach ($validated['supplies'] as $item) {
+                // Check availability across all fund clusters
                 $stockAvailable = SupplyStock::where('supply_id', $item['supply_id'])
                     ->where('status', 'available')
-                    ->where('quantity_on_hand', '>=', $item['quantity'])
-                    ->exists();
+                    ->sum('quantity_on_hand') >= $item['quantity'];
 
                 RisItem::create([
                     'ris_id' => $risSlip->ris_id,
@@ -108,9 +109,23 @@ class RisSlipController extends Controller
     public function show(RisSlip $risSlip)
     {
         $risSlip->load(['department', 'requester', 'items.supply']);
+
+        // Calculate availability for each item across all fund clusters
+        foreach ($risSlip->items as $item) {
+            $item->total_available = SupplyStock::where('supply_id', $item->supply_id)
+                ->where('status', 'available')
+                ->sum('quantity_on_hand');
+
+            // Get available in the specific fund cluster
+            $item->matching_fund_available = SupplyStock::where('supply_id', $item->supply_id)
+                ->where('status', 'available')
+                ->where('fund_cluster', $risSlip->fund_cluster)
+                ->sum('quantity_on_hand');
+        }
+
         return view('ris.show', compact('risSlip'));
     }
-    
+
     /**
      * Approve the RIS.
      */
@@ -149,7 +164,7 @@ class RisSlipController extends Controller
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:ris_items,item_id',
             'items.*.quantity_issued' => 'required|integer|min:0',
-            'items.*.remarks' => 'nullable|string', // Added validation for remarks
+            'items.*.remarks' => 'nullable|string',
         ]);
 
         return DB::transaction(function() use ($validated, $risSlip, $request) {
@@ -163,24 +178,82 @@ class RisSlipController extends Controller
                         'remarks' => $item['remarks'] ?? null,
                     ]);
 
-                    $stock = SupplyStock::where('supply_id', $risItem->supply_id)
-                                        ->where('status', 'available')
-                                        ->first();
+                    // Get all available stocks for this supply
+                    $matchingStocks = SupplyStock::where('supply_id', $risItem->supply_id)
+                        ->where('status', 'available')
+                        ->where('quantity_on_hand', '>', 0)
+                        ->orderBy('expiry_date', 'asc') // Use FIFO approach - oldest stock first
+                        ->get();
 
-                    if ($stock) {
-                        app(SupplyTransactionController::class)
-                            ->store(new Request([
-                                'supply_id' => $risItem->supply_id,
-                                'transaction_type' => 'issue',
-                                'transaction_date' => now()->toDateString(),
-                                'reference_no' => $risSlip->ris_no,
-                                'quantity' => $item['quantity_issued'],
-                                'unit_cost' => $stock->unit_cost,
-                                'department_id' => $risSlip->division,
-                                'remarks' => "Issued via RIS #{$risSlip->ris_no}",
-                                'requested_by' => $risSlip->requested_by, // Add requester ID
-                                'received_by' => $request->received_by ?? null, // Add receiver ID
-                            ]));
+                    // Calculate current balance before issuance
+                    $currentBalance = SupplyStock::where('supply_id', $risItem->supply_id)
+                        ->where('status', 'available')
+                        ->sum('quantity_on_hand');
+
+                    // Process the issuance from stocks
+                    $remainingQuantity = $item['quantity_issued'];
+                    $totalCost = 0;
+
+                    foreach ($matchingStocks as $stock) {
+                        if ($remainingQuantity <= 0) break;
+
+                        $qtyToDeduct = min($remainingQuantity, $stock->quantity_on_hand);
+
+                        // Update stock quantity
+                        $stock->quantity_on_hand -= $qtyToDeduct;
+                        $stockItemCost = $qtyToDeduct * $stock->unit_cost;
+                        $totalCost += $stockItemCost;
+
+                        // Update or mark as depleted if zero
+                        if ($stock->quantity_on_hand <= 0) {
+                            $stock->status = 'depleted';
+                        }
+
+                        $stock->save();
+
+                        // Calculate the new balance after this deduction
+                        $newBalance = $currentBalance - $qtyToDeduct;
+
+                        // Create the transaction using direct DB query to ensure all fields are included
+                        $transaction = DB::table('supply_transactions')->insertGetId([
+                            'supply_id' => $risItem->supply_id,
+                            'transaction_type' => 'issue',
+                            'transaction_date' => now()->toDateString(),
+                            'reference_no' => $risSlip->ris_no,
+                            'quantity' => $qtyToDeduct,
+                            'unit_cost' => $stock->unit_cost,
+                            'total_cost' => $stockItemCost,
+                            'department_id' => $risSlip->division,
+                            'remarks' => "Issued via RIS #{$risSlip->ris_no}",
+                            'balance_quantity' => $newBalance,
+                            'user_id' => Auth::id(), // Ensure this field is set
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Set up the many-to-many relationships if needed
+                        if ($risSlip->requested_by) {
+                            DB::table('user_transactions')->insert([
+                                'transaction_id' => $transaction,
+                                'user_id' => $risSlip->requested_by,
+                                'role' => 'requester',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+
+                        if ($request->received_by) {
+                            DB::table('user_transactions')->insert([
+                                'transaction_id' => $transaction,
+                                'user_id' => $request->received_by,
+                                'role' => 'receiver',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+
+                        $remainingQuantity -= $qtyToDeduct;
+                        $currentBalance = $newBalance; // Update current balance for next iteration
                     }
                 }
             }
@@ -195,7 +268,7 @@ class RisSlipController extends Controller
             ]);
 
             return redirect()->route('ris.show', $risSlip)
-                             ->with('success', 'Supplies issued successfully.');
+                            ->with('success', 'Supplies issued successfully.');
         });
     }
 
