@@ -26,12 +26,12 @@ class RisSlipController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('ris_no', 'like', "%{$search}%")
-                  ->orWhereHas('requester', function($subQuery) use ($search) {
-                      $subQuery->where('name', 'like', "%{$search}%");
-                  })
+                ->orWhereHas('requester', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%");
+                })
                   ->orWhereHas('department', function($subQuery) use ($search) {
-                      $subQuery->where('name', 'like', "%{$search}%");
-                  });
+                    $subQuery->where('name', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -110,20 +110,26 @@ class RisSlipController extends Controller
         $risSlip->load(['department', 'requester', 'items.supply']);
         return view('ris.show', compact('risSlip'));
     }
-
+    
     /**
      * Approve the RIS.
      */
-    public function approve(RisSlip $risSlip)
+    public function approve(Request $request, RisSlip $risSlip)
     {
         if ($risSlip->status !== 'draft') {
             return back()->with('error', 'This RIS cannot be approved.');
         }
 
+        // Validate the fund cluster
+        $validated = $request->validate([
+            'fund_cluster' => 'nullable|string',
+        ]);
+
         $risSlip->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
+            'fund_cluster' => $validated['fund_cluster'] ?? $risSlip->fund_cluster,
         ]);
 
         return back()->with('success', 'RIS approved successfully.');
