@@ -297,19 +297,15 @@
                                 </div>
 
                                 <!-- RIS Request Modal -->
-                                <div id="requestModal"
-                                    class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
-                                    <div
-                                        class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
+                                <div id="requestModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
+                                    <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-screen overflow-y-auto">
                                         <div class="flex items-center justify-between p-4 border-b">
                                             <h3 class="text-xl font-semibold text-gray-900">
                                                 Create Requisition and Issue Slip
                                             </h3>
                                             <button id="closeRequestModal" class="text-gray-400 hover:text-gray-500">
-                                                <svg class="h-6 w-6" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -318,31 +314,24 @@
                                             @csrf
                                             <div class="p-6">
                                                 <!-- Header Information -->
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                                     <div>
-                                                        <label
-                                                            class="block text-sm font-medium text-gray-700 mb-1">Entity
-                                                            Name</label>
-                                                        <input type="text" name="entity_name"
-                                                            value="CHEDRO 12"
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Entity Name</label>
+                                                        <input type="text" name="entity_name" value="CHEDRO 12"
                                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                                             required>
                                                     </div>
 
-                                                    <div>
-                                                        <!-- Remove or hide the fund cluster field from the requester's view -->
-                                                        <input type="hidden" name="fund_cluster" value="">
-                                                    </div>
+                                                    <!-- Hidden Fund Cluster field that admin will fill later -->
+                                                    <input type="hidden" name="fund_cluster" value="">
 
                                                     <div>
-                                                        <label
-                                                            class="block text-sm font-medium text-gray-700 mb-1">Division</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Division</label>
                                                         <select name="division"
                                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                                             required>
                                                             @foreach ($departments as $department)
-                                                                <option value="{{ $department->id }}"
-                                                                    {{ Auth::user()->department_id == $department->id ? 'selected' : '' }}>
+                                                                <option value="{{ $department->id }}" {{ Auth::user()->department_id == $department->id ? 'selected' : '' }}>
                                                                     {{ $department->name }}
                                                                 </option>
                                                             @endforeach
@@ -350,99 +339,119 @@
                                                     </div>
 
                                                     <div>
-                                                        <label
-                                                            class="block text-sm font-medium text-gray-700 mb-1">Office</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Office</label>
                                                         <input type="text" name="office"
                                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                                     </div>
 
                                                     <div>
-                                                        <label
-                                                            class="block text-sm font-medium text-gray-700 mb-1">Responsibility
-                                                            Center Code</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Responsibility Center Code</label>
                                                         <input type="text" name="responsibility_center_code"
                                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                                     </div>
-                                                </div>
 
-                                                <!-- Purpose -->
-                                                <div class="mb-6">
-                                                    <label
-                                                        class="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
-                                                    <textarea name="purpose" rows="2"
-                                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                        required></textarea>
+                                                    <div class="md:col-span-2">
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
+                                                        <textarea name="purpose" rows="1"
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                            required></textarea>
+                                                    </div>
                                                 </div>
 
                                                 <!-- Supply Items -->
                                                 <div class="mb-6">
-                                                    <div class="flex justify-between items-center mb-2">
-                                                        <h4 class="text-lg font-medium">Requested Items</h4>
-                                                        <button type="button" id="addItem"
-                                                            class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                                                            Add Item
-                                                        </button>
+                                                    <div class="flex justify-between items-center mb-4">
+                                                        <h4 class="text-lg font-semibold text-gray-900">Select Items to Request</h4>
+
+                                                        <div class="flex items-center">
+                                                            <div class="relative mr-2">
+                                                                <input type="text" id="item-search" placeholder="Search items..."
+                                                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+
+                                                            <button type="button" id="viewCartBtn" class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center shadow-sm">
+                                                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                                </svg>
+                                                                View Selected (<span id="itemCount">0</span>)
+                                                            </button>
+                                                        </div>
                                                     </div>
 
-                                                    <div class="overflow-x-auto">
-                                                        <table class="min-w-full divide-y divide-gray-200">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th
-                                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                        Item</th>
-                                                                    <th
-                                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                        Quantity</th>
-                                                                    <th
-                                                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                        Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="itemsContainer"
-                                                                class="divide-y divide-gray-200">
-                                                                <!-- Item rows will be added here -->
-                                                                <tr class="item-row">
-                                                                    <td class="px-4 py-2">
-                                                                        <select name="supplies[0][supply_id]"
-                                                                            class="w-full px-2 py-1 border border-gray-300 rounded"
-                                                                            required>
-                                                                            <option value="">Select an item
-                                                                            </option>
-                                                                            @foreach ($stocks as $stock)
-                                                                                <option
-                                                                                    value="{{ $stock->supply_id }}">
-                                                                                    {{ $stock->supply->item_name }}
-                                                                                    ({{ $stock->quantity_on_hand }}
-                                                                                    available)
-                                                                                </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </td>
-                                                                    <td class="px-4 py-2">
-                                                                        <input type="number"
-                                                                            name="supplies[0][quantity]"
-                                                                            min="1" value="1"
-                                                                            class="w-full px-2 py-1 border border-gray-300 rounded"
-                                                                            required>
-                                                                    </td>
-                                                                    <td class="px-4 py-2">
-                                                                        <button type="button"
-                                                                            class="text-red-500 hover:text-red-700 remove-item"
-                                                                            disabled>
-                                                                            <svg class="h-5 w-5" fill="none"
-                                                                                stroke="currentColor"
-                                                                                viewBox="0 0 24 24">
-                                                                                <path stroke-linecap="round"
-                                                                                    stroke-linejoin="round"
-                                                                                    stroke-width="2"
-                                                                                    d="M6 18L18 6M6 6l12 12" />
-                                                                            </svg>
+                                                    <!-- Product Grid View -->
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="products-grid">
+                                                        @foreach ($stocks as $stock)
+                                                            <div class="product-card border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200" data-supply-id="{{ $stock->supply_id }}" data-name="{{ $stock->supply->item_name }}" data-available="{{ $stock->quantity_on_hand }}">
+                                                                <div class="p-4 flex flex-col h-full">
+                                                                    <div class="flex-shrink-0 h-40 bg-gray-200 rounded-md mb-3 flex items-center justify-center">
+                                                                        <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                                                        </svg>
+                                                                    </div>
+                                                                    <div class="flex-1">
+                                                                        <h5 class="font-medium text-gray-900 mb-1 line-clamp-2">{{ $stock->supply->item_name }}</h5>
+                                                                        <p class="text-sm text-gray-500 mb-2">Stock No: {{ $stock->supply->stock_no ?? 'N/A' }}</p>
+                                                                        <div class="flex items-center justify-between">
+                                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                                                                {{ $stock->quantity_on_hand }} available
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mt-3 pt-3 border-t flex items-center">
+                                                                        <div class="flex items-center border rounded-md">
+                                                                            <button type="button" class="quantity-btn minus px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50" data-action="decrease" {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                                </svg>
+                                                                            </button>
+                                                                            <input type="number" class="quantity-input w-12 text-center border-none focus:ring-0" value="0" min="0" max="{{ $stock->quantity_on_hand }}" {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                            <button type="button" class="quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50" data-action="increase" {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                        <button type="button" class="add-to-cart ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex-grow text-center" {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                            Add to Request
                                                                         </button>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                    <!-- Selected Items View (Initially Hidden) -->
+                                                    <div id="selected-items-container" class="hidden">
+                                                        <div class="bg-gray-50 border rounded-lg p-4 mb-4">
+                                                            <h5 class="font-medium text-gray-900 mb-3">Selected Items</h5>
+                                                            <div class="overflow-x-auto">
+                                                                <table class="min-w-full divide-y divide-gray-200">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                                Item</th>
+                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                                Quantity</th>
+                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                                Actions</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="selected-items-list" class="bg-white divide-y divide-gray-200">
+                                                                        <!-- Selected items will be added here via JavaScript -->
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Hidden container for form submission -->
+                                                    <div id="request-items-container" class="hidden">
+                                                        <!-- Form inputs will be added here dynamically -->
                                                     </div>
                                                 </div>
                                             </div>
@@ -480,78 +489,332 @@
                                         closeRequestModal.addEventListener('click', closeModal);
                                         cancelRequest.addEventListener('click', closeModal);
 
-                                        // Add/Remove Item Functionality
-                                        const addItemBtn = document.getElementById('addItem');
-                                        const itemsContainer = document.getElementById('itemsContainer');
+                                        // Product selection functionality (new UI)
+                                        const productCards = document.querySelectorAll('.product-card');
+                                        const selectedItemsContainer = document.getElementById('selected-items-container');
+                                        const selectedItemsList = document.getElementById('selected-items-list');
+                                        const requestItemsContainer = document.getElementById('request-items-container');
+                                        const itemCountDisplay = document.getElementById('itemCount');
+                                        const viewCartBtn = document.getElementById('viewCartBtn');
+                                        const productsGrid = document.getElementById('products-grid');
+                                        const itemSearch = document.getElementById('item-search');
 
-                                        addItemBtn.addEventListener('click', function() {
-                                            const itemRows = document.querySelectorAll('.item-row');
-                                            const newIndex = itemRows.length;
+                                        let selectedItems = [];
+                                        let itemIndex = 0;
 
-                                            const newRow = document.createElement('tr');
-                                            newRow.className = 'item-row';
-                                            newRow.innerHTML = `
-                                                    <td class="px-4 py-2">
-                                                        <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                            <option value="">Select an item</option>
-                                                            @foreach ($stocks as $stock)
-                                                                <option value="{{ $stock->supply_id }}">
-                                                                    {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td class="px-4 py-2">
-                                                        <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
-                                                            class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                    </td>
-                                                    <td class="px-4 py-2">
-                                                        <button type="button" class="text-red-500 hover:text-red-700 remove-item">
-                                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                            </svg>
-                                                        </button>
-                                                    </td>
-                                                `;
+                                        // Search functionality
+                                        if (itemSearch) {
+                                            itemSearch.addEventListener('input', function(e) {
+                                                const searchTerm = e.target.value.toLowerCase();
 
-                                            itemsContainer.appendChild(newRow);
-
-                                            // Enable the first row's remove button if we now have more than one row
-                                            if (newIndex === 1) {
-                                                document.querySelector('.remove-item').removeAttribute('disabled');
-                                            }
-
-                                            // Add event listener to the new remove button
-                                            newRow.querySelector('.remove-item').addEventListener('click', function() {
-                                                removeItem(this);
-                                            });
-                                        });
-
-                                        // Function to remove an item row
-                                        function removeItem(button) {
-                                            const row = button.closest('.item-row');
-                                            row.remove();
-
-                                            // If only one row left, disable its remove button
-                                            const itemRows = document.querySelectorAll('.item-row');
-                                            if (itemRows.length === 1) {
-                                                itemRows[0].querySelector('.remove-item').setAttribute('disabled', 'disabled');
-                                            }
-
-                                            // Reindex the remaining rows
-                                            itemRows.forEach((row, index) => {
-                                                const selectInput = row.querySelector('select');
-                                                const quantityInput = row.querySelector('input[type="number"]');
-
-                                                selectInput.name = `supplies[${index}][supply_id]`;
-                                                quantityInput.name = `supplies[${index}][quantity]`;
+                                                productCards.forEach(card => {
+                                                    const productName = card.getAttribute('data-name').toLowerCase();
+                                                    if (productName.includes(searchTerm)) {
+                                                        card.classList.remove('hidden');
+                                                    } else {
+                                                        card.classList.add('hidden');
+                                                    }
+                                                });
                                             });
                                         }
 
-                                        // Add event listener to the first row's remove button
-                                        document.querySelector('.remove-item').addEventListener('click', function() {
-                                            removeItem(this);
+                                        // View cart button
+                                        if (viewCartBtn) {
+                                            viewCartBtn.addEventListener('click', function() {
+                                                if (selectedItems.length > 0) {
+                                                    productsGrid.classList.toggle('hidden');
+                                                    selectedItemsContainer.classList.toggle('hidden');
+
+                                                    // Change button text based on current view
+                                                    if (selectedItemsContainer.classList.contains('hidden')) {
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
+                                                    } else {
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                        </svg>Back to Items`;
+                                                    }
+                                                }
+                                            });
+                                        }
+
+                                        // Quantity buttons
+                                        productCards.forEach(card => {
+                                            const minusBtn = card.querySelector('.quantity-btn.minus');
+                                            const plusBtn = card.querySelector('.quantity-btn.plus');
+                                            const quantityInput = card.querySelector('.quantity-input');
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+                                            const supplyId = card.getAttribute('data-supply-id');
+                                            const supplyName = card.getAttribute('data-name');
+                                            const maxQuantity = parseInt(card.getAttribute('data-available'), 10);
+
+                                            if (minusBtn && plusBtn && quantityInput) {
+                                                minusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (currentValue > 0) {
+                                                        quantityInput.value = currentValue - 1;
+                                                    }
+                                                });
+
+                                                plusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (currentValue < maxQuantity) {
+                                                        quantityInput.value = currentValue + 1;
+                                                    }
+                                                });
+
+                                                quantityInput.addEventListener('change', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (isNaN(currentValue) || currentValue < 0) {
+                                                        quantityInput.value = 0;
+                                                    } else if (currentValue > maxQuantity) {
+                                                        quantityInput.value = maxQuantity;
+                                                    }
+                                                });
+
+                                                addToCartBtn.addEventListener('click', function() {
+                                                    const quantity = parseInt(quantityInput.value, 10);
+                                                    if (quantity > 0) {
+                                                        addItemToSelection(supplyId, supplyName, quantity, maxQuantity);
+                                                        quantityInput.value = 0;
+                                                    }
+                                                });
+                                            }
                                         });
+
+                                        function addItemToSelection(supplyId, supplyName, quantity, maxAvailable) {
+                                            // Check if item already exists in selection
+                                            const existingItemIndex = selectedItems.findIndex(item => item.supplyId === supplyId);
+
+                                            if (existingItemIndex >= 0) {
+                                                // Update existing item
+                                                const newQuantity = selectedItems[existingItemIndex].quantity + quantity;
+                                                if (newQuantity <= maxAvailable) {
+                                                    selectedItems[existingItemIndex].quantity = newQuantity;
+                                                } else {
+                                                    // Show notification that max quantity reached
+                                                    alert(`Maximum available quantity (${maxAvailable}) reached for ${supplyName}`);
+                                                    selectedItems[existingItemIndex].quantity = maxAvailable;
+                                                }
+                                            } else {
+                                                // Add new item
+                                                selectedItems.push({
+                                                    supplyId: supplyId,
+                                                    name: supplyName,
+                                                    quantity: quantity,
+                                                    maxAvailable: maxAvailable,
+                                                    index: itemIndex++
+                                                });
+                                            }
+
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function removeItemFromSelection(index) {
+                                            selectedItems = selectedItems.filter(item => item.index !== index);
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function updateSelectedItemsList() {
+                                            // Update counter
+                                            if (itemCountDisplay) {
+                                                itemCountDisplay.textContent = selectedItems.length;
+                                            }
+
+                                            if (!selectedItemsList) return;
+
+                                            // Clear current list
+                                            selectedItemsList.innerHTML = '';
+
+                                            if (selectedItems.length === 0) {
+                                                selectedItemsList.innerHTML = `
+                                                    <tr>
+                                                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">
+                                                            No items selected. Add items from the product list.
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                                // Hide the selected items view if visible
+                                                if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
+                                                    viewCartBtn.click();
+                                                }
+                                            } else {
+                                                // Add each item to the list
+                                                selectedItems.forEach(item => {
+                                                    const row = document.createElement('tr');
+                                                    row.innerHTML = `
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-md flex items-center justify-center mr-3">
+                                                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-sm font-medium text-gray-900">${item.name}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <button type="button" class="edit-quantity-btn minus px-2 py-1 text-gray-500 hover:text-gray-700" data-index="${item.index}" data-action="decrease">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <span class="w-10 text-center">${item.quantity}</span>
+                                                                <button type="button" class="edit-quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700" data-index="${item.index}" data-action="increase">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <button type="button" class="remove-item-btn text-red-500 hover:text-red-700" data-index="${item.index}">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+                                                    selectedItemsList.appendChild(row);
+                                                });
+
+                                                // Add event listeners to the new buttons
+                                                document.querySelectorAll('.edit-quantity-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        const action = this.getAttribute('data-action');
+                                                        editItemQuantity(index, action);
+                                                    });
+                                                });
+
+                                                document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        removeItemFromSelection(index);
+                                                    });
+                                                });
+                                            }
+                                        }
+
+                                        function editItemQuantity(index, action) {
+                                            const itemIndex = selectedItems.findIndex(item => item.index === index);
+                                            if (itemIndex >= 0) {
+                                                if (action === 'increase' && selectedItems[itemIndex].quantity < selectedItems[itemIndex].maxAvailable) {
+                                                    selectedItems[itemIndex].quantity++;
+                                                } else if (action === 'decrease' && selectedItems[itemIndex].quantity > 1) {
+                                                    selectedItems[itemIndex].quantity--;
+                                                }
+                                                updateSelectedItemsList();
+                                                updateFormInputs();
+                                            }
+                                        }
+
+                                        function updateFormInputs() {
+                                            if (!requestItemsContainer) return;
+
+                                            // Clear current inputs
+                                            requestItemsContainer.innerHTML = '';
+
+                                            // Add inputs for form submission
+                                            selectedItems.forEach((item, i) => {
+                                                const supplyIdInput = document.createElement('input');
+                                                supplyIdInput.type = 'hidden';
+                                                supplyIdInput.name = `supplies[${i}][supply_id]`;
+                                                supplyIdInput.value = item.supplyId;
+
+                                                const quantityInput = document.createElement('input');
+                                                quantityInput.type = 'hidden';
+                                                quantityInput.name = `supplies[${i}][quantity]`;
+                                                quantityInput.value = item.quantity;
+
+                                                requestItemsContainer.appendChild(supplyIdInput);
+                                                requestItemsContainer.appendChild(quantityInput);
+                                            });
+                                        }
+
+                                        // Add/Remove Item Functionality (original functionality)
+                                        const addItemBtn = document.getElementById('addItem');
+                                        const itemsContainer = document.getElementById('itemsContainer');
+
+                                        if (addItemBtn && itemsContainer) {
+                                            addItemBtn.addEventListener('click', function() {
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                const newIndex = itemRows.length;
+
+                                                const newRow = document.createElement('tr');
+                                                newRow.className = 'item-row';
+                                                newRow.innerHTML = `
+                                                        <td class="px-4 py-2">
+                                                            <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                                <option value="">Select an item</option>
+                                                                @foreach ($stocks as $stock)
+                                                                    <option value="{{ $stock->supply_id }}">
+                                                                        {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
+                                                                class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <button type="button" class="text-red-500 hover:text-red-700 remove-item">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+
+                                                itemsContainer.appendChild(newRow);
+
+                                                // Enable the first row's remove button if we now have more than one row
+                                                if (newIndex === 1) {
+                                                    document.querySelector('.remove-item').removeAttribute('disabled');
+                                                }
+
+                                                // Add event listener to the new remove button
+                                                newRow.querySelector('.remove-item').addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            });
+
+                                            // Function to remove an item row
+                                            function removeItem(button) {
+                                                const row = button.closest('.item-row');
+                                                row.remove();
+
+                                                // If only one row left, disable its remove button
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                if (itemRows.length === 1) {
+                                                    itemRows[0].querySelector('.remove-item').setAttribute('disabled', 'disabled');
+                                                }
+
+                                                // Reindex the remaining rows
+                                                itemRows.forEach((row, index) => {
+                                                    const selectInput = row.querySelector('select');
+                                                    const quantityInput = row.querySelector('input[type="number"]');
+
+                                                    selectInput.name = `supplies[${index}][supply_id]`;
+                                                    quantityInput.name = `supplies[${index}][quantity]`;
+                                                });
+                                            }
+
+                                            // Add event listener to the first row's remove button
+                                            const firstRemoveButton = document.querySelector('.remove-item');
+                                            if (firstRemoveButton) {
+                                                firstRemoveButton.addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            }
+                                        }
 
                                         // Search and Filter Functionality
                                         const searchInput = document.getElementById('request-search-input');
@@ -559,34 +822,40 @@
                                         const requestRows = document.querySelectorAll('.request-row');
                                         const noRequestsRow = document.getElementById('no-requests-row');
 
-                                        // Handle status filter clicks
-                                        statusFilters.forEach(filter => {
-                                            filter.addEventListener('click', function() {
-                                                // Remove active class from all filters
-                                                statusFilters.forEach(f => {
-                                                    f.classList.remove('bg-blue-100', 'dark:bg-blue-900',
-                                                        'text-blue-800', 'dark:text-blue-300', 'active-filter');
+                                        if (statusFilters.length > 0) {
+                                            // Handle status filter clicks
+                                            statusFilters.forEach(filter => {
+                                                filter.addEventListener('click', function() {
+                                                    // Remove active class from all filters
+                                                    statusFilters.forEach(f => {
+                                                        f.classList.remove('bg-blue-100', 'dark:bg-blue-900',
+                                                            'text-blue-800', 'dark:text-blue-300', 'active-filter');
+                                                    });
+
+                                                    // Add active class to clicked filter
+                                                    this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-800',
+                                                        'dark:text-blue-300', 'active-filter');
+
+                                                    // Apply filters
+                                                    applyFilters();
                                                 });
+                                            });
+                                        }
 
-                                                // Add active class to clicked filter
-                                                this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-800',
-                                                    'dark:text-blue-300', 'active-filter');
-
-                                                // Apply filters
+                                        if (searchInput) {
+                                            // Handle search input
+                                            searchInput.addEventListener('input', function() {
                                                 applyFilters();
                                             });
-                                        });
-
-                                        // Handle search input
-                                        searchInput.addEventListener('input', function() {
-                                            applyFilters();
-                                        });
+                                        }
 
                                         // Function to apply both search and status filters
                                         function applyFilters() {
+                                            if (!searchInput || !requestRows.length) return;
+
                                             const searchValue = searchInput.value.toLowerCase().trim();
                                             const activeFilter = document.querySelector('.status-filter.active-filter');
-                                            const statusFilter = activeFilter.getAttribute('data-status');
+                                            const statusFilter = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
 
                                             let visibleCount = 0;
 
@@ -613,7 +882,7 @@
                                         }
                                     });
 
-                                    // Functions for search input
+                                    // Functions for search input (preserved from original)
                                     function toggleClearRequestButton() {
                                         const input = document.getElementById('request-search-input');
                                         const clearBtn = document.getElementById('clearRequestButton');
