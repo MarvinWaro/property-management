@@ -2,16 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class SupplyTransaction extends Model
 {
     use HasFactory;
-
-    public const RECEIPT     = 'receipt';
-    public const ISSUE       = 'issue';
-    public const ADJUSTMENT  = 'adjustment';
 
     protected $primaryKey = 'transaction_id';
 
@@ -23,14 +19,17 @@ class SupplyTransaction extends Model
         'quantity',
         'unit_cost',
         'total_cost',
-        'balance_quantity',
         'department_id',
         'user_id',
+        'fund_cluster',
         'remarks',
+        'requested_by',
+        'received_by',
+        'balance_quantity', // Added this field
     ];
 
     protected $casts = [
-        'transaction_date' => 'date',      // <-- add this
+        'transaction_date' => 'date',
         'unit_cost'        => 'decimal:2',
         'total_cost'       => 'decimal:2',
     ];
@@ -56,5 +55,4 @@ class SupplyTransaction extends Model
     {
         return $this->users()->wherePivot('role', 'receiver');
     }
-
 }

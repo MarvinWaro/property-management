@@ -36,4 +36,46 @@ class SupplyStock extends Model
     {
         return $this->belongsTo(Supply::class, 'supply_id', 'supply_id');
     }
+
+    /**
+     * Get all available stocks for a specific supply.
+     *
+     * @param int $supplyId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getAvailableStockForSupply($supplyId)
+    {
+        return self::where('supply_id', $supplyId)
+                   ->where('status', 'available')
+                   ->where('quantity_on_hand', '>', 0)
+                   ->get();
+    }
+
+    /**
+     * Get total available quantity across all fund clusters.
+     *
+     * @param int $supplyId
+     * @return int
+     */
+    public static function getTotalAvailableQuantity($supplyId)
+    {
+        return self::where('supply_id', $supplyId)
+                   ->where('status', 'available')
+                   ->sum('quantity_on_hand');
+    }
+
+    /**
+     * Get available quantity for a specific fund cluster.
+     *
+     * @param int $supplyId
+     * @param string $fundCluster
+     * @return int
+     */
+    public static function getAvailableQuantityByFundCluster($supplyId, $fundCluster)
+    {
+        return self::where('supply_id', $supplyId)
+                   ->where('status', 'available')
+                   ->where('fund_cluster', $fundCluster)
+                   ->sum('quantity_on_hand');
+    }
 }
