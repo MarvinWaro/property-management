@@ -389,9 +389,14 @@
                                                 <!-- Supply Items -->
                                                 <div class="mb-6">
                                                     <!-- Product Grid View -->
+                                                    <!-- Product Grid View with Fund Cluster Information -->
                                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="products-grid">
                                                         @foreach ($stocks as $stock)
-                                                            <div class="product-card border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200" data-supply-id="{{ $stock->supply_id }}" data-name="{{ $stock->supply->item_name }}" data-available="{{ $stock->quantity_on_hand }}">
+                                                            <div class="product-card border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+                                                                data-supply-id="{{ $stock->supply_id }}"
+                                                                data-name="{{ $stock->supply->item_name }}"
+                                                                data-available="{{ $stock->quantity_on_hand }}"
+                                                                data-fund-cluster="{{ $stock->fund_cluster }}">
                                                                 <div class="p-4 flex flex-col h-full">
                                                                     <div class="flex-shrink-0 h-40 bg-gray-200 rounded-md mb-3 flex items-center justify-center">
                                                                         <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,9 +406,14 @@
                                                                     <div class="flex-1">
                                                                         <h5 class="font-medium text-gray-900 mb-1 line-clamp-2">{{ $stock->supply->item_name }}</h5>
                                                                         <p class="text-sm text-gray-500 mb-2">Stock No: {{ $stock->supply->stock_no ?? 'N/A' }}</p>
-                                                                        <div class="flex items-center justify-between">
+                                                                        <div class="flex items-center justify-between mb-2">
                                                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                                                                 {{ $stock->quantity_on_hand }} available
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-600">
+                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                                                                                Fund: {{ $stock->fund_cluster ?: 'Unspecified' }}
                                                                             </span>
                                                                         </div>
                                                                     </div>
