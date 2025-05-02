@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplyController;
 use App\Http\Controllers\SupplyStockController;
 use App\Http\Controllers\SupplyTransactionController;
+use App\Http\Controllers\SignatureController;
 
 
 use App\Http\Controllers\StaffDashboardController;
@@ -32,6 +33,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
+
+
+    // Signature Management Routes (add these new routes)
+    Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
+    Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
     /**
      * ------------------

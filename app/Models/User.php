@@ -36,6 +36,7 @@ class User extends Authenticatable
         'designation_id',
         'status',
         'needs_password_change', // <— Add here
+        'signature_path', // Add this new field
     ];
 
     // protected $casts = [
