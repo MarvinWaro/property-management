@@ -243,6 +243,11 @@ $isAssetsMode =
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
+                            <!-- E-Signature Management (available to everyone) -->
+                            <x-dropdown-link href="{{ route('profile.show') }}#signature-section">
+                                {{ __('E-Signature') }}
+                            </x-dropdown-link>
+
                             <!-- Only admins see the toggle to switch between "Supplies" and "Assets" -->
                             @if (auth()->user()->role === 'admin')
                                 <x-dropdown-link

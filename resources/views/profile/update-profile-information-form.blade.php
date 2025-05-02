@@ -1,3 +1,15 @@
+@if (session('success'))
+    <div class="mb-4 font-medium text-sm text-green-600">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="mb-4 font-medium text-sm text-red-600">
+        {{ session('error') }}
+    </div>
+@endif
+
 <x-form-section submit="updateProfileInformation">
     <x-slot name="title">
         {{ __('Profile Information') }}
@@ -107,8 +119,6 @@
                     value="{{ optional($this->user->designation)->name }}" disabled />
         </div>
         @endif
-
-
     </x-slot>
 
     <x-slot name="actions">

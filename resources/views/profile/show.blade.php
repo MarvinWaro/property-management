@@ -13,6 +13,12 @@
                 <x-section-border />
             @endif
 
+            <div class="mt-10 sm:mt-0" id="signature-section">
+                @include('profile.update-signature-form')
+            </div>
+
+            <x-section-border />
+
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
                 <div class="mt-10 sm:mt-0">
                     @livewire('profile.update-password-form')

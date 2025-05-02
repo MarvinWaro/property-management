@@ -185,41 +185,85 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Requested By:</p>
-                            <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $risSlip->requester->name ?? 'N/A' }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ optional($risSlip->requester)->designation->name ?? 'N/A' }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $risSlip->created_at->format('M d, Y h:i A') }}</p>
+                            <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                @if($risSlip->requester && $risSlip->requester->signature_path)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <img src="{{ Storage::url($risSlip->requester->signature_path) }}"
+                                            alt="Requester signature"
+                                            class="max-h-16 mx-auto"
+                                            style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @endif
+                            </div>
+                            <div style="border-top: 1px solid #000; width: 100%;"></div>
+                            <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ $risSlip->requester->name ?? 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->requester)->designation->name ?? 'N/A' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->created_at->format('M d, Y h:i A') }}</p>
                         </div>
 
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved By:</p>
+                            <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                @if($risSlip->approved_by && $risSlip->approver && $risSlip->approver->signature_path)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <img src="{{ Storage::url($risSlip->approver->signature_path) }}"
+                                            alt="Approver signature"
+                                            class="max-h-16 mx-auto"
+                                            style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @endif
+                            </div>
+                            <div style="border-top: 1px solid #000; width: 100%;"></div>
                             @if($risSlip->approved_by)
-                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ optional($risSlip->approver)->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ optional($risSlip->approver)->designation->name ?? 'N/A' }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $risSlip->approved_at->format('M d, Y h:i A') }}</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->approver)->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->approver)->designation->name ?? 'N/A' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->approved_at->format('M d, Y h:i A') }}</p>
                             @else
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pending</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">Pending</p>
                             @endif
                         </div>
 
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Issued By:</p>
+                            <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                @if($risSlip->issued_by && $risSlip->issuer && $risSlip->issuer->signature_path)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <img src="{{ Storage::url($risSlip->issuer->signature_path) }}"
+                                            alt="Issuer signature"
+                                            class="max-h-16 mx-auto"
+                                            style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @endif
+                            </div>
+                            <div style="border-top: 1px solid #000; width: 100%;"></div>
                             @if($risSlip->issued_by)
-                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ optional($risSlip->issuer)->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ optional($risSlip->issuer)->designation->name ?? 'N/A' }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $risSlip->issued_at->format('M d, Y h:i A') }}</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->issuer)->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->issuer)->designation->name ?? 'N/A' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->issued_at->format('M d, Y h:i A') }}</p>
                             @else
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pending</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">Pending</p>
                             @endif
                         </div>
 
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Received By:</p>
+                            <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                @if($risSlip->received_by && $risSlip->receiver && $risSlip->receiver->signature_path)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <img src="{{ Storage::url($risSlip->receiver->signature_path) }}"
+                                            alt="Receiver signature"
+                                            class="max-h-16 mx-auto"
+                                            style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @endif
+                            </div>
+                            <div style="border-top: 1px solid #000; width: 100%;"></div>
                             @if($risSlip->received_by)
-                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ optional($risSlip->receiver)->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ optional($risSlip->receiver)->designation->name ?? 'N/A' }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $risSlip->received_at->format('M d, Y h:i A') }}</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->receiver)->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->receiver)->designation->name ?? 'N/A' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->received_at->format('M d, Y h:i A') }}</p>
                             @else
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pending</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">Pending</p>
                             @endif
                         </div>
                     </div>
