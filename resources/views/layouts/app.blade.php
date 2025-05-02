@@ -60,6 +60,102 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
 
+    @if(auth()->check() && auth()->user()->role === 'admin')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only run this script if the requisition nav link exists
+            const requisitionNavLink = document.getElementById('requisition-nav-link');
+            if (!requisitionNavLink) return;
+
+            // Check if we're currently on the requisitions page
+            const isRequisitionPage = window.location.pathname.includes('/ris') || window.location.href.includes('ris.index');
+
+            // Function to check for pending requisitions
+            const checkPendingRequisitions = async () => {
+                try {
+                    // If we're on the requisition page, don't show the badge and mark as viewed
+                    if (isRequisitionPage) {
+                        hideBadge();
+                        markRequisitionsAsViewed();
+                        return;
+                    }
+
+                    const response = await fetch('/api/pending-requisitions', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateBadge(data.count);
+                    }
+                } catch (error) {
+                    console.error('Error checking for pending requisitions:', error);
+                }
+            };
+
+            // Function to update the badge
+            const updateBadge = (count) => {
+                const badge = document.getElementById('ris-notification-badge');
+                if (!badge) return;
+
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            };
+
+            // Function to hide the badge
+            const hideBadge = () => {
+                const badge = document.getElementById('ris-notification-badge');
+                if (badge) {
+                    badge.classList.add('hidden');
+                }
+            };
+
+            // Function to mark requisitions as viewed
+            const markRequisitionsAsViewed = async () => {
+                try {
+                    await fetch('/api/mark-requisitions-viewed', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        credentials: 'same-origin'
+                    });
+                } catch (error) {
+                    console.error('Error marking requisitions as viewed:', error);
+                }
+            };
+
+            // Check immediately and then every 30 seconds, but only if we're not on the requisition page
+            if (!isRequisitionPage) {
+                checkPendingRequisitions();
+                setInterval(checkPendingRequisitions, 30000);
+            } else {
+                hideBadge();
+                markRequisitionsAsViewed();
+            }
+
+            // Add click event to the requisition link to hide badge when clicked
+            requisitionNavLink.addEventListener('click', function() {
+                hideBadge();
+                markRequisitionsAsViewed();
+            });
+        });
+    </script>
+    @endif
+
 
 </body>
 
