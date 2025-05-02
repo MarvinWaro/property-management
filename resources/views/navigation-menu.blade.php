@@ -38,8 +38,15 @@
                             <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
                                 {{ __('Transactions') }}
                             </x-nav-link>
-                            <x-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')">
+                            <x-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')" class="relative" id="requisition-nav-link">
                                 {{ __('Requisitions') }}
+                                @if(isset($pendingRisCount) && $pendingRisCount > 0)
+                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
+                                        {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
+                                    </span>
+                                @else
+                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900 hidden"></span>
+                                @endif
                             </x-nav-link>
                             <!-- Management Dropdown -->
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true"
