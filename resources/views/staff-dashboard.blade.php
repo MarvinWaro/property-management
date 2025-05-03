@@ -1018,10 +1018,37 @@
                                                                 {{ $requisition['requester_name'] }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                                <a href="{{ $requisition['ris_id'] ? route('ris.show', $requisition['ris_id']) : '#' }}"
-                                                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                                    View Details
-                                                                </a>
+                                                                @php
+                                                                    // Get the RIS slip to check its status
+                                                                    $risSlip = \App\Models\RisSlip::where('ris_no', $requisition['reference_no'])->first();
+                                                                    $canReceive = $risSlip &&
+                                                                                $risSlip->received_by == Auth::id() &&
+                                                                                !$risSlip->received_at &&
+                                                                                $risSlip->status === 'posted' &&
+                                                                                $risSlip->issued_at;
+                                                                @endphp
+
+                                                                <div class="flex items-center justify-center gap-2">
+                                                                    <a href="{{ $requisition['ris_id'] ? route('ris.show', $requisition['ris_id']) : '#' }}"
+                                                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                                        View Details
+                                                                    </a>
+
+                                                                    @if($canReceive)
+                                                                        <form action="{{ route('ris.receive', $risSlip) }}" method="POST" class="inline">
+                                                                            @csrf
+                                                                            <button type="submit"
+                                                                                    onclick="return confirm('Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.')"
+                                                                                    class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                                                                                Receive
+                                                                            </button>
+                                                                        </form>
+                                                                    @elseif($risSlip && $risSlip->received_at)
+                                                                        <span class="text-xs text-green-600 dark:text-green-400">
+                                                                            Received {{ $risSlip->received_at->format('M d, Y') }}
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     @empty

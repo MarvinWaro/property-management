@@ -34,6 +34,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
 
+    Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
+
 
     // Signature Management Routes (add these new routes)
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
