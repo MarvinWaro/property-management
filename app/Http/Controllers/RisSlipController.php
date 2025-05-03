@@ -150,9 +150,6 @@ class RisSlipController extends Controller
         return back()->with('success', 'RIS approved successfully.');
     }
 
-    /**
-     * Process the issuance.
-     */
     public function issue(Request $request, RisSlip $risSlip)
     {
         if ($risSlip->status !== 'approved') {
@@ -258,19 +255,44 @@ class RisSlipController extends Controller
                 }
             }
 
-            // Update the RIS status
+            // Update the RIS status without setting received_at
             $risSlip->update([
                 'status' => 'posted',
                 'issued_by' => Auth::id(),
                 'issued_at' => now(),
                 'received_by' => $request->received_by ?? null,
-                'received_at' => $request->received_by ? now() : null,
             ]);
 
             return redirect()->route('ris.show', $risSlip)
                             ->with('success', 'Supplies issued successfully.');
         });
     }
+
+    public function receive(RisSlip $risSlip)
+    {
+        // Check if the current user is the one assigned to receive
+        if ($risSlip->received_by !== auth()->id()) {
+            return back()->with('error', 'You are not authorized to receive this RIS.');
+        }
+
+        // Check if already received
+        if ($risSlip->received_at) {
+            return back()->with('error', 'This RIS has already been received.');
+        }
+
+        // Check if the RIS has been issued
+        if ($risSlip->status !== 'posted' || !$risSlip->issued_at) {
+            return back()->with('error', 'This RIS has not been issued yet.');
+        }
+
+        // Update the received timestamp
+        $risSlip->update([
+            'received_at' => now(),
+        ]);
+
+        return back()->with('success', 'Supplies received successfully.');
+    }
+
 
     /**
      * Print the RIS form.

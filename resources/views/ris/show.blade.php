@@ -16,14 +16,17 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <!-- Status / Action Bar -->
                 <div class="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
+                    <!-- Replace the existing status div with this: -->
                     <div class="flex items-center">
                         <span class="mr-2 text-gray-700 dark:text-gray-300">Status:</span>
                         @if($risSlip->status === 'draft')
                             <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-800">Draft</span>
                         @elseif($risSlip->status === 'approved')
                             <span class="px-2 py-1 text-xs rounded-full bg-blue-200 text-blue-800">Approved</span>
-                        @elseif($risSlip->status === 'posted')
-                            <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">Issued</span>
+                        @elseif($risSlip->status === 'posted' && !$risSlip->received_at)
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">Issued - Pending Receipt</span>
+                        @elseif($risSlip->status === 'posted' && $risSlip->received_at)
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">Completed</span>
                         @endif
                     </div>
 
@@ -245,10 +248,11 @@
                             @endif
                         </div>
 
+                        <!-- Replace the entire "Received By" div with this: -->
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Received By:</p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->received_by && $risSlip->receiver && $risSlip->receiver->signature_path)
+                                @if($risSlip->received_by && $risSlip->received_at && $risSlip->receiver && $risSlip->receiver->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->receiver->signature_path) }}"
                                             alt="Receiver signature"
@@ -261,7 +265,11 @@
                             @if($risSlip->received_by)
                                 <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->receiver)->name }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->receiver)->designation->name ?? 'N/A' }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->received_at->format('M d, Y h:i A') }}</p>
+                                @if($risSlip->received_at)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->received_at->format('M d, Y h:i A') }}</p>
+                                @else
+                                    <p class="text-xs text-orange-500 dark:text-orange-400 text-center">Pending Confirmation</p>
+                                @endif
                             @else
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">Pending</p>
                             @endif
