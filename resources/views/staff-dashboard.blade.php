@@ -186,92 +186,93 @@
                                 <!-- Requests Table -->
                                 <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
                                     <div class="overflow-x-auto">
-                                        <div class="overflow-y-auto max-h-[500px]">
-                                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                                <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
-                                                    <tr>
-                                                        <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">DATE</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">STATUS</th>
-                                                        <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
+                                                    <th class="px-6 py-3 text-left tracking-wider">DATE</th>
+                                                    <th class="px-6 py-3 text-left tracking-wider">STATUS</th>
+                                                    <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700" id="requests-table-body">
+                                                @forelse($myRequests as $request)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row" data-status="{{ $request->status }}">
+                                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                            {{ $request->ris_no }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="flex flex-col">
+                                                                <span>{{ $request->ris_date->format('M d, Y') }}</span>
+                                                                <span class="text-xs text-gray-500">{{ $request->created_at->format('h:i A') }}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            @if ($request->status === 'draft')
+                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-medium inline-flex items-center">
+                                                                    <span class="relative flex h-2 w-2 mr-1">
+                                                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
+                                                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                                                                    </span>
+                                                                    Pending
+                                                                </span>
+                                                            @elseif($request->status === 'approved')
+                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium inline-flex items-center">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    Approved
+                                                                </span>
+                                                            @elseif($request->status === 'posted')
+                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 font-medium inline-flex items-center">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    Issued
+                                                                </span>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                            <a href="{{ route('ris.show', $request->ris_id) }}"
+                                                            class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg"
+                                                            data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
+                                                            data-tooltip-placement="top">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                </svg>
+                                                            </a>
+                                                            <div id="tooltip-view-request-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                                                View Details
+                                                                <div class="tooltip-arrow" data-popper-arrow></div>
+                                                            </div>
+                                                        </td>
                                                     </tr>
-                                                </thead>
-                                                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700" id="requests-table-body">
-                                                    @php
-                                                        // Sort requests by created_at in descending order
-                                                        $myRequests = $myRequests->sortByDesc('created_at');
-                                                    @endphp
-                                                    @forelse($myRequests as $request)
-                                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row" data-status="{{ $request->status }}">
-                                                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                                {{ $request->ris_no }}
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                                <div class="flex flex-col">
-                                                                    <span>{{ $request->ris_date->format('M d, Y') }}</span>
-                                                                    <span class="text-xs text-gray-500">{{ $request->created_at->format('h:i A') }}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                                @if ($request->status === 'draft')
-                                                                    <span class="px-2.5 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-medium inline-flex items-center">
-                                                                        <span class="relative flex h-2 w-2 mr-1">
-                                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
-                                                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-                                                                        </span>
-                                                                        Pending
-                                                                    </span>
-                                                                @elseif($request->status === 'approved')
-                                                                    <span class="px-2.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium inline-flex items-center">
-                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                                        </svg>
-                                                                        Approved
-                                                                    </span>
-                                                                @elseif($request->status === 'posted')
-                                                                    <span class="px-2.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 font-medium inline-flex items-center">
-                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                                                        </svg>
-                                                                        Issued
-                                                                    </span>
-                                                                @endif
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                                <a href="{{ route('ris.show', $request->ris_id) }}"
-                                                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg"
-                                                                data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
-                                                                data-tooltip-placement="top">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                                    </svg>
-                                                                </a>
-                                                                <div id="tooltip-view-request-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                                                    View Details
-                                                                    <div class="tooltip-arrow" data-popper-arrow></div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr id="no-requests-row">
-                                                            <td colspan="4" class="px-6 py-8 text-center">
-                                                                <!-- Empty state content -->
-                                                                <div class="flex flex-col items-center justify-center py-8">
-                                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                                    </svg>
-                                                                    <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No requisitions found</p>
-                                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get started by clicking the "Request Supply" button</p>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforelse
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                @empty
+                                                    <tr id="no-requests-row">
+                                                        <td colspan="4" class="px-6 py-8 text-center">
+                                                            <!-- Empty state content -->
+                                                            <div class="flex flex-col items-center justify-center py-8">
+                                                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                </svg>
+                                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No requisitions found</p>
+                                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get started by clicking the "Request Supply" button</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+
+                                <!-- Pagination -->
+                                @if($myRequests->hasPages())
+                                    <div class="mt-4">
+                                        {{ $myRequests->links() }}
+                                    </div>
+                                @endif
 
                                 <!-- RIS Request Modal with Only Items Section Scrollable -->
                                 <div id="requestModal" class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden">
@@ -914,159 +915,110 @@
                                 <!-- Received Supplies Table -->
                                 <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
                                     <div class="overflow-x-auto">
-                                        <div class="overflow-y-auto max-h-[500px]">
-                                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                                <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
-                                                    <tr>
-                                                        <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">DATE</th>
-                                                        <th class="px-6 py-3 text-left tracking-wider">REQUESTED BY</th>
-                                                        <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                                    @php
-                                                        // Get an array of distinct RIS numbers the user received supplies for
-                                                        $risNumbers = DB::table('supply_transactions')
-                                                            ->join('user_transactions', 'supply_transactions.transaction_id', '=', 'user_transactions.transaction_id')
-                                                            ->where('user_transactions.user_id', Auth::id())
-                                                            ->where('user_transactions.role', 'receiver')
-                                                            ->select('reference_no')
-                                                            ->distinct()
-                                                            ->pluck('reference_no')
-                                                            ->toArray();
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
+                                                    <th class="px-6 py-3 text-left tracking-wider">DATE</th>
+                                                    <th class="px-6 py-3 text-left tracking-wider">REQUESTED BY</th>
+                                                    <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                                                @forelse($receivedRequisitions as $requisition)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                            {{ $requisition->ris_no }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="flex flex-col">
+                                                                <span>{{ $requisition->ris_date->format('M d, Y') }}</span>
+                                                                <span class="text-xs text-gray-500">{{ $requisition->created_at->format('h:i A') }}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            {{ optional($requisition->requester)->name ?? 'N/A' }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                            @php
+                                                                $canReceive = $requisition->received_by == Auth::id() &&
+                                                                            !$requisition->received_at &&
+                                                                            $requisition->status === 'posted' &&
+                                                                            $requisition->issued_at;
+                                                            @endphp
 
-                                                        // Get detailed information for each RIS
-                                                        $receivedRequisitions = [];
-                                                        foreach ($risNumbers as $risNo) {
-                                                            $risSlip = \App\Models\RisSlip::where('ris_no', $risNo)->first();
-
-                                                            if ($risSlip) {
-                                                                $receivedRequisitions[] = [
-                                                                    'reference_no' => $risNo,
-                                                                    'transaction_date' => $risSlip->ris_date,
-                                                                    'purpose' => $risSlip->purpose ?? 'N/A',
-                                                                    'requester_name' => optional($risSlip->requester)->name ?? 'N/A',
-                                                                    'ris_id' => $risSlip->ris_id,
-                                                                    'created_at' => $risSlip->created_at
-                                                                ];
-                                                            } else {
-                                                                // Fallback to transaction info if RIS not found
-                                                                $transaction = \App\Models\SupplyTransaction::where('reference_no', $risNo)
-                                                                    ->first();
-
-                                                                if ($transaction) {
-                                                                    $requester = $transaction->requesters()->first();
-
-                                                                    $receivedRequisitions[] = [
-                                                                        'reference_no' => $risNo,
-                                                                        'transaction_date' => $transaction->transaction_date,
-                                                                        'purpose' => 'N/A',
-                                                                        'requester_name' => optional($requester)->name ?? 'N/A',
-                                                                        'ris_id' => null,
-                                                                        'created_at' => $transaction->created_at
-                                                                    ];
-                                                                }
-                                                            }
-                                                        }
-
-                                                        // Sort by created_at in descending order (newest first)
-                                                        usort($receivedRequisitions, function($a, $b) {
-                                                            return $b['created_at']->timestamp - $a['created_at']->timestamp;
-                                                        });
-                                                    @endphp
-
-                                                    @forelse($receivedRequisitions as $requisition)
-                                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                                {{ $requisition['reference_no'] }}
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                                <div class="flex flex-col">
-                                                                    <span>{{ $requisition['transaction_date']->format('M d, Y') }}</span>
-                                                                    <span class="text-xs text-gray-500">{{ $requisition['created_at']->format('h:i A') }}</span>
+                                                            <div class="flex items-center justify-center gap-2">
+                                                                <a href="{{ route('ris.show', $requisition->ris_id) }}"
+                                                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg"
+                                                                data-tooltip-target="tooltip-view-{{ $loop->index }}"
+                                                                data-tooltip-placement="top">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                    </svg>
+                                                                </a>
+                                                                <div id="tooltip-view-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                                                    View Details
+                                                                    <div class="tooltip-arrow" data-popper-arrow></div>
                                                                 </div>
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                                {{ $requisition['requester_name'] }}
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                                @php
-                                                                    // Get the RIS slip to check its status
-                                                                    $risSlip = \App\Models\RisSlip::where('ris_no', $requisition['reference_no'])->first();
-                                                                    $canReceive = $risSlip &&
-                                                                                $risSlip->received_by == Auth::id() &&
-                                                                                !$risSlip->received_at &&
-                                                                                $risSlip->status === 'posted' &&
-                                                                                $risSlip->issued_at;
-                                                                @endphp
 
-                                                                <div class="flex items-center justify-center gap-2">
-                                                                    <a href="{{ $requisition['ris_id'] ? route('ris.show', $requisition['ris_id']) : '#' }}"
-                                                                    class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg"
-                                                                    data-tooltip-target="tooltip-view-{{ $loop->index }}"
-                                                                    data-tooltip-placement="top">
-                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                                        </svg>
-                                                                    </a>
-                                                                    <div id="tooltip-view-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                                                        View Details
+                                                                @if($canReceive)
+                                                                    <form action="{{ route('ris.receive', $requisition) }}" method="POST" class="inline">
+                                                                        @csrf
+                                                                        <button type="submit"
+                                                                                onclick="return confirm('Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.')"
+                                                                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg"
+                                                                                data-tooltip-target="tooltip-receive-{{ $loop->index }}"
+                                                                                data-tooltip-placement="top">
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                                            </svg>
+                                                                        </button>
+                                                                    </form>
+                                                                    <div id="tooltip-receive-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                                                        Receive Supplies
                                                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                                                     </div>
-
-                                                                    @if($canReceive)
-                                                                        <form action="{{ route('ris.receive', $risSlip) }}" method="POST" class="inline">
-                                                                            @csrf
-                                                                            <button type="submit"
-                                                                                    onclick="return confirm('Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.')"
-                                                                                    class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg"
-                                                                                    data-tooltip-target="tooltip-receive-{{ $loop->index }}"
-                                                                                    data-tooltip-placement="top">
-                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                        </form>
-                                                                        <div id="tooltip-receive-{{ $loop->index }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                                                                            Receive Supplies
-                                                                            <div class="tooltip-arrow" data-popper-arrow></div>
-                                                                        </div>
-                                                                    @elseif($risSlip && $risSlip->received_at)
-                                                                        <span class="text-xs text-green-600 dark:text-green-400">
-                                                                            Received {{ $risSlip->received_at->format('M d, Y') }}
-                                                                        </span>
-                                                                    @endif
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="4" class="px-6 py-8 text-center">
-                                                                <!-- Empty state content -->
-                                                                <div class="flex flex-col items-center justify-center py-8">
-                                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4"></path>
-                                                                    </svg>
-                                                                    <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No received supplies found</p>
-                                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">You haven't received any supplies yet</p>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforelse
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                                @elseif($requisition->received_at)
+                                                                    <span class="text-xs text-green-600 dark:text-green-400">
+                                                                        Received {{ $requisition->received_at->format('M d, Y') }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="4" class="px-6 py-8 text-center">
+                                                            <!-- Empty state content -->
+                                                            <div class="flex flex-col items-center justify-center py-8">
+                                                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4"></path>
+                                                                </svg>
+                                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No received supplies found</p>
+                                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">You haven't received any supplies yet</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+
+                                <!-- Pagination -->
+                                @if($receivedRequisitions->hasPages())
+                                    <div class="mt-4">
+                                        {{ $receivedRequisitions->links() }}
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Properties Section (initially hidden) -->
                             <div id="properties" class="content-section bg-white shadow rounded-lg p-6 hidden">
                                 <h2 class="text-xl font-bold mb-4">My Properties</h2>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    @forelse(Auth::user()->properties as $property)
+                                    @forelse($properties as $property)
                                         <a href="{{ route('property.view', $property->id) }}" class="block group">
                                             <div
                                                 class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transform transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
@@ -1111,9 +1063,18 @@
                                             </div>
                                         </a>
                                     @empty
-                                        <p class="text-gray-700">No properties assigned to you.</p>
+                                        <div class="col-span-full">
+                                            <p class="text-gray-700">No properties assigned to you.</p>
+                                        </div>
                                     @endforelse
                                 </div>
+
+                                <!-- Pagination -->
+                                @if($properties->hasPages())
+                                    <div class="mt-4">
+                                        {{ $properties->links() }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
