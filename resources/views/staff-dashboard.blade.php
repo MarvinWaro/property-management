@@ -1163,13 +1163,13 @@
                             </div>
 
                             <!-- Properties Section (initially hidden) -->
-                            <div id="properties" class="content-section bg-white shadow rounded-lg p-6 hidden">
-                                <h2 class="text-xl font-bold mb-4">My Properties</h2>
+                            <div id="properties" class="content-section bg-white dark:bg-gray-700 shadow rounded-lg p-6 hidden">
+                                <h2 class="text-xl font-bold mb-4 dark:text-white">My Properties</h2>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @forelse($properties as $property)
                                         <a href="{{ route('property.view', $property->id) }}" class="block group">
                                             <div
-                                                class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transform transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
+                                                class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-600 overflow-hidden transform transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
                                                 <div class="h-48 bg-gray-200 dark:bg-gray-700 relative">
                                                     @if ($property->images->isNotEmpty())
                                                         <img src="{{ asset('storage/' . $property->images->first()->file_path) }}"
@@ -1214,7 +1214,7 @@
                                         </a>
                                     @empty
                                         <div class="col-span-full">
-                                            <p class="text-gray-700">No properties assigned to you.</p>
+                                            <p class="text-gray-700 dark:text-gray-300">No properties assigned to you.</p>
                                         </div>
                                     @endforelse
                                 </div>
