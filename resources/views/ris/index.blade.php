@@ -60,9 +60,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search RIS number, requestor..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                         focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-                                         dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                         dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                        focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                        dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                        dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
@@ -79,9 +79,9 @@
                             <!-- Separate Search Button -->
                             <button type="submit"
                                 class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                       hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                       focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                       dark:focus:ring-blue-800 flex items-center">
+                                    hover:bg-blue-800 focus:ring-1 focus:outline-none
+                                    focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
+                                    dark:focus:ring-blue-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
