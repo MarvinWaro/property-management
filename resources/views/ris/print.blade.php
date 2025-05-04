@@ -244,7 +244,7 @@
                 </td>
                 <td>
                     <div style="height: 60px; position: relative;">
-                        @if($risSlip->received_by && $risSlip->receiver && $risSlip->receiver->signature_path)
+                        @if($risSlip->received_at && $risSlip->receiver && $risSlip->receiver->signature_path)
                             <img src="{{ Storage::url($risSlip->receiver->signature_path) }}"
                                 alt="Receiver signature"
                                 class="signature-image"
@@ -267,9 +267,9 @@
             </tr>
             <tr>
                 <td>{{ $risSlip->created_at->format('M d, Y') }}</td>
-                <td>{{ $risSlip->approved_by ? $risSlip->approved_at->format('M d, Y') : '____________________' }}</td>
-                <td>{{ $risSlip->issued_by ? $risSlip->issued_at->format('M d, Y') : '____________________' }}</td>
-                <td>{{ $risSlip->received_by ? $risSlip->received_at->format('M d, Y') : '____________________' }}</td>
+                <td>{{ $risSlip->approved_at ? $risSlip->approved_at->format('M d, Y') : '____________________' }}</td>
+                <td>{{ $risSlip->issued_at ? $risSlip->issued_at->format('M d, Y') : '____________________' }}</td>
+                <td>{{ $risSlip->received_at ? $risSlip->received_at->format('M d, Y') : '____________________' }}</td>
             </tr>
         </table>
     </div>
