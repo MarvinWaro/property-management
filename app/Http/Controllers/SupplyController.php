@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supply;
+use App\Models\Category;
+use App\Models\Supplier;
+use App\Models\Department;
 use Illuminate\Http\Request;
-use App\Models\Category; // Make sure to include the Category model
 
 class SupplyController extends Controller
 {
@@ -16,8 +18,12 @@ class SupplyController extends Controller
         // Fetch all categories from the database
         $categories = Category::all();
 
-        // Start building the query for supplies with related category
-        $suppliesQuery = Supply::with('category');
+        // Fetch all suppliers and departments for the dropdowns
+        $suppliers = Supplier::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+
+        // Start building the query for supplies with related category, supplier, and department
+        $suppliesQuery = Supply::with(['category', 'supplier', 'department']);
 
         // Check if a search term was provided
         if ($search = $request->input('search')) {
@@ -28,13 +34,12 @@ class SupplyController extends Controller
             });
         }
 
-        // Execute the query to get supplies
-        $supplies = $suppliesQuery->get();
+        // Execute the query to get supplies with pagination
+        $supplies = $suppliesQuery->paginate(5);
 
-        // Pass both variables to your view
-        return view('supplies.index', compact('categories', 'supplies'));
+        // Pass all variables to your view
+        return view('supplies.index', compact('categories', 'supplies', 'suppliers', 'departments'));
     }
-
 
     public function create()
     {
@@ -54,6 +59,8 @@ class SupplyController extends Controller
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
                 'category_id'         => 'required|exists:categories,id',
+                'supplier_id'         => 'required|exists:suppliers,id',
+                'department_id'       => 'required|exists:departments,id',
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
@@ -82,6 +89,8 @@ class SupplyController extends Controller
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
                 'category_id'         => 'required|exists:categories,id',
+                'supplier_id'         => 'required|exists:suppliers,id',
+                'department_id'       => 'required|exists:departments,id',
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
@@ -96,7 +105,6 @@ class SupplyController extends Controller
                 ->with('show_edit_modal', $supply->supply_id); // This flag will be used to reopen the modal
         }
     }
-
 
     public function destroy(Supply $supply)
     {

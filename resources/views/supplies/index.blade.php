@@ -151,8 +151,9 @@
                                         <tr>
                                             <th scope="col" class="px-6 py-3">ID</th>
                                             <th scope="col" class="px-6 py-3">Stock No</th>
-                                            <th scope="col" class="px-6 py-3">Item Name</th>
-                                            <th scope="col" class="px-6 py-3">Category</th>
+                                            <th scope="col" class="px-6 py-3">Item Details</th>
+                                            <th scope="col" class="px-6 py-3">Supplier</th>
+                                            <th scope="col" class="px-6 py-3">Department</th>
                                             <th scope="col" class="px-6 py-3">Unit</th>
                                             <th scope="col" class="px-6 py-3">Reorder Point</th>
                                             <th scope="col" class="px-6 py-3">Cost</th>
@@ -173,13 +174,18 @@
                                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $supply->stock_no }}
                                                 </td>
-                                                <!-- Item Name -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    {{ $supply->item_name }}
+                                                <!-- Item Details (Name + Category) -->
+                                                <td class="px-6 py-4">
+                                                    <div class="text-gray-900 dark:text-white">{{ $supply->item_name }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $supply->category->name ?? 'Uncategorized' }}</div>
                                                 </td>
-                                                <!-- Category -->
+                                                <!-- Supplier -->
                                                 <td class="px-6 py-4 dark:text-white">
-                                                    {{ $supply->category->name ?? 'Uncategorized' }}
+                                                    {{ $supply->supplier->name ?? 'No Supplier' }}
+                                                </td>
+                                                <!-- Department -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    {{ $supply->department->name ?? 'No Department' }}
                                                 </td>
                                                 <!-- Unit -->
                                                 <td class="px-6 py-4 dark:text-white">
@@ -197,9 +203,7 @@
                                                 <td class="px-6 py-4 text-center dark:text-white">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- Edit Button -->
-                                                        <!-- Edit Button -->
-                                                        <button type="button"
-                                                            data-modal-target="editSupplyModal"
+                                                        <button type="button" data-modal-target="editSupplyModal"
                                                             data-modal-toggle="editSupplyModal"
                                                             class="edit-supply-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
                                                             data-supply-id="{{ $supply->supply_id }}"
@@ -207,7 +211,9 @@
                                                             data-item-name="{{ $supply->item_name }}"
                                                             data-description="{{ $supply->description }}"
                                                             data-unit="{{ $supply->unit_of_measurement }}"
-                                                            data-category-id="{{ $supply->category->id }}"
+                                                            data-category-id="{{ $supply->category_id }}"
+                                                            data-supplier-id="{{ $supply->supplier_id ?? '' }}"
+                                                            data-department-id="{{ $supply->department_id ?? '' }}"
                                                             data-reorder-point="{{ $supply->reorder_point }}"
                                                             data-acquisition-cost="{{ number_format($supply->acquisition_cost, 2) }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -221,20 +227,22 @@
                                                             </svg>
                                                         </button>
 
-
                                                         <!-- Delete Button -->
                                                         <button type="button"
                                                             data-modal-target="deleteSupplyModal{{ $supply->supply_id }}"
                                                             data-modal-toggle="deleteSupplyModal{{ $supply->supply_id }}"
                                                             class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                                <path d="M3 6h18"/>
-                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                                                <line x1="10" x2="10" y1="11" y2="17"/>
-                                                                <line x1="14" x2="14" y1="11" y2="17"/>
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11"
+                                                                    y2="17" />
+                                                                <line x1="14" x2="14" y1="11"
+                                                                    y2="17" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -242,7 +250,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="px-6 py-8 text-center">
+                                                <td colspan="9" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
                                                         <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24"
@@ -257,8 +265,8 @@
                                                             No Supply found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
                                                             Get started by adding a new Item/Supply</p>
-                                                        <button type="button" data-modal-target=""
-                                                            data-modal-toggle=""
+                                                        <button type="button" data-modal-target="createSupplyModal"
+                                                            data-modal-toggle="createSupplyModal"
                                                             class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
                                                             <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                 viewBox="0 0 20 20"
@@ -275,7 +283,6 @@
                                         @endforelse
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
                     </div>
@@ -284,10 +291,12 @@
                     <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            pagination here
+                            Showing <span class="font-medium">{{ $supplies->firstItem() ?? 0 }}</span> to
+                            <span class="font-medium">{{ $supplies->lastItem() ?? 0 }}</span> of
+                            <span class="font-medium">{{ $supplies->total() ?? 0 }}</span> results
                         </div>
                         <div class="mt-2 sm:mt-0">
-                            pagination here
+                            {{ $supplies->links() }}
                         </div>
                     </nav>
 
@@ -295,7 +304,7 @@
                     <div id="createSupplyModal" tabindex="-1" aria-hidden="true"
                         class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
 
-                        <div class="relative w-full max-w-3xl max-h-full">
+                        <div class="relative w-full max-w-4xl max-h-full">
                             <!-- Modal content -->
                             <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
                                 <!-- Modal header -->
@@ -312,7 +321,7 @@
                                     </h3>
                                     <button type="button"
                                         class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                        dark:hover:bg-gray-600 transition-all duration-200"
+                                                dark:hover:bg-gray-600 transition-all duration-200"
                                         data-modal-hide="createSupplyModal">
                                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -328,12 +337,14 @@
                                     class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
 
-                                        <!-- Validation Errors Alert -->
-                                        @if ($errors->any() && session('show_create_modal'))
-                                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-                                            <div class="font-medium">Oops! There were some problems with your input:</div>
+                                    <!-- Validation Errors Alert -->
+                                    @if ($errors->any() && session('show_create_modal'))
+                                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                                            role="alert">
+                                            <div class="font-medium">Oops! There were some problems with your input:
+                                            </div>
                                         </div>
-                                        @endif
+                                    @endif
 
                                     <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information
                                         below to
@@ -375,13 +386,13 @@
                                                         <input type="text" name="stock_no" id="stock_no"
                                                             placeholder="Enter Stock No"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                            />
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                                     </div>
                                                     @error('stock_no')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -405,13 +416,13 @@
                                                         <input type="text" name="item_name" id="item_name"
                                                             placeholder="Enter Item Name"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                            />
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                                     </div>
                                                     @error('item_name')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -434,13 +445,14 @@
                                                         </div>
                                                         <textarea name="description" id="description" placeholder="Enter Description" rows="3"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
                                                     </div>
                                                 </div>
                                                 @error('description')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                        {{ $message }}</p>
                                                 @enderror
                                             </div>
 
@@ -475,11 +487,10 @@
                                                             </svg>
                                                         </div>
                                                         <select name="unit_of_measurement" id="unit_of_measurement"
-
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled selected>Select unit
                                                             </option>
                                                             <option value="PCS">Pieces (pcs)</option>
@@ -495,7 +506,8 @@
                                                         </select>
                                                     </div>
                                                     @error('unit_of_measurement')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -518,9 +530,9 @@
                                                         </div>
                                                         <select name="category_id" id="category_id"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled selected>Select Category
                                                             </option>
                                                             @foreach ($categories as $category)
@@ -531,7 +543,8 @@
                                                         </select>
                                                     </div>
                                                     @error('category_id')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -539,6 +552,94 @@
 
                                         <!-- Right Column -->
                                         <div class="space-y-5">
+                                            <!-- Supply Source Section (New) -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4
+                                                    class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Supply Source
+                                                </h4>
+
+                                                <!-- Supplier -->
+                                                <div class="mb-4">
+                                                    <label for="supplier_id"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Supplier <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z">
+                                                                </path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="supplier_id" id="supplier_id"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled selected>Select Supplier
+                                                            </option>
+                                                            @foreach ($suppliers as $supplier)
+                                                                <option value="{{ $supplier->id }}">
+                                                                    {{ $supplier->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @error('supplier_id')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
+                                                    @enderror
+                                                </div>
+
+                                                <!-- Department -->
+                                                <div class="mb-4">
+                                                    <label for="department_id"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Department <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="department_id" id="department_id"
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled selected>Select Department
+                                                            </option>
+                                                            @foreach ($departments as $department)
+                                                                <option value="{{ $department->id }}">
+                                                                    {{ $department->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @error('department_id')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
                                             <!-- Inventory Management Section -->
                                             <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                                 <h4
@@ -575,15 +676,16 @@
                                                         <input type="number" name="reorder_point" id="reorder_point"
                                                             value="0" min="0" required
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum
                                                         quantity before reordering is required</p>
-                                                        @error('reorder_point')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
+                                                    @error('reorder_point')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <!-- Acquisition Cost -->
@@ -611,14 +713,15 @@
                                                             value="{{ old('acquisition_cost', '0.00') }}"
                                                             placeholder="0.00"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per
                                                         unit in your local currency</p>
                                                     @error('acquisition_cost')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -643,12 +746,9 @@
                                                     <li>Stock numbers should be unique to avoid confusion</li>
                                                     <li>Set appropriate reorder points to avoid stockouts</li>
                                                     <li>Acquisition costs help track budget and inventory value</li>
+                                                    <li>Select the correct department and supplier for tracking purposes
+                                                    </li>
                                                 </ul>
-                                            </div>
-
-                                            <!-- Space for future components -->
-                                            <div class="hidden md:block">
-                                                <!-- This div creates space to match the height of the two columns -->
                                             </div>
                                         </div>
                                     </div>
@@ -658,17 +758,17 @@
                                         class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
                                         <button type="button" data-modal-hide="createSupplyModal"
                                             class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                                focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
                                             Cancel
                                         </button>
                                         <button type="submit"
                                             class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                focus:ring-4 focus:outline-none focus:ring-blue-300
-                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                                    focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
                                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
                                                 xmlns="http://www.w3.org/2000/svg">
                                                 <path fill-rule="evenodd"
@@ -686,14 +786,15 @@
                     <!-- Edit Supply Modal -->
                     <div id="editSupplyModal" tabindex="-1" aria-hidden="true"
                         class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
-                        <div class="relative w-full max-w-3xl max-h-full">
+                        <div class="relative w-full max-w-4xl max-h-full">
                             <!-- Modal content -->
                             <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
                                 <!-- Modal header -->
                                 <div
                                     class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
                                     <h3 class="text-2xl font-bold text-white flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -701,7 +802,7 @@
                                     </h3>
                                     <button type="button"
                                         class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                        dark:hover:bg-gray-600 transition-all duration-200"
+                                                    dark:hover:bg-gray-600 transition-all duration-200"
                                         data-modal-hide="editSupplyModal">
                                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -717,15 +818,18 @@
                                     @csrf
                                     @method('PUT')
 
-                                        <!-- Validation Errors Alert -->
-                                        @if ($errors->any() && session('show_edit_modal'))
-                                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-                                                <div class="font-medium">Oops! There were some problems with your input:</div>
+                                    <!-- Validation Errors Alert -->
+                                    @if ($errors->any() && session('show_edit_modal'))
+                                        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                                            role="alert">
+                                            <div class="font-medium">Oops! There were some problems with your input:
                                             </div>
-                                        @endif
+                                        </div>
+                                    @endif
 
                                     <input type="hidden" id="edit_supply_id" name="supply_id">
-                                    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Update the information below to modify this supply item.</p>
+                                    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Update the information
+                                        below to modify this supply item.</p>
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <!-- Left Column -->
@@ -736,7 +840,9 @@
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
                                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                                                        <path fill-rule="evenodd"
+                                                            d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                                                            clip-rule="evenodd"></path>
                                                     </svg>
                                                     Basic Information
                                                 </h4>
@@ -753,19 +859,22 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
                                                         <input type="text" name="stock_no" id="edit_stock_no"
                                                             placeholder="Enter Stock No"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                             required />
                                                     </div>
                                                     @error('stock_no')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -781,19 +890,22 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
                                                         <input type="text" name="item_name" id="edit_item_name"
                                                             placeholder="Enter Item Name"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                             required />
                                                     </div>
                                                     @error('item_name')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -809,18 +921,20 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
-                                                        <textarea name="description" id="edit_description"
-                                                            placeholder="Enter Description" rows="3"
+                                                        <textarea name="description" id="edit_description" placeholder="Enter Description" rows="3"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
                                                     </div>
                                                     @error('description')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -831,7 +945,9 @@
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
                                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                                        <path fill-rule="evenodd"
+                                                            d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                                            clip-rule="evenodd"></path>
                                                     </svg>
                                                     Classification
                                                 </h4>
@@ -848,14 +964,17 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"></path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
-                                                        <select name="unit_of_measurement" id="edit_unit_of_measurement" required
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                        <select name="unit_of_measurement"
+                                                            id="edit_unit_of_measurement" required
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled>Select unit</option>
                                                             <option value="PCS">Pieces (pcs)</option>
                                                             <option value="BOX">Box</option>
@@ -870,7 +989,8 @@
                                                         </select>
                                                     </div>
                                                     @error('unit_of_measurement')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -886,16 +1006,18 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                                                <path
+                                                                    d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                                                                </path>
                                                             </svg>
                                                         </div>
                                                         <select name="category_id" id="edit_category_id" required
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled>Select Category</option>
-                                                            @foreach($categories as $category)
+                                                            @foreach ($categories as $category)
                                                                 <option value="{{ $category->id }}">
                                                                     {{ $category->name }}
                                                                 </option>
@@ -903,7 +1025,8 @@
                                                         </select>
                                                     </div>
                                                     @error('category_id')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
@@ -911,14 +1034,104 @@
 
                                         <!-- Right Column -->
                                         <div class="space-y-5">
+                                            <!-- Supply Source Section -->
+                                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                                <h4
+                                                    class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Supply Source
+                                                </h4>
+
+                                                <!-- Supplier -->
+                                                <div class="mb-4">
+                                                    <label for="edit_supplier_id"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Supplier <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z">
+                                                                </path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="supplier_id" id="edit_supplier_id" required
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled>Select Supplier</option>
+                                                            @foreach ($suppliers as $supplier)
+                                                                <option value="{{ $supplier->id }}">
+                                                                    {{ $supplier->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @error('supplier_id')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
+                                                    @enderror
+                                                </div>
+
+                                                <!-- Department -->
+                                                <div class="mb-4">
+                                                    <label for="edit_department_id"
+                                                        class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Department <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <div
+                                                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                fill="currentColor" viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        </div>
+                                                        <select name="department_id" id="edit_department_id" required
+                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="" disabled>Select Department</option>
+                                                            @foreach ($departments as $department)
+                                                                <option value="{{ $department->id }}">
+                                                                    {{ $department->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @error('department_id')
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
                                             <!-- Inventory Management Section -->
                                             <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                                 <h4
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
                                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                                        <path
+                                                            d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z">
+                                                        </path>
+                                                        <path fill-rule="evenodd"
+                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                                                            clip-rule="evenodd"></path>
                                                     </svg>
                                                     Inventory Management
                                                 </h4>
@@ -935,19 +1148,23 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
-                                                        <input type="number" name="reorder_point" id="edit_reorder_point"
-                                                            min="0" required
+                                                        <input type="number" name="reorder_point"
+                                                            id="edit_reorder_point" min="0" required
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum quantity before reordering is required</p>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum
+                                                        quantity before reordering is required</p>
                                                     @error('reorder_point')
-                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                        <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                            {{ $message }}</p>
                                                     @enderror
                                                 </div>
 
@@ -963,27 +1180,35 @@
                                                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
                                                                 fill="currentColor" viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                                                <path
+                                                                    d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z">
+                                                                </path>
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
-                                                        <input type="text" id="edit_acquisition_cost" name="acquisition_cost"
-                                                            placeholder="0.00"
+                                                        <input type="text" id="edit_acquisition_cost"
+                                                            name="acquisition_cost" placeholder="0.00"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                                 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                                 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per unit in your local currency</p>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per
+                                                        unit in your local currency</p>
                                                 </div>
                                                 @error('acquisition_cost')
-                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                                    <p class="mt-1 text-sm text-red-600 dark:text-red-500">
+                                                        {{ $message }}</p>
                                                 @enderror
                                             </div>
 
                                             <!-- Update Information -->
-                                            <div class="p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg border border-yellow-200 dark:border-yellow-900">
-                                                <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2 flex items-center">
+                                            <div
+                                                class="p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg border border-yellow-200 dark:border-yellow-900">
+                                                <h4
+                                                    class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2 flex items-center">
                                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path fill-rule="evenodd"
@@ -992,17 +1217,22 @@
                                                     </svg>
                                                     Update Information
                                                 </h4>
-                                                <ul class="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 ml-6 list-disc">
-                                                    <li>All fields marked with <span class="text-red-500">*</span> are required</li>
+                                                <ul
+                                                    class="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 ml-6 list-disc">
+                                                    <li>All fields marked with <span class="text-red-500">*</span> are
+                                                        required</li>
                                                     <li>Changes will be applied immediately upon saving</li>
-                                                    <li>Updating a supply item will not affect any related inventory transactions</li>
+                                                    <li>Updating a supply item will not affect any related inventory
+                                                        transactions</li>
+                                                    <li>Make sure to select the correct department and supplier</li>
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Modal Footer -->
-                                    <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                    <div
+                                        class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
                                         <button type="button" data-modal-hide="editSupplyModal"
                                             class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
                                                 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
@@ -1016,8 +1246,10 @@
                                                 focus:ring-4 focus:outline-none focus:ring-blue-300
                                                 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
                                                 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                             </svg>
                                             Update Supply
                                         </button>
@@ -1029,92 +1261,92 @@
 
                     <!-- Delete Supply Modal -->
                     @foreach ($supplies as $supply)
-                    <div id="deleteSupplyModal{{ $supply->supply_id }}" tabindex="-1" aria-hidden="true"
-                        class="hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full flex bg-gray-900 bg-opacity-50">
-                        <div class="relative p-4 w-full max-w-md max-h-full">
-                            <!-- Modal content -->
-                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                                <!-- Modal header -->
-                                <div
-                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-red-500 to-red-700">
-                                    <h3 class="text-lg font-semibold text-white flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            class="mr-2">
-                                            <path d="M3 6h18"></path>
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                            <line x1="10" y1="11" x2="10" y2="17">
-                                            </line>
-                                            <line x1="14" y1="11" x2="14" y2="17">
-                                            </line>
-                                        </svg>
-                                        Delete Supply
-                                    </h3>
-                                    <button type="button"
-                                        class="text-white bg-transparent hover:bg-red-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                                        data-modal-hide="deleteSupplyModal{{ $supply->supply_id }}">
-                                        <svg class="w-3 h-3" aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 14 14">
-                                            <path stroke="currentColor" stroke-linecap="round"
-                                                stroke-linejoin="round" stroke-width="2"
-                                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                        </svg>
-                                        <span class="sr-only">Close modal</span>
-                                    </button>
-                                </div>
-
-                                <!-- Modal body -->
-                                <div class="p-6">
-                                    <div class="mb-5 text-center">
-                                        <div
-                                            class="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        <div id="deleteSupplyModal{{ $supply->supply_id }}" tabindex="-1" aria-hidden="true"
+                            class="hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full flex bg-gray-900 bg-opacity-50">
+                            <div class="relative p-4 w-full max-w-md max-h-full">
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                    <!-- Modal header -->
+                                    <div
+                                        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-red-500 to-red-700">
+                                        <h3 class="text-lg font-semibold text-white flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="mr-2">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                <line x1="10" y1="11" x2="10" y2="17">
+                                                </line>
+                                                <line x1="14" y1="11" x2="14" y2="17">
+                                                </line>
                                             </svg>
-                                        </div>
-                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">
-                                            Confirm Deletion</h3>
-                                        <div class="mt-2 text-gray-600 dark:text-gray-400">
-                                            <p>Are you sure you want to delete this supply item:</p>
-                                            <p class="font-semibold text-gray-800 dark:text-white mt-1">
-                                                "{{ $supply->item_name }}" ({{ $supply->stock_no }})</p>
-                                        </div>
-                                        <p class="mt-3 text-sm text-red-500">This action cannot be undone.</p>
+                                            Delete Supply
+                                        </h3>
+                                        <button type="button"
+                                            class="text-white bg-transparent hover:bg-red-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                            data-modal-hide="deleteSupplyModal{{ $supply->supply_id }}">
+                                            <svg class="w-3 h-3" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2"
+                                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            </svg>
+                                            <span class="sr-only">Close modal</span>
+                                        </button>
                                     </div>
 
-                                    <form action="{{ route('supplies.destroy', $supply->supply_id) }}"
-                                        method="POST" class="mt-6">
-                                        @csrf
-                                        @method('DELETE')
-                                        <div class="flex items-center justify-center space-x-4">
-                                            <button data-modal-hide="deleteSupplyModal{{ $supply->supply_id }}"
-                                                type="button"
-                                                class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                                                Cancel
-                                            </button>
-                                            <button type="submit"
-                                                class="py-2.5 px-5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                    height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round" class="mr-2">
-                                                    <path d="M3 6h18"></path>
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <!-- Modal body -->
+                                    <div class="p-6">
+                                        <div class="mb-5 text-center">
+                                            <div
+                                                class="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                Delete Permanently
-                                            </button>
+                                            </div>
+                                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">
+                                                Confirm Deletion</h3>
+                                            <div class="mt-2 text-gray-600 dark:text-gray-400">
+                                                <p>Are you sure you want to delete this supply item:</p>
+                                                <p class="font-semibold text-gray-800 dark:text-white mt-1">
+                                                    "{{ $supply->item_name }}" ({{ $supply->stock_no }})</p>
+                                            </div>
+                                            <p class="mt-3 text-sm text-red-500">This action cannot be undone.</p>
                                         </div>
-                                    </form>
+
+                                        <form action="{{ route('supplies.destroy', $supply->supply_id) }}"
+                                            method="POST" class="mt-6">
+                                            @csrf
+                                            @method('DELETE')
+                                            <div class="flex items-center justify-center space-x-4">
+                                                <button data-modal-hide="deleteSupplyModal{{ $supply->supply_id }}"
+                                                    type="button"
+                                                    class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit"
+                                                    class="py-2.5 px-5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                        height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" class="mr-2">
+                                                        <path d="M3 6h18"></path>
+                                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    </svg>
+                                                    Delete Permanently
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     @endforeach
 
                 </div>
@@ -1167,139 +1399,153 @@
     </script>
 
 
-<!-- JavaScript for Supply Modals -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Format acquisition cost inputs
-        formatAcquisitionCost('acquisition_cost');
-        formatAcquisitionCost('edit_acquisition_cost');
+    <!-- JavaScript for Supply Modals -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format acquisition cost inputs
+            formatAcquisitionCost('acquisition_cost');
+            formatAcquisitionCost('edit_acquisition_cost');
 
-        // Setup modal toggling
-        setupModalToggles();
+            // Setup modal toggling
+            setupModalToggles();
 
-        // Check for validation errors and show modals if needed
-        @if(session('show_create_modal'))
-            document.getElementById('createSupplyModal').classList.remove('hidden');
-        @endif
+            // Check for validation errors and show modals if needed
+            @if (session('show_create_modal'))
+                document.getElementById('createSupplyModal').classList.remove('hidden');
+            @endif
 
-        @if(session('show_edit_modal'))
-            // Find the edit button with the matching supply ID and trigger click
-            const supplyId = {{ session('show_edit_modal') }};
+            @if (session('show_edit_modal'))
+                // Find the edit button with the matching supply ID and trigger click
+                const supplyId = {{ session('show_edit_modal') }};
+                const editButtons = document.querySelectorAll('.edit-supply-btn');
+                editButtons.forEach(button => {
+                    if (button.getAttribute('data-supply-id') == supplyId) {
+                        button.click();
+                    }
+                });
+            @endif
+        });
+
+        function formatAcquisitionCost(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', function() {
+                    // Remove all non-digit characters
+                    let digits = this.value.replace(/\D/g, '');
+                    if (digits === '') {
+                        digits = '0';
+                    }
+
+                    // Interpret as cents: parse integer, then divide by 100
+                    let intValue = parseInt(digits, 10);
+                    let amount = intValue / 100;
+
+                    // Format with commas + always 2 decimals
+                    this.value = amount.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                });
+            }
+        }
+
+        function setupModalToggles() {
+            // Handle edit button clicks
             const editButtons = document.querySelectorAll('.edit-supply-btn');
             editButtons.forEach(button => {
-                if (button.getAttribute('data-supply-id') == supplyId) {
-                    button.click();
-                }
+                button.addEventListener('click', function() {
+                    // Get the data attributes
+                    const id = this.getAttribute('data-supply-id');
+                    const stockNo = this.getAttribute('data-stock-no');
+                    const itemName = this.getAttribute('data-item-name');
+                    const description = this.getAttribute('data-description');
+                    const unit = this.getAttribute('data-unit');
+                    const categoryId = this.getAttribute('data-category-id');
+                    const supplierId = this.getAttribute('data-supplier-id');         // New attribute
+                    const departmentId = this.getAttribute('data-department-id');     // New attribute
+                    const reorderPoint = this.getAttribute('data-reorder-point');
+                    const acquisitionCost = this.getAttribute('data-acquisition-cost');
+
+                    // Populate form fields
+                    document.getElementById('edit_supply_id').value = id;
+                    document.getElementById('edit_stock_no').value = stockNo;
+                    document.getElementById('edit_item_name').value = itemName;
+                    document.getElementById('edit_description').value = description || '';
+
+                    // Set the select dropdowns
+                    const unitDropdown = document.getElementById('edit_unit_of_measurement');
+                    if (unitDropdown) {
+                        unitDropdown.value = unit;
+                    }
+
+                    const categoryDropdown = document.getElementById('edit_category_id');
+                    if (categoryDropdown) {
+                        categoryDropdown.value = categoryId;
+                    }
+
+                    // Set supplier dropdown (New)
+                    const supplierDropdown = document.getElementById('edit_supplier_id');
+                    if (supplierDropdown) {
+                        supplierDropdown.value = supplierId;
+                    }
+
+                    // Set department dropdown (New)
+                    const departmentDropdown = document.getElementById('edit_department_id');
+                    if (departmentDropdown) {
+                        departmentDropdown.value = departmentId;
+                    }
+
+                    document.getElementById('edit_reorder_point').value = reorderPoint;
+                    document.getElementById('edit_acquisition_cost').value = acquisitionCost;
+
+                    // Set the form action URL
+                    const form = document.getElementById('editSupplyForm');
+                    form.action = `/supplies/${id}`;
+
+                    // Open the modal programmatically
+                    const modal = document.getElementById('editSupplyModal');
+                    modal.classList.remove('hidden');
+                });
             });
-        @endif
-    });
 
-    function formatAcquisitionCost(inputId) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('input', function() {
-                // Remove all non-digit characters
-                let digits = this.value.replace(/\D/g, '');
-                if (digits === '') {
-                    digits = '0';
-                }
+            // Add event listeners for all modal toggle buttons
+            const toggleButtons = document.querySelectorAll('[data-modal-toggle]');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-toggle');
+                    const modal = document.getElementById(modalId);
 
-                // Interpret as cents: parse integer, then divide by 100
-                let intValue = parseInt(digits, 10);
-                let amount = intValue / 100;
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                    }
+                });
+            });
 
-                // Format with commas + always 2 decimals
-                this.value = amount.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+            // Add event listeners for all modal close buttons
+            const closeButtons = document.querySelectorAll('[data-modal-hide]');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-hide');
+                    const modal = document.getElementById(modalId);
+
+                    if (modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Add click event listener for clicking outside modals to close them
+            document.addEventListener('click', function(event) {
+                // Check if we clicked directly on modal background
+                const modals = document.querySelectorAll('.fixed.flex.justify-center.items-center');
+                modals.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.classList.add('hidden');
+                    }
                 });
             });
         }
-    }
-
-    function setupModalToggles() {
-        // Handle edit button clicks
-        const editButtons = document.querySelectorAll('.edit-supply-btn');
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Get the data attributes
-                const id = this.getAttribute('data-supply-id');
-                const stockNo = this.getAttribute('data-stock-no');
-                const itemName = this.getAttribute('data-item-name');
-                const description = this.getAttribute('data-description');
-                const unit = this.getAttribute('data-unit');
-                const categoryId = this.getAttribute('data-category-id');
-                const reorderPoint = this.getAttribute('data-reorder-point');
-                const acquisitionCost = this.getAttribute('data-acquisition-cost');
-
-                // Populate form fields
-                document.getElementById('edit_supply_id').value = id;
-                document.getElementById('edit_stock_no').value = stockNo;
-                document.getElementById('edit_item_name').value = itemName;
-                document.getElementById('edit_description').value = description || '';
-
-                // Set the select dropdowns
-                const unitDropdown = document.getElementById('edit_unit_of_measurement');
-                if (unitDropdown) {
-                    unitDropdown.value = unit;
-                }
-
-                const categoryDropdown = document.getElementById('edit_category_id');
-                if (categoryDropdown) {
-                    categoryDropdown.value = categoryId;
-                }
-
-                document.getElementById('edit_reorder_point').value = reorderPoint;
-                document.getElementById('edit_acquisition_cost').value = acquisitionCost;
-
-                // Set the form action URL
-                const form = document.getElementById('editSupplyForm');
-                form.action = `/supplies/${id}`;
-
-                // Open the modal programmatically
-                const modal = document.getElementById('editSupplyModal');
-                modal.classList.remove('hidden');
-            });
-        });
-
-        // Add event listeners for all modal toggle buttons
-        const toggleButtons = document.querySelectorAll('[data-modal-toggle]');
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const modalId = this.getAttribute('data-modal-toggle');
-                const modal = document.getElementById(modalId);
-
-                if (modal) {
-                    modal.classList.remove('hidden');
-                }
-            });
-        });
-
-        // Add event listeners for all modal close buttons
-        const closeButtons = document.querySelectorAll('[data-modal-hide]');
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const modalId = this.getAttribute('data-modal-hide');
-                const modal = document.getElementById(modalId);
-
-                if (modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        });
-
-        // Add click event listener for clicking outside modals to close them
-        document.addEventListener('click', function(event) {
-            // Check if we clicked directly on modal background
-            const modals = document.querySelectorAll('.fixed.flex.justify-center.items-center');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        });
-    }
-</script>
+    </script>
 
 
 
