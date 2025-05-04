@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $totalProperties = Property::count();
         $totalLocations = Location::count();
 
-        // For user listing with search functionality
+        // For user listing with search functionality - Change from get() to paginate(5)
         $users = User::with('department', 'designation')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -43,7 +43,12 @@ class DashboardController extends Controller
                 });
             })
             ->orderBy('created_at', 'asc')
-            ->get();
+            ->paginate(5);  // Changed from get() to paginate(5)
+
+        // Append search parameter to pagination links
+        if ($search) {
+            $users->appends(['search' => $search]);
+        }
 
         // For the create form
         $departments = Department::all();

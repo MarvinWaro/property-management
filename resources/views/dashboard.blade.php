@@ -346,764 +346,771 @@
                             @endforeach
                         @endif
                     </select>
+
+                    <!-- Clear All Filters Button - Initially Hidden -->
+                    <button type="button" id="clear-filters-button" onclick="clearAllFilters()" style="display: none;"
+                        class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-blue-800">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear All Filters
+                    </button>
                 </div>
 
                 <!-- Table Component with Fixed Height and Scrolling -->
                 <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                     <div class="overflow-x-auto">
-                        <div class="overflow-y-auto max-h-[430px]"> <!-- Height for approximately 5 rows -->
-                            <table class="w-full text-sm text-left">
-                                <thead
-                                    class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3">ID</th>
-                                        <th scope="col" class="px-6 py-3">Name</th>
-                                        <th scope="col" class="px-6 py-3">Email</th>
-                                        <th scope="col" class="px-6 py-3">Role</th>
-                                        <th scope="col" class="px-6 py-3">Department</th>
-                                        <th scope="col" class="px-6 py-3">Designation</th>
-                                        <th scope="col" class="px-6 py-3">Status</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($users as $user)
-                                        <tr data-role="{{ strtolower($user->role) }}"
-                                            data-status="{{ $user->status ? 'active' : 'inactive' }}"
-                                            data-department="{{ $user->department ? $user->department->id : '' }}"
-                                            class="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                                            <td
-                                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                {{ $user->id }}
-                                            </td>
-                                            <td class="px-6 py-4 font-medium">
-                                                <div class="flex items-center">
-                                                    <!-- Display user profile photo or a fallback letter -->
-                                                    @if ($user->profile_photo_url)
-                                                        <img src="{{ $user->profile_photo_url }}"
-                                                            alt="{{ $user->name }}"
-                                                            class="w-8 h-8 mr-3 rounded-full object-cover">
-                                                    @else
-                                                        <div
-                                                            class="w-8 h-8 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
-                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                        </div>
-                                                    @endif
-                                                    <div>
-                                                        <div class="text-gray-900 dark:text-white">{{ $user->name }}
-                                                        </div>
+                        <table class="w-full text-sm text-left">
+                            <thead
+                                class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">ID</th>
+                                    <th scope="col" class="px-6 py-3">Name</th>
+                                    <th scope="col" class="px-6 py-3">Email</th>
+                                    <th scope="col" class="px-6 py-3">Role</th>
+                                    <th scope="col" class="px-6 py-3">Department</th>
+                                    <th scope="col" class="px-6 py-3">Designation</th>
+                                    <th scope="col" class="px-6 py-3">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($users as $user)
+                                    <tr data-role="{{ strtolower($user->role) }}"
+                                        data-status="{{ $user->status ? 'active' : 'inactive' }}"
+                                        data-department="{{ $user->department ? $user->department->id : '' }}"
+                                        class="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                                        <td
+                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {{ $user->id }}
+                                        </td>
+                                        <td class="px-6 py-4 font-medium">
+                                            <div class="flex items-center">
+                                                <!-- Display user profile photo or a fallback letter -->
+                                                @if ($user->profile_photo_url)
+                                                    <img src="{{ $user->profile_photo_url }}"
+                                                        alt="{{ $user->name }}"
+                                                        class="w-8 h-8 mr-3 rounded-full object-cover">
+                                                @else
+                                                    <div
+                                                        class="w-8 h-8 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
+                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                    </div>
+                                                @endif
+                                                <div>
+                                                    <div class="text-gray-900 dark:text-white">{{ $user->name }}
                                                     </div>
                                                 </div>
-                                            </td>
+                                            </div>
+                                        </td>
 
-                                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $user->email }}</td>
-                                            <td class="px-6 py-4">
-                                                @if ($user->role === 'admin')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-                                                            <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
-                                                            <circle cx="12" cy="11" r="4"/>
-                                                        </svg>
-                                                        Admin
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                                            <circle cx="9" cy="7" r="4"/>
-                                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                                        </svg>
-                                                        Staff
-                                                    </span>
-                                                @endif
-                                            </td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $user->email }}</td>
+                                        <td class="px-6 py-4">
+                                            @if ($user->role === 'admin')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                                                        <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
+                                                        <circle cx="12" cy="11" r="4"/>
+                                                    </svg>
+                                                    Admin
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                        <circle cx="9" cy="7" r="4"/>
+                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                    </svg>
+                                                    Staff
+                                                </span>
+                                            @endif
+                                        </td>
 
-                                            <td class="px-6 py-4">
-                                                @if ($user->department)
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                        {{ $user->department->name }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-gray-500 dark:text-gray-400">N/A</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if ($user->designation)
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                        {{ $user->designation->name }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-gray-500 dark:text-gray-400">N/A</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                @if ($user->status)
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                        <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
-                                                        Active
-                                                    </span>
-                                                @else
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                                        <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
-                                                        Inactive
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="flex items-center justify-center space-x-2">
-                                                    <!-- Edit Button -->
-                                                    <button type="button"
-                                                        data-modal-target="editUserModal{{ $user->id }}"
-                                                        data-modal-toggle="editUserModal{{ $user->id }}"
-                                                        class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-all duration-200">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                            height="16" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round"
-                                                            class="lucide lucide-pen-square">
-                                                            <path
-                                                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                            <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                        </svg>
-                                                    </button>
+                                        <td class="px-6 py-4">
+                                            @if ($user->department)
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                    {{ $user->department->name }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-500 dark:text-gray-400">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if ($user->designation)
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                    {{ $user->designation->name }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-500 dark:text-gray-400">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if ($user->status)
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
+                                                    Active
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                                    <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
+                                                    Inactive
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <!-- Edit Button -->
+                                                <button type="button"
+                                                    data-modal-target="editUserModal{{ $user->id }}"
+                                                    data-modal-toggle="editUserModal{{ $user->id }}"
+                                                    class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-all duration-200">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                        height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        class="lucide lucide-pen-square">
+                                                        <path
+                                                            d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                        <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                    </svg>
+                                                </button>
 
-                                                    <!-- View Button -->
-                                                    <!-- View Button in your existing table -->
-                                                    <button type="button"
-                                                        data-modal-target="viewUserModal{{ $user->id }}"
-                                                        data-modal-toggle="viewUserModal{{ $user->id }}"
-                                                        class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                            height="16" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round"
-                                                            class="lucide lucide-eye">
-                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </button>
+                                                <!-- View Button -->
+                                                <!-- View Button in your existing table -->
+                                                <button type="button"
+                                                    data-modal-target="viewUserModal{{ $user->id }}"
+                                                    data-modal-toggle="viewUserModal{{ $user->id }}"
+                                                    class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                        height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        class="lucide lucide-eye">
+                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                        <circle cx="12" cy="12" r="3" />
+                                                    </svg>
+                                                </button>
 
-                                                    <!-- View User Modal -->
-                                                    <div id="viewUserModal{{ $user->id }}" tabindex="-1" aria-hidden="true"
-                                                        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                        <div class="relative p-4 w-full max-w-xl max-h-full">
-                                                            <!-- Modal content -->
-                                                            <div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
-                                                                <!-- Modal header -->
-                                                                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-gradient-to-r from-green-600 to-green-800">
-                                                                    <h3 class="text-xl font-semibold text-white flex items-center">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                                            <circle cx="12" cy="12" r="3" />
-                                                                        </svg>
-                                                                        User Details
-                                                                    </h3>
-                                                                    <button type="button"
-                                                                        class="text-white bg-green-700 hover:bg-green-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
-                                                                        data-modal-hide="viewUserModal{{ $user->id }}">
-                                                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                                        </svg>
-                                                                        <span class="sr-only">Close modal</span>
-                                                                    </button>
-                                                                </div>
-
-                                                                <!-- Modal body -->
-                                                                <div class="p-4 md:p-5 bg-gray-50 dark:bg-gray-800">
-                                                                    <!-- User Profile Card -->
-                                                                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden mb-5">
-                                                                        <!-- User Profile Header with Gradient Background -->
-                                                                        <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 dark:from-green-900/30 dark:to-blue-900/30 p-5 relative h-24">
-                                                                            <!-- User Status Badge - Positioned Absolutely -->
-                                                                            <div class="absolute right-5 top-5">
-                                                                                @if ($user->status)
-                                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 shadow-sm">
-                                                                                        <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
-                                                                                        Active
-                                                                                    </span>
-                                                                                @else
-                                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 shadow-sm">
-                                                                                        <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
-                                                                                        Inactive
-                                                                                    </span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <!-- User Avatar - Overlapping the gradient and white sections -->
-                                                                        <div class="flex justify-center -mt-12">
-                                                                            @if ($user->profile_photo_url)
-                                                                                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
-                                                                                    class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
-                                                                            @else
-                                                                                <div class="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
-                                                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                                                </div>
-                                                                            @endif
-                                                                        </div>
-
-                                                                        <!-- User Info Content -->
-                                                                        <div class="p-5 text-center">
-                                                                            <h4 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $user->name }}</h4>
-                                                                            <p class="text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ $user->email }}</p>
-
-                                                                            <!-- Role Badge - Centered -->
-                                                                            <div class="flex justify-center mt-2">
-                                                                                @if ($user->role === 'admin')
-                                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 shadow-sm">
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                                                            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-                                                                                            <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
-                                                                                            <circle cx="12" cy="11" r="4"/>
-                                                                                        </svg>
-                                                                                        Administrator
-                                                                                    </span>
-                                                                                @else
-                                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 shadow-sm">
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                                                                            <circle cx="9" cy="7" r="4"/>
-                                                                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                                                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                                                                        </svg>
-                                                                                        Staff Member
-                                                                                    </span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Work Information Card -->
-                                                                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5">
-                                                                        <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center pb-2 border-b border-gray-200 dark:border-gray-600">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-green-500">
-                                                                                <rect width="18" height="18" x="3" y="3" rx="2"/>
-                                                                                <path d="M9 17V9l7 4-7 4Z"/>
-                                                                            </svg>
-                                                                            Work Information
-                                                                        </h5>
-
-                                                                        <!-- Work Info in Grid Layout -->
-                                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                                                            <div class="border-l-2 border-green-500 pl-3 py-1">
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                                    @if ($user->department)
-                                                                                        {{ $user->department->name }}
-                                                                                    @else
-                                                                                        <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
-                                                                                    @endif
-                                                                                </p>
-                                                                            </div>
-
-                                                                            <div class="border-l-2 border-blue-500 pl-3 py-1">
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Designation</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                                    @if ($user->designation)
-                                                                                        {{ $user->designation->name }}
-                                                                                    @else
-                                                                                        <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
-                                                                                    @endif
-                                                                                </p>
-                                                                            </div>
-
-                                                                            <div class="border-l-2 border-purple-500 pl-3 py-1">
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Employee ID</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">#{{ $user->id }}</p>
-                                                                            </div>
-
-                                                                            <div class="border-l-2 border-amber-500 pl-3 py-1">
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Joined Date</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                                    {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- QR Code Section (if applicable) -->
-                                                                    @if(isset($user->qr_code) && $user->qr_code)
-                                                                    <div class="mt-5 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5 text-center">
-                                                                        <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-green-500">
-                                                                                <rect width="5" height="5" x="3" y="3" rx="1"/>
-                                                                                <rect width="5" height="5" x="16" y="3" rx="1"/>
-                                                                                <rect width="5" height="5" x="3" y="16" rx="1"/>
-                                                                                <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
-                                                                                <path d="M21 21v.01"/>
-                                                                                <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
-                                                                                <path d="M3 12h.01"/>
-                                                                                <path d="M12 3h.01"/>
-                                                                                <path d="M12 16v.01"/>
-                                                                                <path d="M16 12h1"/>
-                                                                                <path d="M21 12v.01"/>
-                                                                            </svg>
-                                                                            User QR Code
-                                                                        </h5>
-
-                                                                        <div class="flex justify-center">
-                                                                            <div class="bg-white p-2 rounded-lg shadow-sm inline-block">
-                                                                                <img src="{{ $user->qr_code }}" alt="QR Code" class="w-32 h-32">
-                                                                            </div>
-                                                                        </div>
-                                                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Scan for user identification</p>
-                                                                    </div>
-                                                                    @endif
-                                                                </div>
-
-                                                                <!-- Modal footer -->
-                                                                <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
-                                                                    <!-- Edit Button -->
-                                                                    <button data-modal-hide="viewUserModal{{ $user->id }}"
-                                                                            data-modal-target="editUserModal{{ $user->id }}"
-                                                                            data-modal-toggle="editUserModal{{ $user->id }}"
-                                                                            type="button"
-                                                                            class="text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 dark:focus:ring-blue-800 transition-all duration-200">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                            <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                                        </svg>
-                                                                        Edit
-                                                                    </button>
-
-                                                                    <!-- Close Button -->
-                                                                    <button data-modal-hide="viewUserModal{{ $user->id }}" type="button"
-                                                                        class="text-white bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-green-800 transition-all duration-200">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                            <path d="M18 6 6 18"/>
-                                                                            <path d="m6 6 12 12"/>
-                                                                        </svg>
-                                                                        Close
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- More Actions Dropdown (example) -->
-                                                    <div class="relative inline-block text-left">
-                                                        <button id="dropdownButton-{{ $user->id }}"
-                                                            data-dropdown-toggle="dropdown-{{ $user->id }}"
-                                                            type="button"
-                                                            class="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round"
-                                                                class="lucide lucide-more-horizontal">
-                                                                <circle cx="12" cy="12" r="1" />
-                                                                <circle cx="19" cy="12" r="1" />
-                                                                <circle cx="5" cy="12" r="1" />
-                                                            </svg>
-                                                        </button>
-                                                        <!-- Dropdown menu markup goes here -->
-                                                        <!-- Dropdown menu -->
-                                                        <div id="dropdown-{{ $user->id }}"
-                                                            class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
-                                                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                                                                aria-labelledby="dropdownButton-{{ $user->id }}">
-                                                                <li>
-                                                                    <a href="#"
-                                                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <svg class="w-4 h-4 mr-2 inline-block"
-                                                                            fill="none" stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                            </path>
-                                                                        </svg>
-                                                                        User Details
-                                                                    </a>
-                                                                </li>
-                                                                <li>
-                                                                    <a href="#"
-                                                                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <svg class="w-4 h-4 mr-2 inline-block"
-                                                                            fill="none" stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                                                            </path>
-                                                                        </svg>
-                                                                        Reset Password
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-
-                                                <!-- Edit User Modal and other related modals go here -->
-                                                <div id="editUserModal{{ $user->id }}" tabindex="-1"
-                                                    aria-hidden="true"
-                                                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
-                                                                                                    justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                    <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                                <!-- View User Modal -->
+                                                <div id="viewUserModal{{ $user->id }}" tabindex="-1" aria-hidden="true"
+                                                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                    <div class="relative p-4 w-full max-w-xl max-h-full">
                                                         <!-- Modal content -->
-                                                        <div
-                                                            class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
+                                                        <div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
                                                             <!-- Modal header -->
-                                                            <div
-                                                                class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
-                                                                                                dark:border-gray-600 border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800">
-                                                                <h3
-                                                                    class="text-xl font-semibold text-white flex items-center">
-                                                                    <svg class="w-5 h-5 mr-2" fill="currentColor"
-                                                                        viewBox="0 0 20 20"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z">
-                                                                        </path>
+                                                            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-gradient-to-r from-green-600 to-green-800">
+                                                                <h3 class="text-xl font-semibold text-white flex items-center">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                                        <circle cx="12" cy="12" r="3" />
                                                                     </svg>
-                                                                    Edit User: {{ $user->name }}
+                                                                    User Details
                                                                 </h3>
                                                                 <button type="button"
-                                                                    class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                                                                                    dark:hover:bg-gray-600 transition-all duration-200"
-                                                                    data-modal-hide="editUserModal{{ $user->id }}">
-                                                                    <svg class="w-5 h-5"
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M6 18L18 6M6 6l12 12" />
+                                                                    class="text-white bg-green-700 hover:bg-green-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
+                                                                    data-modal-hide="viewUserModal{{ $user->id }}">
+                                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                                     </svg>
                                                                     <span class="sr-only">Close modal</span>
                                                                 </button>
                                                             </div>
 
-                                                            <!-- Modal body: The Form with improved styling -->
-                                                            <form action="{{ route('users.update', $user->id) }}"
-                                                                method="POST"
-                                                                class="p-4 md:p-5 space-y-4 bg-gray-50 dark:bg-gray-800">
-                                                                @csrf
-                                                                @method('PUT')
-
-                                                                <!-- Improved User Information Section -->
-                                                                <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
-                                                                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-                                                                        <svg class="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                                                        </svg>
-                                                                        User Information
-                                                                    </h4>
-
-                                                                    <div class="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 dark:border-gray-600 pb-3 mb-3">
-                                                                        <!-- User profile photo column -->
-                                                                        <div class="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 flex justify-center">
-                                                                            @if ($user->profile_photo_url)
-                                                                                <img src="{{ $user->profile_photo_url }}"
-                                                                                    alt="{{ $user->name }}"
-                                                                                    class="w-16 h-16 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900">
+                                                            <!-- Modal body -->
+                                                            <div class="p-4 md:p-5 bg-gray-50 dark:bg-gray-800">
+                                                                <!-- User Profile Card -->
+                                                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden mb-5">
+                                                                    <!-- User Profile Header with Gradient Background -->
+                                                                    <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 dark:from-green-900/30 dark:to-blue-900/30 p-5 relative h-24">
+                                                                        <!-- User Status Badge - Positioned Absolutely -->
+                                                                        <div class="absolute right-5 top-5">
+                                                                            @if ($user->status)
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
+                                                                                    Active
+                                                                                </span>
                                                                             @else
-                                                                                <div
-                                                                                    class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl">
-                                                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                                                </div>
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
+                                                                                    Inactive
+                                                                                </span>
                                                                             @endif
-                                                                        </div>
-
-                                                                        <!-- User details column -->
-                                                                        <div class="flex-grow">
-                                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                                                <div>
-                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
-                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
-                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->email }}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">User ID</p>
-                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ $user->id }}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Created</p>
-                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                                        {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- QR Code Warning Notice -->
-                                                                    <div class="flex items-start bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-                                                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                                                    <!-- User Avatar - Overlapping the gradient and white sections -->
+                                                                    <div class="flex justify-center -mt-12">
+                                                                        @if ($user->profile_photo_url)
+                                                                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
+                                                                                class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
+                                                                        @else
+                                                                            <div class="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
+                                                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    <!-- User Info Content -->
+                                                                    <div class="p-5 text-center">
+                                                                        <h4 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $user->name }}</h4>
+                                                                        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ $user->email }}</p>
+
+                                                                        <!-- Role Badge - Centered -->
+                                                                        <div class="flex justify-center mt-2">
+                                                                            @if ($user->role === 'admin')
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                                                                                        <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
+                                                                                        <circle cx="12" cy="11" r="4"/>
+                                                                                    </svg>
+                                                                                    Administrator
+                                                                                </span>
+                                                                            @else
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                                                        <circle cx="9" cy="7" r="4"/>
+                                                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                                                    </svg>
+                                                                                    Staff Member
+                                                                                </span>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Work Information Card -->
+                                                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5">
+                                                                    <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center pb-2 border-b border-gray-200 dark:border-gray-600">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-green-500">
+                                                                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                                                            <path d="M9 17V9l7 4-7 4Z"/>
                                                                         </svg>
-                                                                        <div>
-                                                                            <p class="text-xs text-blue-700 dark:text-blue-400">
-                                                                                <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
+                                                                        Work Information
+                                                                    </h5>
+
+                                                                    <!-- Work Info in Grid Layout -->
+                                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                                                        <div class="border-l-2 border-green-500 pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                @if ($user->department)
+                                                                                    {{ $user->department->name }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
+                                                                                @endif
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div class="border-l-2 border-blue-500 pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Designation</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                @if ($user->designation)
+                                                                                    {{ $user->designation->name }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
+                                                                                @endif
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div class="border-l-2 border-purple-500 pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Employee ID</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">#{{ $user->id }}</p>
+                                                                        </div>
+
+                                                                        <div class="border-l-2 border-amber-500 pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Joined Date</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
                                                                             </p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                    <!-- Left Column -->
-                                                                    <div>
-                                                                        <!-- Role -->
-                                                                        <div class="mb-4">
-                                                                            <label for="role_{{ $user->id }}"
-                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                                Role
-                                                                            </label>
-                                                                            <div class="relative">
-                                                                                <div
-                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                        fill="currentColor"
-                                                                                        viewBox="0 0 20 20"
-                                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path
-                                                                                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
-                                                                                        </path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                                <select id="role_{{ $user->id }}"
-                                                                                    name="role"
-                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                                    <option value="admin"
-                                                                                        {{ $user->role === 'admin' ? 'selected' : '' }}>
-                                                                                        Admin</option>
-                                                                                    <option value="staff"
-                                                                                        {{ $user->role === 'staff' ? 'selected' : '' }}>
-                                                                                        Staff</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <!-- Department -->
-                                                                        <div class="mb-4">
-                                                                            <label
-                                                                                for="department_id_{{ $user->id }}"
-                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                                Department
-                                                                            </label>
-                                                                            <div class="relative">
-                                                                                <div
-                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                        fill="currentColor"
-                                                                                        viewBox="0 0 20 20"
-                                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path fill-rule="evenodd"
-                                                                                            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
-                                                                                            clip-rule="evenodd"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                                <select
-                                                                                    id="department_id_{{ $user->id }}"
-                                                                                    name="department_id"
-                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                                    @foreach ($departments as $dept)
-                                                                                        <option
-                                                                                            value="{{ $dept->id }}"
-                                                                                            {{ $dept->id == $user->department_id ? 'selected' : '' }}>
-                                                                                            {{ $dept->name }}
-                                                                                        </option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Right Column -->
-                                                                    <div>
-                                                                        <!-- Designation -->
-                                                                        <div class="mb-4">
-                                                                            <label
-                                                                                for="designation_id_{{ $user->id }}"
-                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                                Designation
-                                                                            </label>
-                                                                            <div class="relative">
-                                                                                <div
-                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                        fill="currentColor"
-                                                                                        viewBox="0 0 20 20"
-                                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path fill-rule="evenodd"
-                                                                                            d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5z"
-                                                                                            clip-rule="evenodd"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                                <select
-                                                                                    id="designation_id_{{ $user->id }}"
-                                                                                    name="designation_id"
-                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                                    @foreach ($designations as $desig)
-                                                                                        <option
-                                                                                            value="{{ $desig->id }}"
-                                                                                            {{ $desig->id == $user->designation_id ? 'selected' : '' }}>
-                                                                                            {{ $desig->name }}
-                                                                                        </option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <!-- Status -->
-                                                                        <div class="mb-4">
-                                                                            <label for="status_{{ $user->id }}"
-                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                                Status
-                                                                            </label>
-                                                                            <div class="relative">
-                                                                                <div
-                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                        fill="currentColor"
-                                                                                        viewBox="0 0 20 20"
-                                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path fill-rule="evenodd"
-                                                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                                                            clip-rule="evenodd"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                                <select
-                                                                                    id="status_{{ $user->id }}"
-                                                                                    name="status"
-                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                                    <option value="1"
-                                                                                        {{ $user->status ? 'selected' : '' }}>
-                                                                                        Active</option>
-                                                                                    <option value="0"
-                                                                                        {{ !$user->status ? 'selected' : '' }}>
-                                                                                        Inactive</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <!-- Important Notice -->
-                                                                <div
-                                                                    class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-900">
-                                                                    <div class="flex items-center mb-2">
-                                                                        <svg class="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-500"
-                                                                            fill="currentColor" viewBox="0 0 20 20"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path fill-rule="evenodd"
-                                                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                                                clip-rule="evenodd"></path>
+                                                                <!-- QR Code Section (if applicable) -->
+                                                                @if(isset($user->qr_code) && $user->qr_code)
+                                                                <div class="mt-5 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5 text-center">
+                                                                    <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-green-500">
+                                                                            <rect width="5" height="5" x="3" y="3" rx="1"/>
+                                                                            <rect width="5" height="5" x="16" y="3" rx="1"/>
+                                                                            <rect width="5" height="5" x="3" y="16" rx="1"/>
+                                                                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
+                                                                            <path d="M21 21v.01"/>
+                                                                            <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
+                                                                            <path d="M3 12h.01"/>
+                                                                            <path d="M12 3h.01"/>
+                                                                            <path d="M12 16v.01"/>
+                                                                            <path d="M16 12h1"/>
+                                                                            <path d="M21 12v.01"/>
                                                                         </svg>
-                                                                        <h5
-                                                                            class="text-sm font-medium text-yellow-700 dark:text-yellow-500">
-                                                                            Important Notice</h5>
-                                                                    </div>
-                                                                    <p
-                                                                        class="text-xs text-yellow-700 dark:text-yellow-500">
-                                                                        Changing a user's role will affect their
-                                                                        permissions in the system. Make sure you verify
-                                                                        this change before saving.
-                                                                    </p>
-                                                                </div>
+                                                                        User QR Code
+                                                                    </h5>
 
-                                                                <!-- Modal footer -->
-                                                                <div
-                                                                    class="flex items-center justify-end pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                                                                    <button
-                                                                        data-modal-hide="editUserModal{{ $user->id }}"
+                                                                    <div class="flex justify-center">
+                                                                        <div class="bg-white p-2 rounded-lg shadow-sm inline-block">
+                                                                            <img src="{{ $user->qr_code }}" alt="QR Code" class="w-32 h-32">
+                                                                        </div>
+                                                                    </div>
+                                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Scan for user identification</p>
+                                                                </div>
+                                                                @endif
+                                                            </div>
+
+                                                            <!-- Modal footer -->
+                                                            <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
+                                                                <!-- Edit Button -->
+                                                                <button data-modal-hide="viewUserModal{{ $user->id }}"
+                                                                        data-modal-target="editUserModal{{ $user->id }}"
+                                                                        data-modal-toggle="editUserModal{{ $user->id }}"
                                                                         type="button"
-                                                                        class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                                                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
-                                                                        Cancel
-                                                                    </button>
-                                                                    <button
-                                                                        data-modal-hide="editUserModal{{ $user->id }}"
-                                                                        type="submit"
-                                                                        class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                                                                    focus:ring-4 focus:outline-none focus:ring-blue-300
-                                                                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                                                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
-                                                                        <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                            xmlns="http://www.w3.org/2000/svg">
-                                                                            <path fill-rule="evenodd"
-                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                clip-rule="evenodd"></path>
-                                                                        </svg>
-                                                                        Save Changes
-                                                                    </button>
-                                                                </div>
-                                                            </form>
+                                                                        class="text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 dark:focus:ring-blue-800 transition-all duration-200">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                        <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                                    </svg>
+                                                                    Edit
+                                                                </button>
+
+                                                                <!-- Close Button -->
+                                                                <button data-modal-hide="viewUserModal{{ $user->id }}" type="button"
+                                                                    class="text-white bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-green-800 transition-all duration-200">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M18 6 6 18"/>
+                                                                        <path d="m6 6 12 12"/>
+                                                                    </svg>
+                                                                    Close
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <!-- End of Edit Modal -->
 
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="px-6 py-8 text-center">
-                                                <!-- Empty state content -->
-                                                <div class="flex flex-col items-center justify-center">
-                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                                                        </path>
-                                                    </svg>
-                                                    <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No
-                                                        users found</p>
-                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
-                                                        started by creating a new user</p>
-                                                    <button type="button" data-modal-target="createUserModal"
-                                                        data-modal-toggle="createUserModal"
-                                                        class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
-                                                        <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                clip-rule="evenodd"></path>
+                                                <!-- More Actions Dropdown (example) -->
+                                                <div class="relative inline-block text-left">
+                                                    <button id="dropdownButton-{{ $user->id }}"
+                                                        data-dropdown-toggle="dropdown-{{ $user->id }}"
+                                                        type="button"
+                                                        class="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                            height="16" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            class="lucide lucide-more-horizontal">
+                                                            <circle cx="12" cy="12" r="1" />
+                                                            <circle cx="19" cy="12" r="1" />
+                                                            <circle cx="5" cy="12" r="1" />
                                                         </svg>
-                                                        Add User
                                                     </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
+                                                    <!-- Dropdown menu markup goes here -->
+                                                    <!-- Dropdown menu -->
+                                                    <div id="dropdown-{{ $user->id }}"
+                                                        class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+                                                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                                            aria-labelledby="dropdownButton-{{ $user->id }}">
+                                                            <li>
+                                                                <a href="#"
+                                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                    <svg class="w-4 h-4 mr-2 inline-block"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                                        </path>
+                                                                    </svg>
+                                                                    User Details
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#"
+                                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                    <svg class="w-4 h-4 mr-2 inline-block"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Reset Password
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
 
-                            </table>
-                        </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Edit User Modal and other related modals go here -->
+                                            <div id="editUserModal{{ $user->id }}" tabindex="-1"
+                                                aria-hidden="true"
+                                                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
+                                                                                                justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                                    <!-- Modal content -->
+                                                    <div
+                                                        class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
+                                                        <!-- Modal header -->
+                                                        <div
+                                                            class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
+                                                                                            dark:border-gray-600 border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800">
+                                                            <h3
+                                                                class="text-xl font-semibold text-white flex items-center">
+                                                                <svg class="w-5 h-5 mr-2" fill="currentColor"
+                                                                    viewBox="0 0 20 20"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z">
+                                                                    </path>
+                                                                </svg>
+                                                                Edit User: {{ $user->name }}
+                                                            </h3>
+                                                            <button type="button"
+                                                                class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                                                                                dark:hover:bg-gray-600 transition-all duration-200"
+                                                                data-modal-hide="editUserModal{{ $user->id }}">
+                                                                <svg class="w-5 h-5"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                                <span class="sr-only">Close modal</span>
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Modal body: The Form with improved styling -->
+                                                        <form action="{{ route('users.update', $user->id) }}"
+                                                            method="POST"
+                                                            class="p-4 md:p-5 space-y-4 bg-gray-50 dark:bg-gray-800">
+                                                            @csrf
+                                                            @method('PUT')
+
+                                                            <!-- Improved User Information Section -->
+                                                            <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
+                                                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
+                                                                    <svg class="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    User Information
+                                                                </h4>
+
+                                                                <div class="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 dark:border-gray-600 pb-3 mb-3">
+                                                                    <!-- User profile photo column -->
+                                                                    <div class="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 flex justify-center">
+                                                                        @if ($user->profile_photo_url)
+                                                                            <img src="{{ $user->profile_photo_url }}"
+                                                                                alt="{{ $user->name }}"
+                                                                                class="w-16 h-16 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900">
+                                                                        @else
+                                                                            <div
+                                                                                class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl">
+                                                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    <!-- User details column -->
+                                                                    <div class="flex-grow">
+                                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                            <div>
+                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
+                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->email }}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">User ID</p>
+                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ $user->id }}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Created</p>
+                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                                    {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- QR Code Warning Notice -->
+                                                                <div class="flex items-start bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+                                                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    <div>
+                                                                        <p class="text-xs text-blue-700 dark:text-blue-400">
+                                                                            <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <!-- Left Column -->
+                                                                <div>
+                                                                    <!-- Role -->
+                                                                    <div class="mb-4">
+                                                                        <label for="role_{{ $user->id }}"
+                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                            Role
+                                                                        </label>
+                                                                        <div class="relative">
+                                                                            <div
+                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path
+                                                                                        d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
+                                                                                    </path>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <select id="role_{{ $user->id }}"
+                                                                                name="role"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                <option value="admin"
+                                                                                    {{ $user->role === 'admin' ? 'selected' : '' }}>
+                                                                                    Admin</option>
+                                                                                <option value="staff"
+                                                                                    {{ $user->role === 'staff' ? 'selected' : '' }}>
+                                                                                    Staff</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Department -->
+                                                                    <div class="mb-4">
+                                                                        <label
+                                                                            for="department_id_{{ $user->id }}"
+                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                            Department
+                                                                        </label>
+                                                                        <div class="relative">
+                                                                            <div
+                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path fill-rule="evenodd"
+                                                                                        d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
+                                                                                        clip-rule="evenodd"></path>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <select
+                                                                                id="department_id_{{ $user->id }}"
+                                                                                name="department_id"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                @foreach ($departments as $dept)
+                                                                                    <option
+                                                                                        value="{{ $dept->id }}"
+                                                                                        {{ $dept->id == $user->department_id ? 'selected' : '' }}>
+                                                                                        {{ $dept->name }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Right Column -->
+                                                                <div>
+                                                                    <!-- Designation -->
+                                                                    <div class="mb-4">
+                                                                        <label
+                                                                            for="designation_id_{{ $user->id }}"
+                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                            Designation
+                                                                        </label>
+                                                                        <div class="relative">
+                                                                            <div
+                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path fill-rule="evenodd"
+                                                                                        d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5z"
+                                                                                        clip-rule="evenodd"></path>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <select
+                                                                                id="designation_id_{{ $user->id }}"
+                                                                                name="designation_id"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                @foreach ($designations as $desig)
+                                                                                    <option
+                                                                                        value="{{ $desig->id }}"
+                                                                                        {{ $desig->id == $user->designation_id ? 'selected' : '' }}>
+                                                                                        {{ $desig->name }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Status -->
+                                                                    <div class="mb-4">
+                                                                        <label for="status_{{ $user->id }}"
+                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                            Status
+                                                                        </label>
+                                                                        <div class="relative">
+                                                                            <div
+                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path fill-rule="evenodd"
+                                                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                                                        clip-rule="evenodd"></path>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <select
+                                                                                id="status_{{ $user->id }}"
+                                                                                name="status"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                <option value="1"
+                                                                                    {{ $user->status ? 'selected' : '' }}>
+                                                                                    Active</option>
+                                                                                <option value="0"
+                                                                                    {{ !$user->status ? 'selected' : '' }}>
+                                                                                    Inactive</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Important Notice -->
+                                                            <div
+                                                                class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-900">
+                                                                <div class="flex items-center mb-2">
+                                                                    <svg class="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-500"
+                                                                        fill="currentColor" viewBox="0 0 20 20"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd"
+                                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    <h5
+                                                                        class="text-sm font-medium text-yellow-700 dark:text-yellow-500">
+                                                                        Important Notice</h5>
+                                                                </div>
+                                                                <p
+                                                                    class="text-xs text-yellow-700 dark:text-yellow-500">
+                                                                    Changing a user's role will affect their
+                                                                    permissions in the system. Make sure you verify
+                                                                    this change before saving.
+                                                                </p>
+                                                            </div>
+
+                                                            <!-- Modal footer -->
+                                                            <div
+                                                                class="flex items-center justify-end pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                                                                <button
+                                                                    data-modal-hide="editUserModal{{ $user->id }}"
+                                                                    type="button"
+                                                                    class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
+                                                                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                                                                                focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                                                                                dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                                                                                dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                                                    Cancel
+                                                                </button>
+                                                                <button
+                                                                    data-modal-hide="editUserModal{{ $user->id }}"
+                                                                    type="submit"
+                                                                    class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
+                                                                                                focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                                                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                                                    <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                                        viewBox="0 0 20 20"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd"
+                                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                            clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    Save Changes
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- End of Edit Modal -->
+
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-8 text-center">
+                                            <!-- Empty state content -->
+                                            <div class="flex flex-col items-center justify-center">
+                                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                                    </path>
+                                                </svg>
+                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No
+                                                    users found</p>
+                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
+                                                    started by creating a new user</p>
+                                                <button type="button" data-modal-target="createUserModal"
+                                                    data-modal-toggle="createUserModal"
+                                                    class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                        viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Add User
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+
+                        </table>
                     </div>
                 </div>
 
@@ -1737,11 +1744,18 @@
         const roleFilter = document.getElementById('role-filter');
         const statusFilter = document.getElementById('status-filter');
         const departmentFilter = document.getElementById('department-filter');
+        const clearButton = document.getElementById('clear-filters-button');
 
         // Add event listeners to filter dropdowns
         if (roleFilter) roleFilter.addEventListener('change', filterTable);
         if (statusFilter) statusFilter.addEventListener('change', filterTable);
         if (departmentFilter) departmentFilter.addEventListener('change', filterTable);
+
+        // Make filterTable function available globally
+        window.filterTable = filterTable;
+
+        // Check initial state of filters
+        updateClearButtonVisibility();
 
         function filterTable() {
             const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
@@ -1794,7 +1808,7 @@
                                 </svg>
                                 <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No matching users found</p>
                                 <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Try changing your filters</p>
-                                <button type="button" onclick="clearFilters()" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                <button type="button" onclick="clearAllFilters()" class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
                                     </svg>
@@ -1810,21 +1824,46 @@
             } else if (emptyStateRow) {
                 emptyStateRow.style.display = 'none';
             }
+
+            // Update clear button visibility
+            updateClearButtonVisibility();
+        }
+
+        function updateClearButtonVisibility() {
+            const roleValue = roleFilter ? roleFilter.value : '';
+            const statusValue = statusFilter ? statusFilter.value : '';
+            const departmentValue = departmentFilter ? departmentFilter.value : '';
+
+            // Show button if any filter has a value
+            if (roleValue || statusValue || departmentValue) {
+                clearButton.style.display = 'inline-flex';
+            } else {
+                clearButton.style.display = 'none';
+            }
         }
     });
 
     // Function to clear all filters
-    function clearFilters() {
+    function clearAllFilters() {
         const roleFilter = document.getElementById('role-filter');
         const statusFilter = document.getElementById('status-filter');
         const departmentFilter = document.getElementById('department-filter');
+        const clearButton = document.getElementById('clear-filters-button');
 
         if (roleFilter) roleFilter.value = '';
         if (statusFilter) statusFilter.value = '';
         if (departmentFilter) departmentFilter.value = '';
 
+        // Hide the clear button
+        if (clearButton) clearButton.style.display = 'none';
+
         // Trigger filter update
         filterTable();
+    }
+
+    // Keep the old function name for backward compatibility
+    function clearFilters() {
+        clearAllFilters();
     }
 
     // Function for the search clear button
