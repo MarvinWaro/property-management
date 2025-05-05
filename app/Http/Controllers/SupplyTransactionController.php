@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\SupplyTransaction;
 use App\Models\SupplyStock;
+use App\Models\Supply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\ReferenceNumberService;
 
 class SupplyTransactionController extends Controller
 {
@@ -27,21 +29,32 @@ class SupplyTransactionController extends Controller
         return view('supply-transaction.show', ['txn' => $supplyTransaction]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, ReferenceNumberService $referenceNumberService)
     {
         /* 1 ▸ Validate input */
         $data = $request->validate([
             'supply_id'        => 'required|exists:supplies,supply_id',
             'transaction_type' => 'required|in:receipt,issue,adjustment',
             'transaction_date' => 'required|date',
-            'reference_no'     => 'required|string',
+            'reference_no'     => 'nullable|string', // Changed to nullable
             'quantity'         => 'required|integer|min:0',   // qty 0 allowed for adjustment
             'unit_cost'        => 'required|numeric|min:0',
             'department_id'    => 'required|exists:departments,id',
             'remarks'          => 'nullable|string',
             'requested_by'     => 'nullable|exists:users,id',  // Added for requester
             'received_by'      => 'nullable|exists:users,id',  // Added for receiver
+            'fund_cluster'     => 'nullable|string', // Added for fund cluster
+            'days_to_consume'  => 'nullable|integer', // Added for days to consume
         ]);
+
+        /* ▲ NEW: Generate reference number for receipt transactions */
+        if ($data['transaction_type'] === 'receipt' && empty($data['reference_no'])) {
+            // Get the supply for the IAR generation
+            $supply = Supply::findOrFail($data['supply_id']);
+
+            // Generate IAR number specific to this supply
+            $data['reference_no'] = $referenceNumberService->generateIarNumber($data['supply_id']);
+        }
 
         /* ▲ NEW: record who performed the transaction */
         $data['user_id'] = auth()->id();

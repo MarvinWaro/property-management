@@ -11,6 +11,7 @@ use App\Models\SupplyTransaction; // Add this import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ReferenceNumberService;
 
 class RisSlipController extends Controller
 {
@@ -43,7 +44,7 @@ class RisSlipController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ReferenceNumberService $referenceNumberService)
     {
         // Validate the form data
         $validated = $request->validate([
@@ -58,14 +59,8 @@ class RisSlipController extends Controller
             'supplies.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Generate RIS number
-        $latestRis = RisSlip::latest('ris_id')->first();
-        $newRisNumber = 'RIS-' . date('Ym') . '-' . str_pad(
-            ($latestRis ? ($latestRis->ris_id + 1) : 1),
-            4,
-            '0',
-            STR_PAD_LEFT
-        );
+        // Generate RIS number using the service
+        $newRisNumber = $referenceNumberService->generateRisNumber();
 
         // Begin transaction
         return DB::transaction(function() use ($validated, $newRisNumber) {

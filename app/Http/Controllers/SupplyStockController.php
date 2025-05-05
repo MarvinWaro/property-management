@@ -4,12 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\SupplyStock;
 use App\Models\SupplyTransaction;
+use App\Models\Supply;
+use App\Services\ReferenceNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SupplyStockController extends Controller
 {
+    /**
+     * @var ReferenceNumberService
+     */
+    protected $referenceNumberService;
+
+    public function __construct(ReferenceNumberService $referenceNumberService)
+    {
+        $this->referenceNumberService = $referenceNumberService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -31,7 +43,7 @@ class SupplyStockController extends Controller
             $stocksQuery->where('status', $status);
         }
 
-        $supplies = \App\Models\Supply::all();
+        $supplies = Supply::all();
         $stocks   = $stocksQuery->paginate(10);
 
         return view('manage-stock.index', compact('stocks', 'supplies'));
@@ -54,7 +66,10 @@ class SupplyStockController extends Controller
             'remarks'          => 'nullable|string',
         ]);
 
-        DB::transaction(function() use ($validated, $request) {
+        // Generate IAR reference number
+        $referenceNo = $this->referenceNumberService->generateIarNumber($validated['supply_id']);
+
+        DB::transaction(function() use ($validated, $request, $referenceNo) {
             // 1) Pull or init the summary row (group only by supply+cluster)
             $stock = SupplyStock::firstOrNew([
                 'supply_id'    => $validated['supply_id'],
@@ -86,7 +101,7 @@ class SupplyStockController extends Controller
                 'supply_id'        => $validated['supply_id'],
                 'transaction_type' => 'receipt',
                 'transaction_date' => now()->toDateString(),
-                'reference_no'     => $request->input('reference_no','Manual Stocking'),
+                'reference_no'     => $referenceNo,
                 'quantity'         => $validated['quantity_on_hand'],
                 'unit_cost'        => $validated['unit_cost'],
                 'total_cost'       => $newLotCost,
@@ -94,6 +109,8 @@ class SupplyStockController extends Controller
                 'department_id'    => auth()->user()->department_id,
                 'user_id'          => auth()->id(),
                 'remarks'          => $validated['remarks'],
+                'fund_cluster'     => $validated['fund_cluster'],
+                'days_to_consume'  => $validated['days_to_consume'],
             ]);
         });
 
@@ -150,11 +167,51 @@ class SupplyStockController extends Controller
             'department_id'    => auth()->user()->department_id,
             'user_id'          => auth()->id(),
             'remarks'          => $validated['remarks'] ?? 'Stock re-valued', // Make sure we capture remarks
+            'fund_cluster'     => $validated['fund_cluster'],
+            'days_to_consume'  => $validated['days_to_consume'],
         ]);
 
         return redirect()
             ->route('stocks.index')
             ->with('success', 'Stock updated successfully.');
+    }
+
+    /**
+     * Create beginning balance entries for the new year
+     */
+    public function createBeginningBalances()
+    {
+        // Check if we're in a new year period
+        if (!$this->referenceNumberService->isNewYear()) {
+            return redirect()->route('stocks.index')
+                ->with('error', 'Beginning balance can only be created at the beginning of the year.');
+        }
+
+        // Get all supplies with stock
+        $stocks = SupplyStock::where('quantity_on_hand', '>', 0)->get();
+
+        DB::transaction(function() use ($stocks) {
+            foreach ($stocks as $stock) {
+                // Create beginning balance transaction for each stock
+                SupplyTransaction::create([
+                    'supply_id'        => $stock->supply_id,
+                    'transaction_type' => 'receipt',
+                    'transaction_date' => now()->startOfYear()->toDateString(),
+                    'reference_no'     => 'Beginning Balance',
+                    'quantity'         => $stock->quantity_on_hand,
+                    'unit_cost'        => $stock->unit_cost,
+                    'total_cost'       => $stock->total_cost,
+                    'balance_quantity' => $stock->quantity_on_hand,
+                    'department_id'    => auth()->user()->department_id,
+                    'user_id'          => auth()->id(),
+                    'remarks'          => 'Beginning balance for ' . now()->year,
+                    'fund_cluster'     => $stock->fund_cluster,
+                ]);
+            }
+        });
+
+        return redirect()->route('stocks.index')
+            ->with('success', 'Beginning balances created successfully for ' . now()->year);
     }
 
     /**

@@ -35,6 +35,10 @@
                             <x-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')">
                                 {{ __('Supply Stocks') }}
                             </x-nav-link>
+                            <!-- Add this new link for Stock Cards -->
+                            <x-nav-link href="{{ route('stock-cards.index') }}" :active="request()->routeIs('stock-cards.*')">
+                                {{ __('Stock Cards') }}
+                            </x-nav-link>
                             <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
                                 {{ __('Transactions') }}
                             </x-nav-link>
@@ -202,10 +206,10 @@
 
                 @php
                     // Determine if we're in "Assets mode" vs. "Supplies mode"
-$isAssetsMode =
-    request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-    (request()->routeIs('profile.show') && session('from_assets_mode', false));
-                @endphp
+                    $isAssetsMode =
+                        request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+                        (request()->routeIs('profile.show') && session('from_assets_mode', false));
+                                    @endphp
 
                 <div class="ms-3 relative">
                     <x-dropdown align="right" width="48">

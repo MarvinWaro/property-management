@@ -17,6 +17,7 @@ use App\Http\Controllers\SignatureController;
 
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\RisSlipController;
+use App\Http\Controllers\StockCardController;
 
 
 Route::get('/', function () {
@@ -35,6 +36,19 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
 
     Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
+
+    // Stock Card routes
+    // Route::get('/stock-cards', [App\Http\Controllers\StockCardController::class, 'index'])->name('stock-cards.index');
+    // Route::get('/stock-cards/{supplyId}', [App\Http\Controllers\StockCardController::class, 'show'])->name('stock-cards.show');
+    // Route::get('/stock-cards/{supplyId}/export-pdf', [App\Http\Controllers\StockCardController::class, 'exportPdf'])->name('stock-cards.export-pdf');
+
+    Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');
+    Route::get('/stock-cards/{supplyId}', [StockCardController::class, 'show'])->name('stock-cards.show');
+    Route::get('/stock-cards/{supplyId}/export-pdf', [StockCardController::class, 'exportPdf'])->name('stock-cards.export-pdf');
+
+    // Beginning Balance creation route
+    Route::post('/stocks/create-beginning-balances', [App\Http\Controllers\SupplyStockController::class, 'createBeginningBalances'])
+        ->name('stocks.create-beginning-balances');
 
 
     // Signature Management Routes (add these new routes)
