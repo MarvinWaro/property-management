@@ -50,15 +50,24 @@
                             </button>
                         </form>
 
-                        <!-- Create Stock Button -->
-                        <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
-                            class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ml-2 inline-flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span class="hidden sm:inline-block">Add Stock</span>
-                        </button>
+                        <!-- Somewhere in your header section, after the search form -->
+                        <div class="flex space-x-2">
+                            <a href="{{ route('stock-cards.index') }}" class="py-2 px-3 text-white bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 transition-all duration-200 inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>All Stock Cards</span>
+                            </a>
+
+                            <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
+                                class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span class="hidden sm:inline-block">Add Stock</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Flash Messages -->
@@ -180,14 +189,15 @@
                                                     @endif
                                                 </td>
                                                 <!-- Actions -->
+                                                <!-- Actions column with added Stock Card button -->
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- + Add Stock -->
                                                         <button type="button" data-modal-target="createStockModal"
                                                             data-modal-toggle="createStockModal"
                                                             class="add-stock-btn inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
-                                                            data-supply-id  ="{{ $stock->supply_id }}"
-                                                            data-unit-cost  ="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-supply-id="{{ $stock->supply_id }}"
+                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
                                                             data-fund-cluster="{{ $stock->fund_cluster }}"
                                                             title="Add stock to {{ $stock->supply->item_name }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
@@ -202,16 +212,16 @@
                                                             class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200
                                                                 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900
                                                                 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
-                                                            data-stock-id       ="{{ $stock->stock_id }}"
-                                                            data-supply-id      ="{{ $stock->supply_id }}"
-                                                            data-supply-name    ="{{ $stock->supply->item_name }}"
-                                                            data-quantity       ="{{ $stock->quantity_on_hand }}"
-                                                            data-unit-cost      ="{{ number_format($stock->unit_cost, 2) }}"
-                                                            data-status         ="{{ $stock->status }}"
-                                                            data-expiry-date    ="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
-                                                            data-fund-cluster   ="{{ $stock->fund_cluster }}"
+                                                            data-stock-id="{{ $stock->stock_id }}"
+                                                            data-supply-id="{{ $stock->supply_id }}"
+                                                            data-supply-name="{{ $stock->supply->item_name }}"
+                                                            data-quantity="{{ $stock->quantity_on_hand }}"
+                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-status="{{ $stock->status }}"
+                                                            data-expiry-date="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
+                                                            data-fund-cluster="{{ $stock->fund_cluster }}"
                                                             data-days-to-consume="{{ $stock->days_to_consume }}"
-                                                            data-remarks        ="{{ $stock->remarks }}"
+                                                            data-remarks="{{ $stock->remarks }}"
                                                             data-modal-target="editStockModal"
                                                             data-modal-toggle="editStockModal" title="Re‑value stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -225,12 +235,26 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- Delete Stock (no data-modal- attributes) -->
+                                                        <!-- NEW Stock Card Button -->
+                                                        <a href="{{ route('stock-cards.show', $stock->supply_id) }}"
+                                                            class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800 transition-all duration-200"
+                                                            title="View Stock Card">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <path d="M14 2v6h6"></path>
+                                                                <path d="M16 13H8"></path>
+                                                                <path d="M16 17H8"></path>
+                                                                <path d="M10 9H8"></path>
+                                                            </svg>
+                                                        </a>
+
+                                                        <!-- Delete Stock -->
                                                         <button type="button"
                                                             class="delete-stock-btn p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
                                                             title="Delete stock">
-                                                            <!-- your delete icon SVG here -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"

@@ -35,10 +35,10 @@
                             <x-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')">
                                 {{ __('Supply Stocks') }}
                             </x-nav-link>
-                            <!-- Add this new link for Stock Cards -->
+                            {{-- <!-- Add this new link for Stock Cards -->
                             <x-nav-link href="{{ route('stock-cards.index') }}" :active="request()->routeIs('stock-cards.*')">
                                 {{ __('Stock Cards') }}
-                            </x-nav-link>
+                            </x-nav-link> --}}
                             <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
                                 {{ __('Transactions') }}
                             </x-nav-link>
