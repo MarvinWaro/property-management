@@ -34,6 +34,7 @@
             max-width: 8.5in;
             margin: 0 auto;
             padding: 0.5in;
+            position: relative;
         }
         .header {
             text-align: center;
@@ -105,8 +106,11 @@
             margin-bottom: 10px;
         }
         .appendix {
-            text-align: right;
+            position: absolute;
+            top: 0.5in;
+            right: 0.5in;
             font-style: italic;
+            font-size: 15px;
         }
         @media print {
             .no-print {
@@ -120,18 +124,21 @@
                 padding: 0;
                 max-width: none;
             }
+            .appendix {
+                top: 0;
+                right: 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="print-header">
-            <div class="no-print">
-                <button onclick="window.print()">Print RIS</button>
-                <a href="{{ route('ris.show', $risSlip) }}">Back to Details</a>
-            </div>
-            <div class="appendix">Appendix 63</div>
+        <div class="no-print">
+            <button onclick="window.print()">Print RIS</button>
+            <a href="{{ route('ris.show', $risSlip) }}">Back to Details</a>
         </div>
+
+        <div class="appendix">Appendix 63</div>
 
         <div class="header">
             <h1>REQUISITION AND ISSUE SLIP</h1>
@@ -216,16 +223,10 @@
 
         <table class="signature-table">
             <tr>
-                <td colspan="4" style="border: none; padding: 0;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="width: 25%;">Requested by:</td>
-                            <td style="width: 25%;">Approved by:</td>
-                            <td style="width: 25%;">Issued by:</td>
-                            <td style="width: 25%;">Received by:</td>
-                        </tr>
-                    </table>
-                </td>
+                <td>Requested by:</td>
+                <td>Approved by:</td>
+                <td>Issued by:</td>
+                <td>Received by:</td>
             </tr>
             <tr>
                 <td>
