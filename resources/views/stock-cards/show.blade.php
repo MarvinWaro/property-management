@@ -73,35 +73,43 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-                            <tr>
-                                <th scope="col" class="px-6 py-3">Date</th>
-                                <th scope="col" class="px-6 py-3">Reference</th>
-                                <th scope="col" class="px-6 py-3 text-center">
-                                    <div>Receipt</div>
-                                    <div class="text-xs font-normal">Qty.</div>
+                        <thead>
+                            <!-- Main header row with column groups -->
+                            <tr class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-600 text-center">DATE</th>
+                                <th scope="col" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-600 text-center">REFERENCE</th>
+                                <th scope="col" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-600 text-center bg-green-50 dark:bg-green-900/20">
+                                    RECEIPT<br />QTY.
                                 </th>
-                                <th scope="col" colspan="2" class="px-6 py-3 text-center">
-                                    <div>Issue</div>
-                                    <div class="grid grid-cols-2 text-xs font-normal">
-                                        <div>Qty.</div>
-                                        <div>Office</div>
-                                    </div>
+                                <th scope="col" colspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-600 text-center bg-red-50 dark:bg-red-900/20">
+                                    ISSUE
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-center">
-                                    <div>Balance</div>
-                                    <div class="text-xs font-normal">Qty.</div>
+                                <th scope="col" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-600 text-center bg-blue-50 dark:bg-blue-900/20">
+                                    BALANCE<br />QTY.
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-right">Days to Consume</th>
+                                <th scope="col" class="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-center">
+                                    DAYS TO<br />CONSUME
+                                </th>
+                            </tr>
+
+                            <!-- Subheader for issue columns -->
+                            <tr class="text-xs text-gray-700 bg-gray-50 dark:bg-gray-700/70 dark:text-gray-400">
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600"></th>
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600"></th>
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600 bg-green-50/50 dark:bg-green-900/10"></th>
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center bg-red-50/50 dark:bg-red-900/10">QTY.</th>
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center bg-red-50/50 dark:bg-red-900/10">OFFICE</th>
+                                <th scope="col" class="px-4 py-2 border-b border-r border-gray-200 dark:border-gray-600 bg-blue-50/50 dark:bg-blue-900/10"></th>
+                                <th scope="col" class="px-4 py-2 border-b border-gray-200 dark:border-gray-600"></th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($stockCardEntries as $entry)
                                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-100 dark:border-gray-700">
                                         {{ \Carbon\Carbon::parse($entry['date'])->format('M d, Y') }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-3 border-r border-gray-100 dark:border-gray-700">
                                         @if($entry['reference'] === 'Beginning Balance')
                                             <span class="font-medium text-gray-800 dark:text-white">
                                                 {{ $entry['reference'] }}
@@ -110,33 +118,33 @@
                                             {{ $entry['reference'] }}
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-4 py-3 text-center bg-green-50/30 dark:bg-green-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if($entry['receipt_qty'])
                                             <span class="font-medium text-green-600 dark:text-green-400">
                                                 {{ number_format($entry['receipt_qty']) }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-4 py-3 text-center bg-red-50/30 dark:bg-red-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if($entry['issue_qty'])
                                             <span class="font-medium text-red-600 dark:text-red-400">
                                                 {{ number_format($entry['issue_qty']) }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-3 bg-red-50/30 dark:bg-red-900/5 border-r border-gray-100 dark:border-gray-700">
                                         {{ $entry['issue_office'] }}
                                     </td>
-                                    <td class="px-6 py-4 text-center font-medium text-gray-800 dark:text-white">
+                                    <td class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
                                         {{ number_format($entry['balance_qty']) }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-4 py-3 text-center">
                                         {{ $entry['days_to_consume'] ?? 'N/A' }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="7" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
                                         No transactions found for this supply.
                                     </td>
                                 </tr>
