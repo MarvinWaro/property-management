@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RIS #{{ $risSlip->ris_no }}</title>
     <style>
+    @page {
+        margin: 0;
+        }
+        @media print {
+        html, body {
+            margin: 0;
+            padding: 40px;
+        }
+
+        /* give yourself a half-inch gutter on whatever paper you choose */
+        .container {
+            padding: 0.5in;
+        }
+    }
+
+
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
