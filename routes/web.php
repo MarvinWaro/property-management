@@ -18,6 +18,7 @@ use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\RisSlipController;
 use App\Http\Controllers\StockCardController;
+use App\Http\Controllers\Api\NotificationController;
 
 
 Route::get('/', function () {
@@ -61,6 +62,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      * ------------------
      */
     Route::middleware(['role:admin'])->group(function () {
+
+         // these now share your normal web session cookie
+        Route::get('/pending-requisitions', [NotificationController::class, 'getPendingCount']);
+        Route::post('/mark-requisitions-viewed', [NotificationController::class, 'markAsViewed']);
+
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
