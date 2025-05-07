@@ -19,9 +19,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                              focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-                                              dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                              dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                            focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                            dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                            dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
