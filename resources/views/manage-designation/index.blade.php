@@ -73,6 +73,37 @@
                         </script>
                     @endif
 
+                    <!-- Error Messages -->
+                    @if (session()->has('error'))
+                        <div id="errorMessage"
+                            class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                            role="alert">
+                            <span class="font-medium">Error!</span> {{ session('error') }}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('errorMessage').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    @endif
+
+                    <!-- Validation Error Summary -->
+                    @if ($errors->any())
+                        <div id="validationErrors" class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                            <div class="font-medium">Please fix the following errors:</div>
+                            <ul class="mt-1.5 ml-4 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('validationErrors').style.display = 'none';
+                            }, 5000);
+                        </script>
+                    @endif
+
                     <!-- Table Description Caption -->
                     <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
                         <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED User Designations</h3>
@@ -218,10 +249,14 @@
                                 <!-- Modal body -->
                                 <form id="createDesignationForm" action="{{ route('designations.store') }}" method="POST" class="p-4 md:p-5">
                                     @csrf
+                                    <input type="hidden" name="_form_type" value="create">
                                     <div class="grid gap-4 mb-4">
                                         <div class="col-span-2">
                                             <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Designation Name</label>
-                                            <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter designation name" required>
+                                            <input type="text" name="name" id="name" value="{{ old('name') }}" class="bg-gray-50 border @error('name') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter designation name" required>
+                                            @error('name')
+                                                <p class="mt-2 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end space-x-4">
@@ -252,12 +287,16 @@
                                 <form id="editDesignationForm" method="POST" class="p-4 md:p-5">
                                     @csrf
                                     @method('PUT')
-                                    <input type="hidden" id="edit_designation_id" name="designation_id">
+                                    <input type="hidden" name="_form_type" value="edit">
+                                    <input type="hidden" id="edit_designation_id" name="designation_id" value="{{ old('designation_id') }}">
 
                                     <div class="grid gap-4 mb-4">
                                         <div class="col-span-2">
                                             <label for="edit_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Designation Name</label>
-                                            <input type="text" name="name" id="edit_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter designation name" required>
+                                            <input type="text" name="name" id="edit_name" value="{{ old('name') }}" class="bg-gray-50 border @error('name') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter designation name" required>
+                                            @error('name')
+                                                <p class="mt-2 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end space-x-4">
@@ -349,6 +388,7 @@
             const input = document.getElementById('search-input');
             input.value = '';
             document.getElementById('clearButton').style.display = 'none';
+            window.location.href = window.location.pathname;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -356,53 +396,96 @@
         });
     </script>
 
-<!-- JavaScript for handling edit functionality -->
-<script>
-    // When edit button is clicked, populate the modal with designation data
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle edit button clicks
-        const editButtons = document.querySelectorAll('.edit-designation-btn');
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-designation-id');
-                const name = this.getAttribute('data-designation-name');
+    <!-- JavaScript for handling edit functionality and validation errors -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle edit button clicks
+            const editButtons = document.querySelectorAll('.edit-designation-btn');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-designation-id');
+                    const name = this.getAttribute('data-designation-name');
 
-                // Populate form fields
-                document.getElementById('edit_designation_id').value = id;
-                document.getElementById('edit_name').value = name;
+                    // Populate form fields
+                    document.getElementById('edit_designation_id').value = id;
+                    document.getElementById('edit_name').value = name;
 
-                // Update form action URL
-                const form = document.getElementById('editDesignationForm');
-                form.action = `/designations/${id}`;
+                    // Update form action URL
+                    const form = document.getElementById('editDesignationForm');
+                    form.action = `/designations/${id}`;
+                });
             });
-        });
 
-        // Clear search functionality
-        function toggleClearButton() {
-            const searchInput = document.getElementById('search-input');
-            const clearButton = document.getElementById('clearButton');
+            // Clear search functionality
+            function toggleClearButton() {
+                const searchInput = document.getElementById('search-input');
+                const clearButton = document.getElementById('clearButton');
 
-            if (searchInput && clearButton) {
-                if (searchInput.value.length > 0) {
-                    clearButton.style.display = 'flex';
-                } else {
-                    clearButton.style.display = 'none';
+                if (searchInput && clearButton) {
+                    if (searchInput.value.length > 0) {
+                        clearButton.style.display = 'flex';
+                    } else {
+                        clearButton.style.display = 'none';
+                    }
                 }
             }
-        }
 
-        function clearSearch() {
-            document.getElementById('search-input').value = '';
+            function clearSearch() {
+                document.getElementById('search-input').value = '';
+                toggleClearButton();
+                window.location.href = window.location.pathname;
+            }
+
+            // Initialize state on page load
             toggleClearButton();
-            window.location.href = window.location.pathname;
-        }
 
-        // Initialize state on page load
-        toggleClearButton();
+            // Make these functions globally available
+            window.toggleClearButton = toggleClearButton;
+            window.clearSearch = clearSearch;
 
-        // Make these functions globally available
-        window.toggleClearButton = toggleClearButton;
-        window.clearSearch = clearSearch;
-    });
-</script>
+            // Handle validation errors - reopen modals with errors
+            const hasErrors = {{ $errors->any() ? 'true' : 'false' }};
+            const formType = "{{ old('_form_type', '') }}";
+
+            if (hasErrors) {
+                if (formType === 'create') {
+                    // Open create modal with validation errors
+                    const createModalElement = document.getElementById('createDesignationModal');
+                    if (createModalElement) {
+                        // Use Flowbite's API if available
+                        if (typeof window.Flowbite !== 'undefined') {
+                            const createModal = new window.Flowbite.Modal(createModalElement);
+                            createModal.show();
+                        } else {
+                            // Fallback if Flowbite API isn't available
+                            createModalElement.classList.remove('hidden');
+                            createModalElement.setAttribute('aria-hidden', 'false');
+                            createModalElement.style.display = 'flex';
+                        }
+                    }
+                } else if (formType === 'edit') {
+                    // Open edit modal with validation errors
+                    const editModalElement = document.getElementById('editDesignationModal');
+                    if (editModalElement) {
+                        // Use Flowbite's API if available
+                        if (typeof window.Flowbite !== 'undefined') {
+                            const editModal = new window.Flowbite.Modal(editModalElement);
+                            editModal.show();
+                        } else {
+                            // Fallback if Flowbite API isn't available
+                            editModalElement.classList.remove('hidden');
+                            editModalElement.setAttribute('aria-hidden', 'false');
+                            editModalElement.style.display = 'flex';
+                        }
+                    }
+
+                    // Update form action with the designation ID from old input
+                    const oldDesignationId = "{{ old('designation_id', '') }}";
+                    if (oldDesignationId) {
+                        document.getElementById('editDesignationForm').action = `/designations/${oldDesignationId}`;
+                    }
+                }
+            }
+        });
+    </script>
 </x-app-layout>
