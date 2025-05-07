@@ -21,7 +21,6 @@ class DesignationController extends Controller
         return view('manage-designation.index', compact('designations'));
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -35,16 +34,32 @@ class DesignationController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        // Add a form type identifier for validation error handling
+        $request->merge(['_form_type' => 'create']);
 
-        Designation::create($validated);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:designations,name',
+            ]);
 
-        return redirect()->route('designations.index')
-                        ->with('success', 'Designation created successfully.');
+            Designation::create($validated);
+
+            return redirect()->route('designations.index')
+                          ->with('success', 'Designation created successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Catch database exceptions like duplicate entries
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                return redirect()->back()
+                                ->withInput()
+                                ->withErrors(['name' => 'This designation name already exists.']);
+            }
+
+            // For other database errors
+            return redirect()->back()
+                           ->withInput()
+                           ->withErrors(['name' => 'An error occurred while saving the designation.']);
+        }
     }
-
 
     /**
      * Display the specified resource.
@@ -54,7 +69,6 @@ class DesignationController extends Controller
         //
     }
 
-
     public function edit(\App\Models\Designation $designation)
     {
         // Return the edit view with the selected designation
@@ -63,25 +77,50 @@ class DesignationController extends Controller
 
     public function update(Request $request, Designation $designation)
     {
-        // Validate the input
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        // Add a form type identifier for validation error handling
+        $request->merge([
+            '_form_type' => 'edit',
+            'designation_id' => $designation->id
         ]);
 
-        // Update the designation in the database
-        $designation->update($validated);
+        try {
+            // Validate the input - ignore current record on unique check
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:designations,name,'.$designation->id,
+            ]);
 
-        // Redirect back to the index with a success message
-        return redirect()->route('designations.index')->with('success', 'Designation updated successfully.');
+            // Update the designation in the database
+            $designation->update($validated);
+
+            // Redirect back to the index with a success message
+            return redirect()->route('designations.index')->with('success', 'Designation updated successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Catch database exceptions
+            if ($e->getCode() == 23000) { // Integrity constraint violation
+                return redirect()->back()
+                                ->withInput()
+                                ->withErrors(['name' => 'This designation name already exists.']);
+            }
+
+            // For other database errors
+            return redirect()->back()
+                           ->withInput()
+                           ->withErrors(['name' => 'An error occurred while updating the designation.']);
+        }
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Designation $designation)
     {
-        $designation->delete();
-        return redirect()->route('designations.index')->with('success', 'Designation deleted successfully.');
+        try {
+            $designation->delete();
+            return redirect()->route('designations.index')
+                           ->with('success', 'Designation deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('designations.index')
+                           ->with('error', 'Failed to delete designation. It may be in use.');
+        }
     }
 }
