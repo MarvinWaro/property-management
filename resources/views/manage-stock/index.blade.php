@@ -50,15 +50,25 @@
                             </button>
                         </form>
 
-                        <!-- Somewhere in your header section, after the search form -->
+                        <!-- Replace the header section with navigation buttons -->
                         <div class="flex space-x-2">
-                            <a href="{{ route('stock-cards.index') }}" class="py-2 px-3 text-white bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 transition-all duration-200 inline-flex items-center">
+                            <!-- Stock Cards button - using teal/cyan instead of blue -->
+                            <a href="{{ route('stock-cards.index') }}" class="py-2 px-3 text-white bg-teal-600 hover:bg-teal-700 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 transition-all duration-200 inline-flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>All Stock Cards</span>
+                                <span>Stock Cards</span>
                             </a>
 
+                            <!-- Supply Ledger Cards button - keeping purple for consistency with individual card access -->
+                            <a href="{{ route('supply-ledger-cards.index') }}" class="py-2 px-3 text-white bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 transition-all duration-200 inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Ledger Cards</span>
+                            </a>
+
+                            <!-- Add Stock button - keeping blue as it's the primary action -->
                             <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
                                 class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 inline-flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
@@ -189,7 +199,7 @@
                                                     @endif
                                                 </td>
                                                 <!-- Actions -->
-                                                <!-- Actions column with added Stock Card button -->
+                                                <!-- Updates for the Action buttons in the table -->
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- + Add Stock -->
@@ -235,9 +245,9 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- NEW Stock Card Button -->
+                                                        <!-- Stock Card Button - using teal to match header button -->
                                                         <a href="{{ route('stock-cards.show', $stock->supply_id) }}"
-                                                            class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800 transition-all duration-200"
+                                                            class="p-2 bg-teal-100 text-teal-600 rounded-lg hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:bg-teal-900 dark:text-teal-300 dark:hover:bg-teal-800 transition-all duration-200"
                                                             title="View Stock Card">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -247,6 +257,22 @@
                                                                 <path d="M16 13H8"></path>
                                                                 <path d="M16 17H8"></path>
                                                                 <path d="M10 9H8"></path>
+                                                            </svg>
+                                                        </a>
+
+                                                        <!-- Supply Ledger Card Button - keeping purple -->
+                                                        <a href="{{ route('supply-ledger-cards.show', $stock->supply_id) }}"
+                                                            class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800 transition-all duration-200"
+                                                            title="View Supply Ledger Card">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <path d="M14 2v6h6"></path>
+                                                                <path d="M16 13H8"></path>
+                                                                <path d="M16 17H8"></path>
+                                                                <path d="M10 9H8"></path>
+                                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                                             </svg>
                                                         </a>
 
