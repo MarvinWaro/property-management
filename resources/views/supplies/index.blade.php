@@ -488,21 +488,25 @@
                                                         </div>
                                                         <select name="unit_of_measurement" id="unit_of_measurement"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled selected>Select unit
                                                             </option>
-                                                            <option value="PCS">Pieces (pcs)</option>
-                                                            <option value="BOX">Box</option>
-                                                            <option value="REAM">Ream</option>
-                                                            <option value="KG">Kilogram (kg)</option>
-                                                            <option value="LITRE">Litre (L)</option>
-                                                            <option value="PACK">Pack</option>
-                                                            <option value="PAIR">Pair</option>
-                                                            <option value="CARTON">Carton</option>
-                                                            <option value="SET">Set</option>
-                                                            <option value="DOZEN">Dozen</option>
+                                                            <option value="PIECES">PIECES (PCS)</option>
+                                                            <option value="BOX">BOX</option>
+                                                            <option value="REAM">REAM</option>
+                                                            <option value="GALLON">GALLON</option>
+                                                            <option value="LITRE">LITRE (L)</option>
+                                                            <option value="PACK">PACK</option>
+                                                            <option value="PAIR">PAIR</option>
+                                                            <option value="CAN">CAN</option>
+                                                            <option value="SET">SET</option>
+                                                            <option value="ROLL">ROLL</option>
+                                                            <option value="BOTTLE">BOTTLE</option>
+                                                            <option value="PAD">PAD</option>
+                                                            <option value="POUCH">POUCH</option>
+                                                            <option value="SHEET">SHEET</option>
                                                         </select>
                                                     </div>
                                                     @error('unit_of_measurement')
