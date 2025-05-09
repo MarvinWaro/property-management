@@ -170,8 +170,14 @@
                                     <td class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
                                         {{ number_format($entry['balance_qty']) }}
                                     </td>
+                                    <!-- Balance unit cost column -->
+                                    <!-- Balance unit cost column -->
                                     <td class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
-                                        {{ number_format($entry['balance_unit_cost'], 2) }}
+                                        @if($entry['balance_unit_cost'] !== null && $entry['balance_qty'] > 0)
+                                            {{ number_format($entry['balance_unit_cost'], 2) }}
+                                        @else
+                                            0.00
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
                                         ₱{{ number_format($entry['balance_total_cost'], 2) }}

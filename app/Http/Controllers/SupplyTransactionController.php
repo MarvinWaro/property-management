@@ -45,15 +45,23 @@ class SupplyTransactionController extends Controller
             'received_by'      => 'nullable|exists:users,id',  // Added for receiver
             'fund_cluster'     => 'nullable|string', // Added for fund cluster
             'days_to_consume'  => 'nullable|integer', // Added for days to consume
+            'ris_id'           => 'nullable|exists:ris_slips,ris_id', // Add this to link with RIS slip
         ]);
 
-        /* ▲ NEW: Generate reference number for receipt transactions */
-        if ($data['transaction_type'] === 'receipt' && empty($data['reference_no'])) {
-            // Get the supply for the IAR generation
-            $supply = Supply::findOrFail($data['supply_id']);
-
-            // Generate IAR number specific to this supply
-            $data['reference_no'] = $referenceNumberService->generateIarNumber($data['supply_id']);
+        /* Generate reference number if not provided */
+        if (empty($data['reference_no'])) {
+            if ($data['transaction_type'] === 'receipt') {
+                // Generate IAR number for receipt transactions
+                $data['reference_no'] = $referenceNumberService->generateIarNumber($data['supply_id']);
+            } elseif ($data['transaction_type'] === 'issue') {
+                // Use RIS number from the RIS slip if available, or generate a new one
+                if (!empty($data['ris_id'])) {
+                    $risSlip = \App\Models\RisSlip::find($data['ris_id']);
+                    $data['reference_no'] = $risSlip->ris_no;
+                } else {
+                    $data['reference_no'] = $referenceNumberService->generateRisNumber();
+                }
+            }
         }
 
         /* ▲ NEW: record who performed the transaction */
