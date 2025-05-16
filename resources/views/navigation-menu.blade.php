@@ -35,15 +35,11 @@
                             <x-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')">
                                 {{ __('Supply Stocks') }}
                             </x-nav-link>
-                            {{-- <!-- Add this new link for Stock Cards -->
-                            <x-nav-link href="{{ route('stock-cards.index') }}" :active="request()->routeIs('stock-cards.*')">
-                                {{ __('Stock Cards') }}
-                            </x-nav-link> --}}
-                            <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
+                            {{-- <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
                                 {{ __('Transactions') }}
-                            </x-nav-link>
+                            </x-nav-link> --}}
                             <x-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')" class="relative" id="requisition-nav-link">
-                                {{ __('Requisitions') }}
+                                {{ __('Requisitions (RIS)') }}
                                 @if(isset($pendingRisCount) && $pendingRisCount > 0)
                                     <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
                                         {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
@@ -250,6 +246,10 @@
                             <!-- E-Signature Management (available to everyone) -->
                             <x-dropdown-link href="{{ route('profile.show') }}#signature-section">
                                 {{ __('E-Signature') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link href="{{ route('supply-transactions.index') }}">
+                                {{ __('Transactions') }}
                             </x-dropdown-link>
 
                             <!-- Only admins see the toggle to switch between "Supplies" and "Assets" -->

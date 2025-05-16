@@ -28,8 +28,20 @@
                             <h3 class="text-xl font-bold">{{ $supply->item_name }}</h3>
                             <p class="text-blue-100">Stock No: {{ $supply->stock_no }}</p>
                         </div>
-                        <div class="mt-2 md:mt-0">
+                        <div class="mt-2 md:mt-0 flex space-x-2">
                             <form method="GET" action="{{ route('stock-cards.show', $supply->supply_id) }}" class="flex space-x-2">
+                                <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
+                                <select name="year" onchange="this.form.submit()"
+                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    @foreach($availableYears as $year)
+                                        <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                                            Year: {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </form>
+                            <form method="GET" action="{{ route('stock-cards.show', $supply->supply_id) }}" class="flex space-x-2">
+                                <input type="hidden" name="year" value="{{ $selectedYear }}">
                                 <select name="fund_cluster" onchange="this.form.submit()"
                                     class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
                                     @foreach($fundClusters as $fc)
