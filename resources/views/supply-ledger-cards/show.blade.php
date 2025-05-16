@@ -75,7 +75,7 @@
             <!-- Supply Ledger Card Table -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Supply Ledger Card</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Supply Ledger Card - {{ $selectedYear }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         Entity Name: COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII &nbsp;&nbsp;|&nbsp;&nbsp;
                         Fund Cluster: {{ $fundCluster }}
