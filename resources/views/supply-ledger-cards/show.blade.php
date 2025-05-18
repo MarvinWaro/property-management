@@ -4,16 +4,16 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Supply Ledger Card: {{ $supply->item_name }}
             </h2>
-            <a href="{{ route('supply-ledger-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}"
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                <span class="flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span>Export as PDF</span>
-                </span>
-            </a>
+                <a href="{{ route('supply-ledger-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span>Export as PDF</span>
+                    </span>
+                </a>
         </div>
     </x-slot>
 
@@ -27,8 +27,20 @@
                             <h3 class="text-xl font-bold">{{ $supply->item_name }}</h3>
                             <p class="text-blue-100">Stock No: {{ $supply->stock_no }}</p>
                         </div>
-                        <div class="mt-2 md:mt-0">
+                        <div class="mt-2 md:mt-0 flex space-x-2">
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
+                                <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
+                                <select name="year" onchange="this.form.submit()"
+                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    @foreach($availableYears as $year)
+                                        <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                                            Year: {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </form>
+                            <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
+                                <input type="hidden" name="year" value="{{ $selectedYear }}">
                                 <select name="fund_cluster" onchange="this.form.submit()"
                                     class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
                                     @foreach($fundClusters as $fc)
@@ -63,7 +75,7 @@
             <!-- Supply Ledger Card Table -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Supply Ledger Card</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Supply Ledger Card - {{ $selectedYear }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         Entity Name: COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII &nbsp;&nbsp;|&nbsp;&nbsp;
                         Fund Cluster: {{ $fundCluster }}
