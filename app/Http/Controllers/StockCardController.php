@@ -222,5 +222,5 @@ class StockCardController extends Controller
         // Return the PDF for download
         return $pdf->download("stock-card-{$supply->stock_no}-{$selectedYear}.pdf");
     }
-    
+
 }
