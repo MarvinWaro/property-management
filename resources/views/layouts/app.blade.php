@@ -232,7 +232,7 @@
     });
 </script>
 
-{{-- Loader script --}}
+{{-- Loader script
 <script>
     function showLoader() {
         const loader = document.getElementById('loader-container');
@@ -258,6 +258,6 @@
             showLoader();
         }
     });
-</script>
+</script> --}}
 
 </html>
