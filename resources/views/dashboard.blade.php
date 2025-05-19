@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <!-- Floating Cards Section (Separate) - Unchanged -->
+            <!-- Floating Cards Section (Separate) -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
 
                 <!-- Employees Card (Purple) - Staff Only Count -->
@@ -78,7 +78,7 @@
                                 Employees
                             </dt>
                             <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                {{ App\Models\User::where('role', 'staff')->count() }}
+                                {{ $staffCount }}
                             </dd>
                             @if ($lastUpdated)
                                 <dd
@@ -104,7 +104,7 @@
                     </div>
                 </div>
 
-                <!-- Requests per Month (Blue) -->
+                <!-- Total Supplies (Blue) -->
                 <div
                     class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
                     <!-- Background with gradient and subtle pattern -->
@@ -116,19 +116,14 @@
                     <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
                             <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Requests per Month
+                                Total Supplies
                             </dt>
                             <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                1,205
+                                {{ number_format($totalSupplies) }}
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">
-                                <span>3% decrease</span>
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.75V17.25H8.75" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17L6.75 6.75" />
-                                </svg>
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium {{ $lowStockItems > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
+                                <span>{{ $lowStockItems > 0 ? $lowStockItems . ' items low' : 'All stocked' }}</span>
                             </dd>
                         </dl>
                         <div
@@ -137,18 +132,13 @@
                             <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500 dark:text-blue-400 group-hover:text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 4.5h17.25c.621 0 1.125.504
-                                1.125 1.125v1.5c0 .621-.504 1.125-1.125
-                                1.125h-.375v9.75c0 .621-.504 1.125-1.125
-                                1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-9.75H3.375c-.621
-                                0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125
-                                1.125-1.125zM9.75 9.75h4.5m-4.5 3h4.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- Total Transaction Cost (Teal) -->
+                <!-- Total Stock Value (Teal) -->
                 <div
                     class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
                     <!-- Background with gradient and subtle pattern -->
@@ -160,19 +150,17 @@
                     <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
                             <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Total Transaction Cost
+                                Total Stock Value
                             </dt>
                             <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                9,789
+                                ₱{{ number_format($totalStockValue, 2) }}
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
-                                <span>2 new</span>
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 15.25V6.75H8.75" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 7L6.75 17.25" />
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-teal-600 dark:text-teal-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                 </svg>
+                                <span>Current inventory value</span>
                             </dd>
                         </dl>
                         <div
@@ -192,7 +180,7 @@
                     </div>
                 </div>
 
-                <!-- Requests per Month (Orange) -->
+                <!-- Transactions This Month (Orange) -->
                 <div
                     class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
                     <!-- Background with gradient and subtle pattern -->
@@ -204,19 +192,18 @@
                     <div class="flex justify-between relative z-10">
                         <dl class="space-y-2">
                             <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Requests per Month
+                                Transactions This Month
                             </dt>
                             <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                1,205
+                                {{ number_format($transactionsThisMonth) }}
                             </dd>
                             <dd
-                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400">
-                                <span>3% decrease</span>
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.75V17.25H8.75" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17L6.75 6.75" />
+                                class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
                                 </svg>
+                                <span>Latest {{ $lastTransactionDate ? $lastTransactionDate->diffForHumans() : 'today' }}</span>
                             </dd>
                         </dl>
                         <div
@@ -225,17 +212,49 @@
                             <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-orange-500 dark:text-orange-400 group-hover:text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 4.5h17.25c.621 0 1.125.504
-                                1.125 1.125v1.5c0 .621-.504 1.125-1.125
-                                1.125h-.375v9.75c0 .621-.504 1.125-1.125
-                                1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-9.75H3.375c-.621
-                                0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125
-                                1.125-1.125zM9.75 9.75h4.5m-4.5 3h4.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                             </svg>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {{-- for debugging purpose only and not connected to the dashboard controller --}}
+            {{-- @if(auth()->user()->role === 'admin') <!-- Only show to admins -->
+                <div class="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">Stock Value Debugging</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Supply</th>
+                                    <th scope="col" class="px-4 py-3">Quantity</th>
+                                    <th scope="col" class="px-4 py-3">Unit Cost</th>
+                                    <th scope="col" class="px-4 py-3">Status</th>
+                                    <th scope="col" class="px-4 py-3">Total Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stockItems as $stock)
+                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <td class="px-4 py-3">{{ $stock->supply->item_name ?? 'Unknown' }} ({{ $stock->supply_id }})</td>
+                                    <td class="px-4 py-3">{{ $stock->quantity_on_hand }}</td>
+                                    <td class="px-4 py-3">₱{{ number_format($stock->unit_cost, 2) }}</td>
+                                    <td class="px-4 py-3">{{ $stock->status }}</td>
+                                    <td class="px-4 py-3">₱{{ number_format($stock->quantity_on_hand * $stock->unit_cost, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-semibold bg-gray-50 dark:bg-gray-700">
+                                    <td colspan="4" class="px-4 py-3 text-right">Total:</td>
+                                    <td class="px-4 py-3">₱{{ number_format($stockItems->sum('total_value'), 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            @endif --}}
 
             <!-- New Section: List of Registered Users -->
             <div class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">

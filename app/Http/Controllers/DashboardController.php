@@ -8,6 +8,12 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Supply;
+use App\Models\SupplyStock;
+use App\Models\SupplyTransaction;
+use App\Models\RisSlip;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -16,14 +22,59 @@ class DashboardController extends Controller
         // Get search query if exists
         $search = $request->get('search');
 
-        // Stats for the page
+        // Staff count (for employees card)
+        $staffCount = User::where('role', 'staff')->count();
+
+        // Total supplies count
+        $totalSupplies = Supply::count();
+
+        // Get stock items for debugging
+        $stockItems = SupplyStock::with('supply')
+            ->where('status', 'available')
+            ->select('supply_id', 'quantity_on_hand', 'unit_cost', 'status', 'total_cost', DB::raw('quantity_on_hand * unit_cost as calculated_value'))
+            ->get();
+
+        // Total stock value - Using the stored total_cost value from the database
+        $totalStockValue = SupplyStock::where('status', 'available')
+            ->sum('total_cost');
+
+        // Low stock items - Using raw DB query that doesn't rely on relationship
+        $lowStockItems = DB::table('supplies')
+            ->leftJoin(DB::raw('(SELECT supply_id, SUM(quantity_on_hand) as total_qty FROM supply_stocks WHERE status = "available" GROUP BY supply_id) as ss'),
+                'supplies.supply_id', '=', 'ss.supply_id')
+            ->whereRaw('COALESCE(ss.total_qty, 0) <= supplies.reorder_point')
+            ->count();
+
+        // Transactions this month
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        $transactionsThisMonth = SupplyTransaction::whereMonth('transaction_date', $currentMonth)
+            ->whereYear('transaction_date', $currentYear)
+            ->count();
+
+        // Get percentage change from last month
+        $lastMonth = Carbon::now()->subMonth();
+        $transactionsLastMonth = SupplyTransaction::whereMonth('transaction_date', $lastMonth->month)
+            ->whereYear('transaction_date', $lastMonth->year)
+            ->count();
+
+        $transactionPercentChange = $transactionsLastMonth > 0
+            ? round((($transactionsThisMonth - $transactionsLastMonth) / $transactionsLastMonth) * 100, 1)
+            : 0;
+
+        // Get the latest transaction date for the Transactions This Month card
+        $latestTransaction = SupplyTransaction::latest('transaction_date')->first();
+        $lastTransactionDate = $latestTransaction ? $latestTransaction->transaction_date : null;
+
+        // Stats for the page (keep existing ones)
         $totalUsers = User::count();
         $lastUpdatedRecord = User::latest('updated_at')->first();
         $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
         $totalProperties = Property::count();
         $totalLocations = Location::count();
 
-        // For user listing with search functionality - Change from get() to paginate(5)
+        // For user listing with search functionality
         $users = User::with('department', 'designation')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -43,7 +94,7 @@ class DashboardController extends Controller
                 });
             })
             ->orderBy('created_at', 'asc')
-            ->paginate(5);  // Changed from get() to paginate(5)
+            ->paginate(5);
 
         // Append search parameter to pagination links
         if ($search) {
@@ -55,6 +106,12 @@ class DashboardController extends Controller
         $designations = Designation::all();
 
         return view('dashboard', compact(
+            'staffCount',
+            'totalSupplies',
+            'totalStockValue',
+            'lowStockItems',
+            'transactionsThisMonth',
+            'transactionPercentChange',
             'totalUsers',
             'lastUpdated',
             'totalProperties',
@@ -62,7 +119,9 @@ class DashboardController extends Controller
             'users',
             'departments',
             'designations',
-            'search' // Pass the search query to the view
+            'search',
+            'stockItems',
+            'lastTransactionDate'  // Added for the transaction card
         ));
     }
 
