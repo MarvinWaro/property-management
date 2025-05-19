@@ -43,4 +43,12 @@ class Supply extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+    /**
+     * Get the stock records for this supply
+     */
+    public function stocks()
+    {
+        return $this->hasMany(SupplyStock::class, 'supply_id', 'supply_id');
+    }
 }
