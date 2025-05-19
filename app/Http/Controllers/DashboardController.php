@@ -63,9 +63,9 @@ class DashboardController extends Controller
             ? round((($transactionsThisMonth - $transactionsLastMonth) / $transactionsLastMonth) * 100, 1)
             : 0;
 
-        // Get the latest transaction date for the Transactions This Month card
-        $latestTransaction = SupplyTransaction::latest('transaction_date')->first();
-        $lastTransactionDate = $latestTransaction ? $latestTransaction->transaction_date : null;
+        // Get the latest transaction created/updated time (based on database record change)
+        $latestTransactionUpdate = SupplyTransaction::latest('created_at')->first();
+        $lastTransactionUpdateTime = $latestTransactionUpdate ? $latestTransactionUpdate->created_at : null;
 
         // Stats for the page (keep existing ones)
         $totalUsers = User::count();
@@ -121,7 +121,7 @@ class DashboardController extends Controller
             'designations',
             'search',
             'stockItems',
-            'lastTransactionDate'  // Added for the transaction card
+            'lastTransactionUpdateTime'  // Changed variable name to reflect that it's the update time
         ));
     }
 
