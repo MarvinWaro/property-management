@@ -7,7 +7,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <!-- Floating Cards Section -->
+            {{-- <!-- Floating Cards Section -->
             <div class="relative w-full mb-8 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-900 rounded-xl shadow-xl">
                 <!-- Wave SVG Decorations - Top -->
                 <div class="absolute top-0 left-0 right-0 h-20 overflow-hidden">
@@ -58,7 +58,7 @@
                     <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">Welcome, Admin</h1>
                     <p class="text-blue-100 max-w-2xl mx-auto">Your inventory management dashboard is ready. Track stock levels, monitor transactions, and manage your inventory with ease.</p>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- Floating Cards Section (Separate) -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
