@@ -248,9 +248,13 @@
                                 {{ __('E-Signature') }}
                             </x-dropdown-link>
 
-                            <x-dropdown-link href="{{ route('supply-transactions.index') }}">
-                                {{ __('Transactions') }}
-                            </x-dropdown-link>
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
+                            @if (auth()->user()->role === 'admin')
+                                <x-dropdown-link href="{{ route('supply-transactions.index') }}">
+                                    {{ __('Transactions') }}
+                                </x-dropdown-link>
+                            @endif
 
                             <!-- Only admins see the toggle to switch between "Supplies" and "Assets" -->
                             @if (auth()->user()->role === 'admin')
@@ -272,7 +276,7 @@
                             <form method="POST" action="{{ route('logout') }}" x-data>
                                 @csrf
                                 <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                                    {{ __('Log Out') }}
+                                    <span class="text-red-400">{{ __('Log Out') }}</span>
                                 </x-dropdown-link>
                             </form>
                         </x-slot>

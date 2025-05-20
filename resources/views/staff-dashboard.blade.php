@@ -434,7 +434,7 @@
                                                                 data-available="{{ $stock->quantity_on_hand }}"
                                                                 data-fund-cluster="{{ $stock->fund_cluster }}">
                                                                 <div class="p-4 flex flex-col h-full">
-                                                                    <div
+                                                                    {{-- <div
                                                                         class="flex-shrink-0 h-40 bg-gray-200 dark:bg-gray-700 rounded-md mb-3 flex items-center justify-center">
                                                                         <svg class="h-16 w-16 text-gray-400"
                                                                             fill="none" stroke="currentColor"
@@ -445,13 +445,16 @@
                                                                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
                                                                             </path>
                                                                         </svg>
-                                                                    </div>
+                                                                    </div> --}}
                                                                     <div class="flex-1">
                                                                         <h5
                                                                             class="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">
                                                                             {{ $stock->supply->item_name }}</h5>
                                                                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Stock No:
                                                                             {{ $stock->supply->stock_no ?? 'N/A' }}</p>
+                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Description:
+                                                                            {{ $stock->supply->description ?? 'N/A' }}</p>
+                                                                        </p>
                                                                         <div
                                                                             class="flex items-center justify-between mb-2">
                                                                             <span
@@ -583,6 +586,47 @@
                                         closeRequestModal.addEventListener('click', closeModal);
                                         cancelRequest.addEventListener('click', closeModal);
 
+                                        // Add CSS to ensure quantity inputs have sufficient width
+                                        const style = document.createElement('style');
+                                        style.textContent = `
+                                            /* Increase width of quantity input fields to fit double digits */
+                                            .product-card .quantity-input,
+                                            #selected-items-list .quantity-input,
+                                            .quantity-display,
+                                            span.w-10 {
+                                                min-width: 3rem !important; /* Ensure minimum width */
+                                                width: 3rem !important; /* Fixed width */
+                                                text-align: center;
+                                                padding-left: 0.5rem !important;
+                                                padding-right: 0.5rem !important;
+                                            }
+
+                                            /* Fix for the quantity input in the "Select Items to Request" modal */
+                                            .quantity-wrapper {
+                                                display: flex;
+                                                align-items: center;
+                                                min-width: 5rem; /* Ensure there's enough space */
+                                            }
+
+                                            .quantity-wrapper input[type="number"],
+                                            .quantity-wrapper input {
+                                                min-width: 2.5rem !important;
+                                                width: 2.5rem !important;
+                                                text-align: center;
+                                                padding-left: 0.25rem !important;
+                                                padding-right: 0.25rem !important;
+                                                -moz-appearance: textfield; /* Remove spinner in Firefox */
+                                            }
+
+                                            /* Remove spinner arrows from number inputs in all browsers */
+                                            input[type=number]::-webkit-inner-spin-button,
+                                            input[type=number]::-webkit-outer-spin-button {
+                                                -webkit-appearance: none;
+                                                margin: 0;
+                                            }
+                                        `;
+                                        document.head.appendChild(style);
+
                                         // Product selection functionality (new UI)
                                         const productCards = document.querySelectorAll('.product-card');
                                         const selectedItemsContainer = document.getElementById('selected-items-container');
@@ -595,6 +639,15 @@
 
                                         let selectedItems = [];
                                         let itemIndex = 0;
+
+                                        // Apply classes to existing number inputs
+                                        const modalQuantityInputs = document.querySelectorAll('#requestModal .quantity-input');
+                                        modalQuantityInputs.forEach(input => {
+                                            const parent = input.parentElement;
+                                            if (!parent.classList.contains('quantity-wrapper')) {
+                                                parent.classList.add('quantity-wrapper');
+                                            }
+                                        });
 
                                         // Search functionality
                                         if (itemSearch) {
@@ -616,20 +669,34 @@
                                         if (viewCartBtn) {
                                             viewCartBtn.addEventListener('click', function() {
                                                 if (selectedItems.length > 0) {
-                                                    productsGrid.classList.toggle('hidden');
-                                                    selectedItemsContainer.classList.toggle('hidden');
-
-                                                    // Change button text based on current view
+                                                    // Toggle visibility of containers
                                                     if (selectedItemsContainer.classList.contains('hidden')) {
-                                                        viewCartBtn.innerHTML =
-                                                            `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
-                                                    } else {
+                                                        // Show selected items, hide products grid
+                                                        selectedItemsContainer.classList.remove('hidden');
+                                                        productsGrid.classList.add('hidden');
+
+                                                        // Change button text to "Back to Items"
                                                         viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                                         </svg>Back to Items`;
+                                                    } else {
+                                                        // Show products grid, hide selected items
+                                                        selectedItemsContainer.classList.add('hidden');
+                                                        productsGrid.classList.remove('hidden');
+
+                                                        // Change button text to "View Selected"
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
                                                     }
+
+                                                    // Apply styling to quantity spans in the selected items list
+                                                    setTimeout(() => {
+                                                        const quantitySpans = document.querySelectorAll('#selected-items-list .w-10');
+                                                        quantitySpans.forEach(span => {
+                                                            span.classList.add('quantity-display');
+                                                        });
+                                                    }, 100);
                                                 }
                                             });
                                         }
@@ -734,7 +801,16 @@
                                                 `;
                                                 // Hide the selected items view if visible
                                                 if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
-                                                    viewCartBtn.click();
+                                                    // Make sure we show products grid and hide selected items
+                                                    selectedItemsContainer.classList.add('hidden');
+                                                    productsGrid.classList.remove('hidden');
+
+                                                    // Update the button text
+                                                    if (viewCartBtn) {
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                    }
                                                 }
                                             } else {
                                                 // Add each item to the list
@@ -760,7 +836,7 @@
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                                                                     </svg>
                                                                 </button>
-                                                                <span class="w-10 text-center text-gray-900 dark:text-white">${item.quantity}</span>
+                                                                <span class="w-10 text-center text-gray-900 dark:text-white quantity-display">${item.quantity}</span>
                                                                 <button type="button" class="edit-quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" data-index="${item.index}" data-action="increase">
                                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
@@ -980,6 +1056,21 @@
                                                 noRequestsRow.classList.add('hidden');
                                             }
                                         }
+
+                                        // Also update the quantity inputs in the selection modal
+                                        const addToRequestContainers = document.querySelectorAll('[class*="Add to Request"]');
+                                        addToRequestContainers.forEach(container => {
+                                            const parent = container.closest('.relative, .flex');
+                                            if (parent) {
+                                                const quantityInput = parent.querySelector('input[type="number"]');
+                                                if (quantityInput) {
+                                                    const wrapper = quantityInput.parentElement;
+                                                    if (wrapper && !wrapper.classList.contains('quantity-wrapper')) {
+                                                        wrapper.classList.add('quantity-wrapper');
+                                                    }
+                                                }
+                                            }
+                                        });
                                     });
 
                                     // Functions for search input (preserved from original)
@@ -1012,10 +1103,8 @@
                                 <h2 class="text-xl font-bold mb-4 dark:text-white">Supplies Received</h2>
 
                                 <!-- Table Description Caption -->
-                                <div
-                                    class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received
-                                        Supplies Management</h3>
+                                <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received Supplies Management</h3>
                                     <p>
                                         View and manage supplies that have been issued to you. Track all requisitions
                                         you've received across different departments.
@@ -1023,12 +1112,10 @@
                                 </div>
 
                                 <!-- Received Supplies Table -->
-                                <div
-                                    class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                                <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead
-                                                class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
                                                 <tr>
                                                     <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
                                                     <th class="px-6 py-3 text-left tracking-wider">DATE</th>
@@ -1036,19 +1123,16 @@
                                                     <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
                                                 </tr>
                                             </thead>
-                                            <tbody
-                                                class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                                 @forelse($receivedRequisitions as $requisition)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td
-                                                            class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                                             {{ $requisition->ris_no }}
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="flex flex-col">
                                                                 <span class="dark:text-gray-300">{{ $requisition->ris_date->format('M d, Y') }}</span>
-                                                                <span
-                                                                    class="text-xs text-gray-500 dark:text-gray-400">{{ $requisition->created_at->format('h:i A') }}</span>
+                                                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $requisition->created_at->format('h:i A') }}</span>
                                                             </div>
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap dark:text-gray-300">
@@ -1088,15 +1172,14 @@
                                                                 </div>
 
                                                                 @if ($canReceive)
-                                                                    <form
-                                                                        action="{{ route('ris.receive', $requisition) }}"
-                                                                        method="POST" class="inline">
+                                                                    <form action="{{ route('ris.receive', $requisition) }}"
+                                                                        method="POST" class="inline" id="receive-form-{{ $requisition->ris_id }}">
                                                                         @csrf
-                                                                        <button type="submit"
-                                                                            onclick="return confirm('Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.')"
+                                                                        <button type="button"
                                                                             class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 rounded-lg"
                                                                             data-tooltip-target="tooltip-receive-{{ $loop->index }}"
-                                                                            data-tooltip-placement="top">
+                                                                            data-tooltip-placement="top"
+                                                                            onclick="confirmReceive({{ $requisition->ris_id }})">
                                                                             <svg class="w-4 h-4" fill="none"
                                                                                 stroke="currentColor"
                                                                                 viewBox="0 0 24 24"
@@ -1116,8 +1199,7 @@
                                                                         </div>
                                                                     </div>
                                                                 @elseif($requisition->received_at)
-                                                                    <span
-                                                                        class="text-xs text-green-600 dark:text-green-400">
+                                                                    <span class="text-xs text-green-600 dark:text-green-400">
                                                                         Received
                                                                         {{ $requisition->received_at->format('M d, Y') }}
                                                                     </span>
@@ -1129,8 +1211,7 @@
                                                     <tr>
                                                         <td colspan="4" class="px-6 py-8 text-center">
                                                             <!-- Empty state content -->
-                                                            <div
-                                                                class="flex flex-col items-center justify-center py-8">
+                                                            <div class="flex flex-col items-center justify-center py-8">
                                                                 <svg class="w-12 h-12 text-gray-400 mb-4"
                                                                     fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
@@ -1139,11 +1220,9 @@
                                                                         d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4">
                                                                     </path>
                                                                 </svg>
-                                                                <p
-                                                                    class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">
                                                                     No received supplies found</p>
-                                                                <p
-                                                                    class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
                                                                     You haven't received any supplies yet</p>
                                                             </div>
                                                         </td>
@@ -1304,6 +1383,46 @@
                 });
             });
         });
+    </script>
+
+    <script>
+        function confirmReceive(requisitionId) {
+            Swal.fire({
+                title: 'Confirm Receipt',
+                text: 'Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10B981', // Green color (Tailwind's green-500)
+                cancelButtonColor: '#6B7280', // Gray color (Tailwind's gray-500)
+                confirmButtonText: 'Yes, receive supplies',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusConfirm: false,
+                width: '28rem',
+                padding: '1rem',
+                customClass: {
+                    confirmButton: 'px-4 py-2 text-sm font-medium rounded-md',
+                    cancelButton: 'px-4 py-2 text-sm font-medium rounded-md'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, submit the form
+                    document.getElementById('receive-form-' + requisitionId).submit();
+
+                    // Show loading state while processing
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Confirming receipt of supplies',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                }
+            });
+        }
     </script>
 
 </x-app-layout>
