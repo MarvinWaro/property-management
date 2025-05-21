@@ -311,11 +311,13 @@
                                     class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden">
                                     <div
                                         class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[90vh] flex flex-col">
-                                        <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 shrink-0">
+                                        <div
+                                            class="flex items-center justify-between p-4 border-b dark:border-gray-700 shrink-0">
                                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                                 Create Requisition and Issue Slip
                                             </h3>
-                                            <button id="closeRequestModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400">
+                                            <button id="closeRequestModal"
+                                                class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400">
                                                 <svg class="h-6 w-6" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -384,7 +386,8 @@
 
                                                 <!-- Items Header (Also Fixed) -->
                                                 <div class="flex justify-between items-center mb-4">
-                                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Select Items to
+                                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                        Select Items to
                                                         Request</h4>
 
                                                     <div class="flex items-center">
@@ -450,10 +453,15 @@
                                                                         <h5
                                                                             class="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">
                                                                             {{ $stock->supply->item_name }}</h5>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Stock No:
+                                                                        <p
+                                                                            class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                                                            Stock No:
                                                                             {{ $stock->supply->stock_no ?? 'N/A' }}</p>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Description:
-                                                                            {{ $stock->supply->description ?? 'N/A' }}</p>
+                                                                        <p
+                                                                            class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                                                            Description:
+                                                                            {{ $stock->supply->description ?? 'N/A' }}
+                                                                        </p>
                                                                         </p>
                                                                         <div
                                                                             class="flex items-center justify-between mb-2">
@@ -463,7 +471,8 @@
                                                                                 available
                                                                             </span>
                                                                         </div>
-                                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
+                                                                        <div
+                                                                            class="text-xs text-gray-600 dark:text-gray-400">
                                                                             <span
                                                                                 class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
                                                                                 Fund:
@@ -471,7 +480,8 @@
                                                                             </span>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="mt-3 pt-3 border-t dark:border-gray-700 flex items-center">
+                                                                    <div
+                                                                        class="mt-3 pt-3 border-t dark:border-gray-700 flex items-center">
                                                                         <div
                                                                             class="flex items-center border dark:border-gray-600 rounded-md">
                                                                             <button type="button"
@@ -519,11 +529,14 @@
 
                                                     <!-- Selected Items View (Initially Hidden) -->
                                                     <div id="selected-items-container" class="hidden">
-                                                        <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-4 mb-4">
-                                                            <h5 class="font-medium text-gray-900 dark:text-white mb-3">Selected Items
+                                                        <div
+                                                            class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-4 mb-4">
+                                                            <h5 class="font-medium text-gray-900 dark:text-white mb-3">
+                                                                Selected Items
                                                             </h5>
                                                             <div class="overflow-x-auto">
-                                                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                                                <table
+                                                                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                                                                     <thead>
                                                                         <tr>
                                                                             <th
@@ -553,7 +566,8 @@
                                                 </div>
                                             </div>
 
-                                            <div class="px-6 py-3 border-t dark:border-gray-700 flex justify-end shrink-0">
+                                            <div
+                                                class="px-6 py-3 border-t dark:border-gray-700 flex justify-end shrink-0">
                                                 <button type="button" id="cancelRequest"
                                                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
                                                     Cancel
@@ -1071,6 +1085,178 @@
                                                 }
                                             }
                                         });
+
+                                        // ========================
+                                        // E-SIGNATURE CONFIRMATION MODAL
+                                        // ========================
+
+                                        // Get the form for requisition submission
+                                        const risForm = document.querySelector('form[action="{{ route('ris.store') }}"]');
+
+                                        if (risForm) {
+                                            // Override the form submission
+                                            risForm.addEventListener('submit', function(event) {
+                                                // Prevent default form submission
+                                                event.preventDefault();
+
+                                                // Check if any items are selected
+                                                if (selectedItems.length === 0) {
+                                                    Swal.fire({
+                                                        title: 'No Items Selected',
+                                                        text: 'Please select at least one item before submitting your request.',
+                                                        icon: 'warning',
+                                                        confirmButtonColor: '#3085d6'
+                                                    });
+                                                    return;
+                                                }
+
+                                                // Get purpose text for confirmation
+                                                const purposeText = document.querySelector('textarea[name="purpose"]').value.trim();
+
+                                                // User's signature path for preview if available
+                                                const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+
+                                                // Signature preview HTML - will show if e-signature is selected
+                                                const signaturePreviewHtml = userSignaturePath ?
+                                                    `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
+                                                        <p class="text-sm mb-1">Your signature will appear as:</p>
+                                                        <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
+                                                    </div>` : '';
+
+                                                // Show confirmation dialog with signature options
+                                                Swal.fire({
+                                                    title: 'Confirm Requisition',
+                                                    html: `
+                                                        <div class="text-left mb-4">
+                                                            <p class="mb-3">You are about to submit a requisition with <strong>${selectedItems.length}</strong> item(s).</p>
+                                                            <p class="mb-4"><strong>Purpose:</strong> ${purposeText || 'Not specified'}</p>
+
+                                                            <div class="mb-4">
+                                                                <label class="block text-sm font-bold mb-2">
+                                                                    How would you like to sign this request?
+                                                                </label>
+                                                                <div class="flex items-center mb-2">
+                                                                    <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
+                                                                    <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                                                                </div>
+                                                                <div class="flex items-center">
+                                                                    <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                                                    <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                                                                </div>
+                                                                ${!userSignaturePath ?
+                                                                    '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
+                                                            </div>
+
+                                                            ${signaturePreviewHtml}
+
+                                                            <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
+                                                                <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
+                                                                <ul class="list-disc pl-4 space-y-1">
+                                                                    <li>I authorize the use of my electronic signature for this requisition.</li>
+                                                                    <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                                                    <li>I confirm all details provided in this requisition are accurate and complete.</li>
+                                                                </ul>
+                                                                <div class="mt-2">
+                                                                    <input type="checkbox" id="agree-terms" class="mr-1">
+                                                                    <label for="agree-terms" class="text-xs">I agree to the above terms</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `,
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Submit Request',
+                                                    cancelButtonText: 'Cancel',
+                                                    focusConfirm: false,
+                                                    didRender: () => {
+                                                        // Disable the confirm button initially if e-signature is selected (terms not agreed)
+                                                        const confirmButton = Swal.getConfirmButton();
+                                                        const agreeTerms = document.getElementById('agree-terms');
+                                                        const esignRadio = document.getElementById('swal-esign');
+                                                        const sgdRadio = document.getElementById('swal-sgd');
+                                                        const termsDiv = document.getElementById('esign-terms');
+                                                        const signaturePreview = document.getElementById('signature-preview-container');
+
+                                                        // Function to toggle the confirm button state based on selections
+                                                        const updateConfirmButtonState = () => {
+                                                            if (esignRadio.checked && !agreeTerms.checked) {
+                                                                confirmButton.disabled = true;
+                                                                confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                                                            } else {
+                                                                confirmButton.disabled = false;
+                                                                confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                                            }
+                                                        };
+
+                                                        // Add event listeners
+                                                        esignRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.remove('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.remove('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        sgdRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.add('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.add('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        if (agreeTerms) {
+                                                            agreeTerms.addEventListener('change', updateConfirmButtonState);
+                                                        }
+
+                                                        // Initialize state
+                                                        updateConfirmButtonState();
+                                                    },
+                                                    preConfirm: () => {
+                                                        const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+
+                                                        // If e-signature selected, check if terms are agreed to
+                                                        if (signatureType === 'esign') {
+                                                            const termsAgreed = document.getElementById('agree-terms').checked;
+                                                            if (!termsAgreed) {
+                                                                Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                                                                return false;
+                                                            }
+                                                        }
+
+                                                        return signatureType;
+                                                    }
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        // Add signature type as hidden field
+                                                        let signatureInput = risForm.querySelector('input[name="signature_type"]');
+
+                                                        if (!signatureInput) {
+                                                            signatureInput = document.createElement('input');
+                                                            signatureInput.type = 'hidden';
+                                                            signatureInput.name = 'signature_type';
+                                                            risForm.appendChild(signatureInput);
+                                                        }
+
+                                                        signatureInput.value = result.value;
+
+                                                        // Submit the form
+                                                        risForm.submit();
+
+                                                        // Show loading indicator
+                                                        Swal.fire({
+                                                            title: 'Submitting...',
+                                                            html: 'Your requisition is being processed',
+                                                            allowOutsideClick: false,
+                                                            didOpen: () => {
+                                                                Swal.showLoading();
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        }
                                     });
 
                                     // Functions for search input (preserved from original)
@@ -1099,12 +1285,15 @@
                             </div>
 
                             <!-- Received Supplies Section (initially hidden) -->
-                            <div id="received-supplies" class="content-section bg-white dark:bg-gray-800 shadow rounded-lg p-6 hidden">
+                            <div id="received-supplies"
+                                class="content-section bg-white dark:bg-gray-800 shadow rounded-lg p-6 hidden">
                                 <h2 class="text-xl font-bold mb-4 dark:text-white">Supplies Received</h2>
 
                                 <!-- Table Description Caption -->
-                                <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received Supplies Management</h3>
+                                <div
+                                    class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received
+                                        Supplies Management</h3>
                                     <p>
                                         View and manage supplies that have been issued to you. Track all requisitions
                                         you've received across different departments.
@@ -1112,10 +1301,12 @@
                                 </div>
 
                                 <!-- Received Supplies Table -->
-                                <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                                <div
+                                    class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                            <thead
+                                                class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
                                                 <tr>
                                                     <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
                                                     <th class="px-6 py-3 text-left tracking-wider">DATE</th>
@@ -1123,16 +1314,20 @@
                                                     <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                                            <tbody
+                                                class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                                                 @forelse($receivedRequisitions as $requisition)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                        <td
+                                                            class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                                             {{ $requisition->ris_no }}
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="flex flex-col">
-                                                                <span class="dark:text-gray-300">{{ $requisition->ris_date->format('M d, Y') }}</span>
-                                                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $requisition->created_at->format('h:i A') }}</span>
+                                                                <span
+                                                                    class="dark:text-gray-300">{{ $requisition->ris_date->format('M d, Y') }}</span>
+                                                                <span
+                                                                    class="text-xs text-gray-500 dark:text-gray-400">{{ $requisition->created_at->format('h:i A') }}</span>
                                                             </div>
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap dark:text-gray-300">
@@ -1172,8 +1367,10 @@
                                                                 </div>
 
                                                                 @if ($canReceive)
-                                                                    <form action="{{ route('ris.receive', $requisition) }}"
-                                                                        method="POST" class="inline" id="receive-form-{{ $requisition->ris_id }}">
+                                                                    <form
+                                                                        action="{{ route('ris.receive', $requisition) }}"
+                                                                        method="POST" class="inline"
+                                                                        id="receive-form-{{ $requisition->ris_id }}">
                                                                         @csrf
                                                                         <button type="button"
                                                                             class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 rounded-lg"
@@ -1199,7 +1396,8 @@
                                                                         </div>
                                                                     </div>
                                                                 @elseif($requisition->received_at)
-                                                                    <span class="text-xs text-green-600 dark:text-green-400">
+                                                                    <span
+                                                                        class="text-xs text-green-600 dark:text-green-400">
                                                                         Received
                                                                         {{ $requisition->received_at->format('M d, Y') }}
                                                                     </span>
@@ -1211,7 +1409,8 @@
                                                     <tr>
                                                         <td colspan="4" class="px-6 py-8 text-center">
                                                             <!-- Empty state content -->
-                                                            <div class="flex flex-col items-center justify-center py-8">
+                                                            <div
+                                                                class="flex flex-col items-center justify-center py-8">
                                                                 <svg class="w-12 h-12 text-gray-400 mb-4"
                                                                     fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
@@ -1220,9 +1419,11 @@
                                                                         d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4">
                                                                     </path>
                                                                 </svg>
-                                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                                <p
+                                                                    class="text-lg font-medium text-gray-500 dark:text-gray-400">
                                                                     No received supplies found</p>
-                                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                                <p
+                                                                    class="text-gray-400 dark:text-gray-500 text-sm mt-1">
                                                                     You haven't received any supplies yet</p>
                                                             </div>
                                                         </td>
@@ -1242,7 +1443,8 @@
                             </div>
 
                             <!-- Properties Section (initially hidden) -->
-                            <div id="properties" class="content-section bg-white dark:bg-gray-700 shadow rounded-lg p-6 hidden">
+                            <div id="properties"
+                                class="content-section bg-white dark:bg-gray-700 shadow rounded-lg p-6 hidden">
                                 <h2 class="text-xl font-bold mb-4 dark:text-white">My Properties</h2>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @forelse($properties as $property)
@@ -1293,7 +1495,8 @@
                                         </a>
                                     @empty
                                         <div class="col-span-full">
-                                            <p class="text-gray-700 dark:text-gray-300">No properties assigned to you.</p>
+                                            <p class="text-gray-700 dark:text-gray-300">No properties assigned to you.
+                                            </p>
                                         </div>
                                     @endforelse
                                 </div>
@@ -1385,44 +1588,157 @@
         });
     </script>
 
-    <script>
-        function confirmReceive(requisitionId) {
-            Swal.fire({
-                title: 'Confirm Receipt',
-                text: 'Are you sure you want to receive these supplies? This will confirm receipt with your e-signature.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10B981', // Green color (Tailwind's green-500)
-                cancelButtonColor: '#6B7280', // Gray color (Tailwind's gray-500)
-                confirmButtonText: 'Yes, receive supplies',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true,
-                focusConfirm: false,
-                width: '28rem',
-                padding: '1rem',
-                customClass: {
-                    confirmButton: 'px-4 py-2 text-sm font-medium rounded-md',
-                    cancelButton: 'px-4 py-2 text-sm font-medium rounded-md'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // If confirmed, submit the form
-                    document.getElementById('receive-form-' + requisitionId).submit();
+<script>
+    function confirmReceive(requisitionId) {
+        // User's signature path for preview if available
+        const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
 
-                    // Show loading state while processing
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Confirming receipt of supplies',
-                        icon: 'info',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
+        // Signature preview HTML - will show if e-signature is selected
+        const signaturePreviewHtml = userSignaturePath ?
+            `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
+                <p class="text-sm mb-1">Your signature will appear as:</p>
+                <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
+            </div>` : '';
+
+        Swal.fire({
+            title: 'Confirm Receipt',
+            html: `
+                <div class="text-left mb-4">
+                    <p class="mb-3">Are you sure you want to receive these supplies? This will confirm receipt with your signature.</p>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold mb-2">
+                            How would you like to sign this receipt?
+                        </label>
+                        <div class="flex items-center mb-2">
+                            <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
+                            <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                            <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                        </div>
+                        ${!userSignaturePath ?
+                            '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
+                    </div>
+
+                    ${signaturePreviewHtml}
+
+                    <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
+                        <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>I authorize the use of my electronic signature to confirm receipt.</li>
+                            <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                            <li>I confirm I have received all the items as specified in this requisition.</li>
+                        </ul>
+                        <div class="mt-2">
+                            <input type="checkbox" id="agree-terms" class="mr-1">
+                            <label for="agree-terms" class="text-xs">I agree to the above terms</label>
+                        </div>
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10B981', // Green color (Tailwind's green-500)
+            cancelButtonColor: '#6B7280', // Gray color (Tailwind's gray-500)
+            confirmButtonText: 'Yes, receive supplies',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            focusConfirm: false,
+            width: '28rem',
+            padding: '1rem',
+            customClass: {
+                confirmButton: 'px-4 py-2 text-sm font-medium rounded-md',
+                cancelButton: 'px-4 py-2 text-sm font-medium rounded-md'
+            },
+            didRender: () => {
+                // Disable the confirm button initially if e-signature is selected (terms not agreed)
+                const confirmButton = Swal.getConfirmButton();
+                const agreeTerms = document.getElementById('agree-terms');
+                const esignRadio = document.getElementById('swal-esign');
+                const sgdRadio = document.getElementById('swal-sgd');
+                const termsDiv = document.getElementById('esign-terms');
+                const signaturePreview = document.getElementById('signature-preview-container');
+
+                // Function to toggle the confirm button state based on selections
+                const updateConfirmButtonState = () => {
+                    if (esignRadio.checked && !agreeTerms.checked) {
+                        confirmButton.disabled = true;
+                        confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        confirmButton.disabled = false;
+                        confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                };
+
+                // Add event listeners
+                esignRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        termsDiv.classList.remove('hidden');
+                        if (signaturePreview) signaturePreview.classList.remove('hidden');
+                        updateConfirmButtonState();
+                    }
+                });
+
+                sgdRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        termsDiv.classList.add('hidden');
+                        if (signaturePreview) signaturePreview.classList.add('hidden');
+                        updateConfirmButtonState();
+                    }
+                });
+
+                if (agreeTerms) {
+                    agreeTerms.addEventListener('change', updateConfirmButtonState);
                 }
-            });
-        }
-    </script>
+
+                // Initialize state
+                updateConfirmButtonState();
+            },
+            preConfirm: () => {
+                const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+
+                // If e-signature selected, check if terms are agreed to
+                if (signatureType === 'esign') {
+                    const termsAgreed = document.getElementById('agree-terms').checked;
+                    if (!termsAgreed) {
+                        Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                        return false;
+                    }
+                }
+
+                return signatureType;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Get the form
+                const form = document.getElementById('receive-form-' + requisitionId);
+
+                // Add signature type as hidden field
+                let signatureInput = document.createElement('input');
+                signatureInput.type = 'hidden';
+                signatureInput.name = 'signature_type';
+                signatureInput.value = result.value;
+                form.appendChild(signatureInput);
+
+                // Submit the form
+                form.submit();
+
+                // Show loading state while processing
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Confirming receipt of supplies',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+        });
+    }
+</script>
 
 </x-app-layout>

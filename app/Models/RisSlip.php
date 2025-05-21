@@ -24,14 +24,18 @@ class RisSlip extends Model
         'fund_cluster',
         'responsibility_center_code',
         'requested_by',
+        'requester_signature_type', // Make sure these fields are included
         'purpose',
         'status',
         'approved_by',
         'approved_at',
+        'approver_signature_type', // Make sure these fields are included
         'issued_by',
         'issued_at',
+        'issuer_signature_type', // Make sure these fields are included
         'received_by',
         'received_at',
+        'receiver_signature_type', // Make sure these fields are included
     ];
 
     protected $casts = [
