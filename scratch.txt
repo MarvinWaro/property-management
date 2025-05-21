@@ -120,3 +120,1709 @@
   </div>
 </body>
 </html>
+
+
+
+
+
+
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Modal Controls
+                                        const requestModal = document.getElementById('requestModal');
+                                        const openRequestModal = document.getElementById('openRequestModal');
+                                        const closeRequestModal = document.getElementById('closeRequestModal');
+                                        const cancelRequest = document.getElementById('cancelRequest');
+
+                                        openRequestModal.addEventListener('click', function() {
+                                            requestModal.classList.remove('hidden');
+                                        });
+
+                                        function closeModal() {
+                                            requestModal.classList.add('hidden');
+                                            // Reset all product quantities when closing the modal
+                                            resetProductQuantities();
+                                        }
+
+                                        closeRequestModal.addEventListener('click', closeModal);
+                                        cancelRequest.addEventListener('click', closeModal);
+
+                                        // Add CSS to ensure quantity inputs have sufficient width
+                                        const style = document.createElement('style');
+                                        style.textContent = `
+                                            /* Increase width of quantity input fields to fit double digits */
+                                            .product-card .quantity-input,
+                                            #selected-items-list .quantity-input,
+                                            .quantity-display,
+                                            span.w-10 {
+                                                min-width: 3rem !important; /* Ensure minimum width */
+                                                width: 3rem !important; /* Fixed width */
+                                                text-align: center;
+                                                padding-left: 0.5rem !important;
+                                                padding-right: 0.5rem !important;
+                                            }
+
+                                            /* Fix for the quantity input in the "Select Items to Request" modal */
+                                            .quantity-wrapper {
+                                                display: flex;
+                                                align-items: center;
+                                                min-width: 5rem; /* Ensure there's enough space */
+                                            }
+
+                                            .quantity-wrapper input[type="number"],
+                                            .quantity-wrapper input {
+                                                min-width: 2.5rem !important;
+                                                width: 2.5rem !important;
+                                                text-align: center;
+                                                padding-left: 0.25rem !important;
+                                                padding-right: 0.25rem !important;
+                                                -moz-appearance: textfield; /* Remove spinner in Firefox */
+                                            }
+
+                                            /* Remove spinner arrows from number inputs in all browsers */
+                                            input[type=number]::-webkit-inner-spin-button,
+                                            input[type=number]::-webkit-outer-spin-button {
+                                                -webkit-appearance: none;
+                                                margin: 0;
+                                            }
+
+                                            /* Add All button styling */
+                                            .add-all-btn {
+                                                padding: 0.25rem 0.5rem;
+                                                font-size: 0.75rem;
+                                                border-radius: 0.25rem;
+                                                margin-right: 0.25rem;
+                                                background-color: #4f46e5;
+                                                color: white;
+                                            }
+
+                                            .add-all-btn:hover {
+                                                background-color: #4338ca;
+                                            }
+
+                                            .add-all-btn:disabled {
+                                                opacity: 0.5;
+                                                cursor: not-allowed;
+                                            }
+                                        `;
+                                        document.head.appendChild(style);
+
+                                        // Product selection functionality (new UI)
+                                        const productCards = document.querySelectorAll('.product-card');
+                                        const selectedItemsContainer = document.getElementById('selected-items-container');
+                                        const selectedItemsList = document.getElementById('selected-items-list');
+                                        const requestItemsContainer = document.getElementById('request-items-container');
+                                        const itemCountDisplay = document.getElementById('itemCount');
+                                        const viewCartBtn = document.getElementById('viewCartBtn');
+                                        const productsGrid = document.getElementById('products-grid');
+                                        const itemSearch = document.getElementById('item-search');
+
+                                        let selectedItems = [];
+                                        let itemIndex = 0;
+
+                                        // Track original available quantities
+                                        const originalAvailableQuantities = {};
+                                        productCards.forEach(card => {
+                                            const supplyId = card.getAttribute('data-supply-id');
+                                            const availableQuantity = parseInt(card.getAttribute('data-available'), 10);
+                                            originalAvailableQuantities[supplyId] = availableQuantity;
+                                        });
+
+                                        // Apply classes to existing number inputs
+                                        const modalQuantityInputs = document.querySelectorAll('#requestModal .quantity-input');
+                                        modalQuantityInputs.forEach(input => {
+                                            const parent = input.parentElement;
+                                            if (!parent.classList.contains('quantity-wrapper')) {
+                                                parent.classList.add('quantity-wrapper');
+                                            }
+                                        });
+
+                                        // Create "Add All to Request" button to add all selected quantities at once
+                                        const itemsHeaderDiv = document.querySelector('.flex.justify-between.items-center.mb-4');
+                                        if (itemsHeaderDiv) {
+                                            const addAllToRequestBtn = document.createElement('button');
+                                            addAllToRequestBtn.type = 'button';
+                                            addAllToRequestBtn.className = 'px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center shadow-sm mr-2';
+                                            addAllToRequestBtn.innerHTML = `
+                                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                Add All to Request
+                                            `;
+
+                                            // Insert before the search input container
+                                            const searchContainer = itemsHeaderDiv.querySelector('.flex.items-center');
+                                            itemsHeaderDiv.insertBefore(addAllToRequestBtn, searchContainer);
+
+                                            // Add event listener to the button
+                                            addAllToRequestBtn.addEventListener('click', function() {
+                                                let anyItemsAdded = false;
+
+                                                // Loop through all product cards and add any with quantity > 0
+                                                productCards.forEach(card => {
+                                                    const quantityInput = card.querySelector('.quantity-input');
+                                                    const quantity = parseInt(quantityInput.value, 10);
+
+                                                    if (quantity > 0) {
+                                                        const supplyId = card.getAttribute('data-supply-id');
+                                                        const supplyName = card.getAttribute('data-name');
+                                                        const maxAvailable = originalAvailableQuantities[supplyId];
+
+                                                        addItemToSelection(supplyId, supplyName, quantity, maxAvailable);
+                                                        quantityInput.value = 0; // Reset input after adding
+                                                        anyItemsAdded = true;
+                                                    }
+                                                });
+
+                                                if (!anyItemsAdded) {
+                                                    // Alert user if no items were selected
+                                                    alert('No items selected. Please set quantities for items you wish to request.');
+                                                }
+                                            });
+                                        }
+
+                                        // Search functionality
+                                        if (itemSearch) {
+                                            itemSearch.addEventListener('input', function(e) {
+                                                const searchTerm = e.target.value.toLowerCase();
+
+                                                productCards.forEach(card => {
+                                                    const productName = card.getAttribute('data-name').toLowerCase();
+                                                    if (productName.includes(searchTerm)) {
+                                                        card.classList.remove('hidden');
+                                                    } else {
+                                                        card.classList.add('hidden');
+                                                    }
+                                                });
+                                            });
+                                        }
+
+                                        // View cart button
+                                        if (viewCartBtn) {
+                                            viewCartBtn.addEventListener('click', function() {
+                                                if (selectedItems.length > 0) {
+                                                    // Toggle visibility of containers
+                                                    if (selectedItemsContainer.classList.contains('hidden')) {
+                                                        // Show selected items, hide products grid
+                                                        selectedItemsContainer.classList.remove('hidden');
+                                                        productsGrid.classList.add('hidden');
+
+                                                        // Change button text to "Back to Items"
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                        </svg>Back to Items`;
+                                                    } else {
+                                                        // Show products grid, hide selected items
+                                                        selectedItemsContainer.classList.add('hidden');
+                                                        productsGrid.classList.remove('hidden');
+
+                                                        // Change button text to "View Selected"
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
+                                                    }
+
+                                                    // Apply styling to quantity spans in the selected items list
+                                                    setTimeout(() => {
+                                                        const quantitySpans = document.querySelectorAll('#selected-items-list .w-10');
+                                                        quantitySpans.forEach(span => {
+                                                            span.classList.add('quantity-display');
+                                                        });
+                                                    }, 100);
+                                                }
+                                            });
+                                        }
+
+                                        // Add "Add All" button to each product card
+                                        productCards.forEach(card => {
+                                            const actionsDiv = card.querySelector('.add-to-cart').parentElement;
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+
+                                            // Create "Add All" button
+                                            const addAllBtn = document.createElement('button');
+                                            addAllBtn.type = 'button';
+                                            addAllBtn.className = 'add-all-btn ml-2';
+                                            addAllBtn.textContent = 'Add All';
+
+                                            // Disable "Add All" button if no stock is available
+                                            const maxQuantity = parseInt(card.getAttribute('data-available'), 10);
+                                            if (maxQuantity <= 0) {
+                                                addAllBtn.disabled = true;
+                                            }
+
+                                            // Insert button before "Add to Request"
+                                            actionsDiv.insertBefore(addAllBtn, addToCartBtn);
+
+                                            // Update card available quantity display
+                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+
+                                            // Add event listener to "Add All" button
+                                            addAllBtn.addEventListener('click', function() {
+                                                const supplyId = card.getAttribute('data-supply-id');
+                                                const supplyName = card.getAttribute('data-name');
+                                                const quantityInput = card.querySelector('.quantity-input');
+                                                const currentAvailableQuantity = parseInt(card.getAttribute('data-available'), 10);
+
+                                                if (currentAvailableQuantity > 0) {
+                                                    // Set input value to max available quantity
+                                                    quantityInput.value = currentAvailableQuantity;
+
+                                                    // Add item to selection
+                                                    addItemToSelection(supplyId, supplyName, currentAvailableQuantity, originalAvailableQuantities[supplyId]);
+
+                                                    // Reset input value
+                                                    quantityInput.value = 0;
+                                                }
+                                            });
+                                        });
+
+                                        // Quantity buttons
+                                        productCards.forEach(card => {
+                                            const minusBtn = card.querySelector('.quantity-btn.minus');
+                                            const plusBtn = card.querySelector('.quantity-btn.plus');
+                                            const quantityInput = card.querySelector('.quantity-input');
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+                                            const supplyId = card.getAttribute('data-supply-id');
+                                            const supplyName = card.getAttribute('data-name');
+                                            const addAllBtn = card.querySelector('.add-all-btn');
+
+                                            // Update available quantity span reference
+                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+
+                                            if (minusBtn && plusBtn && quantityInput) {
+                                                minusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (currentValue > 0) {
+                                                        quantityInput.value = currentValue - 1;
+                                                    }
+                                                });
+
+                                                plusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
+                                                    if (currentValue < currentAvailable) {
+                                                        quantityInput.value = currentValue + 1;
+                                                    }
+                                                });
+
+                                                quantityInput.addEventListener('change', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
+                                                    if (isNaN(currentValue) || currentValue < 0) {
+                                                        quantityInput.value = 0;
+                                                    } else if (currentValue > currentAvailable) {
+                                                        quantityInput.value = currentAvailable;
+                                                    }
+                                                });
+
+                                                addToCartBtn.addEventListener('click', function() {
+                                                    const quantity = parseInt(quantityInput.value, 10);
+                                                    if (quantity > 0) {
+                                                        addItemToSelection(supplyId, supplyName, quantity, originalAvailableQuantities[supplyId]);
+                                                        quantityInput.value = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        function addItemToSelection(supplyId, supplyName, quantity, maxOriginalQuantity) {
+                                            const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
+                                            const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
+                                            // Don't allow adding more than what's available
+                                            if (quantity > currentAvailable) {
+                                                quantity = currentAvailable;
+                                            }
+
+                                            if (quantity <= 0) {
+                                                return; // Nothing to add
+                                            }
+
+                                            // Check if item already exists in selection
+                                            const existingItemIndex = selectedItems.findIndex(item => item.supplyId === supplyId);
+
+                                            if (existingItemIndex >= 0) {
+                                                // Update existing item
+                                                const newQuantity = selectedItems[existingItemIndex].quantity + quantity;
+
+                                                // Ensure we don't exceed original max quantity
+                                                if (newQuantity <= maxOriginalQuantity) {
+                                                    // Update the item quantity
+                                                    selectedItems[existingItemIndex].quantity = newQuantity;
+
+                                                    // Update available quantity on the card
+                                                    updateAvailableQuantity(supplyId, -quantity);
+                                                } else {
+                                                    // Show notification that max quantity reached
+                                                    alert(`Maximum available quantity (${maxOriginalQuantity}) reached for ${supplyName}`);
+
+                                                    // Set to max available
+                                                    const additionalQty = maxOriginalQuantity - selectedItems[existingItemIndex].quantity;
+                                                    if (additionalQty > 0) {
+                                                        selectedItems[existingItemIndex].quantity = maxOriginalQuantity;
+                                                        updateAvailableQuantity(supplyId, -additionalQty);
+                                                    }
+                                                }
+                                            } else {
+                                                // Add new item
+                                                selectedItems.push({
+                                                    supplyId: supplyId,
+                                                    name: supplyName,
+                                                    quantity: quantity,
+                                                    maxAvailable: maxOriginalQuantity,
+                                                    index: itemIndex++
+                                                });
+
+                                                // Update available quantity on the card
+                                                updateAvailableQuantity(supplyId, -quantity);
+                                            }
+
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function updateAvailableQuantity(supplyId, change) {
+                                            const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
+                                            if (!card) return;
+
+                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                            const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+                                            const newAvailable = currentAvailable + change;
+
+                                            // Update data attribute
+                                            card.setAttribute('data-available', newAvailable);
+
+                                            // Update display text
+                                            if (availableSpan) {
+                                                availableSpan.textContent = `${newAvailable} available`;
+
+                                                // Update color based on availability
+                                                availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+
+                                                if (newAvailable > 10) {
+                                                    availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                } else if (newAvailable > 0) {
+                                                    availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                } else {
+                                                    availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                }
+                                            }
+
+                                            // Update max value of quantity input
+                                            const quantityInput = card.querySelector('.quantity-input');
+                                            if (quantityInput) {
+                                                quantityInput.max = newAvailable;
+                                            }
+
+                                            // Enable/disable buttons based on availability
+                                            const minusBtn = card.querySelector('.quantity-btn.minus');
+                                            const plusBtn = card.querySelector('.quantity-btn.plus');
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+                                            const addAllBtn = card.querySelector('.add-all-btn');
+
+                                            if (newAvailable <= 0) {
+                                                if (minusBtn) minusBtn.disabled = true;
+                                                if (plusBtn) plusBtn.disabled = true;
+                                                if (addToCartBtn) addToCartBtn.disabled = true;
+                                                if (addAllBtn) addAllBtn.disabled = true;
+                                                if (quantityInput) quantityInput.disabled = true;
+                                            } else {
+                                                if (minusBtn) minusBtn.disabled = false;
+                                                if (plusBtn) plusBtn.disabled = false;
+                                                if (addToCartBtn) addToCartBtn.disabled = false;
+                                                if (addAllBtn) addAllBtn.disabled = false;
+                                                if (quantityInput) quantityInput.disabled = false;
+                                            }
+                                        }
+
+                                        function removeItemFromSelection(index) {
+                                            // Find the item to remove
+                                            const itemToRemove = selectedItems.find(item => item.index === index);
+
+                                            if (itemToRemove) {
+                                                // Restore the available quantity
+                                                updateAvailableQuantity(itemToRemove.supplyId, itemToRemove.quantity);
+
+                                                // Remove the item from the selection
+                                                selectedItems = selectedItems.filter(item => item.index !== index);
+                                            }
+
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function updateSelectedItemsList() {
+                                            // Update counter
+                                            if (itemCountDisplay) {
+                                                itemCountDisplay.textContent = selectedItems.length;
+                                            }
+
+                                            if (!selectedItemsList) return;
+
+                                            // Clear current list
+                                            selectedItemsList.innerHTML = '';
+
+                                            if (selectedItems.length === 0) {
+                                                selectedItemsList.innerHTML = `
+                                                    <tr>
+                                                        <td colspan="3" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                                            No items selected. Add items from the product list.
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                                // Hide the selected items view if visible
+                                                if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
+                                                    // Make sure we show products grid and hide selected items
+                                                    selectedItemsContainer.classList.add('hidden');
+                                                    productsGrid.classList.remove('hidden');
+
+                                                    // Update the button text
+                                                    if (viewCartBtn) {
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                    }
+                                                }
+                                            } else {
+                                                // Add each item to the list
+                                                selectedItems.forEach(item => {
+                                                    const row = document.createElement('tr');
+                                                    row.innerHTML = `
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center mr-3">
+                                                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">${item.name}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <button type="button" class="edit-quantity-btn minus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" data-index="${item.index}" data-action="decrease">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <span class="w-10 text-center text-gray-900 dark:text-white quantity-display">${item.quantity}</span>
+                                                                <button type="button" class="edit-quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" data-index="${item.index}" data-action="increase">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <button type="button" class="remove-item-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500" data-index="${item.index}">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+                                                    selectedItemsList.appendChild(row);
+                                                });
+
+                                                // Add event listeners to the new buttons
+                                                document.querySelectorAll('.edit-quantity-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        const action = this.getAttribute('data-action');
+                                                        editItemQuantity(index, action);
+                                                    });
+                                                });
+
+                                                document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        removeItemFromSelection(index);
+                                                    });
+                                                });
+                                            }
+                                        }
+
+                                        function editItemQuantity(index, action) {
+                                            const itemIndex = selectedItems.findIndex(item => item.index === index);
+                                            if (itemIndex >= 0) {
+                                                const card = document.querySelector(`.product-card[data-supply-id="${selectedItems[itemIndex].supplyId}"]`);
+                                                const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+                                                const supplyId = selectedItems[itemIndex].supplyId;
+
+                                                if (action === 'increase') {
+                                                    // Check if we have any available quantity left to add
+                                                    if (currentAvailable > 0) {
+                                                        selectedItems[itemIndex].quantity++;
+                                                        // Update the available quantity display on the card
+                                                        updateAvailableQuantity(supplyId, -1);
+                                                    }
+                                                } else if (action === 'decrease' && selectedItems[itemIndex].quantity > 1) {
+                                                    selectedItems[itemIndex].quantity--;
+                                                    // Update the available quantity display on the card
+                                                    updateAvailableQuantity(supplyId, 1);
+                                                }
+
+                                                updateSelectedItemsList();
+                                                updateFormInputs();
+                                            }
+                                        }
+
+                                        function updateFormInputs() {
+                                            if (!requestItemsContainer) return;
+
+                                            // Clear current inputs
+                                            requestItemsContainer.innerHTML = '';
+
+                                            // Add inputs for form submission
+                                            selectedItems.forEach((item, i) => {
+                                                const supplyIdInput = document.createElement('input');
+                                                supplyIdInput.type = 'hidden';
+                                                supplyIdInput.name = `supplies[${i}][supply_id]`;
+                                                supplyIdInput.value = item.supplyId;
+
+                                                const quantityInput = document.createElement('input');
+                                                quantityInput.type = 'hidden';
+                                                quantityInput.name = `supplies[${i}][quantity]`;
+                                                quantityInput.value = item.quantity;
+
+                                                requestItemsContainer.appendChild(supplyIdInput);
+                                                requestItemsContainer.appendChild(quantityInput);
+                                            });
+                                        }
+
+                                        // Function to reset product quantities to original values
+                                        function resetProductQuantities() {
+                                            // Reset selected items array
+                                            selectedItems = [];
+
+                                            // Reset all product cards to original quantities
+                                            productCards.forEach(card => {
+                                                const supplyId = card.getAttribute('data-supply-id');
+                                                const originalQuantity = originalAvailableQuantities[supplyId];
+
+                                                // Reset quantity input
+                                                const quantityInput = card.querySelector('.quantity-input');
+                                                if (quantityInput) {
+                                                    quantityInput.value = 0;
+                                                    quantityInput.max = originalQuantity;
+                                                    quantityInput.disabled = originalQuantity <= 0;
+                                                }
+
+                                                // Reset available quantity display
+                                                card.setAttribute('data-available', originalQuantity);
+                                                const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                                if (availableSpan) {
+                                                    availableSpan.textContent = `${originalQuantity} available`;
+
+                                                    // Update color based on original availability
+                                                    availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+
+                                                    if (originalQuantity > 10) {
+                                                        availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                    } else if (originalQuantity > 0) {
+                                                        availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                    } else {
+                                                        availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                    }
+                                                }
+
+                                                // Enable/disable buttons based on original availability
+                                                const minusBtn = card.querySelector('.quantity-btn.minus');
+                                                const plusBtn = card.querySelector('.quantity-btn.plus');
+                                                const addToCartBtn = card.querySelector('.add-to-cart');
+                                                const addAllBtn = card.querySelector('.add-all-btn');
+
+                                                const shouldDisable = originalQuantity <= 0;
+                                                if (minusBtn) minusBtn.disabled = shouldDisable;
+                                                if (plusBtn) plusBtn.disabled = shouldDisable;
+                                                if (addToCartBtn) addToCartBtn.disabled = shouldDisable;
+                                                if (addAllBtn) addAllBtn.disabled = shouldDisable;
+                                            });
+
+                                            // Update UI
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+
+                                            // Reset view back to products grid if needed
+                                            if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
+                                                selectedItemsContainer.classList.add('hidden');
+                                                productsGrid.classList.remove('hidden');
+
+                                                // Update the button text
+                                                if (viewCartBtn) {
+                                                    viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                }
+                                            }
+                                        }
+
+                                        // Add/Remove Item Functionality (original functionality)
+                                        const addItemBtn = document.getElementById('addItem');
+                                        const itemsContainer = document.getElementById('itemsContainer');
+
+                                        if (addItemBtn && itemsContainer) {
+                                            addItemBtn.addEventListener('click', function() {
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                const newIndex = itemRows.length;
+
+                                                const newRow = document.createElement('tr');
+                                                newRow.className = 'item-row';
+                                                newRow.innerHTML = `
+                                                        <td class="px-4 py-2">
+                                                            <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                                <option value="">Select an item</option>
+                                                                @foreach ($stocks as $stock)
+                                                                    <option value="{{ $stock->supply_id }}">
+                                                                        {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
+                                                                class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <button type="button" class="text-red-500 hover:text-red-700 remove-item">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+
+                                                itemsContainer.appendChild(newRow);
+
+                                                // Enable the first row's remove button if we now have more than one row
+                                                if (newIndex === 1) {
+                                                    document.querySelector('.remove-item').removeAttribute('disabled');
+                                                }
+
+                                                // Add event listener to the new remove button
+                                                newRow.querySelector('.remove-item').addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            });
+
+                                            // Function to remove an item row
+                                            function removeItem(button) {
+                                                const row = button.closest('.item-row');
+                                                row.remove();
+
+                                                // If only one row left, disable its remove button
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                if (itemRows.length === 1) {
+                                                    itemRows[0].querySelector('.remove-item').setAttribute('disabled', 'disabled');
+                                                }
+
+                                                // Reindex the remaining rows
+                                                itemRows.forEach((row, index) => {
+                                                    const selectInput = row.querySelector('select');
+                                                    const quantityInput = row.querySelector('input[type="number"]');
+
+                                                    selectInput.name = `supplies[${index}][supply_id]`;
+                                                    quantityInput.name = `supplies[${index}][quantity]`;
+                                                    quantityInput.name = `supplies[${index}][quantity]`;
+                                                });
+                                            }
+
+                                            // Add event listener to the first row's remove button
+                                            const firstRemoveButton = document.querySelector('.remove-item');
+                                            if (firstRemoveButton) {
+                                                firstRemoveButton.addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            }
+                                        }
+
+                                        // Search and Filter Functionality
+                                        const searchInput = document.getElementById('request-search-input');
+                                        const statusFilters = document.querySelectorAll('.status-filter');
+                                        const requestRows = document.querySelectorAll('.request-row');
+                                        const noRequestsRow = document.getElementById('no-requests-row');
+
+                                        if (statusFilters.length > 0) {
+                                            // Handle status filter clicks
+                                            statusFilters.forEach(filter => {
+                                                filter.addEventListener('click', function() {
+                                                    // Remove active class from all filters
+                                                    statusFilters.forEach(f => {
+                                                        f.classList.remove('bg-blue-100', 'dark:bg-blue-900',
+                                                            'text-blue-800', 'dark:text-blue-300', 'active-filter');
+                                                        // Add default text colors back
+                                                        f.classList.add('text-gray-700', 'dark:text-gray-300');
+                                                    });
+
+                                                    // Add active class to clicked filter
+                                                    this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-800',
+                                                        'dark:text-blue-300', 'active-filter');
+                                                    // Remove default text colors from active filter
+                                                    this.classList.remove('text-gray-700', 'dark:text-gray-300');
+
+                                                    // Apply filters
+                                                    applyFilters();
+                                                });
+                                            });
+                                        }
+
+                                        if (searchInput) {
+                                            // Handle search input
+                                            searchInput.addEventListener('input', function() {
+                                                applyFilters();
+                                            });
+                                        }
+
+                                        // Function to apply both search and status filters
+                                        function applyFilters() {
+                                            if (!searchInput || !requestRows.length) return;
+
+                                            const searchValue = searchInput.value.toLowerCase().trim();
+                                            const activeFilter = document.querySelector('.status-filter.active-filter');
+                                            const statusFilter = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
+
+                                            let visibleCount = 0;
+
+                                            requestRows.forEach(row => {
+                                                const rowStatus = row.getAttribute('data-status');
+                                                const rowText = row.textContent.toLowerCase();
+                                                const statusMatch = statusFilter === 'all' || rowStatus === statusFilter;
+                                                const searchMatch = searchValue === '' || rowText.includes(searchValue);
+
+                                                if (statusMatch && searchMatch) {
+                                                    row.classList.remove('hidden');
+                                                    visibleCount++;
+                                                } else {
+                                                    row.classList.add('hidden');
+                                                }
+                                            });
+
+                                            // Show/hide "no requests" message
+                                            if (visibleCount === 0 && noRequestsRow) {
+                                                noRequestsRow.classList.remove('hidden');
+                                            } else if (noRequestsRow) {
+                                                noRequestsRow.classList.add('hidden');
+                                            }
+                                        }
+
+                                        // Also update the quantity inputs in the selection modal
+                                        const addToRequestContainers = document.querySelectorAll('[class*="Add to Request"]');
+                                        addToRequestContainers.forEach(container => {
+                                            const parent = container.closest('.relative, .flex');
+                                            if (parent) {
+                                                const quantityInput = parent.querySelector('input[type="number"]');
+                                                if (quantityInput) {
+                                                    const wrapper = quantityInput.parentElement;
+                                                    if (wrapper && !wrapper.classList.contains('quantity-wrapper')) {
+                                                        wrapper.classList.add('quantity-wrapper');
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                        // ========================
+                                        // E-SIGNATURE CONFIRMATION MODAL
+                                        // ========================
+
+                                        // Get the form for requisition submission
+                                        const risForm = document.querySelector('form[action="{{ route('ris.store') }}"]');
+
+                                        if (risForm) {
+                                            // Override the form submission
+                                            risForm.addEventListener('submit', function(event) {
+                                                // Prevent default form submission
+                                                event.preventDefault();
+
+                                                // Check if any items are selected
+                                                if (selectedItems.length === 0) {
+                                                    Swal.fire({
+                                                        title: 'No Items Selected',
+                                                        text: 'Please select at least one item before submitting your request.',
+                                                        icon: 'warning',
+                                                        confirmButtonColor: '#3085d6'
+                                                    });
+                                                    return;
+                                                }
+
+                                                // Get purpose text for confirmation
+                                                const purposeText = document.querySelector('textarea[name="purpose"]').value.trim();
+
+                                                // User's signature path for preview if available
+                                                const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+
+                                                // Signature preview HTML - will show if e-signature is selected
+                                                const signaturePreviewHtml = userSignaturePath ?
+                                                    `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
+                                                        <p class="text-sm mb-1">Your signature will appear as:</p>
+                                                        <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
+                                                    </div>` : '';
+
+                                                // Show confirmation dialog with signature options
+                                                Swal.fire({
+                                                    title: 'Confirm Requisition',
+                                                    html: `
+                                                        <div class="text-left mb-4">
+                                                            <p class="mb-3">You are about to submit a requisition with <strong>${selectedItems.length}</strong> item(s).</p>
+                                                            <p class="mb-4"><strong>Purpose:</strong> ${purposeText || 'Not specified'}</p>
+
+                                                            <div class="mb-4">
+                                                                <label class="block text-sm font-bold mb-2">
+                                                                    How would you like to sign this request?
+                                                                </label>
+                                                                <div class="flex items-center mb-2">
+                                                                    <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
+                                                                    <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                                                                </div>
+                                                                <div class="flex items-center">
+                                                                    <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                                                    <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                                                                </div>
+                                                                ${!userSignaturePath ?
+                                                                    '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
+                                                            </div>
+
+                                                            ${signaturePreviewHtml}
+
+                                                            <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
+                                                                <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
+                                                                <ul class="list-disc pl-4 space-y-1">
+                                                                    <li>I authorize the use of my electronic signature for this requisition.</li>
+                                                                    <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                                                    <li>I confirm all details provided in this requisition are accurate and complete.</li>
+                                                                </ul>
+                                                                <div class="mt-2">
+                                                                    <input type="checkbox" id="agree-terms" class="mr-1">
+                                                                    <label for="agree-terms" class="text-xs">I agree to the above terms</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `,
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Submit Request',
+                                                    cancelButtonText: 'Cancel',
+                                                    focusConfirm: false,
+                                                    didRender: () => {
+                                                        // Disable the confirm button initially if e-signature is selected (terms not agreed)
+                                                        const confirmButton = Swal.getConfirmButton();
+                                                        const agreeTerms = document.getElementById('agree-terms');
+                                                        const esignRadio = document.getElementById('swal-esign');
+                                                        const sgdRadio = document.getElementById('swal-sgd');
+                                                        const termsDiv = document.getElementById('esign-terms');
+                                                        const signaturePreview = document.getElementById('signature-preview-container');
+
+                                                        // Function to toggle the confirm button state based on selections
+                                                        const updateConfirmButtonState = () => {
+                                                            if (esignRadio.checked && !agreeTerms.checked) {
+                                                                confirmButton.disabled = true;
+                                                                confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                                                            } else {
+                                                                confirmButton.disabled = false;
+                                                                confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                                            }
+                                                        };
+
+                                                        // Add event listeners
+                                                        esignRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.remove('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.remove('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        sgdRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.add('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.add('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        if (agreeTerms) {
+                                                            agreeTerms.addEventListener('change', updateConfirmButtonState);
+                                                        }
+
+                                                        // Initialize state
+                                                        updateConfirmButtonState();
+                                                    },
+                                                    preConfirm: () => {
+                                                        const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+
+                                                        // If e-signature selected, check if terms are agreed to
+                                                        if (signatureType === 'esign') {
+                                                            const termsAgreed = document.getElementById('agree-terms').checked;
+                                                            if (!termsAgreed) {
+                                                                Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                                                                return false;
+                                                            }
+                                                        }
+
+                                                        return signatureType;
+                                                    }
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        // Add signature type as hidden field
+                                                        let signatureInput = risForm.querySelector('input[name="signature_type"]');
+
+                                                        if (!signatureInput) {
+                                                            signatureInput = document.createElement('input');
+                                                            signatureInput.type = 'hidden';
+                                                            signatureInput.name = 'signature_type';
+                                                            risForm.appendChild(signatureInput);
+                                                        }
+
+                                                        signatureInput.value = result.value;
+
+                                                        // Submit the form
+                                                        risForm.submit();
+
+                                                        // Show loading indicator
+                                                        Swal.fire({
+                                                            title: 'Submitting...',
+                                                            html: 'Your requisition is being processed',
+                                                            allowOutsideClick: false,
+                                                            didOpen: () => {
+                                                                Swal.showLoading();
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    });
+
+                                    // Functions for search input (preserved from original)
+                                    function toggleClearRequestButton() {
+                                        const input = document.getElementById('request-search-input');
+                                        const clearBtn = document.getElementById('clearRequestButton');
+                                        if (input && clearBtn) {
+                                            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+                                        }
+                                    }
+
+                                    function clearRequestSearch() {
+                                        const input = document.getElementById('request-search-input');
+                                        if (input) {
+                                            input.value = '';
+                                            document.getElementById('clearRequestButton').style.display = 'none';
+                                            // Trigger input event to update the filters
+                                            const event = new Event('input', {
+                                                bubbles: true
+                                            });
+                                            input.dispatchEvent(event);
+                                        }
+                                    }
+                                </script>
+
+
+
+
+                                {{-- <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Modal Controls
+                                        const requestModal = document.getElementById('requestModal');
+                                        const openRequestModal = document.getElementById('openRequestModal');
+                                        const closeRequestModal = document.getElementById('closeRequestModal');
+                                        const cancelRequest = document.getElementById('cancelRequest');
+
+                                        openRequestModal.addEventListener('click', function() {
+                                            requestModal.classList.remove('hidden');
+                                        });
+
+                                        function closeModal() {
+                                            requestModal.classList.add('hidden');
+                                        }
+
+                                        closeRequestModal.addEventListener('click', closeModal);
+                                        cancelRequest.addEventListener('click', closeModal);
+
+                                        // Add CSS to ensure quantity inputs have sufficient width
+                                        const style = document.createElement('style');
+                                        style.textContent = `
+                                            /* Increase width of quantity input fields to fit double digits */
+                                            .product-card .quantity-input,
+                                            #selected-items-list .quantity-input,
+                                            .quantity-display,
+                                            span.w-10 {
+                                                min-width: 3rem !important; /* Ensure minimum width */
+                                                width: 3rem !important; /* Fixed width */
+                                                text-align: center;
+                                                padding-left: 0.5rem !important;
+                                                padding-right: 0.5rem !important;
+                                            }
+
+                                            /* Fix for the quantity input in the "Select Items to Request" modal */
+                                            .quantity-wrapper {
+                                                display: flex;
+                                                align-items: center;
+                                                min-width: 5rem; /* Ensure there's enough space */
+                                            }
+
+                                            .quantity-wrapper input[type="number"],
+                                            .quantity-wrapper input {
+                                                min-width: 2.5rem !important;
+                                                width: 2.5rem !important;
+                                                text-align: center;
+                                                padding-left: 0.25rem !important;
+                                                padding-right: 0.25rem !important;
+                                                -moz-appearance: textfield; /* Remove spinner in Firefox */
+                                            }
+
+                                            /* Remove spinner arrows from number inputs in all browsers */
+                                            input[type=number]::-webkit-inner-spin-button,
+                                            input[type=number]::-webkit-outer-spin-button {
+                                                -webkit-appearance: none;
+                                                margin: 0;
+                                            }
+                                        `;
+                                        document.head.appendChild(style);
+
+                                        // Product selection functionality (new UI)
+                                        const productCards = document.querySelectorAll('.product-card');
+                                        const selectedItemsContainer = document.getElementById('selected-items-container');
+                                        const selectedItemsList = document.getElementById('selected-items-list');
+                                        const requestItemsContainer = document.getElementById('request-items-container');
+                                        const itemCountDisplay = document.getElementById('itemCount');
+                                        const viewCartBtn = document.getElementById('viewCartBtn');
+                                        const productsGrid = document.getElementById('products-grid');
+                                        const itemSearch = document.getElementById('item-search');
+
+                                        let selectedItems = [];
+                                        let itemIndex = 0;
+
+                                        // Apply classes to existing number inputs
+                                        const modalQuantityInputs = document.querySelectorAll('#requestModal .quantity-input');
+                                        modalQuantityInputs.forEach(input => {
+                                            const parent = input.parentElement;
+                                            if (!parent.classList.contains('quantity-wrapper')) {
+                                                parent.classList.add('quantity-wrapper');
+                                            }
+                                        });
+
+                                        // Search functionality
+                                        if (itemSearch) {
+                                            itemSearch.addEventListener('input', function(e) {
+                                                const searchTerm = e.target.value.toLowerCase();
+
+                                                productCards.forEach(card => {
+                                                    const productName = card.getAttribute('data-name').toLowerCase();
+                                                    if (productName.includes(searchTerm)) {
+                                                        card.classList.remove('hidden');
+                                                    } else {
+                                                        card.classList.add('hidden');
+                                                    }
+                                                });
+                                            });
+                                        }
+
+                                        // View cart button
+                                        if (viewCartBtn) {
+                                            viewCartBtn.addEventListener('click', function() {
+                                                if (selectedItems.length > 0) {
+                                                    // Toggle visibility of containers
+                                                    if (selectedItemsContainer.classList.contains('hidden')) {
+                                                        // Show selected items, hide products grid
+                                                        selectedItemsContainer.classList.remove('hidden');
+                                                        productsGrid.classList.add('hidden');
+
+                                                        // Change button text to "Back to Items"
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                        </svg>Back to Items`;
+                                                    } else {
+                                                        // Show products grid, hide selected items
+                                                        selectedItemsContainer.classList.add('hidden');
+                                                        productsGrid.classList.remove('hidden');
+
+                                                        // Change button text to "View Selected"
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
+                                                    }
+
+                                                    // Apply styling to quantity spans in the selected items list
+                                                    setTimeout(() => {
+                                                        const quantitySpans = document.querySelectorAll('#selected-items-list .w-10');
+                                                        quantitySpans.forEach(span => {
+                                                            span.classList.add('quantity-display');
+                                                        });
+                                                    }, 100);
+                                                }
+                                            });
+                                        }
+
+                                        // Quantity buttons
+                                        productCards.forEach(card => {
+                                            const minusBtn = card.querySelector('.quantity-btn.minus');
+                                            const plusBtn = card.querySelector('.quantity-btn.plus');
+                                            const quantityInput = card.querySelector('.quantity-input');
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+                                            const supplyId = card.getAttribute('data-supply-id');
+                                            const supplyName = card.getAttribute('data-name');
+                                            const maxQuantity = parseInt(card.getAttribute('data-available'), 10);
+
+                                            if (minusBtn && plusBtn && quantityInput) {
+                                                minusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (currentValue > 0) {
+                                                        quantityInput.value = currentValue - 1;
+                                                    }
+                                                });
+
+                                                plusBtn.addEventListener('click', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (currentValue < maxQuantity) {
+                                                        quantityInput.value = currentValue + 1;
+                                                    }
+                                                });
+
+                                                quantityInput.addEventListener('change', function() {
+                                                    let currentValue = parseInt(quantityInput.value, 10);
+                                                    if (isNaN(currentValue) || currentValue < 0) {
+                                                        quantityInput.value = 0;
+                                                    } else if (currentValue > maxQuantity) {
+                                                        quantityInput.value = maxQuantity;
+                                                    }
+                                                });
+
+                                                addToCartBtn.addEventListener('click', function() {
+                                                    const quantity = parseInt(quantityInput.value, 10);
+                                                    if (quantity > 0) {
+                                                        addItemToSelection(supplyId, supplyName, quantity, maxQuantity);
+                                                        quantityInput.value = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        function addItemToSelection(supplyId, supplyName, quantity, maxAvailable) {
+                                            // Check if item already exists in selection
+                                            const existingItemIndex = selectedItems.findIndex(item => item.supplyId === supplyId);
+
+                                            if (existingItemIndex >= 0) {
+                                                // Update existing item
+                                                const newQuantity = selectedItems[existingItemIndex].quantity + quantity;
+                                                if (newQuantity <= maxAvailable) {
+                                                    selectedItems[existingItemIndex].quantity = newQuantity;
+                                                } else {
+                                                    // Show notification that max quantity reached
+                                                    alert(`Maximum available quantity (${maxAvailable}) reached for ${supplyName}`);
+                                                    selectedItems[existingItemIndex].quantity = maxAvailable;
+                                                }
+                                            } else {
+                                                // Add new item
+                                                selectedItems.push({
+                                                    supplyId: supplyId,
+                                                    name: supplyName,
+                                                    quantity: quantity,
+                                                    maxAvailable: maxAvailable,
+                                                    index: itemIndex++
+                                                });
+                                            }
+
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function removeItemFromSelection(index) {
+                                            selectedItems = selectedItems.filter(item => item.index !== index);
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+                                        }
+
+                                        function updateSelectedItemsList() {
+                                            // Update counter
+                                            if (itemCountDisplay) {
+                                                itemCountDisplay.textContent = selectedItems.length;
+                                            }
+
+                                            if (!selectedItemsList) return;
+
+                                            // Clear current list
+                                            selectedItemsList.innerHTML = '';
+
+                                            if (selectedItems.length === 0) {
+                                                selectedItemsList.innerHTML = `
+                                                    <tr>
+                                                        <td colspan="3" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                                            No items selected. Add items from the product list.
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                                // Hide the selected items view if visible
+                                                if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
+                                                    // Make sure we show products grid and hide selected items
+                                                    selectedItemsContainer.classList.add('hidden');
+                                                    productsGrid.classList.remove('hidden');
+
+                                                    // Update the button text
+                                                    if (viewCartBtn) {
+                                                        viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                    }
+                                                }
+                                            } else {
+                                                // Add each item to the list
+                                                selectedItems.forEach(item => {
+                                                    const row = document.createElement('tr');
+                                                    row.innerHTML = `
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center mr-3">
+                                                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">${item.name}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center">
+                                                                <button type="button" class="edit-quantity-btn minus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" data-index="${item.index}" data-action="decrease">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <span class="w-10 text-center text-gray-900 dark:text-white quantity-display">${item.quantity}</span>
+                                                                <button type="button" class="edit-quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" data-index="${item.index}" data-action="increase">
+                                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <button type="button" class="remove-item-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500" data-index="${item.index}">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+                                                    selectedItemsList.appendChild(row);
+                                                });
+
+                                                // Add event listeners to the new buttons
+                                                document.querySelectorAll('.edit-quantity-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        const action = this.getAttribute('data-action');
+                                                        editItemQuantity(index, action);
+                                                    });
+                                                });
+
+                                                document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                                                    btn.addEventListener('click', function() {
+                                                        const index = parseInt(this.getAttribute('data-index'), 10);
+                                                        removeItemFromSelection(index);
+                                                    });
+                                                });
+                                            }
+                                        }
+
+                                        function editItemQuantity(index, action) {
+                                            const itemIndex = selectedItems.findIndex(item => item.index === index);
+                                            if (itemIndex >= 0) {
+                                                if (action === 'increase' && selectedItems[itemIndex].quantity < selectedItems[itemIndex]
+                                                    .maxAvailable) {
+                                                    selectedItems[itemIndex].quantity++;
+                                                } else if (action === 'decrease' && selectedItems[itemIndex].quantity > 1) {
+                                                    selectedItems[itemIndex].quantity--;
+                                                }
+                                                updateSelectedItemsList();
+                                                updateFormInputs();
+                                            }
+                                        }
+
+                                        function updateFormInputs() {
+                                            if (!requestItemsContainer) return;
+
+                                            // Clear current inputs
+                                            requestItemsContainer.innerHTML = '';
+
+                                            // Add inputs for form submission
+                                            selectedItems.forEach((item, i) => {
+                                                const supplyIdInput = document.createElement('input');
+                                                supplyIdInput.type = 'hidden';
+                                                supplyIdInput.name = `supplies[${i}][supply_id]`;
+                                                supplyIdInput.value = item.supplyId;
+
+                                                const quantityInput = document.createElement('input');
+                                                quantityInput.type = 'hidden';
+                                                quantityInput.name = `supplies[${i}][quantity]`;
+                                                quantityInput.value = item.quantity;
+
+                                                requestItemsContainer.appendChild(supplyIdInput);
+                                                requestItemsContainer.appendChild(quantityInput);
+                                            });
+                                        }
+
+                                        // Add/Remove Item Functionality (original functionality)
+                                        const addItemBtn = document.getElementById('addItem');
+                                        const itemsContainer = document.getElementById('itemsContainer');
+
+                                        if (addItemBtn && itemsContainer) {
+                                            addItemBtn.addEventListener('click', function() {
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                const newIndex = itemRows.length;
+
+                                                const newRow = document.createElement('tr');
+                                                newRow.className = 'item-row';
+                                                newRow.innerHTML = `
+                                                        <td class="px-4 py-2">
+                                                            <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                                <option value="">Select an item</option>
+                                                                @foreach ($stocks as $stock)
+                                                                    <option value="{{ $stock->supply_id }}">
+                                                                        {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
+                                                                class="w-full px-2 py-1 border border-gray-300 rounded" required>
+                                                        </td>
+                                                        <td class="px-4 py-2">
+                                                            <button type="button" class="text-red-500 hover:text-red-700 remove-item">
+                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    `;
+
+                                                itemsContainer.appendChild(newRow);
+
+                                                // Enable the first row's remove button if we now have more than one row
+                                                if (newIndex === 1) {
+                                                    document.querySelector('.remove-item').removeAttribute('disabled');
+                                                }
+
+                                                // Add event listener to the new remove button
+                                                newRow.querySelector('.remove-item').addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            });
+
+                                            // Function to remove an item row
+                                            function removeItem(button) {
+                                                const row = button.closest('.item-row');
+                                                row.remove();
+
+                                                // If only one row left, disable its remove button
+                                                const itemRows = document.querySelectorAll('.item-row');
+                                                if (itemRows.length === 1) {
+                                                    itemRows[0].querySelector('.remove-item').setAttribute('disabled', 'disabled');
+                                                }
+
+                                                // Reindex the remaining rows
+                                                itemRows.forEach((row, index) => {
+                                                    const selectInput = row.querySelector('select');
+                                                    const quantityInput = row.querySelector('input[type="number"]');
+
+                                                    selectInput.name = `supplies[${index}][supply_id]`;
+                                                    quantityInput.name = `supplies[${index}][quantity]`;
+                                                });
+                                            }
+
+                                            // Add event listener to the first row's remove button
+                                            const firstRemoveButton = document.querySelector('.remove-item');
+                                            if (firstRemoveButton) {
+                                                firstRemoveButton.addEventListener('click', function() {
+                                                    removeItem(this);
+                                                });
+                                            }
+                                        }
+
+                                        // Search and Filter Functionality
+                                        const searchInput = document.getElementById('request-search-input');
+                                        const statusFilters = document.querySelectorAll('.status-filter');
+                                        const requestRows = document.querySelectorAll('.request-row');
+                                        const noRequestsRow = document.getElementById('no-requests-row');
+
+                                        if (statusFilters.length > 0) {
+                                            // Handle status filter clicks
+                                            statusFilters.forEach(filter => {
+                                                filter.addEventListener('click', function() {
+                                                    // Remove active class from all filters
+                                                    statusFilters.forEach(f => {
+                                                        f.classList.remove('bg-blue-100', 'dark:bg-blue-900',
+                                                            'text-blue-800', 'dark:text-blue-300', 'active-filter');
+                                                        // Add default text colors back
+                                                        f.classList.add('text-gray-700', 'dark:text-gray-300');
+                                                    });
+
+                                                    // Add active class to clicked filter
+                                                    this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-800',
+                                                        'dark:text-blue-300', 'active-filter');
+                                                    // Remove default text colors from active filter
+                                                    this.classList.remove('text-gray-700', 'dark:text-gray-300');
+
+                                                    // Apply filters
+                                                    applyFilters();
+                                                });
+                                            });
+                                        }
+
+                                        if (searchInput) {
+                                            // Handle search input
+                                            searchInput.addEventListener('input', function() {
+                                                applyFilters();
+                                            });
+                                        }
+
+                                        // Function to apply both search and status filters
+                                        function applyFilters() {
+                                            if (!searchInput || !requestRows.length) return;
+
+                                            const searchValue = searchInput.value.toLowerCase().trim();
+                                            const activeFilter = document.querySelector('.status-filter.active-filter');
+                                            const statusFilter = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
+
+                                            let visibleCount = 0;
+
+                                            requestRows.forEach(row => {
+                                                const rowStatus = row.getAttribute('data-status');
+                                                const rowText = row.textContent.toLowerCase();
+                                                const statusMatch = statusFilter === 'all' || rowStatus === statusFilter;
+                                                const searchMatch = searchValue === '' || rowText.includes(searchValue);
+
+                                                if (statusMatch && searchMatch) {
+                                                    row.classList.remove('hidden');
+                                                    visibleCount++;
+                                                } else {
+                                                    row.classList.add('hidden');
+                                                }
+                                            });
+
+                                            // Show/hide "no requests" message
+                                            if (visibleCount === 0 && noRequestsRow) {
+                                                noRequestsRow.classList.remove('hidden');
+                                            } else if (noRequestsRow) {
+                                                noRequestsRow.classList.add('hidden');
+                                            }
+                                        }
+
+                                        // Also update the quantity inputs in the selection modal
+                                        const addToRequestContainers = document.querySelectorAll('[class*="Add to Request"]');
+                                        addToRequestContainers.forEach(container => {
+                                            const parent = container.closest('.relative, .flex');
+                                            if (parent) {
+                                                const quantityInput = parent.querySelector('input[type="number"]');
+                                                if (quantityInput) {
+                                                    const wrapper = quantityInput.parentElement;
+                                                    if (wrapper && !wrapper.classList.contains('quantity-wrapper')) {
+                                                        wrapper.classList.add('quantity-wrapper');
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                        // ========================
+                                        // E-SIGNATURE CONFIRMATION MODAL
+                                        // ========================
+
+                                        // Get the form for requisition submission
+                                        const risForm = document.querySelector('form[action="{{ route('ris.store') }}"]');
+
+                                        if (risForm) {
+                                            // Override the form submission
+                                            risForm.addEventListener('submit', function(event) {
+                                                // Prevent default form submission
+                                                event.preventDefault();
+
+                                                // Check if any items are selected
+                                                if (selectedItems.length === 0) {
+                                                    Swal.fire({
+                                                        title: 'No Items Selected',
+                                                        text: 'Please select at least one item before submitting your request.',
+                                                        icon: 'warning',
+                                                        confirmButtonColor: '#3085d6'
+                                                    });
+                                                    return;
+                                                }
+
+                                                // Get purpose text for confirmation
+                                                const purposeText = document.querySelector('textarea[name="purpose"]').value.trim();
+
+                                                // User's signature path for preview if available
+                                                const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+
+                                                // Signature preview HTML - will show if e-signature is selected
+                                                const signaturePreviewHtml = userSignaturePath ?
+                                                    `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
+                                                        <p class="text-sm mb-1">Your signature will appear as:</p>
+                                                        <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
+                                                    </div>` : '';
+
+                                                // Show confirmation dialog with signature options
+                                                Swal.fire({
+                                                    title: 'Confirm Requisition',
+                                                    html: `
+                                                        <div class="text-left mb-4">
+                                                            <p class="mb-3">You are about to submit a requisition with <strong>${selectedItems.length}</strong> item(s).</p>
+                                                            <p class="mb-4"><strong>Purpose:</strong> ${purposeText || 'Not specified'}</p>
+
+                                                            <div class="mb-4">
+                                                                <label class="block text-sm font-bold mb-2">
+                                                                    How would you like to sign this request?
+                                                                </label>
+                                                                <div class="flex items-center mb-2">
+                                                                    <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
+                                                                    <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                                                                </div>
+                                                                <div class="flex items-center">
+                                                                    <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                                                    <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                                                                </div>
+                                                                ${!userSignaturePath ?
+                                                                    '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
+                                                            </div>
+
+                                                            ${signaturePreviewHtml}
+
+                                                            <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
+                                                                <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
+                                                                <ul class="list-disc pl-4 space-y-1">
+                                                                    <li>I authorize the use of my electronic signature for this requisition.</li>
+                                                                    <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                                                    <li>I confirm all details provided in this requisition are accurate and complete.</li>
+                                                                </ul>
+                                                                <div class="mt-2">
+                                                                    <input type="checkbox" id="agree-terms" class="mr-1">
+                                                                    <label for="agree-terms" class="text-xs">I agree to the above terms</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `,
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Submit Request',
+                                                    cancelButtonText: 'Cancel',
+                                                    focusConfirm: false,
+                                                    didRender: () => {
+                                                        // Disable the confirm button initially if e-signature is selected (terms not agreed)
+                                                        const confirmButton = Swal.getConfirmButton();
+                                                        const agreeTerms = document.getElementById('agree-terms');
+                                                        const esignRadio = document.getElementById('swal-esign');
+                                                        const sgdRadio = document.getElementById('swal-sgd');
+                                                        const termsDiv = document.getElementById('esign-terms');
+                                                        const signaturePreview = document.getElementById('signature-preview-container');
+
+                                                        // Function to toggle the confirm button state based on selections
+                                                        const updateConfirmButtonState = () => {
+                                                            if (esignRadio.checked && !agreeTerms.checked) {
+                                                                confirmButton.disabled = true;
+                                                                confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                                                            } else {
+                                                                confirmButton.disabled = false;
+                                                                confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                                            }
+                                                        };
+
+                                                        // Add event listeners
+                                                        esignRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.remove('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.remove('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        sgdRadio.addEventListener('change', function() {
+                                                            if (this.checked) {
+                                                                termsDiv.classList.add('hidden');
+                                                                if (signaturePreview) signaturePreview.classList.add('hidden');
+                                                                updateConfirmButtonState();
+                                                            }
+                                                        });
+
+                                                        if (agreeTerms) {
+                                                            agreeTerms.addEventListener('change', updateConfirmButtonState);
+                                                        }
+
+                                                        // Initialize state
+                                                        updateConfirmButtonState();
+                                                    },
+                                                    preConfirm: () => {
+                                                        const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+
+                                                        // If e-signature selected, check if terms are agreed to
+                                                        if (signatureType === 'esign') {
+                                                            const termsAgreed = document.getElementById('agree-terms').checked;
+                                                            if (!termsAgreed) {
+                                                                Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                                                                return false;
+                                                            }
+                                                        }
+
+                                                        return signatureType;
+                                                    }
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        // Add signature type as hidden field
+                                                        let signatureInput = risForm.querySelector('input[name="signature_type"]');
+
+                                                        if (!signatureInput) {
+                                                            signatureInput = document.createElement('input');
+                                                            signatureInput.type = 'hidden';
+                                                            signatureInput.name = 'signature_type';
+                                                            risForm.appendChild(signatureInput);
+                                                        }
+
+                                                        signatureInput.value = result.value;
+
+                                                        // Submit the form
+                                                        risForm.submit();
+
+                                                        // Show loading indicator
+                                                        Swal.fire({
+                                                            title: 'Submitting...',
+                                                            html: 'Your requisition is being processed',
+                                                            allowOutsideClick: false,
+                                                            didOpen: () => {
+                                                                Swal.showLoading();
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    });
+
+                                    // Functions for search input (preserved from original)
+                                    function toggleClearRequestButton() {
+                                        const input = document.getElementById('request-search-input');
+                                        const clearBtn = document.getElementById('clearRequestButton');
+                                        if (input && clearBtn) {
+                                            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+                                        }
+                                    }
+
+                                    function clearRequestSearch() {
+                                        const input = document.getElementById('request-search-input');
+                                        if (input) {
+                                            input.value = '';
+                                            document.getElementById('clearRequestButton').style.display = 'none';
+                                            // Trigger input event to update the filters
+                                            const event = new Event('input', {
+                                                bubbles: true
+                                            });
+                                            input.dispatchEvent(event);
+                                        }
+                                    }
+                                </script> --}}
+
+

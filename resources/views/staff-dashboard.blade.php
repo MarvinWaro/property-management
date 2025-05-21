@@ -595,6 +595,8 @@
 
                                         function closeModal() {
                                             requestModal.classList.add('hidden');
+                                            // Reset all product quantities when closing the modal
+                                            resetProductQuantities();
                                         }
 
                                         closeRequestModal.addEventListener('click', closeModal);
@@ -638,6 +640,16 @@
                                                 -webkit-appearance: none;
                                                 margin: 0;
                                             }
+
+                                            /* Make Add to Request button match the counter height */
+                                            .add-to-cart {
+                                                padding-top: 0.25rem !important;
+                                                padding-bottom: 0.25rem !important;
+                                                height: 100% !important;
+                                                display: flex !important;
+                                                align-items: center !important;
+                                                justify-content: center !important;
+                                            }
                                         `;
                                         document.head.appendChild(style);
 
@@ -654,6 +666,14 @@
                                         let selectedItems = [];
                                         let itemIndex = 0;
 
+                                        // Track original available quantities
+                                        const originalAvailableQuantities = {};
+                                        productCards.forEach(card => {
+                                            const supplyId = card.getAttribute('data-supply-id');
+                                            const availableQuantity = parseInt(card.getAttribute('data-available'), 10);
+                                            originalAvailableQuantities[supplyId] = availableQuantity;
+                                        });
+
                                         // Apply classes to existing number inputs
                                         const modalQuantityInputs = document.querySelectorAll('#requestModal .quantity-input');
                                         modalQuantityInputs.forEach(input => {
@@ -662,6 +682,53 @@
                                                 parent.classList.add('quantity-wrapper');
                                             }
                                         });
+
+                                        // Create "Add All to Request" button to add all selected quantities at once
+                                        const itemsHeaderDiv = document.querySelector('.flex.justify-between.items-center.mb-4');
+                                        if (itemsHeaderDiv) {
+                                            const addAllToRequestBtn = document.createElement('button');
+                                            addAllToRequestBtn.type = 'button';
+                                            addAllToRequestBtn.className = 'px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-900 flex items-center shadow-sm mr-2';
+                                            addAllToRequestBtn.innerHTML = `
+                                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                Add All to Request
+                                            `;
+
+                                            // Find the container that has the viewCartBtn and insert our button before it
+                                            const buttonsContainer = itemsHeaderDiv.querySelector('.flex.items-center');
+                                            const viewCartBtn = document.getElementById('viewCartBtn');
+
+                                            // Insert before the viewCartBtn
+                                            buttonsContainer.insertBefore(addAllToRequestBtn, viewCartBtn);
+
+                                            // Add event listener to the button
+                                            addAllToRequestBtn.addEventListener('click', function() {
+                                                let anyItemsAdded = false;
+
+                                                // Loop through all product cards and add any with quantity > 0
+                                                productCards.forEach(card => {
+                                                    const quantityInput = card.querySelector('.quantity-input');
+                                                    const quantity = parseInt(quantityInput.value, 10);
+
+                                                    if (quantity > 0) {
+                                                        const supplyId = card.getAttribute('data-supply-id');
+                                                        const supplyName = card.getAttribute('data-name');
+                                                        const maxAvailable = originalAvailableQuantities[supplyId];
+
+                                                        addItemToSelection(supplyId, supplyName, quantity, maxAvailable);
+                                                        quantityInput.value = 0; // Reset input after adding
+                                                        anyItemsAdded = true;
+                                                    }
+                                                });
+
+                                                if (!anyItemsAdded) {
+                                                    // Alert user if no items were selected
+                                                    alert('No items selected. Please set quantities for items you wish to request.');
+                                                }
+                                            });
+                                        }
 
                                         // Search functionality
                                         if (itemSearch) {
@@ -723,7 +790,9 @@
                                             const addToCartBtn = card.querySelector('.add-to-cart');
                                             const supplyId = card.getAttribute('data-supply-id');
                                             const supplyName = card.getAttribute('data-name');
-                                            const maxQuantity = parseInt(card.getAttribute('data-available'), 10);
+
+                                            // Update available quantity span reference
+                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
 
                                             if (minusBtn && plusBtn && quantityInput) {
                                                 minusBtn.addEventListener('click', function() {
@@ -735,43 +804,71 @@
 
                                                 plusBtn.addEventListener('click', function() {
                                                     let currentValue = parseInt(quantityInput.value, 10);
-                                                    if (currentValue < maxQuantity) {
+                                                    const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
+                                                    if (currentValue < currentAvailable) {
                                                         quantityInput.value = currentValue + 1;
                                                     }
                                                 });
 
                                                 quantityInput.addEventListener('change', function() {
                                                     let currentValue = parseInt(quantityInput.value, 10);
+                                                    const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
                                                     if (isNaN(currentValue) || currentValue < 0) {
                                                         quantityInput.value = 0;
-                                                    } else if (currentValue > maxQuantity) {
-                                                        quantityInput.value = maxQuantity;
+                                                    } else if (currentValue > currentAvailable) {
+                                                        quantityInput.value = currentAvailable;
                                                     }
                                                 });
 
                                                 addToCartBtn.addEventListener('click', function() {
                                                     const quantity = parseInt(quantityInput.value, 10);
                                                     if (quantity > 0) {
-                                                        addItemToSelection(supplyId, supplyName, quantity, maxQuantity);
+                                                        addItemToSelection(supplyId, supplyName, quantity, originalAvailableQuantities[supplyId]);
                                                         quantityInput.value = 0;
                                                     }
                                                 });
                                             }
                                         });
 
-                                        function addItemToSelection(supplyId, supplyName, quantity, maxAvailable) {
+                                        function addItemToSelection(supplyId, supplyName, quantity, maxOriginalQuantity) {
+                                            const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
+                                            const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+
+                                            // Don't allow adding more than what's available
+                                            if (quantity > currentAvailable) {
+                                                quantity = currentAvailable;
+                                            }
+
+                                            if (quantity <= 0) {
+                                                return; // Nothing to add
+                                            }
+
                                             // Check if item already exists in selection
                                             const existingItemIndex = selectedItems.findIndex(item => item.supplyId === supplyId);
 
                                             if (existingItemIndex >= 0) {
                                                 // Update existing item
                                                 const newQuantity = selectedItems[existingItemIndex].quantity + quantity;
-                                                if (newQuantity <= maxAvailable) {
+
+                                                // Ensure we don't exceed original max quantity
+                                                if (newQuantity <= maxOriginalQuantity) {
+                                                    // Update the item quantity
                                                     selectedItems[existingItemIndex].quantity = newQuantity;
+
+                                                    // Update available quantity on the card
+                                                    updateAvailableQuantity(supplyId, -quantity);
                                                 } else {
                                                     // Show notification that max quantity reached
-                                                    alert(`Maximum available quantity (${maxAvailable}) reached for ${supplyName}`);
-                                                    selectedItems[existingItemIndex].quantity = maxAvailable;
+                                                    alert(`Maximum available quantity (${maxOriginalQuantity}) reached for ${supplyName}`);
+
+                                                    // Set to max available
+                                                    const additionalQty = maxOriginalQuantity - selectedItems[existingItemIndex].quantity;
+                                                    if (additionalQty > 0) {
+                                                        selectedItems[existingItemIndex].quantity = maxOriginalQuantity;
+                                                        updateAvailableQuantity(supplyId, -additionalQty);
+                                                    }
                                                 }
                                             } else {
                                                 // Add new item
@@ -779,17 +876,81 @@
                                                     supplyId: supplyId,
                                                     name: supplyName,
                                                     quantity: quantity,
-                                                    maxAvailable: maxAvailable,
+                                                    maxAvailable: maxOriginalQuantity,
                                                     index: itemIndex++
                                                 });
+
+                                                // Update available quantity on the card
+                                                updateAvailableQuantity(supplyId, -quantity);
                                             }
 
                                             updateSelectedItemsList();
                                             updateFormInputs();
                                         }
 
+                                        function updateAvailableQuantity(supplyId, change) {
+                                            const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
+                                            if (!card) return;
+
+                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                            const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+                                            const newAvailable = currentAvailable + change;
+
+                                            // Update data attribute
+                                            card.setAttribute('data-available', newAvailable);
+
+                                            // Update display text
+                                            if (availableSpan) {
+                                                availableSpan.textContent = `${newAvailable} available`;
+
+                                                // Update color based on availability
+                                                availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+
+                                                if (newAvailable > 10) {
+                                                    availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                } else if (newAvailable > 0) {
+                                                    availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                } else {
+                                                    availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                }
+                                            }
+
+                                            // Update max value of quantity input
+                                            const quantityInput = card.querySelector('.quantity-input');
+                                            if (quantityInput) {
+                                                quantityInput.max = newAvailable;
+                                            }
+
+                                            // Enable/disable buttons based on availability
+                                            const minusBtn = card.querySelector('.quantity-btn.minus');
+                                            const plusBtn = card.querySelector('.quantity-btn.plus');
+                                            const addToCartBtn = card.querySelector('.add-to-cart');
+
+                                            if (newAvailable <= 0) {
+                                                if (minusBtn) minusBtn.disabled = true;
+                                                if (plusBtn) plusBtn.disabled = true;
+                                                if (addToCartBtn) addToCartBtn.disabled = true;
+                                                if (quantityInput) quantityInput.disabled = true;
+                                            } else {
+                                                if (minusBtn) minusBtn.disabled = false;
+                                                if (plusBtn) plusBtn.disabled = false;
+                                                if (addToCartBtn) addToCartBtn.disabled = false;
+                                                if (quantityInput) quantityInput.disabled = false;
+                                            }
+                                        }
+
                                         function removeItemFromSelection(index) {
-                                            selectedItems = selectedItems.filter(item => item.index !== index);
+                                            // Find the item to remove
+                                            const itemToRemove = selectedItems.find(item => item.index === index);
+
+                                            if (itemToRemove) {
+                                                // Restore the available quantity
+                                                updateAvailableQuantity(itemToRemove.supplyId, itemToRemove.quantity);
+
+                                                // Remove the item from the selection
+                                                selectedItems = selectedItems.filter(item => item.index !== index);
+                                            }
+
                                             updateSelectedItemsList();
                                             updateFormInputs();
                                         }
@@ -890,12 +1051,23 @@
                                         function editItemQuantity(index, action) {
                                             const itemIndex = selectedItems.findIndex(item => item.index === index);
                                             if (itemIndex >= 0) {
-                                                if (action === 'increase' && selectedItems[itemIndex].quantity < selectedItems[itemIndex]
-                                                    .maxAvailable) {
-                                                    selectedItems[itemIndex].quantity++;
+                                                const card = document.querySelector(`.product-card[data-supply-id="${selectedItems[itemIndex].supplyId}"]`);
+                                                const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+                                                const supplyId = selectedItems[itemIndex].supplyId;
+
+                                                if (action === 'increase') {
+                                                    // Check if we have any available quantity left to add
+                                                    if (currentAvailable > 0) {
+                                                        selectedItems[itemIndex].quantity++;
+                                                        // Update the available quantity display on the card
+                                                        updateAvailableQuantity(supplyId, -1);
+                                                    }
                                                 } else if (action === 'decrease' && selectedItems[itemIndex].quantity > 1) {
                                                     selectedItems[itemIndex].quantity--;
+                                                    // Update the available quantity display on the card
+                                                    updateAvailableQuantity(supplyId, 1);
                                                 }
+
                                                 updateSelectedItemsList();
                                                 updateFormInputs();
                                             }
@@ -922,6 +1094,71 @@
                                                 requestItemsContainer.appendChild(supplyIdInput);
                                                 requestItemsContainer.appendChild(quantityInput);
                                             });
+                                        }
+
+                                        // Function to reset product quantities to original values
+                                        function resetProductQuantities() {
+                                            // Reset selected items array
+                                            selectedItems = [];
+
+                                            // Reset all product cards to original quantities
+                                            productCards.forEach(card => {
+                                                const supplyId = card.getAttribute('data-supply-id');
+                                                const originalQuantity = originalAvailableQuantities[supplyId];
+
+                                                // Reset quantity input
+                                                const quantityInput = card.querySelector('.quantity-input');
+                                                if (quantityInput) {
+                                                    quantityInput.value = 0;
+                                                    quantityInput.max = originalQuantity;
+                                                    quantityInput.disabled = originalQuantity <= 0;
+                                                }
+
+                                                // Reset available quantity display
+                                                card.setAttribute('data-available', originalQuantity);
+                                                const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                                if (availableSpan) {
+                                                    availableSpan.textContent = `${originalQuantity} available`;
+
+                                                    // Update color based on original availability
+                                                    availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+
+                                                    if (originalQuantity > 10) {
+                                                        availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                    } else if (originalQuantity > 0) {
+                                                        availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                    } else {
+                                                        availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                    }
+                                                }
+
+                                                // Enable/disable buttons based on original availability
+                                                const minusBtn = card.querySelector('.quantity-btn.minus');
+                                                const plusBtn = card.querySelector('.quantity-btn.plus');
+                                                const addToCartBtn = card.querySelector('.add-to-cart');
+
+                                                const shouldDisable = originalQuantity <= 0;
+                                                if (minusBtn) minusBtn.disabled = shouldDisable;
+                                                if (plusBtn) plusBtn.disabled = shouldDisable;
+                                                if (addToCartBtn) addToCartBtn.disabled = shouldDisable;
+                                            });
+
+                                            // Update UI
+                                            updateSelectedItemsList();
+                                            updateFormInputs();
+
+                                            // Reset view back to products grid if needed
+                                            if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
+                                                selectedItemsContainer.classList.add('hidden');
+                                                productsGrid.classList.remove('hidden');
+
+                                                // Update the button text
+                                                if (viewCartBtn) {
+                                                    viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                }
+                                            }
                                         }
 
                                         // Add/Remove Item Functionality (original functionality)
@@ -989,6 +1226,7 @@
                                                     const quantityInput = row.querySelector('input[type="number"]');
 
                                                     selectInput.name = `supplies[${index}][supply_id]`;
+                                                    quantityInput.name = `supplies[${index}][quantity]`;
                                                     quantityInput.name = `supplies[${index}][quantity]`;
                                                 });
                                             }
@@ -1588,157 +1826,157 @@
         });
     </script>
 
-<script>
-    function confirmReceive(requisitionId) {
-        // User's signature path for preview if available
-        const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+    <script>
+        function confirmReceive(requisitionId) {
+            // User's signature path for preview if available
+            const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
 
-        // Signature preview HTML - will show if e-signature is selected
-        const signaturePreviewHtml = userSignaturePath ?
-            `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
-                <p class="text-sm mb-1">Your signature will appear as:</p>
-                <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
-            </div>` : '';
+            // Signature preview HTML - will show if e-signature is selected
+            const signaturePreviewHtml = userSignaturePath ?
+                `<div class="mt-3 border rounded p-2 text-center hidden" id="signature-preview-container">
+                    <p class="text-sm mb-1">Your signature will appear as:</p>
+                    <img src="${userSignaturePath}" alt="Your signature" class="max-h-16 mx-auto">
+                </div>` : '';
 
-        Swal.fire({
-            title: 'Confirm Receipt',
-            html: `
-                <div class="text-left mb-4">
-                    <p class="mb-3">Are you sure you want to receive these supplies? This will confirm receipt with your signature.</p>
+            Swal.fire({
+                title: 'Confirm Receipt',
+                html: `
+                    <div class="text-left mb-4">
+                        <p class="mb-3">Are you sure you want to receive these supplies? This will confirm receipt with your signature.</p>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold mb-2">
-                            How would you like to sign this receipt?
-                        </label>
-                        <div class="flex items-center mb-2">
-                            <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
-                            <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold mb-2">
+                                How would you like to sign this receipt?
+                            </label>
+                            <div class="flex items-center mb-2">
+                                <input type="radio" id="swal-esign" name="signature_type" value="esign" class="mr-2" ${!userSignaturePath ? 'disabled' : ''}>
+                                <label for="swal-esign" class="text-sm">Use E-Signature</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                            </div>
+                            ${!userSignaturePath ?
+                                '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
                         </div>
-                        <div class="flex items-center">
-                            <input type="radio" id="swal-sgd" name="signature_type" value="sgd" class="mr-2" checked>
-                            <label for="swal-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+
+                        ${signaturePreviewHtml}
+
+                        <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
+                            <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li>I authorize the use of my electronic signature to confirm receipt.</li>
+                                <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                <li>I confirm I have received all the items as specified in this requisition.</li>
+                            </ul>
+                            <div class="mt-2">
+                                <input type="checkbox" id="agree-terms" class="mr-1">
+                                <label for="agree-terms" class="text-xs">I agree to the above terms</label>
+                            </div>
                         </div>
-                        ${!userSignaturePath ?
-                            '<p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>' : ''}
                     </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10B981', // Green color (Tailwind's green-500)
+                cancelButtonColor: '#6B7280', // Gray color (Tailwind's gray-500)
+                confirmButtonText: 'Yes, receive supplies',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusConfirm: false,
+                width: '28rem',
+                padding: '1rem',
+                customClass: {
+                    confirmButton: 'px-4 py-2 text-sm font-medium rounded-md',
+                    cancelButton: 'px-4 py-2 text-sm font-medium rounded-md'
+                },
+                didRender: () => {
+                    // Disable the confirm button initially if e-signature is selected (terms not agreed)
+                    const confirmButton = Swal.getConfirmButton();
+                    const agreeTerms = document.getElementById('agree-terms');
+                    const esignRadio = document.getElementById('swal-esign');
+                    const sgdRadio = document.getElementById('swal-sgd');
+                    const termsDiv = document.getElementById('esign-terms');
+                    const signaturePreview = document.getElementById('signature-preview-container');
 
-                    ${signaturePreviewHtml}
+                    // Function to toggle the confirm button state based on selections
+                    const updateConfirmButtonState = () => {
+                        if (esignRadio.checked && !agreeTerms.checked) {
+                            confirmButton.disabled = true;
+                            confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            confirmButton.disabled = false;
+                            confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    };
 
-                    <div id="esign-terms" class="hidden bg-gray-100 p-3 rounded text-xs mt-3">
-                        <p class="font-bold mb-1">E-Signature Terms and Conditions:</p>
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li>I authorize the use of my electronic signature to confirm receipt.</li>
-                            <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
-                            <li>I confirm I have received all the items as specified in this requisition.</li>
-                        </ul>
-                        <div class="mt-2">
-                            <input type="checkbox" id="agree-terms" class="mr-1">
-                            <label for="agree-terms" class="text-xs">I agree to the above terms</label>
-                        </div>
-                    </div>
-                </div>
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#10B981', // Green color (Tailwind's green-500)
-            cancelButtonColor: '#6B7280', // Gray color (Tailwind's gray-500)
-            confirmButtonText: 'Yes, receive supplies',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true,
-            focusConfirm: false,
-            width: '28rem',
-            padding: '1rem',
-            customClass: {
-                confirmButton: 'px-4 py-2 text-sm font-medium rounded-md',
-                cancelButton: 'px-4 py-2 text-sm font-medium rounded-md'
-            },
-            didRender: () => {
-                // Disable the confirm button initially if e-signature is selected (terms not agreed)
-                const confirmButton = Swal.getConfirmButton();
-                const agreeTerms = document.getElementById('agree-terms');
-                const esignRadio = document.getElementById('swal-esign');
-                const sgdRadio = document.getElementById('swal-sgd');
-                const termsDiv = document.getElementById('esign-terms');
-                const signaturePreview = document.getElementById('signature-preview-container');
+                    // Add event listeners
+                    esignRadio.addEventListener('change', function() {
+                        if (this.checked) {
+                            termsDiv.classList.remove('hidden');
+                            if (signaturePreview) signaturePreview.classList.remove('hidden');
+                            updateConfirmButtonState();
+                        }
+                    });
 
-                // Function to toggle the confirm button state based on selections
-                const updateConfirmButtonState = () => {
-                    if (esignRadio.checked && !agreeTerms.checked) {
-                        confirmButton.disabled = true;
-                        confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        confirmButton.disabled = false;
-                        confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    sgdRadio.addEventListener('change', function() {
+                        if (this.checked) {
+                            termsDiv.classList.add('hidden');
+                            if (signaturePreview) signaturePreview.classList.add('hidden');
+                            updateConfirmButtonState();
+                        }
+                    });
+
+                    if (agreeTerms) {
+                        agreeTerms.addEventListener('change', updateConfirmButtonState);
                     }
-                };
 
-                // Add event listeners
-                esignRadio.addEventListener('change', function() {
-                    if (this.checked) {
-                        termsDiv.classList.remove('hidden');
-                        if (signaturePreview) signaturePreview.classList.remove('hidden');
-                        updateConfirmButtonState();
+                    // Initialize state
+                    updateConfirmButtonState();
+                },
+                preConfirm: () => {
+                    const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+
+                    // If e-signature selected, check if terms are agreed to
+                    if (signatureType === 'esign') {
+                        const termsAgreed = document.getElementById('agree-terms').checked;
+                        if (!termsAgreed) {
+                            Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                            return false;
+                        }
                     }
-                });
 
-                sgdRadio.addEventListener('change', function() {
-                    if (this.checked) {
-                        termsDiv.classList.add('hidden');
-                        if (signaturePreview) signaturePreview.classList.add('hidden');
-                        updateConfirmButtonState();
-                    }
-                });
-
-                if (agreeTerms) {
-                    agreeTerms.addEventListener('change', updateConfirmButtonState);
+                    return signatureType;
                 }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Get the form
+                    const form = document.getElementById('receive-form-' + requisitionId);
 
-                // Initialize state
-                updateConfirmButtonState();
-            },
-            preConfirm: () => {
-                const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+                    // Add signature type as hidden field
+                    let signatureInput = document.createElement('input');
+                    signatureInput.type = 'hidden';
+                    signatureInput.name = 'signature_type';
+                    signatureInput.value = result.value;
+                    form.appendChild(signatureInput);
 
-                // If e-signature selected, check if terms are agreed to
-                if (signatureType === 'esign') {
-                    const termsAgreed = document.getElementById('agree-terms').checked;
-                    if (!termsAgreed) {
-                        Swal.showValidationMessage('You must agree to the terms to use e-signature');
-                        return false;
-                    }
+                    // Submit the form
+                    form.submit();
+
+                    // Show loading state while processing
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Confirming receipt of supplies',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                 }
-
-                return signatureType;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Get the form
-                const form = document.getElementById('receive-form-' + requisitionId);
-
-                // Add signature type as hidden field
-                let signatureInput = document.createElement('input');
-                signatureInput.type = 'hidden';
-                signatureInput.name = 'signature_type';
-                signatureInput.value = result.value;
-                form.appendChild(signatureInput);
-
-                // Submit the form
-                form.submit();
-
-                // Show loading state while processing
-                Swal.fire({
-                    title: 'Processing...',
-                    text: 'Confirming receipt of supplies',
-                    icon: 'info',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            }
-        });
-    }
-</script>
+            });
+        }
+    </script>
 
 </x-app-layout>
