@@ -31,7 +31,7 @@ class RisSlipController extends Controller
                 ->orWhereHas('requester', function($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%");
                 })
-                  ->orWhereHas('department', function($subQuery) use ($search) {
+                    ->orWhereHas('department', function($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%");
                 });
             });
@@ -57,6 +57,7 @@ class RisSlipController extends Controller
             'supplies' => 'required|array',
             'supplies.*.supply_id' => 'required|exists:supplies,supply_id',
             'supplies.*.quantity' => 'required|integer|min:1',
+            'signature_type' => 'required|in:esign,sgd', // Add this validation
         ]);
 
         // Generate RIS number using the service
@@ -74,6 +75,7 @@ class RisSlipController extends Controller
                 'fund_cluster' => $validated['fund_cluster'],
                 'responsibility_center_code' => $validated['responsibility_center_code'],
                 'requested_by' => Auth::id(),
+                'requester_signature_type' => $validated['signature_type'], // Add this field
                 'purpose' => $validated['purpose'],
                 'status' => 'draft',
             ]);
@@ -94,7 +96,7 @@ class RisSlipController extends Controller
             }
 
             return redirect()->back()
-                             ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
+                            ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
         });
     }
 
@@ -130,15 +132,17 @@ class RisSlipController extends Controller
             return back()->with('error', 'This RIS cannot be approved.');
         }
 
-        // Validate the fund cluster
+        // Validate the fund cluster and signature type
         $validated = $request->validate([
             'fund_cluster' => 'nullable|string',
+            'signature_type' => 'required|in:esign,sgd', // Add this validation
         ]);
 
         $risSlip->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
+            'approver_signature_type' => $validated['signature_type'], // Add this field
             'fund_cluster' => $validated['fund_cluster'] ?? $risSlip->fund_cluster,
         ]);
 
@@ -151,12 +155,14 @@ class RisSlipController extends Controller
             return back()->with('error', 'This RIS cannot be issued.');
         }
 
-        // Validate the quantities and remarks
+        // Validate the quantities, remarks, and signature type
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:ris_items,item_id',
             'items.*.quantity_issued' => 'required|integer|min:0',
             'items.*.remarks' => 'nullable|string',
+            'received_by' => 'nullable|exists:users,id',
+            'signature_type' => 'required|in:esign,sgd', // Add this validation
         ]);
 
         return DB::transaction(function() use ($validated, $risSlip, $request) {
@@ -250,11 +256,12 @@ class RisSlipController extends Controller
                 }
             }
 
-            // Update the RIS status without setting received_at
+            // Update the RIS status
             $risSlip->update([
                 'status' => 'posted',
                 'issued_by' => Auth::id(),
                 'issued_at' => now(),
+                'issuer_signature_type' => $validated['signature_type'], // Add this field
                 'received_by' => $request->received_by ?? null,
             ]);
 
@@ -263,8 +270,13 @@ class RisSlipController extends Controller
         });
     }
 
-    public function receive(RisSlip $risSlip)
+    public function receive(Request $request, RisSlip $risSlip)
     {
+        // Validate the signature type
+        $validated = $request->validate([
+            'signature_type' => 'required|in:esign,sgd', // Add this validation
+        ]);
+
         // Check if the current user is the one assigned to receive
         if ($risSlip->received_by !== auth()->id()) {
             return back()->with('error', 'You are not authorized to receive this RIS.');
@@ -280,9 +292,10 @@ class RisSlipController extends Controller
             return back()->with('error', 'This RIS has not been issued yet.');
         }
 
-        // Update the received timestamp
+        // Update the received timestamp with signature type
         $risSlip->update([
             'received_at' => now(),
+            'receiver_signature_type' => $validated['signature_type'], // Add this field
         ]);
 
         return back()->with('success', 'Supplies received successfully.');

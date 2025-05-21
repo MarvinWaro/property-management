@@ -11,6 +11,15 @@
         </div>
     </x-slot>
 
+    {{-- <div style="background: #f9f9f9; padding: 10px; margin-top: 20px; font-size: 12px;">
+        <p>Debug Info (remove in production):</p>
+        <ul>
+            <li>Requester Signature Type: {{ $risSlip->requester_signature_type ?? 'null' }}</li>
+            <li>Requester Has Signature: {{ $risSlip->requester && $risSlip->requester->signature_path ? 'Yes' : 'No' }}</li>
+            <li>Signature Path: {{ $risSlip->requester && $risSlip->requester->signature_path ? $risSlip->requester->signature_path : 'No path' }}</li>
+        </ul>
+    </div> --}}
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
@@ -61,7 +70,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            <form action="{{ route('ris.approve', $risSlip) }}" method="POST">
+                            <form action="{{ route('ris.approve', $risSlip) }}" method="POST" id="approveForm">
                                 @csrf
                                 <div class="p-6">
                                     <div class="mb-4">
@@ -71,18 +80,118 @@
                                             <option value="151" {{ $risSlip->fund_cluster == "151" ? 'selected' : '' }}>151</option>
                                         </select>
                                     </div>
+
+                                    <!-- Add signature type selection -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Signature Type</label>
+                                        <div class="flex items-center mb-2">
+                                            <input type="radio" id="approve-esign" name="signature_type" value="esign" class="mr-2" {{ auth()->user()->signature_path ? '' : 'disabled' }}>
+                                            <label for="approve-esign" class="text-sm">Use E-Signature</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="approve-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                            <label for="approve-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                                        </div>
+                                        @if(!auth()->user()->signature_path)
+                                            <p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Signature preview -->
+                                    @if(auth()->user()->signature_path)
+                                    <div id="approve-signature-preview" class="mb-4 p-2 border rounded text-center hidden">
+                                        <p class="text-sm mb-1">Your signature will appear as:</p>
+                                        <img src="{{ Storage::url(auth()->user()->signature_path) }}" alt="Your signature" class="max-h-16 mx-auto">
+                                    </div>
+                                    @endif
+
+                                    <!-- Terms and conditions for e-signature -->
+                                    <div id="approve-esign-terms" class="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs mt-3 mb-4 hidden">
+                                        <p class="font-bold mb-1 text-gray-900 dark:text-white">E-Signature Terms and Conditions:</p>
+                                        <ul class="list-disc pl-4 space-y-1 text-gray-700 dark:text-gray-300">
+                                            <li>I authorize the use of my electronic signature for this approval.</li>
+                                            <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                            <li>I confirm I have reviewed this requisition and approve it.</li>
+                                        </ul>
+                                        <div class="mt-2">
+                                            <input type="checkbox" id="approve-agree-terms" class="mr-1">
+                                            <label for="approve-agree-terms" class="text-xs text-gray-800 dark:text-gray-200">I agree to the above terms</label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                                     <button type="button" id="cancelApprove" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
                                         Cancel
                                     </button>
-                                    <button type="submit" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <button type="submit" id="submitApproveBtn" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                         Approve Request
                                     </button>
                                 </div>
                             </form>
                         </div>
                     </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Approve form validation
+                            const approveForm = document.getElementById('approveForm');
+                            const approveEsignRadio = document.getElementById('approve-esign');
+                            const approveSgdRadio = document.getElementById('approve-sgd');
+                            const approveTermsCheckbox = document.getElementById('approve-agree-terms');
+                            const approveTermsDiv = document.getElementById('approve-esign-terms');
+                            const approveSignaturePreview = document.getElementById('approve-signature-preview');
+                            const submitApproveBtn = document.getElementById('submitApproveBtn');
+
+                            // Function to toggle submit button state
+                            function updateApproveSubmitButton() {
+                                if (approveEsignRadio.checked && !approveTermsCheckbox.checked) {
+                                    submitApproveBtn.disabled = true;
+                                    submitApproveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                } else {
+                                    submitApproveBtn.disabled = false;
+                                    submitApproveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                }
+                            }
+
+                            // Add event listeners
+                            if (approveEsignRadio) {
+                                approveEsignRadio.addEventListener('change', function() {
+                                    if (this.checked) {
+                                        approveTermsDiv.classList.remove('hidden');
+                                        if (approveSignaturePreview) approveSignaturePreview.classList.remove('hidden');
+                                        updateApproveSubmitButton();
+                                    }
+                                });
+                            }
+
+                            if (approveSgdRadio) {
+                                approveSgdRadio.addEventListener('change', function() {
+                                    if (this.checked) {
+                                        approveTermsDiv.classList.add('hidden');
+                                        if (approveSignaturePreview) approveSignaturePreview.classList.add('hidden');
+                                        updateApproveSubmitButton();
+                                    }
+                                });
+                            }
+
+                            if (approveTermsCheckbox) {
+                                approveTermsCheckbox.addEventListener('change', updateApproveSubmitButton);
+                            }
+
+                            // Handle form submission
+                            if (approveForm) {
+                                approveForm.addEventListener('submit', function(e) {
+                                    if (approveEsignRadio.checked && !approveTermsCheckbox.checked) {
+                                        e.preventDefault();
+                                        alert('You must agree to the terms to use e-signature');
+                                    }
+                                });
+                            }
+
+                            // Initialize button state
+                            updateApproveSubmitButton();
+                        });
+                    </script>
                 @endif
 
                 <div class="p-6">
@@ -184,17 +293,21 @@
                         </div>
                     </div>
 
-                    <!-- Signatures -->
+                    <!-- Signatures Section -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Requested By:</p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->requester && $risSlip->requester->signature_path)
+                                @if($risSlip->requester && $risSlip->requester_signature_type == 'esign' && $risSlip->requester->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->requester->signature_path) }}"
                                             alt="Requester signature"
                                             class="max-h-16 mx-auto"
                                             style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @elseif($risSlip->requester)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <p class="italic font-bold">SGD</p>
                                     </div>
                                 @endif
                             </div>
@@ -207,12 +320,16 @@
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved By:</p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->approved_by && $risSlip->approver && $risSlip->approver->signature_path)
+                                @if($risSlip->approved_by && $risSlip->approver_signature_type == 'esign' && $risSlip->approver && $risSlip->approver->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->approver->signature_path) }}"
                                             alt="Approver signature"
                                             class="max-h-16 mx-auto"
                                             style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @elseif($risSlip->approved_by)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <p class="italic font-bold">SGD</p>
                                     </div>
                                 @endif
                             </div>
@@ -229,12 +346,16 @@
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Issued By:</p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->issued_by && $risSlip->issuer && $risSlip->issuer->signature_path)
+                                @if($risSlip->issued_by && $risSlip->issuer_signature_type == 'esign' && $risSlip->issuer && $risSlip->issuer->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->issuer->signature_path) }}"
                                             alt="Issuer signature"
                                             class="max-h-16 mx-auto"
                                             style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @elseif($risSlip->issued_by)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <p class="italic font-bold">SGD</p>
                                     </div>
                                 @endif
                             </div>
@@ -248,16 +369,19 @@
                             @endif
                         </div>
 
-                        <!-- Replace the entire "Received By" div with this: -->
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Received By:</p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->received_by && $risSlip->received_at && $risSlip->receiver && $risSlip->receiver->signature_path)
+                                @if($risSlip->received_by && $risSlip->received_at && $risSlip->receiver_signature_type == 'esign' && $risSlip->receiver && $risSlip->receiver->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->receiver->signature_path) }}"
                                             alt="Receiver signature"
                                             class="max-h-16 mx-auto"
                                             style="mix-blend-mode: multiply; filter: contrast(1.2); opacity: 0.9;">
+                                    </div>
+                                @elseif($risSlip->received_by && $risSlip->received_at)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <p class="italic font-bold">SGD</p>
                                     </div>
                                 @endif
                             </div>
@@ -275,6 +399,122 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Add this to the show.blade.php where appropriate -->
+                    @if(auth()->id() === $risSlip->received_by && !$risSlip->received_at && $risSlip->status === 'posted')
+                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Confirm Receipt of Supplies</h3>
+                            <p class="text-sm text-blue-700 dark:text-blue-400 mb-3">
+                                These supplies have been issued to you. Please confirm receipt.
+                            </p>
+
+                            <form action="{{ route('ris.receive', $risSlip) }}" method="POST" id="receiveForm" class="mt-2">
+                                @csrf
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Signature Type</label>
+                                    <div class="flex items-center mb-2">
+                                        <input type="radio" id="receive-esign" name="signature_type" value="esign" class="mr-2" {{ auth()->user()->signature_path ? '' : 'disabled' }}>
+                                        <label for="receive-esign" class="text-sm">Use E-Signature</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="receive-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                        <label for="receive-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                                    </div>
+                                    @if(!auth()->user()->signature_path)
+                                        <p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>
+                                    @endif
+                                </div>
+
+                                <!-- Signature preview -->
+                                @if(auth()->user()->signature_path)
+                                <div id="receive-signature-preview" class="mb-3 p-2 border rounded text-center hidden">
+                                    <p class="text-sm mb-1">Your signature will appear as:</p>
+                                    <img src="{{ Storage::url(auth()->user()->signature_path) }}" alt="Your signature" class="max-h-16 mx-auto">
+                                </div>
+                                @endif
+
+                                <!-- Terms and conditions for e-signature -->
+                                <div id="receive-esign-terms" class="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs mb-3 hidden">
+                                    <p class="font-bold mb-1 text-gray-900 dark:text-white">E-Signature Terms and Conditions:</p>
+                                    <ul class="list-disc pl-4 space-y-1 text-gray-700 dark:text-gray-300">
+                                        <li>I authorize the use of my electronic signature to confirm receipt.</li>
+                                        <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                        <li>I confirm I have received all the items as specified.</li>
+                                    </ul>
+                                    <div class="mt-2">
+                                        <input type="checkbox" id="receive-agree-terms" class="mr-1">
+                                        <label for="receive-agree-terms" class="text-xs text-gray-800 dark:text-gray-200">I agree to the above terms</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="submitReceiveBtn" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    Confirm Receipt
+                                </button>
+                            </form>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Receive form validation
+                                const receiveForm = document.getElementById('receiveForm');
+                                const receiveEsignRadio = document.getElementById('receive-esign');
+                                const receiveSgdRadio = document.getElementById('receive-sgd');
+                                const receiveTermsCheckbox = document.getElementById('receive-agree-terms');
+                                const receiveTermsDiv = document.getElementById('receive-esign-terms');
+                                const receiveSignaturePreview = document.getElementById('receive-signature-preview');
+                                const submitReceiveBtn = document.getElementById('submitReceiveBtn');
+
+                                // Function to toggle submit button state
+                                function updateReceiveSubmitButton() {
+                                    if (receiveEsignRadio.checked && !receiveTermsCheckbox.checked) {
+                                        submitReceiveBtn.disabled = true;
+                                        submitReceiveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                    } else {
+                                        submitReceiveBtn.disabled = false;
+                                        submitReceiveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                    }
+                                }
+
+                                // Add event listeners
+                                if (receiveEsignRadio) {
+                                    receiveEsignRadio.addEventListener('change', function() {
+                                        if (this.checked) {
+                                            receiveTermsDiv.classList.remove('hidden');
+                                            if (receiveSignaturePreview) receiveSignaturePreview.classList.remove('hidden');
+                                            updateReceiveSubmitButton();
+                                        }
+                                    });
+                                }
+
+                                if (receiveSgdRadio) {
+                                    receiveSgdRadio.addEventListener('change', function() {
+                                        if (this.checked) {
+                                            receiveTermsDiv.classList.add('hidden');
+                                            if (receiveSignaturePreview) receiveSignaturePreview.classList.add('hidden');
+                                            updateReceiveSubmitButton();
+                                        }
+                                    });
+                                }
+
+                                if (receiveTermsCheckbox) {
+                                    receiveTermsCheckbox.addEventListener('change', updateReceiveSubmitButton);
+                                }
+
+                                // Handle form submission
+                                if (receiveForm) {
+                                    receiveForm.addEventListener('submit', function(e) {
+                                        if (receiveEsignRadio.checked && !receiveTermsCheckbox.checked) {
+                                            e.preventDefault();
+                                            alert('You must agree to the terms to use e-signature');
+                                        }
+                                    });
+                                }
+
+                                // Initialize button state
+                                updateReceiveSubmitButton();
+                            });
+                        </script>
+                    @endif
                 </div>
             </div>
         </div>
@@ -295,7 +535,7 @@
                     </button>
                 </div>
 
-                <form action="{{ route('ris.issue', $risSlip) }}" method="POST">
+                <form action="{{ route('ris.issue', $risSlip) }}" method="POST" id="issueForm">
                     @csrf
                     <div class="p-6">
                         <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
@@ -379,19 +619,135 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Add signature type selection -->
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Signature Type</label>
+                            <div class="flex items-center mb-2">
+                                <input type="radio" id="issue-esign" name="signature_type" value="esign" class="mr-2" {{ auth()->user()->signature_path ? '' : 'disabled' }}>
+                                <label for="issue-esign" class="text-sm">Use E-Signature</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="issue-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                <label for="issue-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
+                            </div>
+                            @if(!auth()->user()->signature_path)
+                                <p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>
+                            @endif
+                        </div>
+
+                        <!-- Signature preview -->
+                        @if(auth()->user()->signature_path)
+                        <div id="issue-signature-preview" class="mt-3 p-2 border rounded text-center hidden">
+                            <p class="text-sm mb-1">Your signature will appear as:</p>
+                            <img src="{{ Storage::url(auth()->user()->signature_path) }}" alt="Your signature" class="max-h-16 mx-auto">
+                        </div>
+                        @endif
+
+                        <!-- Terms and conditions for e-signature -->
+                        <div id="issue-esign-terms" class="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs mt-3 hidden">
+                            <p class="font-bold mb-1 text-gray-900 dark:text-white">E-Signature Terms and Conditions:</p>
+                            <ul class="list-disc pl-4 space-y-1 text-gray-700 dark:text-gray-300">
+                                <li>I authorize the use of my electronic signature for this issuance.</li>
+                                <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
+                                <li>I confirm I have verified the quantities being issued.</li>
+                            </ul>
+                            <div class="mt-2">
+                                <input type="checkbox" id="issue-agree-terms" class="mr-1">
+                                <label for="issue-agree-terms" class="text-xs text-gray-800 dark:text-gray-200">I agree to the above terms</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                         <button type="button" id="cancelIssue" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <button type="submit" id="submitIssueBtn" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             Process Issuance
                         </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Issue modal controls
+                const issueModal = document.getElementById('issueModal');
+                const openIssueBtn = document.getElementById('openIssueModal');
+                const closeIssueBtn = document.getElementById('closeIssueModal');
+                const cancelIssueBtn = document.getElementById('cancelIssue');
+
+                if (openIssueBtn) {
+                    openIssueBtn.addEventListener('click', function() {
+                        issueModal.classList.remove('hidden');
+                    });
+                }
+
+                const hideIssueModal = () => issueModal.classList.add('hidden');
+                closeIssueBtn?.addEventListener('click', hideIssueModal);
+                cancelIssueBtn?.addEventListener('click', hideIssueModal);
+
+                // Issue form validation
+                const issueForm = document.getElementById('issueForm');
+                const issueEsignRadio = document.getElementById('issue-esign');
+                const issueSgdRadio = document.getElementById('issue-sgd');
+                const issueTermsCheckbox = document.getElementById('issue-agree-terms');
+                const issueTermsDiv = document.getElementById('issue-esign-terms');
+                const issueSignaturePreview = document.getElementById('issue-signature-preview');
+                const submitIssueBtn = document.getElementById('submitIssueBtn');
+
+                // Function to toggle submit button state
+                function updateIssueSubmitButton() {
+                    if (issueEsignRadio.checked && !issueTermsCheckbox.checked) {
+                        submitIssueBtn.disabled = true;
+                        submitIssueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        submitIssueBtn.disabled = false;
+                        submitIssueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+
+                // Add event listeners
+                if (issueEsignRadio) {
+                    issueEsignRadio.addEventListener('change', function() {
+                        if (this.checked) {
+                            issueTermsDiv.classList.remove('hidden');
+                            if (issueSignaturePreview) issueSignaturePreview.classList.remove('hidden');
+                            updateIssueSubmitButton();
+                        }
+                    });
+                }
+
+                if (issueSgdRadio) {
+                    issueSgdRadio.addEventListener('change', function() {
+                        if (this.checked) {
+                            issueTermsDiv.classList.add('hidden');
+                            if (issueSignaturePreview) issueSignaturePreview.classList.add('hidden');
+                            updateIssueSubmitButton();
+                        }
+                    });
+                }
+
+                if (issueTermsCheckbox) {
+                    issueTermsCheckbox.addEventListener('change', updateIssueSubmitButton);
+                }
+
+                // Handle form submission
+                if (issueForm) {
+                    issueForm.addEventListener('submit', function(e) {
+                        if (issueEsignRadio.checked && !issueTermsCheckbox.checked) {
+                            e.preventDefault();
+                            alert('You must agree to the terms to use e-signature');
+                        }
+                    });
+                }
+
+                // Initialize button state
+                updateIssueSubmitButton();
+            });
+        </script>
     @endif
 
 

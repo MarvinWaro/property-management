@@ -231,41 +231,49 @@
             <tr>
                 <td>
                     <div style="height: 60px; position: relative;">
-                        @if($risSlip->requester && $risSlip->requester->signature_path)
+                        @if($risSlip->requester && $risSlip->requester_signature_type == 'esign' && $risSlip->requester->signature_path)
                             <img src="{{ Storage::url($risSlip->requester->signature_path) }}"
                                 alt="Requester signature"
                                 class="signature-image"
                                 style="position: absolute; bottom: 0;">
+                        @elseif($risSlip->requester)
+                            <div style="position: absolute; bottom: 0; font-style: italic; font-weight: bold;">SGD</div>
                         @endif
                     </div>
                 </td>
                 <td>
                     <div style="height: 60px; position: relative;">
-                        @if($risSlip->approved_by && $risSlip->approver && $risSlip->approver->signature_path)
+                        @if($risSlip->approved_by && $risSlip->approver_signature_type == 'esign' && $risSlip->approver && $risSlip->approver->signature_path)
                             <img src="{{ Storage::url($risSlip->approver->signature_path) }}"
                                 alt="Approver signature"
                                 class="signature-image"
                                 style="position: absolute; bottom: 0;">
+                        @elseif($risSlip->approved_by)
+                            <div style="position: absolute; bottom: 0; font-style: italic; font-weight: bold;">SGD</div>
                         @endif
                     </div>
                 </td>
                 <td>
                     <div style="height: 60px; position: relative;">
-                        @if($risSlip->issued_by && $risSlip->issuer && $risSlip->issuer->signature_path)
+                        @if($risSlip->issued_by && $risSlip->issuer_signature_type == 'esign' && $risSlip->issuer && $risSlip->issuer->signature_path)
                             <img src="{{ Storage::url($risSlip->issuer->signature_path) }}"
                                 alt="Issuer signature"
                                 class="signature-image"
                                 style="position: absolute; bottom: 0;">
+                        @elseif($risSlip->issued_by)
+                            <div style="position: absolute; bottom: 0; font-style: italic; font-weight: bold;">SGD</div>
                         @endif
                     </div>
                 </td>
                 <td>
                     <div style="height: 60px; position: relative;">
-                        @if($risSlip->received_at && $risSlip->receiver && $risSlip->receiver->signature_path)
+                        @if($risSlip->received_at && $risSlip->receiver_signature_type == 'esign' && $risSlip->receiver && $risSlip->receiver->signature_path)
                             <img src="{{ Storage::url($risSlip->receiver->signature_path) }}"
                                 alt="Receiver signature"
                                 class="signature-image"
                                 style="position: absolute; bottom: 0;">
+                        @elseif($risSlip->received_at)
+                            <div style="position: absolute; bottom: 0; font-style: italic; font-weight: bold;">SGD</div>
                         @endif
                     </div>
                 </td>
