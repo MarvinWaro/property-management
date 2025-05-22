@@ -57,47 +57,67 @@ class RisSlipController extends Controller
             'supplies' => 'required|array',
             'supplies.*.supply_id' => 'required|exists:supplies,supply_id',
             'supplies.*.quantity' => 'required|integer|min:1',
-            'signature_type' => 'required|in:esign,sgd', // Add this validation
+            'signature_type' => 'required|in:esign,sgd',
         ]);
 
-        // Generate RIS number using the service
-        $newRisNumber = $referenceNumberService->generateRisNumber();
+        $maxAttempts = 5;
+        $attempt = 0;
 
-        // Begin transaction
-        return DB::transaction(function() use ($validated, $newRisNumber) {
-            // Create RIS Slip
-            $risSlip = RisSlip::create([
-                'ris_no' => $newRisNumber,
-                'ris_date' => now(),
-                'entity_name' => $validated['entity_name'],
-                'division' => $validated['division'],
-                'office' => $validated['office'],
-                'fund_cluster' => $validated['fund_cluster'],
-                'responsibility_center_code' => $validated['responsibility_center_code'],
-                'requested_by' => Auth::id(),
-                'requester_signature_type' => $validated['signature_type'], // Add this field
-                'purpose' => $validated['purpose'],
-                'status' => 'draft',
-            ]);
+        do {
+            $attempt++;
+            // Generate a new RIS number each attempt
+            $newRisNumber = $referenceNumberService->generateRisNumber();
 
-            // Create RIS Items
-            foreach ($validated['supplies'] as $item) {
-                // Check availability across all fund clusters
-                $stockAvailable = SupplyStock::where('supply_id', $item['supply_id'])
-                    ->where('status', 'available')
-                    ->sum('quantity_on_hand') >= $item['quantity'];
+            try {
+                // Begin transaction
+                return DB::transaction(function() use ($validated, $newRisNumber) {
+                    // Check again to avoid any duplicate number
+                    if (\App\Models\RisSlip::where('ris_no', $newRisNumber)->exists()) {
+                        throw new \Exception("RIS number already exists, retrying...");
+                    }
 
-                RisItem::create([
-                    'ris_id' => $risSlip->ris_id,
-                    'supply_id' => $item['supply_id'],
-                    'quantity_requested' => $item['quantity'],
-                    'stock_available' => $stockAvailable,
-                ]);
+                    // Create RIS Slip
+                    $risSlip = \App\Models\RisSlip::create([
+                        'ris_no' => $newRisNumber,
+                        'ris_date' => now(),
+                        'entity_name' => $validated['entity_name'],
+                        'division' => $validated['division'],
+                        'office' => $validated['office'],
+                        'fund_cluster' => $validated['fund_cluster'],
+                        'responsibility_center_code' => $validated['responsibility_center_code'],
+                        'requested_by' => Auth::id(),
+                        'requester_signature_type' => $validated['signature_type'],
+                        'purpose' => $validated['purpose'],
+                        'status' => 'draft',
+                    ]);
+
+                    // Create RIS Items
+                    foreach ($validated['supplies'] as $item) {
+                        $stockAvailable = \App\Models\SupplyStock::where('supply_id', $item['supply_id'])
+                            ->where('status', 'available')
+                            ->sum('quantity_on_hand') >= $item['quantity'];
+
+                        \App\Models\RisItem::create([
+                            'ris_id' => $risSlip->ris_id,
+                            'supply_id' => $item['supply_id'],
+                            'quantity_requested' => $item['quantity'],
+                            'stock_available' => $stockAvailable,
+                        ]);
+                    }
+
+                    return redirect()->back()
+                        ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
+                });
+            } catch (\Exception $e) {
+                // Retry only for RIS number conflict
+                if ($attempt >= $maxAttempts || strpos($e->getMessage(), 'retrying') === false) {
+                    throw $e;
+                }
+                usleep(150000); // 0.15s sleep before retry
             }
+        } while ($attempt < $maxAttempts);
 
-            return redirect()->back()
-                            ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
-        });
+        return redirect()->back()->with('error', 'Failed to generate unique RIS number after several attempts.');
     }
 
     /**

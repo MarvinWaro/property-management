@@ -133,14 +133,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-        // End Users
-        // Route::get('/end_users', [EndUserController::class, 'index'])->name('end_users.index');
-        // Route::get('/end_users/create', [EndUserController::class, 'create'])->name('end_users.create');
-        // Route::post('/end_users', [EndUserController::class, 'store'])->name('end_users.store');
-        // Route::get('/end_users/{hashedId}/edit', [EndUserController::class, 'edit'])->name('end_users.edit');
-        // Route::put('/end_users/{endUser}', [EndUserController::class, 'update'])->name('end_users.update');
-        // Route::delete('/end_users/{endUser}', [EndUserController::class, 'destroy'])->name('end_users.destroy');
-
         // Location
         Route::get('/location', [LocationController::class, 'index'])->name('location.index');
         Route::get('/location/create', [LocationController::class, 'create'])->name('location.create');
