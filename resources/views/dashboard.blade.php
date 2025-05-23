@@ -1380,7 +1380,7 @@
                                         <div class="mb-4">
                                             <label for="department_id"
                                                 class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Department <span class="text-red-500">*</span>
+                                                Division <span class="text-red-500">*</span>
                                             </label>
                                             <div class="relative">
                                                 <div
@@ -1399,7 +1399,7 @@
                                                         dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                         dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                     required>
-                                                    <option value="" disabled selected>Select department</option>
+                                                    <option value="" disabled selected>Select division</option>
                                                     @foreach ($departments as $dept)
                                                         <option value="{{ $dept->id }}">{{ $dept->name }}
                                                         </option>

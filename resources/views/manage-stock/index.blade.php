@@ -471,31 +471,79 @@
                                                     Supply Information
                                                 </h4>
 
-                                                <!-- Supply Selection -->
+                                                <!-- Supply Selection with Search -->
                                                 <div class="mb-4">
-                                                    <label for="supply_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    <label for="supply_search" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                                         Supply Item <span class="text-red-500">*</span>
                                                     </label>
+
+                                                    <!-- Searchable Dropdown -->
                                                     <div class="relative">
-                                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-                                                            </svg>
+                                                        <!-- Search Input -->
+                                                        <div class="relative">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <input type="text" id="supply_search"
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                                placeholder="Search Supplies."
+                                                                autocomplete="off">
+
+                                                            <!-- Clear button -->
+                                                            <button type="button" id="clear_supply_search"
+                                                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-red-500 focus:outline-none hidden">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                                                                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                                                                </svg>
+                                                            </button>
                                                         </div>
-                                                        <select name="supply_id" id="supply_id" required
-                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                            dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                            dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                            <option value="">Select a supply</option>
+
+                                                        <!-- Dropdown List -->
+                                                        <div id="supply_dropdown"
+                                                            class="absolute z-10 w-full mt-1 max-h-60 overflow-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg hidden">
+                                                            <ul id="supply_list" class="py-1 text-sm text-gray-700 dark:text-gray-200">
+                                                                <!-- Dropdown items will be dynamically populated -->
+                                                            </ul>
+                                                        </div>
+
+                                                        <!-- Hidden select for form submission -->
+                                                        <select id="supply_id" name="supply_id" class="hidden">
+                                                            <option selected disabled value="">Select a supply</option>
                                                             @foreach ($supplies as $s)
-                                                                <option value="{{ $s->supply_id }}" data-cost="{{ $s->acquisition_cost }}"
-                                                                    {{ old('supply_id') == $s->supply_id ? 'selected' : '' }}>
-                                                                    {{ $s->item_name }} ({{ $s->stock_no }})
+                                                                <option value="{{ $s->supply_id }}"
+                                                                        data-name="{{ $s->item_name }}"
+                                                                        data-description="{{ $s->description }}"
+                                                                        data-stock-no="{{ $s->stock_no }}"
+                                                                        {{ old('supply_id') == $s->supply_id ? 'selected' : '' }}>
+                                                                    {{ $s->item_name }} — {{ Str::limit($s->description, 60) }} ({{ $s->stock_no }})
                                                                 </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
+
+                                                    <!-- Selected Supply Display -->
+                                                    <div id="selected_supply" class="mt-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-blue-50 dark:bg-gray-700 hidden">
+                                                        <div class="flex justify-between">
+                                                            <div>
+                                                                <p id="selected_supply_name" class="font-medium text-gray-900 dark:text-white"></p>
+                                                                <p id="selected_supply_desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+                                                                <p id="selected_supply_stock_no" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></p>
+                                                            </div>
+                                                            <button type="button" id="clear_selection" class="text-gray-400 hover:text-red-500 dark:hover:text-gray-300 focus:outline-none">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                                                                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
                                                     @error('supply_id')
                                                         <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
                                                     @enderror
@@ -1109,154 +1157,323 @@
         });
     </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Flowbite modals
-        const modals = {
-            createStockModal: document.getElementById('createStockModal'),
-            editStockModal: document.getElementById('editStockModal')
-        };
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Flowbite modals
+            const modals = {
+                createStockModal: document.getElementById('createStockModal'),
+                editStockModal: document.getElementById('editStockModal')
+            };
 
-        // Manual modal control functions
-        const show = id => {
-            if (modals[id]) {
-                const options = {
-                    backdrop: 'static',
-                    placement: 'center',
-                    backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
-                };
+            // Manual modal control functions
+            const show = id => {
+                if (modals[id]) {
+                    const options = {
+                        backdrop: 'static',
+                        placement: 'center',
+                        backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
+                    };
 
-                // Use Flowbite Modal if available, otherwise use classList
-                if (window.Flowbite && window.Flowbite.Modal) {
-                    const modal = new window.Flowbite.Modal(modals[id], options);
-                    modal.show();
-                } else {
-                    modals[id].classList.remove('hidden');
-                }
-            }
-        };
-
-        const hide = id => {
-            if (modals[id]) {
-                // Use Flowbite Modal if available, otherwise use classList
-                if (window.Flowbite && window.Flowbite.Modal) {
-                    const modal = new window.Flowbite.Modal(modals[id]);
-                    modal.hide();
-                } else {
-                    modals[id].classList.add('hidden');
-                }
-            }
-        };
-
-        // Close modals
-        document.querySelectorAll('[data-modal-hide]').forEach(btn =>
-            btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
-        );
-
-        // + Add‑Stock button
-        document.querySelectorAll('.add-stock-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const {
-                    supplyId,
-                    unitCost,
-                    fundCluster
-                } = btn.dataset;
-                document.getElementById('supply_id').value = supplyId;
-                document.getElementById('fund_cluster').value = fundCluster;
-                document.getElementById('unit_cost').value =
-                    parseFloat(unitCost).toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                // reset other fields
-                document.getElementById('quantity_on_hand').value = 0;
-                document.getElementById('status').value = 'available';
-                document.getElementById('expiry_date').value = '';
-                document.getElementById('days_to_consume').value = '';
-                document.getElementById('remarks').value = '';
-                show('createStockModal');
-                document.getElementById('quantity_on_hand').focus();
-            });
-        });
-
-        // === Edit‑Stock button (updated) ===
-        document.querySelectorAll('.edit-stock-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const d = btn.dataset;
-                // Set the stock_id in the hidden field
-                document.getElementById('edit_stock_id').value = d.stockId;
-                document.getElementById('edit_supply_id').value = d.supplyId;
-                document.getElementById('edit_supply_name').value = d.supplyName;
-                document.getElementById('edit_unit_cost').value = d.unitCost;
-                document.getElementById('edit_status').value = d.status;
-                document.getElementById('edit_expiry_date').value = d.expiryDate;
-                document.getElementById('edit_fund_cluster').value = d.fundCluster;
-                document.getElementById('edit_days_to_consume').value = d.daysToConsume;
-                document.getElementById('edit_remarks').value = d.remarks;
-
-                // Update form action to point to the correct route
-                document.getElementById('editStockForm').action = `/stocks/${d.stockId}`;
-
-                // Show the modal
-                show('editStockModal');
-            });
-        });
-
-        // Delete‑Stock button
-        document.querySelectorAll('.delete-stock-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!confirm('Are you sure you want to delete this stock?')) return;
-                const id = btn.dataset.stockId;
-                fetch(`/supply-stocks/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector(
-                            'meta[name="csrf-token"]').content
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id], options);
+                        modal.show();
+                    } else {
+                        modals[id].classList.remove('hidden');
                     }
-                }).then(() => location.reload());
-            });
-        });
+                }
+            };
 
-        // format money fields
-        const formatMoney = el => {
-            let digits = (el.value || '').replace(/\D/g, '') || '0';
-            let amt = parseInt(digits, 10) / 100;
-            el.value = amt.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        };
-        ['unit_cost', 'edit_unit_cost'].forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.addEventListener('input', () => formatMoney(input));
-        });
+            const hide = id => {
+                if (modals[id]) {
+                    // Use Flowbite Modal if available, otherwise use classList
+                    if (window.Flowbite && window.Flowbite.Modal) {
+                        const modal = new window.Flowbite.Modal(modals[id]);
+                        modal.hide();
+                    } else {
+                        modals[id].classList.add('hidden');
+                    }
+                }
+            };
 
-        // search clear
-        const inp = document.getElementById('search-input'),
-            clr = document.getElementById('clearButton');
-        const toggleClr = () => clr && (clr.style.display = inp.value.trim() ? 'flex' : 'none');
-        if (inp && clr) {
-            inp.addEventListener('input', toggleClr);
-            toggleClr();
-            window.clearSearch = () => {
-                inp.value = '';
+            // Close modals
+            document.querySelectorAll('[data-modal-hide]').forEach(btn =>
+                btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
+            );
+
+            // + Add‑Stock button
+            document.querySelectorAll('.add-stock-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const {
+                        supplyId,
+                        unitCost,
+                        fundCluster
+                    } = btn.dataset;
+                    document.getElementById('supply_id').value = supplyId;
+                    document.getElementById('fund_cluster').value = fundCluster;
+                    document.getElementById('unit_cost').value =
+                        parseFloat(unitCost).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    // reset other fields
+                    document.getElementById('quantity_on_hand').value = 0;
+                    document.getElementById('status').value = 'available';
+                    document.getElementById('expiry_date').value = '';
+                    document.getElementById('days_to_consume').value = '';
+                    document.getElementById('remarks').value = '';
+                    show('createStockModal');
+                    document.getElementById('quantity_on_hand').focus();
+                });
+            });
+
+            // === Edit‑Stock button (updated) ===
+            document.querySelectorAll('.edit-stock-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const d = btn.dataset;
+                    // Set the stock_id in the hidden field
+                    document.getElementById('edit_stock_id').value = d.stockId;
+                    document.getElementById('edit_supply_id').value = d.supplyId;
+                    document.getElementById('edit_supply_name').value = d.supplyName;
+                    document.getElementById('edit_unit_cost').value = d.unitCost;
+                    document.getElementById('edit_status').value = d.status;
+                    document.getElementById('edit_expiry_date').value = d.expiryDate;
+                    document.getElementById('edit_fund_cluster').value = d.fundCluster;
+                    document.getElementById('edit_days_to_consume').value = d.daysToConsume;
+                    document.getElementById('edit_remarks').value = d.remarks;
+
+                    // Update form action to point to the correct route
+                    document.getElementById('editStockForm').action = `/stocks/${d.stockId}`;
+
+                    // Show the modal
+                    show('editStockModal');
+                });
+            });
+
+            // Delete‑Stock button
+            document.querySelectorAll('.delete-stock-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!confirm('Are you sure you want to delete this stock?')) return;
+                    const id = btn.dataset.stockId;
+                    fetch(`/supply-stocks/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').content
+                        }
+                    }).then(() => location.reload());
+                });
+            });
+
+            // format money fields
+            const formatMoney = el => {
+                let digits = (el.value || '').replace(/\D/g, '') || '0';
+                let amt = parseInt(digits, 10) / 100;
+                el.value = amt.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            };
+            ['unit_cost', 'edit_unit_cost'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.addEventListener('input', () => formatMoney(input));
+            });
+
+            // search clear
+            const inp = document.getElementById('search-input'),
+                clr = document.getElementById('clearButton');
+            const toggleClr = () => clr && (clr.style.display = inp.value.trim() ? 'flex' : 'none');
+            if (inp && clr) {
+                inp.addEventListener('input', toggleClr);
                 toggleClr();
-                inp.form.submit();
+                window.clearSearch = () => {
+                    inp.value = '';
+                    toggleClr();
+                    inp.form.submit();
+                }
             }
-        }
 
-        // re‑open on validation errors
-        @if ($errors->any() && session('show_create_modal'))
-            show('createStockModal');
-        @endif
-        @if ($errors->any() && session('show_edit_modal'))
-            // find the button for this edit and trigger it
-            const editId = {{ session('show_edit_modal') }};
-            document.querySelectorAll('.edit-stock-btn').forEach(b => {
-                if (b.dataset.stockId == editId) b.click();
+            // re‑open on validation errors
+            @if ($errors->any() && session('show_create_modal'))
+                show('createStockModal');
+            @endif
+            @if ($errors->any() && session('show_edit_modal'))
+                // find the button for this edit and trigger it
+                const editId = {{ session('show_edit_modal') }};
+                document.querySelectorAll('.edit-stock-btn').forEach(b => {
+                    if (b.dataset.stockId == editId) b.click();
+                });
+            @endif
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cache DOM elements
+            const supplySearch = document.getElementById('supply_search');
+            const clearSearchBtn = document.getElementById('clear_supply_search');
+            const supplyDropdown = document.getElementById('supply_dropdown');
+            const supplyList = document.getElementById('supply_list');
+            const supplySelect = document.getElementById('supply_id');
+            const selectedSupplyDiv = document.getElementById('selected_supply');
+            const selectedSupplyName = document.getElementById('selected_supply_name');
+            const selectedSupplyDesc = document.getElementById('selected_supply_desc');
+            const selectedSupplyStockNo = document.getElementById('selected_supply_stock_no');
+            const clearSelectionBtn = document.getElementById('clear_selection');
+
+            // Parse all supplies into a usable array
+            const supplies = Array.from(supplySelect.options).slice(1).map(option => {
+                return {
+                    id: option.value,
+                    name: option.getAttribute('data-name'),
+                    description: option.getAttribute('data-description'),
+                    stockNo: option.getAttribute('data-stock-no'),
+                    searchText: `${option.getAttribute('data-name')} ${option.getAttribute('data-description')} ${option.getAttribute('data-stock-no')}`.toLowerCase()
+                };
             });
-        @endif
-    });
-</script>
+
+            // Toggle clear search button visibility
+            function toggleClearSearch() {
+                clearSearchBtn.classList.toggle('hidden', !supplySearch.value.trim());
+            }
+
+            // Filter supplies based on search query
+            function filterSupplies() {
+                const query = supplySearch.value.toLowerCase().trim();
+
+                // Show dropdown if search input has focus
+                if (document.activeElement === supplySearch) {
+                    supplyDropdown.classList.remove('hidden');
+                }
+
+                // Clear the list
+                supplyList.innerHTML = '';
+
+                // Filter supplies
+                let filteredSupplies = query ?
+                    supplies.filter(supply => supply.searchText.includes(query)) :
+                    supplies.slice(0, 100); // Limit to first 100 if no search
+
+                // Display no results message
+                if (filteredSupplies.length === 0) {
+                    const noResults = document.createElement('li');
+                    noResults.className = 'px-4 py-3 text-center text-gray-500 dark:text-gray-400';
+                    noResults.textContent = 'No matching supplies found';
+                    supplyList.appendChild(noResults);
+                    return;
+                }
+
+                // Create list items for filtered supplies
+                filteredSupplies.forEach(supply => {
+                    const item = document.createElement('li');
+                    item.className = 'border-b last:border-b-0 border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+                    item.dataset.id = supply.id;
+
+                    item.innerHTML = `
+                        <div class="px-4 py-2">
+                            <div class="font-medium text-gray-900 dark:text-white">${supply.name}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">${supply.description}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">(${supply.stockNo})</div>
+                        </div>
+                    `;
+
+                    item.addEventListener('click', () => selectSupply(supply));
+                    supplyList.appendChild(item);
+                });
+            }
+
+            // Select a supply
+            function selectSupply(supply) {
+                // Update hidden select for form submission
+                supplySelect.value = supply.id;
+
+                // Display selected supply details
+                selectedSupplyName.textContent = supply.name;
+                selectedSupplyDesc.textContent = supply.description;
+                selectedSupplyStockNo.textContent = `Stock No: ${supply.stockNo}`;
+                selectedSupplyDiv.classList.remove('hidden');
+
+                // Clear search and hide dropdown
+                supplySearch.value = '';
+                supplyDropdown.classList.add('hidden');
+                toggleClearSearch();
+
+                // Dispatch change event for validation
+                supplySelect.dispatchEvent(new Event('change'));
+            }
+
+            // Clear selection
+            function clearSelection() {
+                supplySelect.value = '';
+                selectedSupplyDiv.classList.add('hidden');
+                supplySearch.value = '';
+                toggleClearSearch();
+
+                // Dispatch change event for validation
+                supplySelect.dispatchEvent(new Event('change'));
+
+                // Focus on search input
+                supplySearch.focus();
+            }
+
+            // Initialize with existing selection if any
+            function initializeSelection() {
+                if (supplySelect.value) {
+                    const selectedOption = supplySelect.options[supplySelect.selectedIndex];
+                    const supply = {
+                        id: selectedOption.value,
+                        name: selectedOption.getAttribute('data-name'),
+                        description: selectedOption.getAttribute('data-description'),
+                        stockNo: selectedOption.getAttribute('data-stock-no')
+                    };
+
+                    // Display selected supply details
+                    selectedSupplyName.textContent = supply.name;
+                    selectedSupplyDesc.textContent = supply.description;
+                    selectedSupplyStockNo.textContent = `Stock No: ${supply.stockNo}`;
+                    selectedSupplyDiv.classList.remove('hidden');
+                }
+            }
+
+            // Event Listeners
+            supplySearch.addEventListener('input', () => {
+                filterSupplies();
+                toggleClearSearch();
+            });
+
+            supplySearch.addEventListener('focus', filterSupplies);
+
+            clearSearchBtn.addEventListener('click', () => {
+                supplySearch.value = '';
+                toggleClearSearch();
+                filterSupplies();
+                supplySearch.focus();
+            });
+
+            clearSelectionBtn.addEventListener('click', clearSelection);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!supplySearch.contains(e.target) && !supplyDropdown.contains(e.target)) {
+                    supplyDropdown.classList.add('hidden');
+                }
+            });
+
+            // Handle keyboard navigation
+            supplySearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    supplyDropdown.classList.add('hidden');
+                } else if (e.key === 'ArrowDown' && !supplyDropdown.classList.contains('hidden')) {
+                    e.preventDefault();
+                    const firstItem = supplyList.querySelector('li');
+                    if (firstItem) firstItem.focus();
+                }
+            });
+
+            // Initialize
+            toggleClearSearch();
+            initializeSelection();
+        });
+    </script>
 
 </x-app-layout>
