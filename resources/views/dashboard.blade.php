@@ -5,60 +5,7 @@
         </h2>
     </x-slot>
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            {{-- <!-- Floating Cards Section -->
-            <div class="relative w-full mb-8 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-900 rounded-xl shadow-xl">
-                <!-- Wave SVG Decorations - Top -->
-                <div class="absolute top-0 left-0 right-0 h-20 overflow-hidden">
-                    <svg class="absolute bottom-0 w-full h-20 text-white/10 fill-current" viewBox="0 0 1440 120" preserveAspectRatio="none">
-                        <path d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,85.3C672,75,768,85,864,96C960,107,1056,117,1152,112C1248,107,1344,85,1392,74.7L1440,64L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
-                    </svg>
-                </div>
-
-                <!-- Wave SVG Decorations - Bottom -->
-                <div class="absolute bottom-0 left-0 right-0 h-20 overflow-hidden">
-                    <svg class="absolute bottom-0 w-full h-20 text-white/10 fill-current transform rotate-180" viewBox="0 0 1440 120" preserveAspectRatio="none">
-                        <path d="M0,64L60,69.3C120,75,240,85,360,90.7C480,96,600,96,720,96C840,96,960,96,1080,85.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
-                    </svg>
-                </div>
-
-                <!-- Floating Decorative Elements - Responsive sizes -->
-                <div class="absolute inset-0 overflow-hidden pointer-events-none">
-                    <!-- Box/Package Icon - Responsive sizing and positioning -->
-                    <div class="absolute top-1/4 right-5 sm:right-8 lg:right-12 w-10 h-10 sm:w-16 sm:h-16 text-white/20 dark:text-white/10 transform transition-all duration-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
-                            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375z" />
-                            <path fill-rule="evenodd" d="M3.087 9l.54 9.176A3 3 0 006.62 21h10.757a3 3 0 002.995-2.824L20.913 9H3.087zM12 10.5a.75.75 0 01.75.75v4.94l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72v-4.94a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-
-                    <!-- Barcode Icon - Responsive sizing and positioning -->
-                    <div class="absolute bottom-1/4 left-4 sm:left-8 lg:left-12 w-12 h-12 sm:w-16 sm:h-16 text-white/15 dark:text-white/5 transform transition-all duration-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
-                            <path d="M4 5h2v14H4V5zm4 0h1v14H8V5zm2 0h3v14h-3V5zm4 0h1v14h-1V5zm3 0h2v14h-2V5zm3 0h1v14h-1V5z"/>
-                        </svg>
-                    </div>
-
-                    <!-- Clipboard/Inventory Icon - Only visible on larger screens -->
-                    <div class="hidden sm:block absolute top-1/2 right-1/3 transform -translate-y-1/2 w-10 h-10 lg:w-14 lg:h-14 text-white/10 dark:text-white/5 transition-all duration-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
-                            <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5z" clip-rule="evenodd" />
-                            <path fill-rule="evenodd" d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V9.375zM6 12a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V12zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V15zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 18a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V18zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-
-                    <!-- Additional decorative shapes that hide/show based on screen size -->
-                    <div class="hidden md:block absolute bottom-1/3 right-1/4 w-20 h-20 bg-blue-300 rounded-full opacity-10 blur-xl"></div>
-                    <div class="absolute top-1/3 left-1/3 w-12 h-12 sm:w-24 sm:h-24 bg-blue-200 rounded-full opacity-10 blur-2xl"></div>
-                </div>
-
-                <!-- Admin Welcome Message -->
-                <div class="relative text-center z-10">
-                    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">Welcome, Admin</h1>
-                    <p class="text-blue-100 max-w-2xl mx-auto">Your inventory management dashboard is ready. Track stock levels, monitor transactions, and manage your inventory with ease.</p>
-                </div>
-            </div> --}}
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
 
             <!-- Floating Cards Section (Separate) -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
@@ -223,43 +170,6 @@
                     </div>
                 </a>
             </div>
-
-            {{-- for debugging purpose only and not connected to the dashboard controller --}}
-            {{-- @if(auth()->user()->role === 'admin') <!-- Only show to admins -->
-                <div class="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">Stock Value Debugging</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3">Supply</th>
-                                    <th scope="col" class="px-4 py-3">Quantity</th>
-                                    <th scope="col" class="px-4 py-3">Unit Cost</th>
-                                    <th scope="col" class="px-4 py-3">Status</th>
-                                    <th scope="col" class="px-4 py-3">Total Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($stockItems as $stock)
-                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                    <td class="px-4 py-3">{{ $stock->supply->item_name ?? 'Unknown' }} ({{ $stock->supply_id }})</td>
-                                    <td class="px-4 py-3">{{ $stock->quantity_on_hand }}</td>
-                                    <td class="px-4 py-3">₱{{ number_format($stock->unit_cost, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $stock->status }}</td>
-                                    <td class="px-4 py-3">₱{{ number_format($stock->quantity_on_hand * $stock->unit_cost, 2) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr class="font-semibold bg-gray-50 dark:bg-gray-700">
-                                    <td colspan="4" class="px-4 py-3 text-right">Total:</td>
-                                    <td class="px-4 py-3">₱{{ number_format($stockItems->sum('total_value'), 2) }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            @endif --}}
 
             <!-- New Section: List of Registered Users -->
             <div id="user-section" class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
@@ -1380,7 +1290,7 @@
                                         <div class="mb-4">
                                             <label for="department_id"
                                                 class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Department <span class="text-red-500">*</span>
+                                                Division <span class="text-red-500">*</span>
                                             </label>
                                             <div class="relative">
                                                 <div
@@ -1399,7 +1309,7 @@
                                                         dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                                         dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                     required>
-                                                    <option value="" disabled selected>Select department</option>
+                                                    <option value="" disabled selected>Select division</option>
                                                     @foreach ($departments as $dept)
                                                         <option value="{{ $dept->id }}">{{ $dept->name }}
                                                         </option>

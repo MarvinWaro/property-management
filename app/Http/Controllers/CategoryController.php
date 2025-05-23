@@ -26,8 +26,6 @@ class CategoryController extends Controller
         return view('manage-category.index', compact('categories'));
     }
 
-
-
     /**
      * Show the form for creating a new resource.
      */
@@ -43,8 +41,8 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:categories,name',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:categories,name',
+            'description' => 'nullable|string|max:2000', // Added max length for text field
         ]);
 
         $category = Category::create($validated);
@@ -77,7 +75,6 @@ class CategoryController extends Controller
         return view('manage-category.edit', compact('category'));
     }
 
-
     /**
      * Update the specified resource in storage.
      */
@@ -85,8 +82,8 @@ class CategoryController extends Controller
     {
         // Validate the request data
         $validated = $request->validate([
-            'name' => 'required|string|unique:categories,name,' . $category->id,
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string|max:2000', // Added max length for text field
         ]);
 
         // Update the category
@@ -96,7 +93,6 @@ class CategoryController extends Controller
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
@@ -105,5 +101,4 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->route('categories.index')->with('deleted', 'Category deleted successfully.');
     }
-
 }

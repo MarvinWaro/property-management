@@ -6,9 +6,9 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-auto sm:px-6 lg:px-8">
             <div class="bg-gray-100 dark:bg-gray-900">
-                <div class="container mx-auto py-8">
+                <div class="mx-12 mx-auto py-8">
                     <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
 
 
@@ -434,7 +434,7 @@
                                                             <div class="product-card border dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
                                                                 data-supply-id="{{ $stock->supply_id }}"
                                                                 data-name="{{ $stock->supply->item_name }}"
-                                                                data-available="{{ $stock->quantity_on_hand }}"
+                                                                data-available="{{ $stock->available_for_request }}"
                                                                 data-fund-cluster="{{ $stock->fund_cluster }}">
                                                                 <div class="p-4 flex flex-col h-full">
                                                                     {{-- <div
@@ -467,8 +467,8 @@
                                                                             class="flex items-center justify-between mb-2">
                                                                             <span
                                                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300') }}">
-                                                                                {{ $stock->quantity_on_hand }}
-                                                                                available
+                                                                                    {{ $stock->available_for_request }}
+                                                                                    available
                                                                             </span>
                                                                         </div>
                                                                         <div

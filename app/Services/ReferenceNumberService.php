@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\SupplyTransaction;
 use App\Models\RisSlip;
+use App\Models\SupplyTransaction;
 use Carbon\Carbon;
 
 class ReferenceNumberService
@@ -40,55 +40,34 @@ class ReferenceNumberService
     }
 
     /**
-     * Generate a RIS reference number for a specific month/year
-     * Format: RIS YYYY-MM-NNN where NNN is sequential per month
+     * Generate a unique RIS number in the format "RIS YYYY-MM-NNN"
+     * where NNN is sequential per month
      */
     public function generateRisNumber(): string
     {
         $today = Carbon::now();
-        $year = $today->format('Y');
-        $month = $today->format('m');
+        $yearMonth = $today->format('Y-m');
+        $prefix = "RIS {$yearMonth}-";
 
-        // First check for RIS transactions in this format (RIS YYYY-MM-NNN)
-        $latestRis = SupplyTransaction::where('transaction_type', 'issue')
-            ->where('reference_no', 'like', "RIS {$year}-{$month}-%")
-            ->orderBy('created_at', 'desc')
+        // Always get the highest existing number for this month
+        $lastRisSlip = RisSlip::where('ris_no', 'like', "$prefix%")
+            ->orderByRaw("CAST(SUBSTRING(ris_no, LENGTH('$prefix') + 1) AS UNSIGNED) DESC")
             ->first();
 
-        // If no transactions found, check RIS slips
-        if (!$latestRis) {
-            $latestRisSlip = RisSlip::where('ris_no', 'like', "RIS {$year}-{$month}-%")
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-            if ($latestRisSlip) {
-                $parts = explode('-', $latestRisSlip->ris_no);
-                if (count($parts) >= 3) {
-                    $nextNumber = intval($parts[2]) + 1;
-                } else {
-                    $nextNumber = 1;
-                }
-            } else {
-                $nextNumber = 1;
-            }
+        if ($lastRisSlip) {
+            // Parse last number
+            $lastNumber = intval(substr($lastRisSlip->ris_no, strlen($prefix)));
+            $nextNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         } else {
-            // Extract the number part from the last RIS transaction
-            $parts = explode('-', $latestRis->reference_no);
-            if (count($parts) >= 3) {
-                $nextNumber = intval($parts[2]) + 1;
-            } else {
-                $nextNumber = 1;
-            }
+            $nextNumber = '001';
         }
 
-        // Format with leading zeros (001, 002, etc.)
-        return "RIS {$year}-{$month}-" . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix . $nextNumber;
     }
 
     /**
      * Check if an RIS number already exists, if so return it.
      * If not, generate a new one.
-     * This helps prevent duplicate RIS numbers for the same RIS slip.
      */
     public function getOrCreateRisNumber(int $risId = null): string
     {

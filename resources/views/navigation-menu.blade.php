@@ -1,6 +1,6 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-[#dc3546] dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-12">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex items-center justify-between w-full">
                 <!-- Left Side (Logo & Navigation Links) -->
@@ -41,21 +41,18 @@
                             <x-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')" class="relative" id="requisition-nav-link">
                                 {{ __('Requisitions (RIS)') }}
                                 @if(isset($pendingRisCount) && $pendingRisCount > 0)
-                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
+                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
                                         {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
                                     </span>
                                 @else
-                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900 hidden"></span>
+                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900 hidden"></span>
                                 @endif
                             </x-nav-link>
                             <!-- Management Dropdown -->
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true"
                                 @mouseleave="open = false">
-                                <x-nav-link href="#" :active="request()->routeIs('supplier.index') ||
-                                    request()->routeIs('categories.index') ||
-                                    request()->routeIs('departments.index') ||
-                                    request()->routeIs('designations.index')"
-                                    class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                                <button type="button"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('supplier.index') || request()->routeIs('categories.index') || request()->routeIs('departments.index') || request()->routeIs('designations.index') ? 'border-white text-white' : 'border-transparent text-white hover:text-gray-200 hover:border-gray-200' }}">
                                     <span>{{ __('Management') }}</span>
                                     <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 20 20" fill="currentColor">
@@ -63,7 +60,7 @@
                                             d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                </x-nav-link>
+                                </button>
 
                                 <div x-show="open" x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="transform opacity-0 scale-95"
@@ -123,20 +120,14 @@
                 <!-- Right Side (Dark Mode Toggle Button) -->
                 <div class="flex items-center">
                     <button id="theme-toggle" type="button"
-                        class="p-2 text-gray-500 bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
-                        {{-- <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-8.66l-.707.707m-14.121 0l-.707-.707M21 12h-1m-16 0H3m8.66 8.66l-.707-.707m-5.656-5.656l-.707-.707M16.24 7.76l.707-.707M7.76 7.76l-.707-.707M12 5a7 7 0 0 1 0 14 7 7 0 0 1 0-14z"></path>
-                        </svg> --}}
-                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                        class="p-2 text-white hover:text-gray-200 focus:outline-none transition duration-150 ease-in-out">
+                        <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16" fill="currentColor">
                             <path
                                 d="M14.438 10.148c.19-.425-.321-.787-.748-.601A5.5 5.5 0 0 1 6.453 2.31c.186-.427-.176-.938-.6-.748a6.501 6.501 0 1 0 8.585 8.586Z" />
                         </svg>
-                        {{-- <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-8.66l-.707.707m-14.121 0l-.707-.707M21 12h-1m-16 0H3m8.66 8.66l-.707-.707m-5.656-5.656l-.707-.707M16.24 7.76l.707-.707M7.76 7.76l-.707-.707"></path>
-                        </svg> --}}
-                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16" fill="currentColor">
                             <path
                                 d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1ZM10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM12.95 4.11a.75.75 0 1 0-1.06-1.06l-1.062 1.06a.75.75 0 0 0 1.061 1.062l1.06-1.061ZM15 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 15 8ZM11.89 12.95a.75.75 0 0 0 1.06-1.06l-1.06-1.062a.75.75 0 0 0-1.062 1.061l1.061 1.06ZM8 12a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 12ZM5.172 11.89a.75.75 0 0 0-1.061-1.062L3.05 11.89a.75.75 0 1 0 1.06 1.06l1.06-1.06ZM4 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 4 8ZM4.11 5.172A.75.75 0 0 0 5.173 4.11L4.11 3.05a.75.75 0 1 0-1.06 1.06l1.06 1.06Z" />
                         </svg>
@@ -152,7 +143,7 @@
                             <x-slot name="trigger">
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-transparent hover:text-gray-200 focus:outline-none focus:bg-red-700 active:bg-red-700 transition ease-in-out duration-150">
                                         {{ Auth::user()->currentTeam->name }}
 
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
@@ -212,14 +203,14 @@
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                 <button
-                                    class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                                    class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-white transition">
                                     <img class="size-8 rounded-full object-cover"
                                         src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-transparent hover:text-gray-200 focus:outline-none transition ease-in-out duration-150">
                                         {{ Auth::user()->name }}
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
                                             fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -288,7 +279,7 @@
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                    class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-red-700 focus:outline-none focus:bg-red-700 focus:text-white transition duration-150 ease-in-out">
                     <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -302,7 +293,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-[#dc3546]">
         <div class="pt-2 pb-3 space-y-1">
             @php
                 $isAssetsMode =
@@ -310,29 +301,60 @@
                     (request()->routeIs('profile.show') && session('from_assets_mode', false));
             @endphp
 
-            @if (!$isAssetsMode)
+            @if (!$isAssetsMode && auth()->user()->role === 'admin')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('supplies.index') }}" :active="request()->routeIs('supplies.index')">
+                    {{ __('Supplies') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')">
+                    {{ __('Supply Stocks') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')">
+                    {{ __('Requisitions (RIS)') }}
+                </x-responsive-nav-link>
+                <!-- Management section for mobile -->
+                <div class="block px-4 py-2 text-xs text-gray-200">
+                    {{ __('Management') }}
+                </div>
+                <x-responsive-nav-link href="{{ route('supplier.index') }}" :active="request()->routeIs('supplier.index')">
+                    {{ __('Supplier') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.index')">
+                    {{ __('Categories') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('departments.index') }}" :active="request()->routeIs('departments.index')">
+                    {{ __('Departments') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('designations.index') }}" :active="request()->routeIs('designations.index')">
+                    {{ __('Designation') }}
+                </x-responsive-nav-link>
             @endif
 
-            @if ($isAssetsMode)
+            @if ($isAssetsMode && auth()->user()->role === 'admin')
                 <x-responsive-nav-link href="{{ route('assets.dashboard') }}" :active="request()->routeIs('assets.dashboard')">
                     {{ __('Assets Dashboard') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')">
-                    {{ __('Manage Property') }}
+                    {{ __('Property') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')">
-                    {{ __('Manage Location') }}
+                    {{ __('Location') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if (auth()->user()->role === 'staff')
+                <x-responsive-nav-link href="{{ route('staff.dashboard') }}" :active="request()->routeIs('staff.dashboard')">
+                    {{ __('Home') }}
                 </x-responsive-nav-link>
             @endif
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
+        <div class="pt-4 pb-1 border-t border-red-600">
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                     <div class="shrink-0 me-3">
@@ -342,8 +364,8 @@
                 @endif
 
                 <div>
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-200">{{ Auth::user()->email }}</div>
                 </div>
             </div>
 
@@ -353,11 +375,22 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <!-- Remove :active from Supplies/Assets | Properties to match dropdown behavior -->
-                <x-responsive-nav-link
-                    href="{{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? route('dashboard') : route('assets.dashboard') }}">
-                    {{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? __('Supplies') : __('Assets | Properties') }}
+                <!-- E-Signature Management -->
+                <x-responsive-nav-link href="{{ route('profile.show') }}#signature-section">
+                    {{ __('E-Signature') }}
                 </x-responsive-nav-link>
+
+                @if (auth()->user()->role === 'admin')
+                    <x-responsive-nav-link href="{{ route('supply-transactions.index') }}">
+                        {{ __('Transactions') }}
+                    </x-responsive-nav-link>
+
+                    <!-- Remove :active from Supplies/Assets | Properties to match dropdown behavior -->
+                    <x-responsive-nav-link
+                        href="{{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? route('dashboard') : route('assets.dashboard') }}">
+                        {{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? __('Supplies') : __('Assets | Properties') }}
+                    </x-responsive-nav-link>
+                @endif
 
                 @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                     <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')">
@@ -369,15 +402,15 @@
                 <form method="POST" action="{{ route('logout') }}" x-data>
                     @csrf
                     <x-responsive-nav-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                        {{ __('Log Out') }}
+                        <span class="text-red-400">{{ __('Log Out') }}</span>
                     </x-responsive-nav-link>
                 </form>
 
                 <!-- Team Management -->
                 @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                    <div class="border-t border-red-600"></div>
 
-                    <div class="block px-4 py-2 text-xs text-gray-400">
+                    <div class="block px-4 py-2 text-xs text-gray-200">
                         {{ __('Manage Team') }}
                     </div>
 
@@ -395,9 +428,9 @@
 
                     <!-- Team Switcher -->
                     @if (Auth::user()->allTeams()->count() > 1)
-                        <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                        <div class="border-t border-red-600"></div>
 
-                        <div class="block px-4 py-2 text-xs text-gray-400">
+                        <div class="block px-4 py-2 text-xs text-gray-200">
                             {{ __('Switch Teams') }}
                         </div>
 

@@ -24,10 +24,23 @@ class StaffDashboardController extends Controller
 
         // 2. dropdown data for the modal
         $departments = Department::orderBy('name')->get(['id','name']);
+
+        // 3. calculate real-time available for each stock
         $stocks = SupplyStock::with('supply')
             ->where('status', 'available')
             ->where('quantity_on_hand', '>', 0)
             ->get();
+
+        foreach ($stocks as $stock) {
+            $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
+                ->whereHas('risSlip', function($q) {
+                    // count BOTH draft and approved slips as “reserved”
+                    $q->whereIn('status', ['draft','approved']);
+                })
+                ->sum('quantity_requested');
+
+            $stock->available_for_request = max(0, $stock->quantity_on_hand - $pendingRequested);
+        }
 
         // 3. the staff member's own slips with pagination
         $myRequests = RisSlip::where('requested_by', $user->id)
@@ -35,7 +48,6 @@ class StaffDashboardController extends Controller
             ->paginate(5, ['*'], 'requests');
 
         // 4. Get received supplies with pagination
-        // First, get all RIS numbers the user received supplies for
         $risNumbers = DB::table('supply_transactions')
             ->join('user_transactions', 'supply_transactions.transaction_id', '=', 'user_transactions.transaction_id')
             ->where('user_transactions.user_id', Auth::id())
@@ -45,9 +57,8 @@ class StaffDashboardController extends Controller
             ->pluck('reference_no')
             ->toArray();
 
-        // Then get the RIS slips with pagination
         $receivedRequisitions = RisSlip::whereIn('ris_no', $risNumbers)
-            ->with('requester') // Eager load the requester relationship
+            ->with('requester')
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'received');
 
