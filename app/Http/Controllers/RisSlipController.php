@@ -60,6 +60,61 @@ class RisSlipController extends Controller
             'signature_type' => 'required|in:esign,sgd',
         ]);
 
+        // NEW: Check stock availability before processing
+        $stockValidationErrors = [];
+        $currentAvailability = [];
+
+        foreach ($validated['supplies'] as $index => $item) {
+            $supplyId = $item['supply_id'];
+            $requestedQty = $item['quantity'];
+
+            // Calculate current real-time availability
+            $stock = SupplyStock::where('supply_id', $supplyId)
+                ->where('status', 'available')
+                ->where('quantity_on_hand', '>', 0)
+                ->first();
+
+            if (!$stock) {
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'message' => 'Item is no longer available',
+                    'available' => 0
+                ];
+                continue;
+            }
+
+            $pendingRequested = RisItem::where('supply_id', $supplyId)
+                ->whereHas('risSlip', function($q) {
+                    $q->whereIn('status', ['draft','approved']);
+                })
+                ->sum('quantity_requested');
+
+            $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
+            $currentAvailability[$supplyId] = $currentAvailable;
+
+            if ($requestedQty > $currentAvailable) {
+                $supply = Supply::find($supplyId);
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
+                    'requested' => $requestedQty,
+                    'available' => $currentAvailable,
+                    'message' => "Only {$currentAvailable} units available (requested: {$requestedQty})"
+                ];
+            }
+        }
+
+        // If there are stock validation errors, return them
+        if (!empty($stockValidationErrors)) {
+            return response()->json([
+                'success' => false,
+                'type' => 'stock_validation_error',
+                'message' => 'Stock availability has changed. Please review and update your request.',
+                'errors' => $stockValidationErrors,
+                'current_availability' => $currentAvailability
+            ], 422);
+        }
+
         $maxAttempts = 5;
         $attempt = 0;
 
@@ -105,8 +160,11 @@ class RisSlipController extends Controller
                         ]);
                     }
 
-                    return redirect()->back()
-                        ->with('success', 'Requisition created successfully with RIS# ' . $newRisNumber);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Requisition created successfully with RIS# ' . $newRisNumber,
+                        'ris_number' => $newRisNumber
+                    ]);
                 });
             } catch (\Exception $e) {
                 // Retry only for RIS number conflict
@@ -117,7 +175,69 @@ class RisSlipController extends Controller
             }
         } while ($attempt < $maxAttempts);
 
-        return redirect()->back()->with('error', 'Failed to generate unique RIS number after several attempts.');
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to generate unique RIS number after several attempts.'
+        ], 500);
+    }
+
+    public function validateStock(Request $request)
+    {
+        $validated = $request->validate([
+            'supplies' => 'required|array',
+            'supplies.*.supply_id' => 'required|exists:supplies,supply_id',
+            'supplies.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $stockValidationErrors = [];
+        $currentAvailability = [];
+
+        foreach ($validated['supplies'] as $index => $item) {
+            $supplyId = $item['supply_id'];
+            $requestedQty = $item['quantity'];
+
+            // Calculate current real-time availability
+            $stock = SupplyStock::where('supply_id', $supplyId)
+                ->where('status', 'available')
+                ->where('quantity_on_hand', '>', 0)
+                ->first();
+
+            if (!$stock) {
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'message' => 'Item is no longer available',
+                    'available' => 0
+                ];
+                $currentAvailability[$supplyId] = 0;
+                continue;
+            }
+
+            $pendingRequested = RisItem::where('supply_id', $supplyId)
+                ->whereHas('risSlip', function($q) {
+                    $q->whereIn('status', ['draft','approved']);
+                })
+                ->sum('quantity_requested');
+
+            $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
+            $currentAvailability[$supplyId] = $currentAvailable;
+
+            if ($requestedQty > $currentAvailable) {
+                $supply = Supply::find($supplyId);
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
+                    'requested' => $requestedQty,
+                    'available' => $currentAvailable,
+                    'message' => "Only {$currentAvailable} units available (requested: {$requestedQty})"
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => empty($stockValidationErrors),
+            'errors' => $stockValidationErrors,
+            'current_availability' => $currentAvailability
+        ]);
     }
 
     /**
