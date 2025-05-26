@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
                     <!-- Button and Search Bar Container -->
@@ -16,12 +16,12 @@
                               class="w-full max-w-sm flex items-center space-x-2">
                             <div class="relative flex-grow">
                                 <input type="text" name="search" id="propertySearchInput"
-                                       value="{{ request()->get('search') }}" oninput="togglePropertyClearButton()"
-                                       placeholder="Search..."
-                                       class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                              focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-                                              dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                              dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                    value="{{ request()->get('search') }}" oninput="togglePropertyClearButton()"
+                                    placeholder="Search..."
+                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
+                                            focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                            dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                            dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="propertyClearBtn" onclick="clearPropertySearch()" style="display: none;"
@@ -345,9 +345,9 @@
             @endforeach
 
             <!-- Footer / Copyright -->
-            <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
+            {{-- <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
                 Copyright © CHED Property Management System
-            </div>
+            </div> --}}
         </div>
     </div>
 

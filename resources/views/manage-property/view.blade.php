@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-8 bg-gray-50 dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
             <!-- Main Container -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
 
@@ -217,7 +217,7 @@
                                 <div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Acquisition Cost</p>
                                     <p class="font-medium text-gray-900 dark:text-white">
-                                        {{ $property->acquisition_cost ? '$' . number_format($property->acquisition_cost, 2) : 'N/A' }}
+                                        {{ $property->acquisition_cost ? '₱' . number_format($property->acquisition_cost, 2) : 'N/A' }}
                                     </p>
                                 </div>
 
