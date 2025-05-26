@@ -28,6 +28,14 @@ class Supply extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Mutator to automatically convert item_name to uppercase when saving
+     */
+    public function setItemNameAttribute($value)
+    {
+        $this->attributes['item_name'] = strtoupper($value);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');

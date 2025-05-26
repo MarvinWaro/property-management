@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
                     <!-- Button and Search Bar Container -->
@@ -445,6 +445,9 @@
                                 <form action="{{ route('stocks.store') }}" method="POST" class="p-6 bg-gray-50 dark:bg-gray-800">
                                     @csrf
 
+                                    <!-- ADD THIS LINE HERE -->
+                                    <input type="hidden" name="submission_token" value="{{ uniqid() . time() }}">
+
                                     <!-- Validation Errors Alert -->
                                     @if ($errors->any() && session('show_create_modal'))
                                         <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
@@ -833,6 +836,9 @@
                                     @csrf
                                     @method('PUT')
 
+                                    <!-- ADD THIS LINE HERE -->
+                                    <input type="hidden" name="submission_token" value="{{ uniqid() . time() }}">
+
                                     <input type="hidden" name="stock_id" id="edit_stock_id">
                                     <input type="hidden" name="supply_id" id="edit_supply_id">
                                     <input type="hidden" name="department_id" value="{{ auth()->user()->department_id }}">
@@ -1078,8 +1084,6 @@
                             </div>
                         </div>
                     </div>
-
-
 
 
                 </div><!-- End .section-container -->
@@ -1474,6 +1478,116 @@
             toggleClearSearch();
             initializeSelection();
         });
+    </script>
+
+    <!-- Add this script tag AFTER your existing scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent double submission for stock forms
+            function preventDoubleSubmission() {
+                const stockForms = [
+                    document.querySelector('#createStockModal form'),
+                    document.querySelector('#editStockModal form')
+                ];
+
+                stockForms.forEach(form => {
+                    if (!form) return;
+
+                    let isSubmitting = false;
+
+                    form.addEventListener('submit', function(e) {
+                        // Prevent double submission
+                        if (isSubmitting) {
+                            e.preventDefault();
+                            console.log('Double submission prevented');
+                            return false;
+                        }
+
+                        // Mark as submitting
+                        isSubmitting = true;
+
+                        // Get the submit button
+                        const submitBtn = form.querySelector('button[type="submit"]');
+
+                        if (submitBtn) {
+                            // Store original content
+                            const originalHTML = submitBtn.innerHTML;
+                            const originalClasses = submitBtn.className;
+
+                            // Disable and show loading state
+                            submitBtn.disabled = true;
+                            submitBtn.className = originalClasses + ' opacity-50 cursor-not-allowed';
+
+                            // Update button content to show loading
+                            const isCreateForm = form.closest('#createStockModal');
+                            const loadingText = isCreateForm ? 'Saving Stock...' : 'Updating Stock...';
+
+                            submitBtn.innerHTML = `
+                                <svg class="animate-spin w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                ${loadingText}
+                            `;
+
+                            // Reset after 8 seconds as fallback (in case form doesn't redirect)
+                            setTimeout(() => {
+                                isSubmitting = false;
+                                submitBtn.disabled = false;
+                                submitBtn.className = originalClasses;
+                                submitBtn.innerHTML = originalHTML;
+                            }, 8000);
+                        }
+
+                        // Also disable modal close buttons to prevent closing during submission
+                        const modal = form.closest('[id$="Modal"]');
+                        if (modal) {
+                            const closeButtons = modal.querySelectorAll('[data-modal-hide]');
+                            closeButtons.forEach(btn => {
+                                btn.disabled = true;
+                                btn.style.opacity = '0.5';
+                                btn.style.pointerEvents = 'none';
+
+                                // Re-enable after timeout
+                                setTimeout(() => {
+                                    btn.disabled = false;
+                                    btn.style.opacity = '';
+                                    btn.style.pointerEvents = '';
+                                }, 8000);
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Initialize the prevention
+            preventDoubleSubmission();
+        });
+
+        // Add CSS for spinning animation
+        if (!document.getElementById('double-submit-styles')) {
+            const style = document.createElement('style');
+            style.id = 'double-submit-styles';
+            style.textContent = `
+                .animate-spin {
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                button:disabled {
+                    pointer-events: none !important;
+                }
+
+                .cursor-not-allowed {
+                    cursor: not-allowed !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     </script>
 
 </x-app-layout>

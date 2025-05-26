@@ -81,7 +81,7 @@
                                         </a>
                                         <a href="{{ route('departments.index') }}"
                                             class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('departments.index') ? 'bg-gray-100' : '' }}">
-                                            {{ __('Departments') }}
+                                            {{ __('Division') }}
                                         </a>
                                         <a href="{{ route('designations.index') }}"
                                             class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('designations.index') ? 'bg-gray-100' : '' }}">
@@ -325,7 +325,7 @@
                     {{ __('Categories') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('departments.index') }}" :active="request()->routeIs('departments.index')">
-                    {{ __('Departments') }}
+                    {{ __('Division') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('designations.index') }}" :active="request()->routeIs('designations.index')">
                     {{ __('Designation') }}

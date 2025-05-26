@@ -55,6 +55,24 @@ class SupplyStockController extends Controller
      */
     public function store(Request $request)
     {
+        // DOUBLE SUBMISSION PREVENTION - START
+        // Generate a unique submission token if not present
+        if (!$request->has('submission_token')) {
+            $request->merge(['submission_token' => uniqid() . time()]);
+        }
+
+        // Check for duplicate submission
+        $submissionToken = $request->input('submission_token');
+        $sessionKey = 'last_stock_submission_' . auth()->id();
+
+        if (session()->has($sessionKey) && session($sessionKey) === $submissionToken) {
+            return back()->with('error', 'Duplicate submission detected. Stock was already saved.');
+        }
+
+        // Store the submission token
+        session([$sessionKey => $submissionToken]);
+        // DOUBLE SUBMISSION PREVENTION - END
+
         $validated = $request->validate([
             'supply_id'        => 'required|exists:supplies,supply_id',
             'quantity_on_hand' => 'required|integer|min:1',
@@ -64,59 +82,77 @@ class SupplyStockController extends Controller
             'fund_cluster'     => 'required|in:101,151',
             'days_to_consume'  => 'nullable|integer|min:0',
             'remarks'          => 'nullable|string',
+            'submission_token' => 'required|string', // Add validation for submission token
         ]);
 
-        // Generate IAR reference number
-        $referenceNo = $this->referenceNumberService->generateIarNumber($validated['supply_id']);
+        try {
+            // Generate IAR reference number
+            $referenceNo = $this->referenceNumberService->generateIarNumber($validated['supply_id']);
 
-        DB::transaction(function() use ($validated, $request, $referenceNo) {
-            // 1) Pull or init the summary row (group only by supply+cluster)
-            $stock = SupplyStock::firstOrNew([
-                'supply_id'    => $validated['supply_id'],
-                'fund_cluster' => $validated['fund_cluster'],
+            DB::transaction(function() use ($validated, $request, $referenceNo) {
+                // 1) Pull or init the summary row (group only by supply+cluster)
+                $stock = SupplyStock::firstOrNew([
+                    'supply_id'    => $validated['supply_id'],
+                    'fund_cluster' => $validated['fund_cluster'],
+                ]);
+
+                // 2) Compute previous totals
+                $oldQty       = $stock->exists ? $stock->quantity_on_hand : 0;
+                $oldTotalCost = $stock->exists ? $stock->total_cost       : 0;
+
+                // 3) Add the new lot
+                $newQty        = $oldQty + $validated['quantity_on_hand'];
+                $newLotCost    = $validated['quantity_on_hand'] * $validated['unit_cost'];
+                $newTotalCost  = $oldTotalCost + $newLotCost;
+                $newAvgCost    = $newTotalCost / $newQty;
+
+                // 4) Update summary row
+                $stock->quantity_on_hand = $newQty;
+                $stock->total_cost       = $newTotalCost;
+                $stock->unit_cost        = $newAvgCost;
+                $stock->expiry_date      = $validated['expiry_date'];
+                $stock->status           = $validated['status'];
+                $stock->days_to_consume  = $validated['days_to_consume'];
+                $stock->remarks          = $validated['remarks'];
+                $stock->save();
+
+                // 5) Log this receipt transaction
+                SupplyTransaction::create([
+                    'supply_id'        => $validated['supply_id'],
+                    'transaction_type' => 'receipt',
+                    'transaction_date' => now()->toDateString(),
+                    'reference_no'     => $referenceNo,
+                    'quantity'         => $validated['quantity_on_hand'],
+                    'unit_cost'        => $validated['unit_cost'],
+                    'total_cost'       => $newLotCost,
+                    'balance_quantity' => $newQty,
+                    'department_id'    => auth()->user()->department_id,
+                    'user_id'          => auth()->id(),
+                    'remarks'          => $validated['remarks'],
+                    'fund_cluster'     => $validated['fund_cluster'],
+                    'days_to_consume'  => $validated['days_to_consume'],
+                ]);
+            });
+
+            // Clear the submission token after successful creation
+            session()->forget($sessionKey);
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('success', 'Stock received and transaction logged.');
+
+        } catch (\Exception $e) {
+            // Clear the submission token on error so user can retry
+            session()->forget($sessionKey);
+
+            Log::error('Failed to create stock', [
+                'error' => $e->getMessage(),
+                'supply_id' => $validated['supply_id'] ?? null,
+                'user_id' => auth()->id()
             ]);
 
-            // 2) Compute previous totals
-            $oldQty       = $stock->exists ? $stock->quantity_on_hand : 0;
-            $oldTotalCost = $stock->exists ? $stock->total_cost       : 0;
-
-            // 3) Add the new lot
-            $newQty        = $oldQty + $validated['quantity_on_hand'];
-            $newLotCost    = $validated['quantity_on_hand'] * $validated['unit_cost'];
-            $newTotalCost  = $oldTotalCost + $newLotCost;
-            $newAvgCost    = $newTotalCost / $newQty;
-
-            // 4) Update summary row
-            $stock->quantity_on_hand = $newQty;
-            $stock->total_cost       = $newTotalCost;
-            $stock->unit_cost        = $newAvgCost;
-            $stock->expiry_date      = $validated['expiry_date'];
-            $stock->status           = $validated['status'];
-            $stock->days_to_consume  = $validated['days_to_consume'];
-            $stock->remarks          = $validated['remarks'];
-            $stock->save();
-
-            // 5) Log this receipt transaction
-            SupplyTransaction::create([
-                'supply_id'        => $validated['supply_id'],
-                'transaction_type' => 'receipt',
-                'transaction_date' => now()->toDateString(),
-                'reference_no'     => $referenceNo,
-                'quantity'         => $validated['quantity_on_hand'],
-                'unit_cost'        => $validated['unit_cost'],
-                'total_cost'       => $newLotCost,
-                'balance_quantity' => $newQty,
-                'department_id'    => auth()->user()->department_id,
-                'user_id'          => auth()->id(),
-                'remarks'          => $validated['remarks'],
-                'fund_cluster'     => $validated['fund_cluster'],
-                'days_to_consume'  => $validated['days_to_consume'],
-            ]);
-        });
-
-        return redirect()
-            ->route('stocks.index')
-            ->with('success', 'Stock received and transaction logged.');
+            return back()->with('error', 'Failed to add stock. Please try again.');
+        }
     }
 
     /**
@@ -125,6 +161,24 @@ class SupplyStockController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // DOUBLE SUBMISSION PREVENTION - START
+        // Generate a unique submission token if not present
+        if (!$request->has('submission_token')) {
+            $request->merge(['submission_token' => uniqid() . time()]);
+        }
+
+        // Check for duplicate submission
+        $submissionToken = $request->input('submission_token');
+        $sessionKey = 'last_stock_update_' . auth()->id() . '_' . $id;
+
+        if (session()->has($sessionKey) && session($sessionKey) === $submissionToken) {
+            return back()->with('error', 'Duplicate submission detected. Stock was already updated.');
+        }
+
+        // Store the submission token
+        session([$sessionKey => $submissionToken]);
+        // DOUBLE SUBMISSION PREVENTION - END
+
         // Log the incoming data for debugging
         Log::debug('Update stock request data:', $request->all());
 
@@ -140,40 +194,58 @@ class SupplyStockController extends Controller
             'fund_cluster'     => 'required|in:101,151',
             'days_to_consume'  => 'nullable|integer|min:0',
             'remarks'          => 'nullable|string',
+            'submission_token' => 'required|string', // Add validation for submission token
         ]);
 
         // Log the validated data for debugging
         Log::debug('Validated update data:', $validated);
 
-        $stock = SupplyStock::findOrFail($id);
+        try {
+            $stock = SupplyStock::findOrFail($id);
 
-        // We keep the same quantity but re‑value at the new unit_cost
-        $currentQty = $stock->quantity_on_hand;
-        $validated['total_cost'] = $currentQty * $validated['unit_cost'];
+            // We keep the same quantity but re‑value at the new unit_cost
+            $currentQty = $stock->quantity_on_hand;
+            $validated['total_cost'] = $currentQty * $validated['unit_cost'];
 
-        // Update stock with all validated fields, including remarks
-        $stock->update($validated);
+            // Update stock with all validated fields, including remarks
+            $stock->update($validated);
 
-        // Create an adjustment transaction to log this change
-        SupplyTransaction::create([
-            'supply_id'        => $stock->supply_id,
-            'transaction_type' => 'adjustment',
-            'transaction_date' => now()->toDateString(),
-            'reference_no'     => 'Re-valuation',
-            'quantity'         => 0, // Zero quantity for re-valuation
-            'unit_cost'        => $validated['unit_cost'],
-            'total_cost'       => 0, // Zero cost impact
-            'balance_quantity' => $stock->quantity_on_hand,
-            'department_id'    => auth()->user()->department_id,
-            'user_id'          => auth()->id(),
-            'remarks'          => $validated['remarks'] ?? 'Stock re-valued', // Make sure we capture remarks
-            'fund_cluster'     => $validated['fund_cluster'],
-            'days_to_consume'  => $validated['days_to_consume'],
-        ]);
+            // Create an adjustment transaction to log this change
+            SupplyTransaction::create([
+                'supply_id'        => $stock->supply_id,
+                'transaction_type' => 'adjustment',
+                'transaction_date' => now()->toDateString(),
+                'reference_no'     => 'Re-valuation',
+                'quantity'         => 0, // Zero quantity for re-valuation
+                'unit_cost'        => $validated['unit_cost'],
+                'total_cost'       => 0, // Zero cost impact
+                'balance_quantity' => $stock->quantity_on_hand,
+                'department_id'    => auth()->user()->department_id,
+                'user_id'          => auth()->id(),
+                'remarks'          => $validated['remarks'] ?? 'Stock re-valued', // Make sure we capture remarks
+                'fund_cluster'     => $validated['fund_cluster'],
+                'days_to_consume'  => $validated['days_to_consume'],
+            ]);
 
-        return redirect()
-            ->route('stocks.index')
-            ->with('success', 'Stock updated successfully.');
+            // Clear the submission token after successful update
+            session()->forget($sessionKey);
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('success', 'Stock updated successfully.');
+
+        } catch (\Exception $e) {
+            // Clear the submission token on error so user can retry
+            session()->forget($sessionKey);
+
+            Log::error('Failed to update stock', [
+                'error' => $e->getMessage(),
+                'stock_id' => $id,
+                'user_id' => auth()->id()
+            ]);
+
+            return back()->with('error', 'Failed to update stock. Please try again.');
+        }
     }
 
     /**
@@ -181,37 +253,59 @@ class SupplyStockController extends Controller
      */
     public function createBeginningBalances()
     {
+        // Check for duplicate submission (simple approach for this method)
+        $sessionKey = 'beginning_balance_created_' . auth()->id();
+
+        if (session()->has($sessionKey) && session($sessionKey) === now()->format('Y-m-d')) {
+            return redirect()->route('stocks.index')
+                ->with('error', 'Beginning balances have already been created today.');
+        }
+
         // Check if we're in a new year period
         if (!$this->referenceNumberService->isNewYear()) {
             return redirect()->route('stocks.index')
                 ->with('error', 'Beginning balance can only be created at the beginning of the year.');
         }
 
-        // Get all supplies with stock
-        $stocks = SupplyStock::where('quantity_on_hand', '>', 0)->get();
+        try {
+            // Get all supplies with stock
+            $stocks = SupplyStock::where('quantity_on_hand', '>', 0)->get();
 
-        DB::transaction(function() use ($stocks) {
-            foreach ($stocks as $stock) {
-                // Create beginning balance transaction for each stock
-                SupplyTransaction::create([
-                    'supply_id'        => $stock->supply_id,
-                    'transaction_type' => 'receipt',
-                    'transaction_date' => now()->startOfYear()->toDateString(),
-                    'reference_no'     => 'Beginning Balance',
-                    'quantity'         => $stock->quantity_on_hand,
-                    'unit_cost'        => $stock->unit_cost,
-                    'total_cost'       => $stock->total_cost,
-                    'balance_quantity' => $stock->quantity_on_hand,
-                    'department_id'    => auth()->user()->department_id,
-                    'user_id'          => auth()->id(),
-                    'remarks'          => 'Beginning balance for ' . now()->year,
-                    'fund_cluster'     => $stock->fund_cluster,
-                ]);
-            }
-        });
+            DB::transaction(function() use ($stocks) {
+                foreach ($stocks as $stock) {
+                    // Create beginning balance transaction for each stock
+                    SupplyTransaction::create([
+                        'supply_id'        => $stock->supply_id,
+                        'transaction_type' => 'receipt',
+                        'transaction_date' => now()->startOfYear()->toDateString(),
+                        'reference_no'     => 'Beginning Balance',
+                        'quantity'         => $stock->quantity_on_hand,
+                        'unit_cost'        => $stock->unit_cost,
+                        'total_cost'       => $stock->total_cost,
+                        'balance_quantity' => $stock->quantity_on_hand,
+                        'department_id'    => auth()->user()->department_id,
+                        'user_id'          => auth()->id(),
+                        'remarks'          => 'Beginning balance for ' . now()->year,
+                        'fund_cluster'     => $stock->fund_cluster,
+                    ]);
+                }
+            });
 
-        return redirect()->route('stocks.index')
-            ->with('success', 'Beginning balances created successfully for ' . now()->year);
+            // Mark that beginning balance was created today
+            session([$sessionKey => now()->format('Y-m-d')]);
+
+            return redirect()->route('stocks.index')
+                ->with('success', 'Beginning balances created successfully for ' . now()->year);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to create beginning balances', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->route('stocks.index')
+                ->with('error', 'Failed to create beginning balances. Please try again.');
+        }
     }
 
     /**
@@ -220,11 +314,33 @@ class SupplyStockController extends Controller
      */
     public function destroy($id)
     {
-        $stock = SupplyStock::findOrFail($id);
-        $stock->delete();
+        try {
+            $stock = SupplyStock::findOrFail($id);
 
-        return redirect()
-            ->route('stocks.index')
-            ->with('deleted', 'Stock deleted successfully.');
+            // Log the deletion for audit purposes
+            Log::info('Stock deleted', [
+                'stock_id' => $stock->stock_id,
+                'supply_id' => $stock->supply_id,
+                'quantity' => $stock->quantity_on_hand,
+                'user_id' => auth()->id()
+            ]);
+
+            $stock->delete();
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('deleted', 'Stock deleted successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Failed to delete stock', [
+                'error' => $e->getMessage(),
+                'stock_id' => $id,
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('error', 'Failed to delete stock. Please try again.');
+        }
     }
 }
