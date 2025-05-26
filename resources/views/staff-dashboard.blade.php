@@ -467,8 +467,8 @@
                                                                             class="flex items-center justify-between mb-2">
                                                                             <span
                                                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300') }}">
-                                                                                    {{ $stock->available_for_request }}
-                                                                                    available
+                                                                                {{ $stock->available_for_request }}
+                                                                                available
                                                                             </span>
                                                                         </div>
                                                                         <div
@@ -581,6 +581,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Replace the existing script section in your staff dashboard with this updated version -->
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function() {
                                         // Modal Controls
@@ -688,13 +689,14 @@
                                         if (itemsHeaderDiv) {
                                             const addAllToRequestBtn = document.createElement('button');
                                             addAllToRequestBtn.type = 'button';
-                                            addAllToRequestBtn.className = 'px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-900 flex items-center shadow-sm mr-2';
+                                            addAllToRequestBtn.className =
+                                                'px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-900 flex items-center shadow-sm mr-2';
                                             addAllToRequestBtn.innerHTML = `
-                                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                </svg>
-                                                Add All to Request
-                                            `;
+                                                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                    Add All to Request
+                                                `;
 
                                             // Find the container that has the viewCartBtn and insert our button before it
                                             const buttonsContainer = itemsHeaderDiv.querySelector('.flex.items-center');
@@ -758,8 +760,8 @@
 
                                                         // Change button text to "Back to Items"
                                                         viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                                        </svg>Back to Items`;
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                    </svg>Back to Items`;
                                                     } else {
                                                         // Show products grid, hide selected items
                                                         selectedItemsContainer.classList.add('hidden');
@@ -767,13 +769,14 @@
 
                                                         // Change button text to "View Selected"
                                                         viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                        </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>View Selected (<span id="itemCount">${selectedItems.length}</span>)`;
                                                     }
 
                                                     // Apply styling to quantity spans in the selected items list
                                                     setTimeout(() => {
-                                                        const quantitySpans = document.querySelectorAll('#selected-items-list .w-10');
+                                                        const quantitySpans = document.querySelectorAll(
+                                                            '#selected-items-list .w-10');
                                                         quantitySpans.forEach(span => {
                                                             span.classList.add('quantity-display');
                                                         });
@@ -792,7 +795,8 @@
                                             const supplyName = card.getAttribute('data-name');
 
                                             // Update available quantity span reference
-                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                            const availableSpan = card.querySelector(
+                                                '.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
 
                                             if (minusBtn && plusBtn && quantityInput) {
                                                 minusBtn.addEventListener('click', function() {
@@ -825,7 +829,8 @@
                                                 addToCartBtn.addEventListener('click', function() {
                                                     const quantity = parseInt(quantityInput.value, 10);
                                                     if (quantity > 0) {
-                                                        addItemToSelection(supplyId, supplyName, quantity, originalAvailableQuantities[supplyId]);
+                                                        addItemToSelection(supplyId, supplyName, quantity,
+                                                            originalAvailableQuantities[supplyId]);
                                                         quantityInput.value = 0;
                                                     }
                                                 });
@@ -892,7 +897,8 @@
                                             const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
                                             if (!card) return;
 
-                                            const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                            const availableSpan = card.querySelector(
+                                            '.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
                                             const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
                                             const newAvailable = currentAvailable + change;
 
@@ -904,14 +910,18 @@
                                                 availableSpan.textContent = `${newAvailable} available`;
 
                                                 // Update color based on availability
-                                                availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+                                                availableSpan.className =
+                                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
 
                                                 if (newAvailable > 10) {
-                                                    availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                    availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900',
+                                                        'dark:text-green-300');
                                                 } else if (newAvailable > 0) {
-                                                    availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                    availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900',
+                                                        'dark:text-yellow-300');
                                                 } else {
-                                                    availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                    availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900',
+                                                        'dark:text-red-300');
                                                 }
                                             }
 
@@ -968,12 +978,12 @@
 
                                             if (selectedItems.length === 0) {
                                                 selectedItemsList.innerHTML = `
-                                                    <tr>
-                                                        <td colspan="3" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                                                            No items selected. Add items from the product list.
-                                                        </td>
-                                                    </tr>
-                                                `;
+                                                        <tr>
+                                                            <td colspan="3" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                                                No items selected. Add items from the product list.
+                                                            </td>
+                                                        </tr>
+                                                    `;
                                                 // Hide the selected items view if visible
                                                 if (selectedItemsContainer && !selectedItemsContainer.classList.contains('hidden')) {
                                                     // Make sure we show products grid and hide selected items
@@ -983,8 +993,8 @@
                                                     // Update the button text
                                                     if (viewCartBtn) {
                                                         viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                        </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>View Selected (<span id="itemCount">0</span>)`;
                                                     }
                                                 }
                                             } else {
@@ -1051,7 +1061,8 @@
                                         function editItemQuantity(index, action) {
                                             const itemIndex = selectedItems.findIndex(item => item.index === index);
                                             if (itemIndex >= 0) {
-                                                const card = document.querySelector(`.product-card[data-supply-id="${selectedItems[itemIndex].supplyId}"]`);
+                                                const card = document.querySelector(
+                                                    `.product-card[data-supply-id="${selectedItems[itemIndex].supplyId}"]`);
                                                 const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
                                                 const supplyId = selectedItems[itemIndex].supplyId;
 
@@ -1116,19 +1127,24 @@
 
                                                 // Reset available quantity display
                                                 card.setAttribute('data-available', originalQuantity);
-                                                const availableSpan = card.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+                                                const availableSpan = card.querySelector(
+                                                    '.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
                                                 if (availableSpan) {
                                                     availableSpan.textContent = `${originalQuantity} available`;
 
                                                     // Update color based on original availability
-                                                    availableSpan.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+                                                    availableSpan.className =
+                                                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
 
                                                     if (originalQuantity > 10) {
-                                                        availableSpan.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-300');
+                                                        availableSpan.classList.add('bg-green-100', 'text-green-800',
+                                                            'dark:bg-green-900', 'dark:text-green-300');
                                                     } else if (originalQuantity > 0) {
-                                                        availableSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900', 'dark:text-yellow-300');
+                                                        availableSpan.classList.add('bg-yellow-100', 'text-yellow-800',
+                                                            'dark:bg-yellow-900', 'dark:text-yellow-300');
                                                     } else {
-                                                        availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-300');
+                                                        availableSpan.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900',
+                                                            'dark:text-red-300');
                                                     }
                                                 }
 
@@ -1155,88 +1171,9 @@
                                                 // Update the button text
                                                 if (viewCartBtn) {
                                                     viewCartBtn.innerHTML = `<svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                    </svg>View Selected (<span id="itemCount">0</span>)`;
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>View Selected (<span id="itemCount">0</span>)`;
                                                 }
-                                            }
-                                        }
-
-                                        // Add/Remove Item Functionality (original functionality)
-                                        const addItemBtn = document.getElementById('addItem');
-                                        const itemsContainer = document.getElementById('itemsContainer');
-
-                                        if (addItemBtn && itemsContainer) {
-                                            addItemBtn.addEventListener('click', function() {
-                                                const itemRows = document.querySelectorAll('.item-row');
-                                                const newIndex = itemRows.length;
-
-                                                const newRow = document.createElement('tr');
-                                                newRow.className = 'item-row';
-                                                newRow.innerHTML = `
-                                                        <td class="px-4 py-2">
-                                                            <select name="supplies[${newIndex}][supply_id]" class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                                <option value="">Select an item</option>
-                                                                @foreach ($stocks as $stock)
-                                                                    <option value="{{ $stock->supply_id }}">
-                                                                        {{ $stock->supply->item_name }} ({{ $stock->quantity_on_hand }} available)
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </td>
-                                                        <td class="px-4 py-2">
-                                                            <input type="number" name="supplies[${newIndex}][quantity]" min="1" value="1"
-                                                                class="w-full px-2 py-1 border border-gray-300 rounded" required>
-                                                        </td>
-                                                        <td class="px-4 py-2">
-                                                            <button type="button" class="text-red-500 hover:text-red-700 remove-item">
-                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                </svg>
-                                                            </button>
-                                                        </td>
-                                                    `;
-
-                                                itemsContainer.appendChild(newRow);
-
-                                                // Enable the first row's remove button if we now have more than one row
-                                                if (newIndex === 1) {
-                                                    document.querySelector('.remove-item').removeAttribute('disabled');
-                                                }
-
-                                                // Add event listener to the new remove button
-                                                newRow.querySelector('.remove-item').addEventListener('click', function() {
-                                                    removeItem(this);
-                                                });
-                                            });
-
-                                            // Function to remove an item row
-                                            function removeItem(button) {
-                                                const row = button.closest('.item-row');
-                                                row.remove();
-
-                                                // If only one row left, disable its remove button
-                                                const itemRows = document.querySelectorAll('.item-row');
-                                                if (itemRows.length === 1) {
-                                                    itemRows[0].querySelector('.remove-item').setAttribute('disabled', 'disabled');
-                                                }
-
-                                                // Reindex the remaining rows
-                                                itemRows.forEach((row, index) => {
-                                                    const selectInput = row.querySelector('select');
-                                                    const quantityInput = row.querySelector('input[type="number"]');
-
-                                                    selectInput.name = `supplies[${index}][supply_id]`;
-                                                    quantityInput.name = `supplies[${index}][quantity]`;
-                                                    quantityInput.name = `supplies[${index}][quantity]`;
-                                                });
-                                            }
-
-                                            // Add event listener to the first row's remove button
-                                            const firstRemoveButton = document.querySelector('.remove-item');
-                                            if (firstRemoveButton) {
-                                                firstRemoveButton.addEventListener('click', function() {
-                                                    removeItem(this);
-                                                });
                                             }
                                         }
 
@@ -1309,23 +1246,8 @@
                                             }
                                         }
 
-                                        // Also update the quantity inputs in the selection modal
-                                        const addToRequestContainers = document.querySelectorAll('[class*="Add to Request"]');
-                                        addToRequestContainers.forEach(container => {
-                                            const parent = container.closest('.relative, .flex');
-                                            if (parent) {
-                                                const quantityInput = parent.querySelector('input[type="number"]');
-                                                if (quantityInput) {
-                                                    const wrapper = quantityInput.parentElement;
-                                                    if (wrapper && !wrapper.classList.contains('quantity-wrapper')) {
-                                                        wrapper.classList.add('quantity-wrapper');
-                                                    }
-                                                }
-                                            }
-                                        });
-
                                         // ========================
-                                        // E-SIGNATURE CONFIRMATION MODAL
+                                        // E-SIGNATURE CONFIRMATION MODAL WITH STOCK VALIDATION
                                         // ========================
 
                                         // Get the form for requisition submission
@@ -1352,7 +1274,8 @@
                                                 const purposeText = document.querySelector('textarea[name="purpose"]').value.trim();
 
                                                 // User's signature path for preview if available
-                                                const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+                                                const userSignaturePath =
+                                                    "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
 
                                                 // Signature preview HTML - will show if e-signature is selected
                                                 const signaturePreviewHtml = userSignaturePath ?
@@ -1414,16 +1337,19 @@
                                                         const esignRadio = document.getElementById('swal-esign');
                                                         const sgdRadio = document.getElementById('swal-sgd');
                                                         const termsDiv = document.getElementById('esign-terms');
-                                                        const signaturePreview = document.getElementById('signature-preview-container');
+                                                        const signaturePreview = document.getElementById(
+                                                            'signature-preview-container');
 
                                                         // Function to toggle the confirm button state based on selections
                                                         const updateConfirmButtonState = () => {
                                                             if (esignRadio.checked && !agreeTerms.checked) {
                                                                 confirmButton.disabled = true;
-                                                                confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+                                                                confirmButton.classList.add('opacity-50',
+                                                                    'cursor-not-allowed');
                                                             } else {
                                                                 confirmButton.disabled = false;
-                                                                confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                                                confirmButton.classList.remove('opacity-50',
+                                                                    'cursor-not-allowed');
                                                             }
                                                         };
 
@@ -1431,7 +1357,8 @@
                                                         esignRadio.addEventListener('change', function() {
                                                             if (this.checked) {
                                                                 termsDiv.classList.remove('hidden');
-                                                                if (signaturePreview) signaturePreview.classList.remove('hidden');
+                                                                if (signaturePreview) signaturePreview.classList
+                                                                    .remove('hidden');
                                                                 updateConfirmButtonState();
                                                             }
                                                         });
@@ -1439,7 +1366,8 @@
                                                         sgdRadio.addEventListener('change', function() {
                                                             if (this.checked) {
                                                                 termsDiv.classList.add('hidden');
-                                                                if (signaturePreview) signaturePreview.classList.add('hidden');
+                                                                if (signaturePreview) signaturePreview.classList
+                                                                    .add('hidden');
                                                                 updateConfirmButtonState();
                                                             }
                                                         });
@@ -1452,13 +1380,16 @@
                                                         updateConfirmButtonState();
                                                     },
                                                     preConfirm: () => {
-                                                        const signatureType = document.querySelector('input[name="signature_type"]:checked').value;
+                                                        const signatureType = document.querySelector(
+                                                            'input[name="signature_type"]:checked').value;
 
                                                         // If e-signature selected, check if terms are agreed to
                                                         if (signatureType === 'esign') {
-                                                            const termsAgreed = document.getElementById('agree-terms').checked;
+                                                            const termsAgreed = document.getElementById('agree-terms')
+                                                                .checked;
                                                             if (!termsAgreed) {
-                                                                Swal.showValidationMessage('You must agree to the terms to use e-signature');
+                                                                Swal.showValidationMessage(
+                                                                    'You must agree to the terms to use e-signature');
                                                                 return false;
                                                             }
                                                         }
@@ -1468,7 +1399,8 @@
                                                 }).then((result) => {
                                                     if (result.isConfirmed) {
                                                         // Add signature type as hidden field
-                                                        let signatureInput = risForm.querySelector('input[name="signature_type"]');
+                                                        let signatureInput = risForm.querySelector(
+                                                            'input[name="signature_type"]');
 
                                                         if (!signatureInput) {
                                                             signatureInput = document.createElement('input');
@@ -1479,9 +1411,6 @@
 
                                                         signatureInput.value = result.value;
 
-                                                        // Submit the form
-                                                        risForm.submit();
-
                                                         // Show loading indicator
                                                         Swal.fire({
                                                             title: 'Submitting...',
@@ -1491,6 +1420,144 @@
                                                                 Swal.showLoading();
                                                             }
                                                         });
+
+                                                        // Submit the form using AJAX to handle stock validation
+                                                        const formData = new FormData(risForm);
+
+                                                        fetch(risForm.action, {
+                                                                method: 'POST',
+                                                                body: formData,
+                                                                headers: {
+                                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                                    'X-CSRF-TOKEN': document.querySelector(
+                                                                        'meta[name="csrf-token"]').getAttribute(
+                                                                        'content')
+                                                                }
+                                                            })
+                                                            .then(response => response.json())
+                                                            .then(data => {
+                                                                if (data.success) {
+                                                                    // Success - show success message and reload page
+                                                                    Swal.fire({
+                                                                        title: 'Success!',
+                                                                        text: data.message,
+                                                                        icon: 'success',
+                                                                        confirmButtonColor: '#10B981'
+                                                                    }).then(() => {
+                                                                        // Reload the page to refresh the stock data
+                                                                        window.location.reload();
+                                                                    });
+                                                                } else if (data.type === 'stock_validation_error') {
+                                                                    // Stock validation error - show detailed error message
+                                                                    let errorHtml = `
+                                                                            <div class="text-left">
+                                                                                <p class="mb-3 text-red-600 font-semibold">${data.message}</p>
+                                                                                <div class="bg-red-50 border border-red-200 rounded p-3 mb-3">
+                                                                                    <h4 class="font-semibold text-red-800 mb-2">Issues found:</h4>
+                                                                                    <ul class="space-y-2">
+                                                                        `;
+
+                                                                    data.errors.forEach(error => {
+                                                                                                        errorHtml += `
+                                                                        <li class="text-sm">
+                                                                            <strong>${error.supply_name || 'Unknown Item'}:</strong><br>
+                                                                            ${error.message}
+                                                                        </li>
+                                                                    `;
+                                                                    });
+
+                                                                    errorHtml += `
+                                                                                </ul>
+                                                                            </div>
+                                                                            <p class="text-sm text-gray-600">
+                                                                                <strong>Recommendation:</strong> Please refresh the page or adjust your quantities and try again.
+                                                                            </p>
+                                                                        </div>
+                                                                    `;
+
+                                                                    Swal.fire({
+                                                                        title: 'Stock Availability Changed',
+                                                                        html: errorHtml,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText: 'Refresh Page',
+                                                                        cancelButtonText: 'Adjust Manually',
+                                                                        confirmButtonColor: '#3085d6',
+                                                                        cancelButtonColor: '#6B7280'
+                                                                    }).then((result) => {
+                                                                        if (result.isConfirmed) {
+                                                                            // User chose to refresh the page
+                                                                            window.location.reload();
+                                                                        } else {
+                                                                            // User chose to adjust manually
+                                                                            // Update the UI with current availability
+                                                                            if (data.current_availability) {
+                                                                                Object.keys(data
+                                                                                        .current_availability)
+                                                                                    .forEach(supplyId => {
+                                                                                        const newAvailable =
+                                                                                            data
+                                                                                            .current_availability[
+                                                                                                supplyId];
+
+                                                                                        // Find the card and update its data attribute
+                                                                                        const card = document
+                                                                                            .querySelector(
+                                                                                                `.product-card[data-supply-id="${supplyId}"]`
+                                                                                                );
+                                                                                        if (card) {
+                                                                                            // Calculate difference and update
+                                                                                            const
+                                                                                                currentDisplayed =
+                                                                                                parseInt(card
+                                                                                                    .getAttribute(
+                                                                                                        'data-available'
+                                                                                                        ), 10);
+                                                                                            const difference =
+                                                                                                newAvailable -
+                                                                                                currentDisplayed;
+
+                                                                                            updateAvailableQuantity
+                                                                                                (supplyId,
+                                                                                                    difference);
+                                                                                            originalAvailableQuantities
+                                                                                                [supplyId] =
+                                                                                                newAvailable;
+                                                                                        }
+                                                                                    });
+                                                                            }
+
+                                                                            // Show a toast notification
+                                                                            Swal.fire({
+                                                                                toast: true,
+                                                                                position: 'top-end',
+                                                                                icon: 'info',
+                                                                                title: 'Stock quantities updated',
+                                                                                showConfirmButton: false,
+                                                                                timer: 3000
+                                                                            });
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    // Other error
+                                                                    Swal.fire({
+                                                                        title: 'Error!',
+                                                                        text: data.message ||
+                                                                            'An error occurred while submitting your request.',
+                                                                        icon: 'error',
+                                                                        confirmButtonColor: '#EF4444'
+                                                                    });
+                                                                }
+                                                            })
+                                                            .catch(error => {
+                                                                console.error('Error:', error);
+                                                                Swal.fire({
+                                                                    title: 'Error!',
+                                                                    text: 'A network error occurred. Please try again.',
+                                                                    icon: 'error',
+                                                                    confirmButtonColor: '#EF4444'
+                                                                });
+                                                            });
                                                     }
                                                 });
                                             });
@@ -1829,7 +1896,8 @@
     <script>
         function confirmReceive(requisitionId) {
             // User's signature path for preview if available
-            const userSignaturePath = "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
+            const userSignaturePath =
+                "{{ Auth::user()->signature_path ? Storage::url(Auth::user()->signature_path) : '' }}";
 
             // Signature preview HTML - will show if e-signature is selected
             const signaturePreviewHtml = userSignaturePath ?
