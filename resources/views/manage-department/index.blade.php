@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Departments') }}
+            {{ __('Divisions') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
                     <!-- Button and Search Bar Container -->
@@ -58,7 +58,7 @@
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
-                            <span class="hidden sm:inline-block">Add Department</span>
+                            <span class="hidden sm:inline-block">Add Division</span>
                         </button>
                     </div>
 
@@ -91,9 +91,9 @@
 
                     <!-- Table Description Caption -->
                     <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Departments</h3>
+                        <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Divisions</h3>
                         <p>
-                            This section lists CHED's departments responsible for policy formulation,
+                            This section lists CHED's divisions responsible for policy formulation,
                             program implementation, quality assurance, and institutional management,
                                 supporting effective governance and higher education excellence.
                         </p>
@@ -179,9 +179,9 @@
                                                         </svg>
                                                         <p
                                                             class="text-lg font-medium text-gray-500 dark:text-gray-400">
-                                                            No departments found</p>
+                                                            No Divison found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
-                                                            started by adding a new department</p>
+                                                            started by adding a new Division</p>
                                                         <button type="button"
                                                             data-modal-target="createDepartmentModal"
                                                             data-modal-toggle="createDepartmentModal"
@@ -193,7 +193,7 @@
                                                                     d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
-                                                            Add Department
+                                                            Add Division
                                                         </button>
                                                     </div>
                                                 </td>
@@ -231,7 +231,7 @@
                                 <div
                                     class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-blue-600 to-blue-800">
                                     <h3 class="text-xl font-semibold text-white">
-                                        Create New Department
+                                        Create New Division
                                     </h3>
                                     <button type="button"
                                         class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600"
@@ -264,7 +264,7 @@
                                             class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
                                         <button type="submit"
                                             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create
-                                            Department</button>
+                                            Division</button>
                                     </div>
                                 </form>
                             </div>
@@ -281,7 +281,7 @@
                                 <div
                                     class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-blue-600 to-blue-800">
                                     <h3 class="text-xl font-semibold text-white">
-                                        Edit Department
+                                        Edit Division
                                     </h3>
                                     <button type="button"
                                         class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600"
@@ -316,7 +316,7 @@
                                             class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Cancel</button>
                                         <button type="submit"
                                             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Update
-                                            Department</button>
+                                            Division</button>
                                     </div>
                                 </form>
                             </div>
@@ -346,7 +346,7 @@
                                                 <line x1="14" y1="11" x2="14" y2="17">
                                                 </line>
                                             </svg>
-                                            Delete Department
+                                            Delete Division
                                         </h3>
                                         <button type="button"
                                             class="text-white bg-transparent hover:bg-red-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
@@ -377,7 +377,7 @@
                                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">
                                                 Confirm Deletion</h3>
                                             <div class="mt-2 text-gray-600 dark:text-gray-400">
-                                                <p>Are you sure you want to delete department:</p>
+                                                <p>Are you sure you want to delete division:</p>
                                                 <p class="font-semibold text-gray-800 dark:text-white mt-1">
                                                     "{{ $department->name }}"</p>
                                             </div>

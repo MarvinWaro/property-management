@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="mx-12 mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Category Section - Now in its own card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6">
@@ -21,8 +21,8 @@
                             @foreach ($categories as $category)
                                 <a href="#"
                                     class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-3
-                                          hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700
-                                          transition-colors duration-200">
+                                        hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700
+                                        transition-colors duration-200">
                                     <span
                                         class="text-sm font-medium text-gray-900 dark:text-white">{{ $category->name }}</span>
                                 </a>
