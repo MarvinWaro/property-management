@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-12 mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="section-container p-5">
                     <!-- Button and Search Bar Container -->
@@ -142,8 +142,9 @@
                                             <th scope="col" class="px-6 py-3">ID</th>
                                             <th scope="col" class="px-6 py-3">Supply Item</th>
                                             <th scope="col" class="px-6 py-3">Quantity</th>
-                                            <th scope="col" class="px-6 py-3">Unit Cost</th>
-                                            <th scope="col" class="px-6 py-3">Total Value</th>
+                                            {{-- <th scope="col" class="px-6 py-3">Reorder Point</th> --}}
+                                            {{-- <th scope="col" class="px-6 py-3">Moving Average Cost</th>
+                                            <th scope="col" class="px-6 py-3">Total Value</th> --}}
                                             <th scope="col" class="px-6 py-3">Status</th>
                                             <th scope="col" class="px-6 py-3">Expiry Date</th>
                                             <th scope="col" class="px-6 py-3 text-center">Actions</th>
@@ -151,8 +152,7 @@
                                     </thead>
                                     <tbody>
                                         @forelse($stocks as $stock)
-                                            <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <tr class="{{ $stock->status_background }} border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                                 <!-- ID -->
                                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                     {{ $stock->stock_id }}
@@ -168,24 +168,42 @@
                                                     {{ number_format($stock->quantity_on_hand) }}
                                                     {{ $stock->supply->unit_of_measurement }}
                                                 </td>
-                                                <!-- Unit Cost -->
+                                                <!-- Reorder Point -->
+                                                {{-- <td class="px-6 py-4 dark:text-white">
+                                                    <span class="font-medium text-gray-600 dark:text-gray-300">
+                                                        {{ number_format($stock->supply->reorder_point) }}
+                                                    </span>
+                                                    <span class="text-sm text-gray-500">{{ $stock->supply->unit_of_measurement }}</span>
+                                                </td> --}}
+                                                {{-- <!-- Unit Cost -->
                                                 <td class="px-6 py-4 dark:text-white">
                                                     ₱{{ number_format($stock->unit_cost, 2) }}
                                                 </td>
                                                 <!-- Total Value -->
                                                 <td class="px-6 py-4 dark:text-white">
                                                     ₱{{ number_format($stock->total_cost, 2) }}
-                                                </td>
+                                                </td> --}}
                                                 <!-- Status -->
                                                 <td class="px-6 py-4">
-                                                    <span
-                                                        class="px-2 py-1 text-xs font-medium rounded-full
-                                                        @if ($stock->status == 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                                        @elseif($stock->status == 'reserved')  bg-blue-100  text-blue-800  dark:bg-blue-900  dark:text-blue-300
-                                                        @elseif($stock->status == 'expired')   bg-red-100   text-red-800   dark:bg-red-900   dark:text-red-300
-                                                        @else                                 bg-gray-100  text-gray-800 dark:bg-gray-900 dark:text-gray-300 @endif">
-                                                        {{ ucfirst($stock->status) }}
+                                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $stock->status_badge_color }}">
+                                                        {{ $stock->status_display }}
                                                     </span>
+
+                                                    @if($stock->dynamic_status === 'low_stock')
+                                                        <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1 flex items-center">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Need to reorder
+                                                        </div>
+                                                    @elseif($stock->dynamic_status === 'depleted')
+                                                        <div class="text-xs text-red-600 dark:text-red-400 mt-1 flex items-center">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Out of stock
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 <!-- Expiry Date -->
                                                 <td class="px-6 py-4 dark:text-white">
@@ -199,7 +217,6 @@
                                                     @endif
                                                 </td>
                                                 <!-- Actions -->
-                                                <!-- Updates for the Action buttons in the table -->
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- + Add Stock -->
@@ -299,12 +316,13 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="px-6 py-8 text-center">
+                                                <td colspan="9" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
                                                         <!-- empty‑state SVG + copy -->
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" ...>…</svg>
-                                                        <p
-                                                            class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                                        </svg>
+                                                        <p class="text-lg font-medium text-gray-500 dark:text-gray-400">
                                                             No stock entries found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
                                                             started by adding new stock items</p>
@@ -325,7 +343,6 @@
                                             </tr>
                                         @endforelse
                                     </tbody>
-
                                 </table>
 
                                 <script>
@@ -393,9 +410,7 @@
                                         const uc = document.getElementById('edit_unit_cost');
                                         if (uc) uc.addEventListener('input', () => formatMoney(uc));
                                     });
-                                    </script>
-
-
+                                </script>
                             </div>
                         </div>
                     </div>
