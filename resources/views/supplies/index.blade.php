@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="mx-12 mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Category Section - Now in its own card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6">

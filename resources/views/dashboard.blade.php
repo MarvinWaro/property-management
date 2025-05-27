@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="py-12">
-        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Floating Cards Section (Separate) -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">

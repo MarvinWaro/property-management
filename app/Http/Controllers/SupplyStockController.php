@@ -30,8 +30,13 @@ class SupplyStockController extends Controller
         $search = $request->get('search');
         $status = $request->get('status');
 
-        // Updated to include the supply relationship for reorder point calculation
-        $stocksQuery = SupplyStock::with(['supply']);
+        // Updated to include the supply relationship and latest transaction for current unit cost
+        $stocksQuery = SupplyStock::with([
+            'supply',
+            'latestTransaction' => function($query) {
+                $query->orderBy('transaction_date', 'desc')->orderBy('created_at', 'desc');
+            }
+        ]);
 
         if ($search) {
             $stocksQuery->whereHas('supply', function($q) use ($search) {
@@ -47,22 +52,22 @@ class SupplyStockController extends Controller
                 $stocksQuery->whereHas('supply', function($q) {
                     $q->whereRaw('supply_stocks.quantity_on_hand <= supplies.reorder_point');
                 })->where('quantity_on_hand', '>', 0)
-                  ->whereNotIn('status', ['depleted', 'expired']);
+                ->whereNotIn('status', ['depleted', 'expired']);
             } elseif ($status === 'depleted') {
                 // Items with 0 quantity or manually marked as depleted
                 $stocksQuery->where(function($q) {
                     $q->where('quantity_on_hand', '<=', 0)
-                      ->orWhere('status', 'depleted');
+                    ->orWhere('status', 'depleted');
                 });
             } else {
                 // For other statuses (available, reserved, expired)
                 if ($status === 'available') {
                     // Available means > reorder point and not expired/depleted
                     $stocksQuery->where('quantity_on_hand', '>', 0)
-                               ->whereNotIn('status', ['depleted', 'expired'])
-                               ->whereHas('supply', function($q) {
-                                   $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
-                               });
+                            ->whereNotIn('status', ['depleted', 'expired'])
+                            ->whereHas('supply', function($q) {
+                                $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
+                            });
                 } else {
                     $stocksQuery->where('status', $status);
                 }

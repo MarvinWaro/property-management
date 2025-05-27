@@ -38,6 +38,55 @@ class SupplyStock extends Model
     }
 
     /**
+     * Get the latest transaction for this stock
+     */
+    public function latestTransaction()
+    {
+        return $this->hasOne(\App\Models\SupplyTransaction::class, 'supply_id', 'supply_id')
+            ->where('fund_cluster', $this->fund_cluster)
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the current unit cost from the latest ledger entry
+     */
+    public function getCurrentUnitCostAttribute()
+    {
+        $latestTransaction = \App\Models\SupplyTransaction::where('supply_id', $this->supply_id)
+            ->where('fund_cluster', $this->fund_cluster)
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($latestTransaction && $latestTransaction->balance_unit_cost) {
+            return number_format($latestTransaction->balance_unit_cost, 2);
+        }
+
+        // Fallback to the stock's unit cost if no transaction found
+        return number_format($this->unit_cost, 2);
+    }
+
+    /**
+     * Get the raw current unit cost value (without formatting)
+     */
+    public function getCurrentUnitCostRawAttribute()
+    {
+        $latestTransaction = \App\Models\SupplyTransaction::where('supply_id', $this->supply_id)
+            ->where('fund_cluster', $this->fund_cluster)
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($latestTransaction && $latestTransaction->balance_unit_cost) {
+            return $latestTransaction->balance_unit_cost;
+        }
+
+        // Fallback to the stock's unit cost if no transaction found
+        return $this->unit_cost;
+    }
+
+    /**
      * Get the dynamic status based on quantity and reorder point
      */
     public function getDynamicStatusAttribute()
