@@ -143,7 +143,7 @@
                                             <th scope="col" class="px-6 py-3">Supply Item</th>
                                             <th scope="col" class="px-6 py-3">Quantity</th>
                                             {{-- <th scope="col" class="px-6 py-3">Reorder Point</th> --}}
-                                            <th scope="col" class="px-6 py-3">Unit Cost</th>
+                                            <th scope="col" class="px-6 py-3">Moving Average Cost</th>
                                             <th scope="col" class="px-6 py-3">Total Value</th>
                                             <th scope="col" class="px-6 py-3">Status</th>
                                             <th scope="col" class="px-6 py-3">Expiry Date</th>
