@@ -6,10 +6,10 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-gray-100 dark:bg-gray-900">
                 <div class="mx-12 mx-auto py-8">
-                    <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
+                    <div class="grid grid-cols-4 sm:grid-cols-12 gap-6">
 
 
                         @if ($forceChangePassword)
