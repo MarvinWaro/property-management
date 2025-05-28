@@ -416,17 +416,20 @@
                     </div>
 
                     <!-- Pagination -->
-                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
+                    {{-- <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             @if ($stocks->count() > 0)
                                 Showing {{ $stocks->firstItem() }} to {{ $stocks->lastItem() }} of
                                 {{ $stocks->total() }} stocks
                             @endif
                         </div>
-                        <div class="mt-2 sm:mt-0">
-                            {{ $stocks->links() }}
-                        </div>
-                    </nav>
+                    </nav> --}}
+
+                    <br>
+
+                    <div class="mt-2 sm:mt-0">
+                        {{ $stocks->links() }}
+                    </div>
 
                     <!-- Create Stock Modal -->
                     <div id="createStockModal" tabindex="-1" aria-hidden="true"

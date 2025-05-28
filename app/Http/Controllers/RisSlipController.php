@@ -37,7 +37,7 @@ class RisSlipController extends Controller
             });
         }
 
-        $risSlips = $query->paginate(10)->withQueryString();
+        $risSlips = $query->paginate(5)->withQueryString();
         return view('ris.index', compact('risSlips'));
     }
 

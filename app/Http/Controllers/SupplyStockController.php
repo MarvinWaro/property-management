@@ -75,7 +75,7 @@ class SupplyStockController extends Controller
         }
 
         $supplies = Supply::all();
-        $stocks   = $stocksQuery->paginate(10);
+        $stocks   = $stocksQuery->paginate(5);
 
         return view('manage-stock.index', compact('stocks', 'supplies'));
     }
