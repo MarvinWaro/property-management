@@ -288,17 +288,20 @@
                     </div>
                     <!-- End of Supply Table -->
 
-                    <!-- Pagination -->
+                    {{-- <!-- Pagination -->
                     <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             Showing <span class="font-medium">{{ $supplies->firstItem() ?? 0 }}</span> to
                             <span class="font-medium">{{ $supplies->lastItem() ?? 0 }}</span> of
                             <span class="font-medium">{{ $supplies->total() ?? 0 }}</span> results
                         </div>
-                        <div class="mt-2 sm:mt-0">
-                            {{ $supplies->links() }}
-                        </div>
-                    </nav>
+                    </nav> --}}
+
+                    <br>
+
+                    <div class="mt-2 sm:mt-0">
+                        {{ $supplies->links() }}
+                    </div>
 
                     <!-- CREATE SUPPLY MODAL -->
                     <div id="createSupplyModal" tabindex="-1" aria-hidden="true"

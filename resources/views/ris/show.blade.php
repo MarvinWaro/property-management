@@ -611,14 +611,72 @@
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Received By (Select User)</label>
                             <select name="received_by" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
-                                <option value="">Select recipient...</option>
-                                @foreach(App\Models\User::orderBy('name')->get() as $user)
-                                    <option value="{{ $user->id }}" {{ $risSlip->requested_by == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }} - {{ optional($user->department)->name ?? 'No Department' }}
-                                    </option>
+                                <option value="" disabled>Select recipient...</option>
+
+                                @php
+                                    // Group users by department
+                                    $usersByDepartment = App\Models\User::with('department')
+                                        ->get()
+                                        ->groupBy(function($user) {
+                                            return $user->department ? $user->department->name : 'No Department';
+                                        })
+                                        ->sortKeys(); // Sort department names alphabetically
+                                @endphp
+
+                                @foreach($usersByDepartment as $departmentName => $users)
+                                    <optgroup label="{{ $departmentName }}" style="font-weight: bold; color: #2563eb; background-color: #f8fafc;">
+                                        @foreach($users->sortBy('name') as $user)
+                                            <option value="{{ $user->id }}" {{ $risSlip->requested_by == $user->id ? 'selected' : '' }} style="font-weight: normal; color: inherit; padding-left: 1rem;">
+                                                {{ $user->name }}
+                                                @if($user->designation)
+                                                    - {{ $user->designation->name }}
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
                         </div>
+
+                        <style>
+                            /* Enhanced styling for department groups */
+                            select optgroup {
+                                font-weight: bold !important;
+                                color: #2563eb !important; /* Blue color */
+                                background-color: #f8fafc !important; /* Light background */
+                                padding: 0.25rem 0.5rem !important;
+                                font-size: 0.875rem !important;
+                            }
+
+                            select option {
+                                font-weight: normal !important;
+                                color: #374151 !important; /* Normal text color */
+                                padding-left: 1rem !important;
+                                background-color: white !important;
+                            }
+
+                            /* Dark mode styles */
+                            .dark select optgroup {
+                                color: #60a5fa !important; /* Lighter blue for dark mode */
+                                background-color: #374151 !important;
+                            }
+
+                            .dark select option {
+                                color: #d1d5db !important;
+                                background-color: #1f2937 !important;
+                            }
+
+                            /* Prevent option selection from disabling */
+                            select option:disabled {
+                                color: #9ca3af !important;
+                                background-color: #f3f4f6 !important;
+                            }
+
+                            .dark select option:disabled {
+                                color: #6b7280 !important;
+                                background-color: #374151 !important;
+                            }
+                        </style>
 
                         <!-- Add signature type selection -->
                         <div class="mt-6">
@@ -659,6 +717,7 @@
                         </div>
                     </div>
 
+                    {{-- buttons --}}
                     <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                         <button type="button" id="cancelIssue" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
                             Cancel

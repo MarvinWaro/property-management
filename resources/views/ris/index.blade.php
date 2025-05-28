@@ -227,17 +227,20 @@
                     </div>
 
                     <!-- Pagination -->
-                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
+                    {{-- <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             @if ($risSlips->count() > 0)
                                 Showing {{ $risSlips->firstItem() }} to {{ $risSlips->lastItem() }} of
                                 {{ $risSlips->total() }} requisitions
                             @endif
                         </div>
-                        <div class="mt-2 sm:mt-0">
-                            {{ $risSlips->links() }}
-                        </div>
-                    </nav>
+                    </nav> --}}
+
+                    <br>
+
+                    <div class="mt-2 sm:mt-0">
+                        {{ $risSlips->links() }}
+                    </div>
                 </div>
             </div>
         </div>
