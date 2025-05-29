@@ -136,15 +136,12 @@
                         <div class="overflow-x-auto">
                             <div class="overflow-y-auto max-h-[500px]">
                                 <table class="w-full text-sm text-left">
-                                    <thead
-                                        class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                    <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
                                         <tr>
                                             <th scope="col" class="px-6 py-3">ID</th>
                                             <th scope="col" class="px-6 py-3">Supply Item</th>
                                             <th scope="col" class="px-6 py-3">Quantity</th>
-                                            {{-- <th scope="col" class="px-6 py-3">Reorder Point</th> --}}
-                                            {{-- <th scope="col" class="px-6 py-3">Moving Average Cost</th>
-                                            <th scope="col" class="px-6 py-3">Total Value</th> --}}
+                                            <th scope="col" class="px-6 py-3">Cost & Value</th>
                                             <th scope="col" class="px-6 py-3">Status</th>
                                             <th scope="col" class="px-6 py-3">Expiry Date</th>
                                             <th scope="col" class="px-6 py-3 text-center">Actions</th>
@@ -163,28 +160,18 @@
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $stock->supply->stock_no }}</div>
                                                 </td>
-                                                <!-- Quantity, Unit-Cost, Total-Cost -->
-                                                <!-- Quantity column – only the count -->
+                                                <!-- Quantity -->
                                                 <td class="px-6 py-4 dark:text-white">
                                                     {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
                                                 </td>
 
-
-                                                <!-- Reorder Point -->
-                                                {{-- <td class="px-6 py-4 dark:text-white">
-                                                    <span class="font-medium text-gray-600 dark:text-gray-300">
-                                                        {{ number_format($stock->supply->reorder_point) }}
-                                                    </span>
-                                                    <span class="text-sm text-gray-500">{{ $stock->supply->unit_of_measurement }}</span>
-                                                </td> --}}
-                                                {{-- <!-- Unit Cost -->
+                                                <!-- Combined Cost & Value -->
                                                 <td class="px-6 py-4 dark:text-white">
-                                                    ₱{{ number_format($stock->unit_cost, 2) }}
+                                                    <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                        Total: ₱{{ number_format($stock->total_cost, 2) }}
+                                                    </div>
                                                 </td>
-                                                <!-- Total Value -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    ₱{{ number_format($stock->total_cost, 2) }}
-                                                </td> --}}
 
                                                 <!-- Status -->
                                                 <td class="px-6 py-4">
@@ -211,8 +198,7 @@
                                                 <!-- Expiry Date -->
                                                 <td class="px-6 py-4 dark:text-white">
                                                     @if ($stock->expiry_date)
-                                                        <span
-                                                            class="@if (\Carbon\Carbon::parse($stock->expiry_date)->isPast()) text-red-600 dark:text-red-400 @endif">
+                                                        <span class="@if (\Carbon\Carbon::parse($stock->expiry_date)->isPast()) text-red-600 dark:text-red-400 @endif">
                                                             {{ \Carbon\Carbon::parse($stock->expiry_date)->format('M d, Y') }}
                                                         </span>
                                                     @else
@@ -232,8 +218,7 @@
                                                             title="Add stock to {{ $stock->supply->item_name }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
                                                                 fill="currentColor" viewBox="0 0 20 20">
-                                                                <path
-                                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
+                                                                <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
                                                             </svg>
                                                         </button>
 
@@ -258,10 +243,8 @@
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path
-                                                                    d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                             </svg>
                                                         </button>
 
@@ -308,10 +291,8 @@
                                                                 <path d="M3 6h18" />
                                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                <line x1="10" x2="10" y1="11"
-                                                                    y2="17" />
-                                                                <line x1="14" x2="14" y1="11"
-                                                                    y2="17" />
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -319,7 +300,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="px-6 py-8 text-center">
+                                                <td colspan="7" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
                                                         <!-- empty‑state SVG + copy -->
                                                         <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

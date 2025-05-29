@@ -695,7 +695,7 @@
                                                 <div class="mb-4">
                                                     <label for="acquisition_cost"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Acquisition Cost <span class="text-red-500">*</span>
+                                                        Acquisition Cost
                                                     </label>
                                                     <div class="relative">
                                                         <div
