@@ -1,4 +1,4 @@
-<div class="loader-container" id="loader-container">
+{{-- <div class="loader-container" id="loader-container">
     <div class="loader-backdrop"></div>
     <div class="loader">
         <svg height="0" width="0" viewBox="0 0 64 64" class="absolute">
@@ -187,4 +187,4 @@
             rotate: 1080deg;
         }
     }
-</style>
+</style> --}}

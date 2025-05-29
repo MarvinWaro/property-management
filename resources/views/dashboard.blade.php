@@ -73,7 +73,8 @@
                                 </dd>
                                 <dd
                                     class="flex items-center space-x-1 text-xs sm:text-sm font-medium {{ $lowStockItems > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
-                                    <span>{{ $lowStockItems > 0 ? $lowStockItems . ' items low' : 'All stocked' }}</span>
+                                    {{-- <span>{{ $lowStockItems > 0 ? $lowStockItems . ' items low' : 'All stocked' }}</span> --}}
+                                    ...
                                 </dd>
                             </dl>
                             <div

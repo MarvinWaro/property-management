@@ -42,7 +42,7 @@
 
 <body class="font-sans antialiased">
 
-    <x-loader />
+    {{-- <x-loader /> --}}
 
     <x-banner />
 
