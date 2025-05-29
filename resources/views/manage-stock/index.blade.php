@@ -165,11 +165,11 @@
                                                     {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
                                                 </td>
 
-                                                <!-- Combined Cost & Value -->
+<!-- Combined Cost & Value -->
                                                 <td class="px-6 py-4 dark:text-white">
-                                                    <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
+                                                    <div class="font-medium">₱{{ number_format($stock->current_moving_average, 2) }}</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                        Total: ₱{{ number_format($stock->total_cost, 2) }}
+                                                        Total: ₱{{ number_format($stock->current_total_value, 2) }}
                                                     </div>
                                                 </td>
 

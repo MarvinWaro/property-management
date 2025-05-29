@@ -84,6 +84,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
         // Supplies Stocks
         Route::resource('stocks', SupplyStockController::class)->except(['create','show']);
+        // Add this route in your admin middleware group
+        Route::post('/stocks/recalculate-averages', [SupplyStockController::class, 'recalculateMovingAverages'])->name('stocks.recalculate-averages');
 
         // Supplies transactions
         Route::get  ('supply-transactions',         [SupplyTransactionController::class,'index'])->name('supply-transactions.index');

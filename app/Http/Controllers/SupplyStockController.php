@@ -427,6 +427,76 @@ class SupplyStockController extends Controller
     }
 
     /**
+     * Recalculate moving averages for all stocks based on transaction history
+     */
+    public function recalculateMovingAverages()
+    {
+        try {
+            DB::transaction(function() {
+                // Get all supply stocks
+                $stocks = SupplyStock::all();
+
+                foreach ($stocks as $stock) {
+                    // Get all transactions for this supply and fund cluster, ordered chronologically
+                    $transactions = SupplyTransaction::where('supply_id', $stock->supply_id)
+                        ->where('fund_cluster', $stock->fund_cluster)
+                        ->orderBy('transaction_date')
+                        ->orderBy('created_at')
+                        ->get();
+
+                    $runningQty = 0;
+                    $runningTotalCost = 0;
+
+                    // Process each transaction to recalculate moving average
+                    foreach ($transactions as $transaction) {
+                        if ($transaction->transaction_type === 'receipt') {
+                            // Add to inventory
+                            $runningQty += $transaction->quantity;
+                            $runningTotalCost += $transaction->total_cost;
+                        } elseif ($transaction->transaction_type === 'issue') {
+                            // Remove from inventory at current average cost
+                            $currentAvgCost = $runningQty > 0 ? $runningTotalCost / $runningQty : 0;
+                            $runningQty -= $transaction->quantity;
+                            $runningTotalCost -= ($transaction->quantity * $currentAvgCost);
+                        }
+                    }
+
+                    // Calculate final moving average
+                    $finalAvgCost = $runningQty > 0 ? $runningTotalCost / $runningQty : 0;
+
+                    // Update the stock record
+                    $stock->update([
+                        'quantity_on_hand' => max(0, $runningQty),
+                        'unit_cost' => round($finalAvgCost, 2),
+                        'total_cost' => round($runningTotalCost, 2)
+                    ]);
+
+                    Log::info('Recalculated moving average', [
+                        'supply_id' => $stock->supply_id,
+                        'fund_cluster' => $stock->fund_cluster,
+                        'final_qty' => $runningQty,
+                        'final_avg_cost' => $finalAvgCost,
+                        'final_total_cost' => $runningTotalCost
+                    ]);
+                }
+            });
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('success', 'Moving averages recalculated successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Failed to recalculate moving averages', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('error', 'Failed to recalculate moving averages.');
+        }
+    }
+
+    /**
      * Remove the specified summary row
      */
     public function destroy($id)

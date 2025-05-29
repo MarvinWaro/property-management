@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class SupplyStock extends Model
 {
@@ -14,7 +15,7 @@ class SupplyStock extends Model
     // ---------------------------------------------------------------------
     // BASIC CONFIG
     // ---------------------------------------------------------------------
-    protected $table      = 'supply_stocks';   // keep / adjust if you use a custom name
+    protected $table      = 'supply_stocks';
     protected $primaryKey = 'stock_id';
 
     protected $fillable = [
@@ -31,7 +32,6 @@ class SupplyStock extends Model
 
     protected $casts = [
         'quantity_on_hand' => 'integer',
-        // if you later change the column to DECIMAL(15,6) keep the cast as string
         'unit_cost'        => 'decimal:2',
         'total_cost'       => 'decimal:2',
         'expiry_date'      => 'date',
@@ -55,44 +55,77 @@ class SupplyStock extends Model
     }
 
     // ---------------------------------------------------------------------
-    // ACCESSORS – CURRENT UNIT COST (moving-average)
+    // NEW METHOD: Get Current Moving Average from Ledger Logic
+    // ---------------------------------------------------------------------
+    public function getCurrentMovingAverageAttribute()
+    {
+        // Get all transactions for this supply and fund cluster
+        $transactions = SupplyTransaction::where('supply_id', $this->supply_id)
+            ->where('fund_cluster', $this->fund_cluster)
+            ->orderBy('transaction_date')
+            ->orderBy('created_at')
+            ->get();
+
+        $runningBalance = 0;
+        $runningTotalCost = 0;
+        $currentYear = Carbon::now()->year;
+
+        // Process each transaction using the exact same logic as SupplyLedgerCardController
+        foreach ($transactions as $transaction) {
+            $unitCost = $transaction->unit_cost ?? 0;
+
+            if ($transaction->transaction_type == 'receipt') {
+                $runningBalance += $transaction->quantity;
+                $runningTotalCost += $transaction->quantity * $unitCost;
+            } elseif ($transaction->transaction_type == 'issue') {
+                $runningBalance -= $transaction->quantity;
+                $runningTotalCost -= $transaction->quantity * $unitCost;
+            } else {
+                // For adjustments, recalculate total for adjustments
+                $runningBalance = $transaction->balance_quantity ?? $runningBalance;
+                $runningTotalCost = $runningBalance * $unitCost;
+            }
+        }
+
+        // Calculate final moving average
+        return $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
+    }
+
+    // ---------------------------------------------------------------------
+    // NEW METHOD: Get Current Total Value from Ledger Logic
+    // ---------------------------------------------------------------------
+    public function getCurrentTotalValueAttribute()
+    {
+        return $this->quantity_on_hand * $this->current_moving_average;
+    }
+
+    // ---------------------------------------------------------------------
+    // FORMATTED ACCESSORS
+    // ---------------------------------------------------------------------
+    public function getCurrentUnitCostAttribute()
+    {
+        return number_format($this->current_moving_average, 2);
+    }
+
+    public function getCurrentBalanceTotalCostAttribute()
+    {
+        return number_format($this->current_total_value, 2);
+    }
+
+    // ---------------------------------------------------------------------
+    // ACCESSORS – CURRENT UNIT COST (moving-average) - Keep for backwards compatibility
     // ---------------------------------------------------------------------
     public function getCurrentUnitCostRawAttribute()
     {
-        $tx = SupplyTransaction::where('supply_id', $this->supply_id)
-              ->where('fund_cluster', $this->fund_cluster)
-              ->latest('transaction_date')
-              ->latest('created_at')
-              ->first();
-
-        return $tx && $tx->balance_unit_cost
-               ? $tx->balance_unit_cost
-               : $this->unit_cost;
+        return $this->current_moving_average;
     }
 
-    public function getCurrentUnitCostAttribute()
-    {
-        return number_format($this->current_unit_cost_raw, 2);
-    }
-
-    // ---------------------------------------------------------------------
-    // ACCESSORS – CURRENT *TOTAL* COST OF WHAT REMAINS
-    // ---------------------------------------------------------------------
     /**
-     * Raw value taken directly from summary row – avoids
-     * re-multiplying rounded unit costs.
+     * Raw value for current total cost
      */
     public function getCurrentBalanceTotalCostRawAttribute()
     {
-        return $this->total_cost;          // <- no calculation
-    }
-
-    /**
-     * Formatted string (₱1,234.56) for display.
-     */
-    public function getCurrentBalanceTotalCostAttribute()
-    {
-        return number_format($this->current_balance_total_cost_raw, 2);
+        return $this->current_total_value;
     }
 
     // ---------------------------------------------------------------------
