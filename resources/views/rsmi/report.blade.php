@@ -86,7 +86,7 @@
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             @if($index === 0)
-                                                {{ $risData['department']->name }}
+                                                {{ $risData['department'] }}
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">{{ $item['stock_no'] }}</td>

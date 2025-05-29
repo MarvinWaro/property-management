@@ -169,6 +169,7 @@
                                                     {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
                                                 </td>
 
+
                                                 <!-- Reorder Point -->
                                                 {{-- <td class="px-6 py-4 dark:text-white">
                                                     <span class="font-medium text-gray-600 dark:text-gray-300">

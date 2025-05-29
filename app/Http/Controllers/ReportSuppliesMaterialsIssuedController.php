@@ -82,7 +82,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             $firstItem = $items->first();
             return [
                 'ris_no' => $risNo,
-                'department' => $firstItem->department->name ?? 'N/A',
+                'department' => 'CHEDRO XII', // Use constant responsibility center code
                 'issued_date' => $firstItem->transaction_date,
                 'items' => $items->map(function($item) {
                     return [
@@ -95,7 +95,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                     ];
                 })
             ];
-        });
+        })->sortKeys(); // Sort by RIS number (ascending)
 
         // Calculate summary
         $summary = [
@@ -254,7 +254,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                 $firstItem = $items->first();
                 return [
                     'ris_no' => $risNo,
-                    'department' => $firstItem->department->name ?? 'N/A',
+                    'department' => 'CHEDRO XII', // Use constant responsibility center code
                     'items' => $items->map(function($item) {
                         return [
                             'stock_no' => $item->supply->stock_no,
@@ -266,7 +266,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                         ];
                     })
                 ];
-            });
+            })->sortKeys(); // Sort by RIS number (ascending)
 
             $viewName = 'rsmi.pdf-standard';
         }
@@ -317,5 +317,60 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         }
 
         return view('rsmi.monthly-comparison', compact('monthlyData', 'year', 'fundCluster'));
+    }
+
+    /**
+     * Generate RSMI summary report grouped by stock number
+     */
+    public function summary(Request $request)
+    {
+        $month = $request->get('month', Carbon::now()->format('Y-m'));
+        $fundCluster = $request->get('fund_cluster', '101');
+
+        // Parse month
+        $startDate = Carbon::parse($month . '-01')->startOfMonth();
+        $endDate = Carbon::parse($month . '-01')->endOfMonth();
+
+        // Get all transactions for the period
+        $transactions = SupplyTransaction::with(['supply.category'])
+            ->where('transaction_type', 'issue')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->whereHas('supply.stocks', function($q) use ($fundCluster) {
+                $q->where('fund_cluster', $fundCluster);
+            })
+            ->get();
+
+        // Group by stock number and calculate totals
+        $summaryData = $transactions->groupBy('supply.stock_no')->map(function($items) {
+            $supply = $items->first()->supply;
+            $totalQuantity = $items->sum('quantity');
+            $totalCost = $items->sum('total_cost');
+
+            return [
+                'stock_no' => $supply->stock_no,
+                'item_name' => $supply->item_name,
+                'unit' => $supply->unit_of_measurement,
+                'total_quantity' => $totalQuantity,
+                'total_cost' => $totalCost,
+            ];
+        })->sortBy('stock_no')->values();
+
+        $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
+
+        // Generate PDF
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('rsmi.pdf-summary', compact(
+            'summaryData',
+            'month',
+            'startDate',
+            'endDate',
+            'entityName',
+            'fundCluster'
+        ));
+
+        $pdf->setPaper('legal', 'landscape');
+
+        $filename = "rsmi-summary-{$month}-{$fundCluster}.pdf";
+        return $pdf->download($filename);
     }
 }
