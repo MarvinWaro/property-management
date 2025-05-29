@@ -55,4 +55,6 @@ class SupplyTransaction extends Model
     {
         return $this->users()->wherePivot('role', 'receiver');
     }
+
+
 }

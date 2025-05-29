@@ -48,6 +48,9 @@
                                     <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900 hidden"></span>
                                 @endif
                             </x-nav-link>
+                            <x-nav-link href="{{ route('rsmi.index') }}" :active="request()->routeIs('rsmi.*')">
+                                {{ __('RSMI') }}
+                            </x-nav-link>
                             <!-- Management Dropdown -->
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true"
                                 @mouseleave="open = false">

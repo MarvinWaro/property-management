@@ -12,7 +12,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="mx-12 mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Main Card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                 <!-- Filter Panel -->
@@ -117,7 +117,7 @@
                                     <th scope="col" class="px-6 py-3 text-right">Qty</th>
                                     <th scope="col" class="px-6 py-3 text-right">Balance</th>
                                     <th scope="col" class="px-6 py-3">Ref No</th>
-                                    <th scope="col" class="px-6 py-3">Department</th>
+                                    {{-- <th scope="col" class="px-6 py-3">Department</th> --}}
                                     {{-- <th scope="col" class="px-6 py-3">User/Staffs</th> --}}
                                     <th scope="col" class="px-6 py-3 text-center">Actions</th>
                                 </tr>
@@ -163,7 +163,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">{{ number_format($txn->balance_quantity) }}</td>
                                         <td class="px-6 py-4">{{ $txn->reference_no }}</td>
-                                        <td class="px-6 py-4">{{ $txn->department->name }}</td>
+                                        {{-- <td class="px-6 py-4">{{ $txn->department->name }}</td> --}}
                                         {{-- <td class="px-6 py-4">{{ $txn->user->name }}</td> --}}
                                         <td class="px-6 py-4 text-center">
                                             <button type="button"

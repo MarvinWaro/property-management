@@ -163,11 +163,13 @@
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $stock->supply->stock_no }}</div>
                                                 </td>
-                                                <!-- Quantity -->
+                                                <!-- Quantity, Unit-Cost, Total-Cost -->
+                                                <!-- Quantity column – only the count -->
                                                 <td class="px-6 py-4 dark:text-white">
-                                                    {{ number_format($stock->quantity_on_hand) }}
-                                                    {{ $stock->supply->unit_of_measurement }}
+                                                    {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
                                                 </td>
+
+
                                                 <!-- Reorder Point -->
                                                 {{-- <td class="px-6 py-4 dark:text-white">
                                                     <span class="font-medium text-gray-600 dark:text-gray-300">
@@ -183,6 +185,7 @@
                                                 <td class="px-6 py-4 dark:text-white">
                                                     ₱{{ number_format($stock->total_cost, 2) }}
                                                 </td> --}}
+
                                                 <!-- Status -->
                                                 <td class="px-6 py-4">
                                                     <span class="px-2 py-1 text-xs font-medium rounded-full {{ $stock->status_badge_color }}">
