@@ -3,13 +3,17 @@
         html, body {
             height: 100%;
             margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
         .register-container {
             position: relative;
-            height: 100vh;
+            min-height: 100vh;
+            width: 100%;
             background: linear-gradient(to bottom, rgba(173,216,230, 0.7), rgba(0,0,139, 0.8)),
                         url('{{ asset("img/bg-login.jpg") }}') no-repeat center center;
             background-size: cover;
+            padding: 1rem;
         }
         #particles-js {
             position: absolute;
@@ -25,7 +29,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
+            min-height: 100vh;
+            width: 100%;
+            padding: 1rem 0;
         }
         .authentication-card {
             background-color: rgba(255, 255, 255, 0.92) !important;
@@ -34,9 +40,20 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 2.5rem;
-            width: 90%;
+            padding: 1.5rem;
+            width: 100%;
             max-width: 700px;
+            margin: 1rem auto;
+        }
+        @media (min-width: 640px) {
+            .authentication-card {
+                padding: 2rem;
+            }
+        }
+        @media (min-width: 768px) {
+            .authentication-card {
+                padding: 2.5rem;
+            }
         }
         .custom-input {
             border: 1px solid #e2e8f0 !important;
@@ -46,6 +63,7 @@
             transition: all 0.3s ease;
             height: 3rem !important;
             font-size: 0.95rem;
+            width: 100%;
         }
         .custom-input:focus {
             border-color: #3b82f6 !important;
@@ -60,6 +78,7 @@
             transition: all 0.3s ease;
             height: 3rem !important;
             font-size: 0.95rem;
+            width: 100%;
         }
         .custom-select:focus {
             border-color: #3b82f6 !important;
@@ -72,18 +91,31 @@
             border-radius: 0.5rem !important;
             height: 3rem !important;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .register-button:hover {
             background: linear-gradient(45deg, #2563eb, #1e40af) !important;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
         }
+        .register-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
         .title-text {
             color: #1e3a8a;
             text-align: center;
-            margin-bottom: 1.75rem;
-            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 1.5rem;
             font-weight: bold;
+        }
+        @media (min-width: 640px) {
+            .title-text {
+                font-size: 1.75rem;
+                margin-bottom: 1.75rem;
+            }
         }
         .form-group {
             margin-bottom: 1.25rem;
@@ -94,6 +126,15 @@
             font-weight: 500;
             color: #374151;
         }
+        .logo-container {
+            max-width: 120px;
+            margin: 0 auto;
+        }
+        @media (max-width: 639px) {
+            .logo-container {
+                max-width: 100px;
+            }
+        }
     </style>
 
     <div class="register-container">
@@ -102,7 +143,7 @@
 
         <div class="content-container">
             <div class="authentication-card">
-                <div class="flex justify-center">
+                <div class="flex justify-center logo-container">
                     <x-authentication-card-logo />
                 </div>
 
@@ -113,8 +154,8 @@
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
 
-                    <!-- Two-Column Grid for Form Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Form Fields - Responsive Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <!-- Name -->
                         <div class="form-group">
                             <x-label for="name" value="{{ __('Name') }}" class="form-label" />
@@ -193,7 +234,7 @@
                     </div>
 
                     @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                        <div class="mt-5">
+                        <div class="mt-4">
                             <x-label for="terms">
                                 <div class="flex items-center">
                                     <x-checkbox name="terms" id="terms" required />
@@ -211,7 +252,7 @@
                     <!-- Register Button -->
                     <div class="mt-6">
                         <x-button class="w-full register-button">
-                            <span class="block text-center w-full">{{ __('Register') }}</span>
+                            <span class="flex items-center justify-center w-full">{{ __('Register') }}</span>
                         </x-button>
                     </div>
 
@@ -234,10 +275,13 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Adjust particle density based on screen size
+            const particleCount = window.innerWidth < 768 ? 40 : 80;
+
             particlesJS('particles-js', {
                 "particles": {
                     "number": {
-                        "value": 80,
+                        "value": particleCount,
                         "density": {
                             "enable": true,
                             "value_area": 800
@@ -270,7 +314,7 @@
                     },
                     "move": {
                         "enable": true,
-                        "speed": 2,
+                        "speed": window.innerWidth < 768 ? 1 : 2,
                         "direction": "none",
                         "random": false,
                         "straight": false,
@@ -304,6 +348,15 @@
                     }
                 },
                 "retina_detect": true
+            });
+
+            // Adjust particle config on window resize
+            window.addEventListener('resize', function() {
+                if (typeof pJSDom !== 'undefined' && pJSDom.length > 0) {
+                    pJSDom[0].pJS.particles.number.value = window.innerWidth < 768 ? 40 : 80;
+                    pJSDom[0].pJS.particles.move.speed = window.innerWidth < 768 ? 1 : 2;
+                    pJSDom[0].pJS.fn.particlesRefresh();
+                }
             });
         });
     </script>

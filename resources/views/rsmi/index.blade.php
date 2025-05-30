@@ -5,104 +5,163 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Main Content Card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6">
-                    <!-- Quick Actions -->
-                    <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">Generate Monthly Report</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">View supplies issued for a specific month</p>
-                            <form method="GET" action="{{ route('rsmi.generate') }}" class="space-y-3">
-                                <select name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                    focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800
-                                    dark:border-gray-700 dark:text-white">
-                                    @forelse($availableMonths as $month)
-                                        <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>
-                                            {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}
-                                        </option>
-                                    @empty
-                                        <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
-                                    @endforelse
-                                </select>
-                                <select name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                    focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800
-                                    dark:border-gray-700 dark:text-white">
-                                    @foreach($fundClusters as $cluster)
-                                        <option value="{{ $cluster }}" {{ $selectedFundCluster == $cluster ? 'selected' : '' }}>
-                                            Fund Cluster: {{ $cluster }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="w-full px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800
-                                    focus:ring-1 focus:outline-none focus:ring-blue-300 dark:bg-blue-600
-                                    dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <!-- Title and Description -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">RSMI Reports</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Generate and view reports of supplies and materials issued for specific periods
+                        </p>
+                    </div>
+
+                    <!-- Report Generation Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Monthly Report Card -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/20
+                            rounded-xl shadow-sm border border-blue-100 dark:border-blue-900/50 p-6">
+                            <div class="flex items-start mb-4">
+                                <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-lg mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300">Generate Monthly Report</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">View supplies issued for a specific month with fund cluster details</p>
+                                </div>
+                            </div>
+
+                            <form method="GET" action="{{ route('rsmi.generate') }}" class="space-y-4">
+                                <div>
+                                    <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Month</label>
+                                    <select id="month" name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700
+                                        dark:border-gray-600 dark:text-white">
+                                        @forelse($availableMonths as $month)
+                                            <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>
+                                                {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}
+                                            </option>
+                                        @empty
+                                            <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="fund_cluster" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                    <select id="fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700
+                                        dark:border-gray-600 dark:text-white">
+                                        @foreach($fundClusters as $cluster)
+                                            <option value="{{ $cluster }}" {{ $selectedFundCluster == $cluster ? 'selected' : '' }}>
+                                                Fund Cluster: {{ $cluster }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="w-full px-4 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700
+                                    focus:ring-2 focus:outline-none focus:ring-blue-300 dark:bg-blue-700 transition
+                                    dark:hover:bg-blue-600 dark:focus:ring-blue-800 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
                                     Generate Report
                                 </button>
                             </form>
                         </div>
 
-                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">Detailed Report by Item</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">View issuances grouped by supply item</p>
-                            <form method="GET" action="{{ route('rsmi.detailed') }}" class="space-y-3">
-                                <select name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                    focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800
-                                    dark:border-gray-700 dark:text-white">
-                                    @forelse($availableMonths as $month)
-                                        <option value="{{ $month }}">
-                                            {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}
-                                        </option>
-                                    @empty
-                                        <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
-                                    @endforelse
-                                </select>
-                                <button type="submit" class="w-full px-4 py-2 text-white bg-green-700 rounded-lg hover:bg-green-800
-                                    focus:ring-1 focus:outline-none focus:ring-green-300 dark:bg-green-600
-                                    dark:hover:bg-green-700 dark:focus:ring-green-800">
-                                    View Detailed Report
-                                </button>
-                            </form>
-                        </div>
+                        <!-- Detailed Report Card -->
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/20
+                            rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900/50 p-6">
+                            <div class="flex items-start mb-4">
+                                <div class="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-lg mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-emerald-800 dark:text-emerald-300">Detailed Report by Item</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">View issuances grouped by supply item with comprehensive details</p>
+                                </div>
+                            </div>
 
-                        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-2">Department Filter</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Generate report for specific department</p>
-                            <form method="GET" action="{{ route('rsmi.generate') }}" class="space-y-3">
-                                <select name="department_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                    focus:ring-1 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800
-                                    dark:border-gray-700 dark:text-white">
-                                    <option value="">All Departments</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->department_id }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                                <input type="hidden" name="month" value="{{ $selectedMonth }}">
-                                <button type="submit" class="w-full px-4 py-2 text-white bg-purple-700 rounded-lg hover:bg-purple-800
-                                    focus:ring-1 focus:outline-none focus:ring-purple-300 dark:bg-purple-600
-                                    dark:hover:bg-purple-700 dark:focus:ring-purple-800">
-                                    Filter by Department
-                                </button>
+                            <form method="GET" action="{{ route('rsmi.detailed') }}" class="space-y-4">
+                                <div>
+                                    <label for="detailed_month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Month</label>
+                                    <select id="detailed_month" name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                        focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700
+                                        dark:border-gray-600 dark:text-white">
+                                        @forelse($availableMonths as $month)
+                                            <option value="{{ $month }}">
+                                                {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}
+                                            </option>
+                                        @empty
+                                            <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+
+                                <div class="pt-5">
+                                    <button type="submit" class="w-full px-4 py-2.5 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700
+                                        focus:ring-2 focus:outline-none focus:ring-emerald-300 dark:bg-emerald-700 transition
+                                        dark:hover:bg-emerald-600 dark:focus:ring-emerald-800 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
+                                        </svg>
+                                        View Detailed Report
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
 
-                    <!-- Recent Issuances Summary -->
-                    <div class="mt-8">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Monthly Comparison</h3>
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                View year-round comparison of supplies issued
-                            </p>
+                    <!-- Monthly Comparison Section -->
+                    <div class="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/20
+                        rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-900/50 p-6">
+                        <div class="flex items-start md:items-center justify-between flex-col md:flex-row mb-6 md:mb-0">
+                            <div class="flex items-start mb-4 md:mb-0">
+                                <div class="bg-indigo-100 dark:bg-indigo-800 p-2 rounded-lg mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-indigo-800 dark:text-indigo-300">Monthly Comparison</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">View year-round comparison of supplies issued with trend analysis</p>
+                                </div>
+                            </div>
+
                             <a href="{{ route('rsmi.monthly-comparison') }}"
-                                class="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700
+                                focus:ring-2 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-700 transition
+                                dark:hover:bg-indigo-600 dark:focus:ring-indigo-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                                 View Comparison Chart
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips Section -->
+                    <div class="mt-8">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                            <h4 class="font-medium text-gray-800 dark:text-gray-200 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Tips for RSMI Reports
+                            </h4>
+                            <ul class="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-7 list-disc">
+                                <li>Generate monthly reports for official documentation and record-keeping</li>
+                                <li>Use detailed reports to track specific item movements across departments</li>
+                                <li>The comparison chart helps identify usage patterns and plan future procurement</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-[#dc3546] dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-12">
+<nav x-data="{ open: false }" class="bg-[#dc3546] dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -296,7 +296,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-[#dc3546]">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-[#dc3546] dark:bg-transparent">
         <div class="pt-2 pb-3 space-y-1">
             @php
                 $isAssetsMode =
@@ -306,7 +306,7 @@
 
             @if (!$isAssetsMode && auth()->user()->role === 'admin')
                 <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
+                    <div class="text-gray-200" >{{ __('Dashboard') }}</div>
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="{{ route('supplies.index') }}" :active="request()->routeIs('supplies.index')">
                     {{ __('Supplies') }}
@@ -318,7 +318,7 @@
                     {{ __('Requisitions (RIS)') }}
                 </x-responsive-nav-link>
                 <!-- Management section for mobile -->
-                <div class="block px-4 py-2 text-xs text-gray-200">
+                <div class="block px-4 py-2 text-xs text-gray-200 dark:text-gray-300">
                     {{ __('Management') }}
                 </div>
                 <x-responsive-nav-link href="{{ route('supplier.index') }}" :active="request()->routeIs('supplier.index')">
@@ -357,7 +357,7 @@
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-red-600">
+        <div class="pt-4 pb-1 border-t border-red-600 dark:border-gray-700">
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                     <div class="shrink-0 me-3">
@@ -368,7 +368,7 @@
 
                 <div>
                     <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-200">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-sm text-gray-200 dark:text-gray-300">{{ Auth::user()->email }}</div>
                 </div>
             </div>
 
@@ -411,9 +411,9 @@
 
                 <!-- Team Management -->
                 @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="border-t border-red-600"></div>
+                    <div class="border-t border-red-600 dark:border-gray-700"></div>
 
-                    <div class="block px-4 py-2 text-xs text-gray-200">
+                    <div class="block px-4 py-2 text-xs text-gray-200 dark:text-gray-300">
                         {{ __('Manage Team') }}
                     </div>
 
@@ -431,9 +431,9 @@
 
                     <!-- Team Switcher -->
                     @if (Auth::user()->allTeams()->count() > 1)
-                        <div class="border-t border-red-600"></div>
+                        <div class="border-t border-red-600 dark:border-gray-700"></div>
 
-                        <div class="block px-4 py-2 text-xs text-gray-200">
+                        <div class="block px-4 py-2 text-xs text-gray-200 dark:text-gray-300">
                             {{ __('Switch Teams') }}
                         </div>
 
