@@ -7,7 +7,6 @@ use App\Models\Property;
 use App\Models\Location;
 use App\Models\User; // Using User model now
 use Illuminate\Support\Facades\Storage;
-use Vinkla\Hashids\Facades\Hashids;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Barryvdh\DomPDF\Facade\Pdf; // PDF facade
@@ -63,8 +62,6 @@ class PropertyController extends Controller
 
         return view('manage-property.view', compact('property', 'qrCodeImage'));
     }
-
-
 
     public function downloadQr($propertyId)
     {
@@ -175,7 +172,6 @@ class PropertyController extends Controller
         // Now pass $users as well if your Blade needs it directly:
         return view('manage-property.create', compact('locations', 'users', 'activeUsers', 'excludedUsers'));
     }
-
 
     public function store(Request $request)
     {
@@ -289,13 +285,8 @@ class PropertyController extends Controller
             ->with('success', 'Property created successfully.');
     }
 
-    public function edit($hashedId)
+    public function edit(Property $property)
     {
-        $decoded = Hashids::decode($hashedId);
-        if (empty($decoded)) {
-            abort(404);
-        }
-        $property = Property::findOrFail($decoded[0]);
         $locations = Location::where('excluded', 0)->get();
 
         // Fetch all users from the users table.
@@ -310,7 +301,6 @@ class PropertyController extends Controller
 
         return view('manage-property.edit', compact('property', 'locations', 'users', 'activeUsers', 'excludedUsers'));
     }
-
 
     public function update(Request $request, Property $property)
     {
