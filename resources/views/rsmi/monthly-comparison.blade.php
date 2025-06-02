@@ -5,74 +5,111 @@
                 Monthly Comparison - {{ $year }}
             </h2>
             <a href="{{ route('rsmi.index') }}"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                Back to RSMI
+                class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to RSMI
+                </div>
             </a>
         </div>
     </x-slot>
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div class="p-6">
-                    <!-- Year Selection -->
-                    <div class="mb-6">
-                        <form method="GET" action="{{ route('rsmi.monthly-comparison') }}" class="flex items-center space-x-4">
-                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Year:</label>
-                            <select name="year" onchange="this.form.submit()"
-                                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                                @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                @endfor
-                            </select>
-                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Fund Cluster:</label>
-                            <select name="fund_cluster" onchange="this.form.submit()"
-                                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                                <option value="101" {{ $fundCluster == '101' ? 'selected' : '' }}>101</option>
-                                <option value="102" {{ $fundCluster == '102' ? 'selected' : '' }}>102</option>
-                            </select>
+                    <!-- Filter Controls -->
+                    <div class="mb-8 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <form method="GET" action="{{ route('rsmi.monthly-comparison') }}" class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                            <div class="flex items-center space-x-3">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 w-16">Year:</label>
+                                <select name="year" onchange="this.form.submit()"
+                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Fund Cluster:</label>
+                                <select name="fund_cluster" onchange="this.form.submit()"
+                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    <option value="101" {{ $fundCluster == '101' ? 'selected' : '' }}>101</option>
+                                    <option value="102" {{ $fundCluster == '102' ? 'selected' : '' }}>102</option>
+                                </select>
+                            </div>
                         </form>
                     </div>
 
                     <!-- Chart Container -->
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <canvas id="monthlyChart"></canvas>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-8">
+                        <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Monthly Issuance Trend - {{ $year }}</h3>
+                        <div class="h-[300px] relative" id="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                            <!-- Fallback message if chart doesn't render -->
+                            <div id="chart-fallback" class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 hidden">
+                                <div class="text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    <p>Chart data is loading or no data available</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Monthly Data Table -->
-                    <div class="mt-6 overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Month</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Total Amount Issued</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                    <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Month</th>
+                                    <th scope="col" class="px-6 py-3 text-right font-bold text-gray-800 dark:text-gray-200">Total Amount Issued</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php $yearTotal = 0; @endphp
                                 @foreach($monthlyData as $data)
                                     @php $yearTotal += $data['total']; @endphp
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <td class="px-6 py-4 font-medium">{{ $data['month'] }}</td>
-                                        <td class="px-6 py-4 text-right {{ $data['total'] > 0 ? 'text-green-600 dark:text-green-400' : '' }}">
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                            {{ $data['month'] }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right {{ $data['total'] > 0 ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-600 dark:text-gray-400' }}">
                                             ₱{{ number_format($data['total'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             @if($data['total'] > 0)
                                                 <a href="{{ route('rsmi.generate') }}?month={{ $year }}-{{ str_pad(array_search($data['month'], ['January','February','March','April','May','June','July','August','September','October','November','December']) + 1, 2, '0', STR_PAD_LEFT) }}"
-                                                    class="text-blue-600 hover:text-blue-900">View Report</a>
+                                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700 transition-all duration-200 inline-flex items-center justify-center"
+                                                    data-tooltip-target="tooltip-view-report-{{ str_replace(' ', '-', strtolower($data['month'])) }}"
+                                                    data-tooltip-placement="left">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                                    </svg>
+                                                </a>
+                                                <div id="tooltip-view-report-{{ str_replace(' ', '-', strtolower($data['month'])) }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                                    View {{ $data['month'] }} Report
+                                                    <div class="tooltip-arrow" data-popper-arrow></div>
+                                                </div>
                                             @else
-                                                <span class="text-gray-400">No data</span>
+                                                <span class="text-gray-400 dark:text-gray-500">No data</span>
                                             @endif
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
-                                <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                                    <td class="px-6 py-4">YEAR TOTAL</td>
-                                    <td class="px-6 py-4 text-right text-blue-600 dark:text-blue-400">
+                                <tr class="bg-gray-50 dark:bg-gray-700 font-bold">
+                                    <td class="px-6 py-4 text-gray-800 dark:text-gray-200">YEAR TOTAL</td>
+                                    <td class="px-6 py-4 text-right text-blue-600 dark:text-blue-400 font-bold">
                                         ₱{{ number_format($yearTotal, 2) }}
                                     </td>
                                     <td></td>
@@ -85,36 +122,100 @@
         </div>
     </div>
 
-    @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('monthlyChart').getContext('2d');
-        const monthlyChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($monthlyData->pluck('month')) !!},
-                datasets: [{
-                    label: 'Total Amount Issued',
-                    data: {!! json_encode($monthlyData->pluck('total')) !!},
-                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '₱' + value.toLocaleString();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the container exists
+            const chartContainer = document.getElementById('chart-container');
+            const fallbackMessage = document.getElementById('chart-fallback');
+            const ctx = document.getElementById('monthlyChart');
+
+            if (!ctx) {
+                console.error('Chart canvas element not found');
+                if (fallbackMessage) fallbackMessage.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Chart configuration
+                const monthlyLabels = {!! json_encode($monthlyData->pluck('month')) !!};
+                const monthlyValues = {!! json_encode($monthlyData->pluck('total')) !!};
+
+                // Check if we have valid data
+                if (!monthlyLabels || !monthlyValues || monthlyLabels.length === 0) {
+                    throw new Error('No chart data available');
+                }
+
+                const monthlyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthlyLabels,
+                        datasets: [{
+                            label: 'Total Amount Issued',
+                            data: monthlyValues,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            hoverBackgroundColor: 'rgba(59, 130, 246, 0.4)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let value = context.raw;
+                                        return '₱' + value.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(156, 163, 175, 0.1)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₱' + value.toLocaleString();
+                                    },
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
+
+                // Set a custom attribute to indicate the chart is loaded
+                ctx.setAttribute('data-chart-loaded', 'true');
+
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+                if (fallbackMessage) fallbackMessage.classList.remove('hidden');
             }
         });
     </script>
-    @endpush
+
 </x-app-layout>
