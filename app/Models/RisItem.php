@@ -37,4 +37,5 @@ class RisItem extends Model
     {
         return $this->belongsTo(Supply::class, 'supply_id', 'supply_id');
     }
+    
 }

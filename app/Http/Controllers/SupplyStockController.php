@@ -101,6 +101,11 @@ class SupplyStockController extends Controller
         session([$sessionKey => $submissionToken]);
         // DOUBLE SUBMISSION PREVENTION - END
 
+        // Format the unit cost properly (remove commas)
+        $request->merge([
+            'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
+        ]);
+
         $validated = $request->validate([
             'supply_id'        => 'required|exists:supplies,supply_id',
             'quantity_on_hand' => 'required|integer|min:1',
@@ -151,6 +156,16 @@ class SupplyStockController extends Controller
                 $stock->save();
 
                 // 7) Log this receipt transaction with the ORIGINAL unit cost (not weighted average)
+                // Get the authenticated user's department_id or default to a system department
+                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+
+                // Debug log to check user and department info
+                Log::info('User and Department Info', [
+                    'user_id' => auth()->id(),
+                    'department_id' => $departmentId,
+                    'auth_check' => auth()->check()
+                ]);
+
                 SupplyTransaction::create([
                     'supply_id'        => $validated['supply_id'],
                     'transaction_type' => 'receipt',
@@ -162,9 +177,9 @@ class SupplyStockController extends Controller
                     'balance_quantity' => $newTotalQty,
                     'balance_unit_cost' => round($newWeightedAvgCost, 2), // Add this field
                     'balance_total_cost' => $newTotalCost, // Add this field
-                    'department_id'    => auth()->user()->department_id,
+                    'department_id'    => $departmentId, // Use the checked department ID
                     'user_id'          => auth()->id(),
-                    'remarks'          => $validated['remarks'],
+                    'remarks'          => $validated['remarks'] ?? 'Stock receipt', // Provide default remarks
                     'fund_cluster'     => $validated['fund_cluster'],
                     'days_to_consume'  => $validated['days_to_consume'],
                 ]);
@@ -197,11 +212,13 @@ class SupplyStockController extends Controller
 
             Log::error('Failed to create stock', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'supply_id' => $validated['supply_id'] ?? null,
                 'user_id' => auth()->id()
             ]);
 
-            return back()->with('error', 'Failed to add stock. Please try again.');
+            // Show the actual error message for debugging (can be removed in production)
+            return back()->with('error', 'Failed to add stock: ' . $e->getMessage());
         }
     }
 
@@ -252,6 +269,9 @@ class SupplyStockController extends Controller
                 $stock->unit_cost = $newWeightedAvgCost;
                 $stock->save();
 
+                // Get the authenticated user's department_id or default to a system department
+                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+
                 // Log the issue transaction
                 SupplyTransaction::create([
                     'supply_id'        => $validated['supply_id'],
@@ -264,9 +284,9 @@ class SupplyStockController extends Controller
                     'balance_quantity' => $newQty,
                     'balance_unit_cost' => $newWeightedAvgCost,
                     'balance_total_cost' => $newTotalCost,
-                    'department_id'    => auth()->user()->department_id,
+                    'department_id'    => $departmentId, // Use the checked department ID
                     'user_id'          => auth()->id(),
-                    'remarks'          => $validated['remarks'],
+                    'remarks'          => $validated['remarks'] ?? 'Stock issued',
                     'fund_cluster'     => $validated['fund_cluster'],
                 ]);
             });
@@ -278,6 +298,7 @@ class SupplyStockController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to issue stock', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'supply_id' => $validated['supply_id'] ?? null,
                 'user_id' => auth()->id()
             ]);
@@ -331,24 +352,27 @@ class SupplyStockController extends Controller
             // Update stock with all validated fields, including remarks
             $stock->update($validated);
 
-            // Create an adjustment transaction to log this change
-            SupplyTransaction::create([
-                'supply_id'        => $stock->supply_id,
-                'transaction_type' => 'adjustment',
-                'transaction_date' => now()->toDateString(),
-                'reference_no'     => 'Re-valuation',
-                'quantity'         => 0, // Zero quantity for re-valuation
-                'unit_cost'        => $validated['unit_cost'],
-                'total_cost'       => 0, // Zero cost impact
-                'balance_quantity' => $stock->quantity_on_hand,
-                'balance_unit_cost' => $validated['unit_cost'],
-                'balance_total_cost' => $validated['total_cost'],
-                'department_id'    => auth()->user()->department_id,
-                'user_id'          => auth()->id(),
-                'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
-                'fund_cluster'     => $validated['fund_cluster'],
-                'days_to_consume'  => $validated['days_to_consume'],
-            ]);
+                // Get the authenticated user's department_id or default to a system department
+                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+
+                // Create an adjustment transaction to log this change
+                SupplyTransaction::create([
+                    'supply_id'        => $stock->supply_id,
+                    'transaction_type' => 'adjustment',
+                    'transaction_date' => now()->toDateString(),
+                    'reference_no'     => 'Re-valuation',
+                    'quantity'         => 0, // Zero quantity for re-valuation
+                    'unit_cost'        => $validated['unit_cost'],
+                    'total_cost'       => 0, // Zero cost impact
+                    'balance_quantity' => $stock->quantity_on_hand,
+                    'balance_unit_cost' => $validated['unit_cost'],
+                    'balance_total_cost' => $validated['total_cost'],
+                    'department_id'    => $departmentId, // Use the checked department ID
+                    'user_id'          => auth()->id(),
+                    'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
+                    'fund_cluster'     => $validated['fund_cluster'],
+                    'days_to_consume'  => $validated['days_to_consume'],
+                ]);
 
             session()->forget($sessionKey);
 
@@ -361,11 +385,12 @@ class SupplyStockController extends Controller
 
             Log::error('Failed to update stock', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'stock_id' => $id,
                 'user_id' => auth()->id()
             ]);
 
-            return back()->with('error', 'Failed to update stock. Please try again.');
+            return back()->with('error', 'Failed to update stock: ' . $e->getMessage());
         }
     }
 
@@ -391,22 +416,25 @@ class SupplyStockController extends Controller
 
             DB::transaction(function() use ($stocks) {
                 foreach ($stocks as $stock) {
-                    SupplyTransaction::create([
-                        'supply_id'        => $stock->supply_id,
-                        'transaction_type' => 'receipt',
-                        'transaction_date' => now()->startOfYear()->toDateString(),
-                        'reference_no'     => 'Beginning Balance',
-                        'quantity'         => $stock->quantity_on_hand,
-                        'unit_cost'        => $stock->unit_cost,
-                        'total_cost'       => $stock->total_cost,
-                        'balance_quantity' => $stock->quantity_on_hand,
-                        'balance_unit_cost' => $stock->unit_cost,
-                        'balance_total_cost' => $stock->total_cost,
-                        'department_id'    => auth()->user()->department_id,
-                        'user_id'          => auth()->id(),
-                        'remarks'          => 'Beginning balance for ' . now()->year,
-                        'fund_cluster'     => $stock->fund_cluster,
-                    ]);
+                // Get the authenticated user's department_id or default to a system department
+                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+
+                SupplyTransaction::create([
+                    'supply_id'        => $stock->supply_id,
+                    'transaction_type' => 'receipt',
+                    'transaction_date' => now()->startOfYear()->toDateString(),
+                    'reference_no'     => 'Beginning Balance',
+                    'quantity'         => $stock->quantity_on_hand,
+                    'unit_cost'        => $stock->unit_cost,
+                    'total_cost'       => $stock->total_cost,
+                    'balance_quantity' => $stock->quantity_on_hand,
+                    'balance_unit_cost' => $stock->unit_cost,
+                    'balance_total_cost' => $stock->total_cost,
+                    'department_id'    => $departmentId, // Use the checked department ID
+                    'user_id'          => auth()->id(),
+                    'remarks'          => 'Beginning balance for ' . now()->year,
+                    'fund_cluster'     => $stock->fund_cluster,
+                ]);
                 }
             });
 
@@ -418,11 +446,12 @@ class SupplyStockController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to create beginning balances', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id()
             ]);
 
             return redirect()->route('stocks.index')
-                ->with('error', 'Failed to create beginning balances. Please try again.');
+                ->with('error', 'Failed to create beginning balances: ' . $e->getMessage());
         }
     }
 
@@ -450,13 +479,14 @@ class SupplyStockController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to delete stock', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'stock_id' => $id,
                 'user_id' => auth()->id()
             ]);
 
             return redirect()
                 ->route('stocks.index')
-                ->with('error', 'Failed to delete stock. Please try again.');
+                ->with('error', 'Failed to delete stock: ' . $e->getMessage());
         }
     }
 }

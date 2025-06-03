@@ -60,9 +60,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search RIS number, requestor..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                        focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                        focus:ring-1 focus:ring-orange-500 focus:border-orange-500
                                         dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                        dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                        dark:focus:ring-orange-500 dark:focus:border-orange-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
@@ -78,10 +78,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                    hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                    focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                    dark:focus:ring-blue-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
+                                    hover:bg-orange-800 focus:ring-1 focus:outline-none
+                                    focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
+                                    dark:focus:ring-orange-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -119,75 +119,60 @@
                         </div>
                     @endif
 
-                    <!-- RIS Table -->
-                    <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                    <!-- RIS Table - Minimalist Design -->
+                    <div class="overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
                             <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                    <thead
-                                        class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                <table class="w-full text-sm text-left border-collapse">
+                                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3">RIS No</th>
-                                            <th scope="col" class="px-6 py-3">Date</th>
-                                            <th scope="col" class="px-6 py-3">Division</th>
-                                            <th scope="col" class="px-6 py-3">Requested By</th>
-                                            <th scope="col" class="px-6 py-3">Status</th>
-                                            <th scope="col" class="px-6 py-3">Actions</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">RIS No</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Date</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Division</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Requested By</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($risSlips as $ris)
-                                            <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                     {{ $ris->ris_no }}
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <div class="flex flex-col">
-                                                        <span>{{ $ris->ris_date->format('M d, Y') }}</span>
-                                                        <span class="text-xs text-gray-500">{{ $ris->created_at->format('h:i A') }}</span>
+                                                        <span class="text-gray-900 dark:text-white">{{ $ris->ris_date->format('M d, Y') }}</span>
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $ris->created_at->format('h:i A') }}</span>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4">
-                                                    {{-- changed from division->name --}}
+                                                <td class="px-6 py-4 text-gray-900 dark:text-white">
                                                     {{ $ris->department->name ?? 'N/A' }}
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4 text-gray-900 dark:text-white">
                                                     {{ $ris->requester->name ?? 'N/A' }}
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     @if ($ris->status === 'draft')
-                                                        <span
-                                                            class="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                                                        <span class="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                                                             <span class="relative flex h-2 w-2 mr-1">
-                                                                <span
-                                                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
-                                                                <span
-                                                                    class="relative inline-flex rounded-full h-2 w-2 bg-gray-500"></span>
+                                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
+                                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-gray-500"></span>
                                                             </span>
                                                             Pending
                                                         </span>
                                                     @elseif($ris->status === 'approved')
-                                                        <span
-                                                            class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                                                            <svg class="w-3 h-3 mr-1" aria-hidden="true"
-                                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                                viewBox="0 0 20 20">
-                                                                <path
-                                                                    d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                                            <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                                                             </svg>
                                                             Approved
                                                         </span>
                                                     @elseif($ris->status === 'posted')
-                                                        <span
-                                                            class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                                                            <svg class="w-3 h-3 mr-1" aria-hidden="true"
-                                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                                viewBox="0 0 20 20">
-                                                                <path
-                                                                    d="m18.774 8.245-.892-.893a1.5 1.5 0 0 1-.437-1.052V5.036a2.484 2.484 0 0 0-2.48-2.48H13.7a1.5 1.5 0 0 1-1.052-.438l-.893-.892a2.484 2.484 0 0 0-3.51 0l-.893.892a1.5 1.5 0 0 1-1.052.437H5.036a2.484 2.484 0 0 0-2.48 2.481V6.3a1.5 1.5 0 0 1-.438 1.052l-.892.893a2.484 2.484 0 0 0 0 3.51l.892.893a1.5 1.5 0 0 1 .437 1.052v1.264a2.484 2.484 0 0 0 2.481 2.481H6.3a1.5 1.5 0 0 1 1.052.437l.893.892a2.484 2.484 0 0 0 3.51 0l.893-.892a1.5 1.5 0 0 1 1.052-.437h1.264a2.484 2.484 0 0 0 2.481-2.48V13.7a1.5 1.5 0 0 1 .437-1.052l.892-.893a2.484 2.484 0 0 0 0-3.51Z" />
-                                                                <path
-                                                                    d="M8 13a1 1 0 0 1-.707-.293l-2-2a1 1 0 1 1 1.414-1.414L8 10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-5 5A1 1 0 0 1 8 13Z" />
+                                                        <span class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                                            <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="m18.774 8.245-.892-.893a1.5 1.5 0 0 1-.437-1.052V5.036a2.484 2.484 0 0 0-2.48-2.48H13.7a1.5 1.5 0 0 1-1.052-.438l-.893-.892a2.484 2.484 0 0 0-3.51 0l-.893.892a1.5 1.5 0 0 1-1.052.437H5.036a2.484 2.484 0 0 0-2.48 2.481V6.3a1.5 1.5 0 0 1-.438 1.052l-.892.893a2.484 2.484 0 0 0 0 3.51l.892.893a1.5 1.5 0 0 1 .437 1.052v1.264a2.484 2.484 0 0 0 2.481 2.481H6.3a1.5 1.5 0 0 1 1.052.437l.893.892a2.484 2.484 0 0 0 3.51 0l.893-.892a1.5 1.5 0 0 1 1.052-.437h1.264a2.484 2.484 0 0 0 2.481-2.48V13.7a1.5 1.5 0 0 1 .437-1.052l.892-.893a2.484 2.484 0 0 0 0-3.51Z" />
+                                                                <path d="M8 13a1 1 0 0 1-.707-.293l-2-2a1 1 0 1 1 1.414-1.414L8 10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-5 5A1 1 0 0 1 8 13Z" />
                                                             </svg>
                                                             Issued
                                                         </span>
@@ -195,24 +180,34 @@
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <a href="{{ route('ris.show', $ris->ris_id) }}"
-                                                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                                                        View Details
+                                                    class="p-2 text-orange-600 hover:bg-orange-50 rounded-lg inline-flex items-center justify-center
+                                                    focus:outline-none focus:ring-2 focus:ring-orange-300 dark:text-orange-400
+                                                    dark:hover:bg-gray-700 transition-all duration-200"
+                                                    data-tooltip-target="tooltip-view-{{ $ris->ris_id }}"
+                                                    data-tooltip-placement="left">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                                            <circle cx="12" cy="12" r="3"></circle>
+                                                        </svg>
                                                     </a>
+                                                    <div id="tooltip-view-{{ $ris->ris_id }}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                                                        View Details
+                                                        <div class="tooltip-arrow" data-popper-arrow></div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
                                                 <td colspan="6" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center py-8">
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" aria-hidden="true"
+                                                        <svg class="w-12 h-12 text-gray-300 mb-4" aria-hidden="true"
                                                             xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24">
                                                             <path stroke="currentColor" stroke-linecap="round"
                                                                 stroke-linejoin="round" stroke-width="1.5"
                                                                 d="M4 4v15a1 1 0 0 0 1 1h15M8 16l2.5-5.5 3 3L17.3 7 20 9.7" />
                                                         </svg>
-                                                        <p
-                                                            class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                        <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
                                                             No requisitions found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">There
                                                             are no requisition slips in the system yet.</p>
@@ -226,21 +221,12 @@
                         </div>
                     </div>
 
-                    <!-- Pagination -->
-                    {{-- <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                            @if ($risSlips->count() > 0)
-                                Showing {{ $risSlips->firstItem() }} to {{ $risSlips->lastItem() }} of
-                                {{ $risSlips->total() }} requisitions
-                            @endif
-                        </div>
-                    </nav> --}}
-
                     <br>
 
                     <div class="mt-2 sm:mt-0">
                         {{ $risSlips->links() }}
                     </div>
+
                 </div>
             </div>
         </div>

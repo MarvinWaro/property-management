@@ -27,7 +27,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Report Header -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow mb-6">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-blue-700">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-blue-700">
                     <div class="text-white text-center">
                         <h3 class="text-xl font-bold">REPORT OF SUPPLIES AND MATERIALS ISSUED</h3>
                         <p class="text-blue-100 mt-1">{{ $entityName }}</p>
@@ -63,16 +63,16 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead>
-                            <tr class="text-xs text-white uppercase bg-blue-600 dark:bg-blue-700">
-                                <th scope="col" class="px-4 py-3 text-center">RIS No.</th>
-                                <th scope="col" class="px-4 py-3 text-center">Responsibility<br>Center Code</th>
-                                <th scope="col" class="px-4 py-3 text-center">Stock No.</th>
-                                <th scope="col" class="px-4 py-3">Item</th>
-                                <th scope="col" class="px-4 py-3 text-center">Unit</th>
-                                <th scope="col" class="px-4 py-3 text-center">Quantity<br>Issued</th>
-                                <th scope="col" class="px-4 py-3 text-center">Unit Cost</th>
-                                <th scope="col" class="px-4 py-3 text-center">Amount</th>
+                        <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-transparent border-b border-gray-200 dark:border-gray-700">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">RIS No.</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Responsibility<br>Center Code</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Stock No.</th>
+                                <th scope="col" class="px-4 py-3 font-bold">Item</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Unit</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Quantity<br>Issued</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Unit Cost</th>
+                                <th scope="col" class="px-4 py-3 text-center font-bold">Amount</th>
                             </tr>
                         </thead>
                         <tbody>

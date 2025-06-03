@@ -9,6 +9,17 @@
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
                     Back to RSMI
                 </a>
+
+                <a href="{{ route('rsmi.analytics') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}{{ $departmentId ? '&department_id=' . $departmentId : '' }}"
+                    class="px-4 py-2 text-sm font-medium text-orange-600 bg-white border border-orange-300 rounded-lg hover:bg-orange-50 dark:bg-gray-700 dark:text-orange-400 dark:border-orange-600 dark:hover:bg-gray-600 transition-colors">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Analytics</span>
+                    </span>
+                </a>
+
                 <a href="{{ route('rsmi.export-pdf') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&format=detailed"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
                     <span class="flex items-center space-x-2">
@@ -32,7 +43,7 @@
                         <div class="w-full">
                             <div class="relative">
                                 <input type="text" id="rsmi-search"
-                                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="block w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500"
                                     placeholder="Search by item name, stock number, or RIS number...">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +54,7 @@
                         </div>
                         <div class="mt-3 md:mt-0 flex space-x-2">
                             <button id="search-button"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
                                 <span class="flex items-center space-x-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -77,7 +88,7 @@
                          data-item-name="{{ $supplyData['item_name'] }}"
                          data-ris-numbers="{{ $supplyData['transactions']->pluck('ris_no')->implode(' ') }}"
                          data-category="{{ $supplyData['category'] }}">
-                        <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-indigo-700">
+                        <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-600 to-orange-700">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center text-white">
                                 <div>
                                     <h3 class="text-lg font-bold">{{ $supplyData['item_name'] }}</h3>
@@ -93,15 +104,15 @@
                         <div class="p-5">
                             <!-- Summary Stats -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                                <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Average Unit Cost</p>
                                     <p class="font-medium text-gray-800 dark:text-white">₱{{ number_format($supplyData['average_unit_cost'], 2) }}</p>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                                <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
                                     <p class="font-medium text-gray-800 dark:text-white">₱{{ number_format($supplyData['total_cost'], 2) }}</p>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                                <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Transactions</p>
                                     <p class="font-medium text-gray-800 dark:text-white">{{ $supplyData['transactions']->count() }}</p>
                                 </div>

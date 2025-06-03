@@ -19,9 +19,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                            focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                            focus:ring-1 focus:ring-orange-500 focus:border-orange-500
                                             dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                            dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                            dark:focus:ring-orange-500 dark:focus:border-orange-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
@@ -37,10 +37,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                            hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                            focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                            dark:focus:ring-blue-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
+                                            hover:bg-orange-700 focus:ring-1 focus:outline-none
+                                            focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
+                                            dark:focus:ring-orange-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -68,9 +68,9 @@
                                 <span>Ledger Cards</span>
                             </a>
 
-                            <!-- Add Stock button - keeping blue as it's the primary action -->
+                            <!-- Add Stock button - simple orange styling -->
                             <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
-                                class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 inline-flex items-center">
+                                class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 transform hover:scale-105 inline-flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -131,20 +131,20 @@
                         </p>
                     </div>
 
-                    <!-- Supply Stock Table -->
-                    <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                    <!-- Supply Stock Table - Minimalist Design -->
+                    <div class="overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
                             <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                <table class="w-full text-sm text-left border-collapse">
+                                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3">ID</th>
-                                            <th scope="col" class="px-6 py-3">Supply Item</th>
-                                            <th scope="col" class="px-6 py-3">Quantity</th>
-                                            <th scope="col" class="px-6 py-3">Cost & Value</th>
-                                            <th scope="col" class="px-6 py-3">Status</th>
-                                            <th scope="col" class="px-6 py-3">Expiry Date</th>
-                                            <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supply Item</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Expiry Date</th>
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -211,22 +211,24 @@
                                                         <!-- + Add Stock -->
                                                         <button type="button" data-modal-target="createStockModal"
                                                             data-modal-toggle="createStockModal"
-                                                            class="add-stock-btn inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200"
+                                                            class="add-stock-btn p-2 text-green-600 hover:bg-green-50 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-green-300 dark:text-green-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
                                                             data-supply-id="{{ $stock->supply_id }}"
                                                             data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
                                                             data-fund-cluster="{{ $stock->fund_cluster }}"
                                                             title="Add stock to {{ $stock->supply->item_name }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                                fill="currentColor" viewBox="0 0 20 20">
-                                                                <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         </button>
 
                                                         <!-- Edit Stock (Adjustment/Re‑value) -->
                                                         <button type="button"
-                                                            class="edit-stock-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200
-                                                                focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900
-                                                                dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
+                                                            class="edit-stock-btn p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:text-yellow-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
                                                             data-supply-id="{{ $stock->supply_id }}"
                                                             data-supply-name="{{ $stock->supply->item_name }}"
@@ -248,9 +250,11 @@
                                                             </svg>
                                                         </button>
 
-                                                        <!-- Stock Card Button - using teal to match header button -->
+                                                        <!-- Stock Card Button -->
                                                         <a href="{{ route('stock-cards.show', $stock->supply_id) }}"
-                                                            class="p-2 bg-teal-100 text-teal-600 rounded-lg hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:bg-teal-900 dark:text-teal-300 dark:hover:bg-teal-800 transition-all duration-200"
+                                                            class="p-2 text-teal-600 hover:bg-teal-50 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-teal-300 dark:text-teal-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
                                                             title="View Stock Card">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -263,9 +267,11 @@
                                                             </svg>
                                                         </a>
 
-                                                        <!-- Supply Ledger Card Button - keeping purple -->
+                                                        <!-- Supply Ledger Card Button -->
                                                         <a href="{{ route('supply-ledger-cards.show', $stock->supply_id) }}"
-                                                            class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800 transition-all duration-200"
+                                                            class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-purple-300 dark:text-purple-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
                                                             title="View Supply Ledger Card">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -275,13 +281,14 @@
                                                                 <path d="M16 13H8"></path>
                                                                 <path d="M16 17H8"></path>
                                                                 <path d="M10 9H8"></path>
-                                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                                             </svg>
                                                         </a>
 
                                                         <!-- Delete Stock -->
                                                         <button type="button"
-                                                            class="delete-stock-btn p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200"
+                                                            class="delete-stock-btn p-2 text-red-600 hover:bg-red-50 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-red-300 dark:text-red-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
                                                             data-stock-id="{{ $stock->stock_id }}"
                                                             title="Delete stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -303,16 +310,18 @@
                                                 <td colspan="7" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
                                                         <!-- empty‑state SVG + copy -->
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                                         </svg>
-                                                        <p class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                        <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
                                                             No stock entries found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
                                                             started by adding new stock items</p>
                                                         <button type="button" data-modal-target="createStockModal"
                                                             data-modal-toggle="createStockModal"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white
+                                                            font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-gray-300
+                                                            dark:bg-gray-600 dark:hover:bg-gray-700">
                                                             <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                 viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -328,86 +337,9 @@
                                         @endforelse
                                     </tbody>
                                 </table>
-
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', () => {
-
-                                        /* ---------- Flowbite helpers ---------- */
-                                        const modals = {
-                                            editStockModal: document.getElementById('editStockModal')
-                                        };
-
-                                        const show = id => {
-                                            if (!modals[id]) return;
-                                            if (window.Flowbite?.Modal) {
-                                                new window.Flowbite.Modal(modals[id], {
-                                                    backdrop: 'static',
-                                                    placement: 'center',
-                                                    backdropClasses: 'bg-gray-900 bg-opacity-50 fixed inset-0 z-40'
-                                                }).show();
-                                            } else {
-                                                modals[id].classList.remove('hidden');
-                                            }
-                                        };
-                                        const hide = id => {
-                                            if (!modals[id]) return;
-                                            if (window.Flowbite?.Modal) {
-                                                new window.Flowbite.Modal(modals[id]).hide();
-                                            } else {
-                                                modals[id].classList.add('hidden');
-                                            }
-                                        };
-                                        document.querySelectorAll('[data-modal-hide]').forEach(btn =>
-                                            btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
-                                        );
-
-                                        /* ---------- Edit‑stock (re‑value) ---------- */
-                                        document.querySelectorAll('.edit-stock-btn').forEach(btn => {
-                                            btn.addEventListener('click', () => {
-
-                                                /* pull dataset */
-                                                const d = btn.dataset;
-
-                                                /* hidden fields required by controller */
-                                                document.getElementById('edit_supply_id').value  = d.supplyId;
-
-                                                /* visible fields */
-                                                document.getElementById('edit_supply_name').value = d.supplyName;
-                                                document.getElementById('edit_unit_cost').value  = d.unitCost;
-                                                document.getElementById('edit_status').value     = d.status;
-                                                document.getElementById('edit_expiry_date').value= d.expiryDate;
-                                                document.getElementById('edit_fund_cluster').value = d.fundCluster;
-                                                document.getElementById('edit_days_to_consume').value = d.daysToConsume;
-                                                document.getElementById('edit_remarks').value    = d.remarks;
-
-                                                show('editStockModal');
-                                            });
-                                        });
-
-                                        /* ---------- money formatting helper ---------- */
-                                        const formatMoney = el => {
-                                            let digits = (el.value || '').replace(/\D/g, '') || '0';
-                                            el.value = (parseInt(digits, 10) / 100).toLocaleString('en-US', {
-                                                minimumFractionDigits: 2, maximumFractionDigits: 2
-                                            });
-                                        };
-                                        const uc = document.getElementById('edit_unit_cost');
-                                        if (uc) uc.addEventListener('input', () => formatMoney(uc));
-                                    });
-                                </script>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Pagination -->
-                    {{-- <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                            @if ($stocks->count() > 0)
-                                Showing {{ $stocks->firstItem() }} to {{ $stocks->lastItem() }} of
-                                {{ $stocks->total() }} stocks
-                            @endif
-                        </div>
-                    </nav> --}}
 
                     <br>
 

@@ -7,27 +7,23 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <!-- Category Section - Now in its own card -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6">
-                    <div class="mx-auto">
-                        <div class="mb-4 flex items-center justify-between gap-4">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-                                Select by category
-                            </h2>
-                        </div>
+            <!-- Category Section - Minimal Design -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-5">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                        Select by category
+                    </h2>
 
-                        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                            @foreach ($categories as $category)
-                                <a href="#"
-                                    class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-3
-                                        hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700
-                                        transition-colors duration-200">
-                                    <span
-                                        class="text-sm font-medium text-gray-900 dark:text-white">{{ $category->name }}</span>
-                                </a>
-                            @endforeach
-                        </div>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($categories as $category)
+                            <a href="#"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50
+                                border border-gray-200 rounded-md hover:bg-white hover:text-gray-900 hover:border-gray-300
+                                dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700
+                                transition-colors duration-200">
+                                {{ $category->name }}
+                            </a>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -46,9 +42,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                              focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-                                              dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                              dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                            focus:ring-1 focus:ring-orange-500 focus:border-orange-500
+                                            dark:bg-gray-800 dark:border-gray-700 dark:text-white
+                                            dark:focus:ring-orange-500 dark:focus:border-orange-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
@@ -64,10 +60,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                           hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                           focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                           dark:focus:ring-blue-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
+                                           hover:bg-orange-800 focus:ring-1 focus:outline-none
+                                           focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
+                                           dark:focus:ring-orange-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -77,10 +73,9 @@
                             </button>
                         </form>
 
-                        <!-- Updated Create New Item Button -->
                         <button data-modal-target="createSupplyModal" data-modal-toggle="createSupplyModal"
                             type="button"
-                            class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ml-2 inline-flex items-center">
+                            class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 transform hover:scale-105 ml-2 inline-flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -141,42 +136,37 @@
                         </p>
                     </div>
 
-                    <!-- Supply Table - Enhanced table -->
-                    <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
+                    <!-- Supply Table - Minimalist Design with Yellow Edit Button -->
+                    <div class="overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
                             <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left">
-                                    <thead
-                                        class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                <table class="w-full text-sm text-left border-collapse">
+                                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3">ID</th>
-                                            <th scope="col" class="px-6 py-3">Stock No</th>
-                                            <th scope="col" class="px-6 py-3">Item Details</th>
-                                            <th scope="col" class="px-6 py-3">Supplier</th>
-                                            <th scope="col" class="px-6 py-3">Department</th>
-                                            <th scope="col" class="px-6 py-3">Unit</th>
-                                            <th scope="col" class="px-6 py-3">Reorder Point</th>
-                                            <th scope="col" class="px-6 py-3">Cost</th>
-                                            <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Stock No</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Item Details</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Unit</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Reorder Point</th>
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($supplies as $supply)
-                                            <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                                 <!-- Supply ID -->
-                                                <td
-                                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $supply->supply_id }}
                                                 </td>
                                                 <!-- Stock No -->
-                                                <td
-                                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $supply->stock_no }}
                                                 </td>
                                                 <!-- Item Details (Name + Category) -->
                                                 <td class="px-6 py-4">
-                                                    <div class="text-gray-900 dark:text-white">{{ $supply->item_name }}</div>
+                                                    <div class="text-gray-900 font-medium dark:text-white">{{ $supply->item_name }}</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ $supply->category->name ?? 'Uncategorized' }}</div>
                                                 </td>
                                                 <!-- Supplier -->
@@ -195,17 +185,13 @@
                                                 <td class="px-6 py-4 dark:text-white">
                                                     {{ $supply->reorder_point }}
                                                 </td>
-                                                <!-- Acquisition Cost -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    {{ number_format($supply->acquisition_cost, 2) }}
-                                                </td>
                                                 <!-- Actions -->
                                                 <td class="px-6 py-4 text-center dark:text-white">
                                                     <div class="flex items-center justify-center space-x-2">
-                                                        <!-- Edit Button -->
+                                                        <!-- Edit Button - Now with Yellow styling -->
                                                         <button type="button" data-modal-target="editSupplyModal"
                                                             data-modal-toggle="editSupplyModal"
-                                                            class="edit-supply-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200"
+                                                            class="edit-supply-btn p-2 text-yellow-600 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:text-yellow-400 dark:hover:bg-gray-700 transition-all duration-200"
                                                             data-supply-id="{{ $supply->supply_id }}"
                                                             data-stock-no="{{ $supply->stock_no }}"
                                                             data-item-name="{{ $supply->item_name }}"
@@ -231,7 +217,7 @@
                                                         <button type="button"
                                                             data-modal-target="deleteSupplyModal{{ $supply->supply_id }}"
                                                             data-modal-toggle="deleteSupplyModal{{ $supply->supply_id }}"
-                                                            class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
+                                                            class="p-2 text-red-600 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:text-red-400 dark:hover:bg-gray-700 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -239,10 +225,8 @@
                                                                 <path d="M3 6h18" />
                                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                <line x1="10" x2="10" y1="11"
-                                                                    y2="17" />
-                                                                <line x1="14" x2="14" y1="11"
-                                                                    y2="17" />
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -252,7 +236,7 @@
                                             <tr>
                                                 <td colspan="9" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
+                                                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24"
                                                             xmlns="http://www.w3.org/2000/svg">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -260,14 +244,13 @@
                                                                 d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
                                                             </path>
                                                         </svg>
-                                                        <p
-                                                            class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                        <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
                                                             No Supply found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
                                                             Get started by adding a new Item/Supply</p>
                                                         <button type="button" data-modal-target="createSupplyModal"
                                                             data-modal-toggle="createSupplyModal"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700">
                                                             <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                 viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -286,18 +269,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- End of Supply Table -->
-
-                    {{-- <!-- Pagination -->
-                    <nav class="flex items-center justify-between pt-4 mb-3" aria-label="Table navigation">
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Showing <span class="font-medium">{{ $supplies->firstItem() ?? 0 }}</span> to
-                            <span class="font-medium">{{ $supplies->lastItem() ?? 0 }}</span> of
-                            <span class="font-medium">{{ $supplies->total() ?? 0 }}</span> results
-                        </div>
-                    </nav> --}}
-
-                    <br>
 
                     <div class="mt-2 sm:mt-0">
                         {{ $supplies->links() }}
@@ -716,9 +687,9 @@
                                                             value="{{ old('acquisition_cost', '0.00') }}"
                                                             placeholder="0.00"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per
                                                         unit in your local currency</p>

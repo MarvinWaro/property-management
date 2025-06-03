@@ -16,13 +16,13 @@
                                 <input type="text" name="search" value="{{ request()->get('search') }}"
                                     placeholder="Search supplies..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                    focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800
+                                    focus:ring-1 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800
                                     dark:border-gray-700 dark:text-white" />
                             </div>
 
                             <div>
                                 <select name="fund_cluster" class="px-4 py-2 border border-gray-300 rounded-lg text-sm
-                                    focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800
+                                    focus:ring-1 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800
                                     dark:border-gray-700 dark:text-white">
                                     <option value="">All Fund Clusters</option>
                                     @foreach($fundClusters as $cluster)
@@ -34,9 +34,9 @@
                                 </select>
                             </div>
 
-                            <button type="submit" class="px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800
-                                focus:ring-1 focus:outline-none focus:ring-blue-300 dark:bg-blue-600
-                                dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            <button type="submit" class="px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-800
+                                focus:ring-1 focus:outline-none focus:ring-orange-300 dark:bg-orange-600
+                                dark:hover:bg-orange-700 dark:focus:ring-orange-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
@@ -47,14 +47,14 @@
                     <!-- Supply List Table -->
                     <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-white uppercase bg-blue-600 dark:bg-blue-700">
+                            <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-transparent border-b border-gray-200 dark:border-gray-700">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Stock No</th>
-                                    <th scope="col" class="px-6 py-3">Item Name</th>
-                                    <th scope="col" class="px-6 py-3">Category</th>
-                                    <th scope="col" class="px-6 py-3">Unit</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Current Stock</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Stock No</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Item Name</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Category</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Unit</th>
+                                    <th scope="col" class="px-6 py-3 text-right font-bold">Current Stock</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -78,7 +78,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <a href="{{ route('stock-cards.show', $supply->supply_id) }}"
-                                                class="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">
+                                                class="px-3 py-2 text-xs font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-800">
                                                 View Stock Card
                                             </a>
                                         </td>

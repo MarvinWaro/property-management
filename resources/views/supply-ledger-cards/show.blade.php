@@ -21,17 +21,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Supply Details Card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow mb-6">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-blue-700">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-700">
                     <div class="flex flex-wrap justify-between items-center">
                         <div class="text-white">
                             <h3 class="text-xl font-bold">{{ $supply->item_name }}</h3>
-                            <p class="text-blue-100">Stock No: {{ $supply->stock_no }}</p>
+                            <p class="text-orange-100">Stock No: {{ $supply->stock_no }}</p>
                         </div>
                         <div class="mt-2 md:mt-0 flex space-x-2">
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
                                 <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
                                 <select name="year" onchange="this.form.submit()"
-                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    class="px-4 py-2 rounded-lg text-sm bg-orange-600 text-white border border-orange-400">
                                     @foreach($availableYears as $year)
                                         <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
                                             Year: {{ $year }}
@@ -42,9 +42,9 @@
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
                                 <input type="hidden" name="year" value="{{ $selectedYear }}">
                                 <select name="fund_cluster" onchange="this.form.submit()"
-                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    class="px-4 py-2 rounded-lg text-sm bg-orange-600 text-white border border-orange-400">
                                     @foreach($fundClusters as $fc)
-                                        <option value="{{ $fc }}" {{ $fundCluster == $fc ? 'selected' : '' }}>
+                                        <option value="{{ $fc }}" {{ $fundCluster == $fc ? 'selected' : '' }} >
                                             Fund Cluster: {{ $fc }}
                                         </option>
                                     @endforeach
@@ -56,19 +56,19 @@
 
                 <div class="p-5">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Unit</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ $supply->unit_of_measurement }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Category</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ $supply->category->name ?? 'N/A' }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Current Balance</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ number_format($currentStock) }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Moving Average Cost</p>
                             <p class="font-medium text-gray-800 dark:text-white">...</p>
                         </div>

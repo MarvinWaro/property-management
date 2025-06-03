@@ -19,9 +19,9 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                              focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                              focus:ring-1 focus:ring-orange-500 focus:border-orange-500
                                               dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                              dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                              dark:focus:ring-orange-500 dark:focus:border-orange-500" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
@@ -37,10 +37,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-blue-700 rounded-lg
-                                           hover:bg-blue-800 focus:ring-1 focus:outline-none
-                                           focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700
-                                           dark:focus:ring-blue-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
+                                           hover:bg-orange-800 focus:ring-1 focus:outline-none
+                                           focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
+                                           dark:focus:ring-orange-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -53,7 +53,7 @@
                         <!-- Changed to button that opens modal -->
                         <button data-modal-target="createDepartmentModal" data-modal-toggle="createDepartmentModal"
                             type="button"
-                            class="py-2 px-3 text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ml-2 inline-flex items-center">
+                            class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg transform hover:scale-105 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 ml-2 inline-flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -105,7 +105,7 @@
                             <div class="overflow-y-auto max-h-[500px]">
                                 <table class="w-full text-sm text-left">
                                     <thead
-                                        class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                        class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
                                             <th scope="col" class="px-6 py-3">ID</th>
                                             <th scope="col" class="px-6 py-3">Name</th>
