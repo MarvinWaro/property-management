@@ -21,17 +21,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Supply Details Card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow mb-6">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-blue-700">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-700">
                     <div class="flex flex-wrap justify-between items-center">
                         <div class="text-white">
                             <h3 class="text-xl font-bold">{{ $supply->item_name }}</h3>
-                            <p class="text-blue-100">Stock No: {{ $supply->stock_no }}</p>
+                            <p class="text-orange-100">Stock No: {{ $supply->stock_no }}</p>
                         </div>
                         <div class="mt-2 md:mt-0 flex space-x-2">
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
                                 <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
                                 <select name="year" onchange="this.form.submit()"
-                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    class="px-4 py-2 rounded-lg text-sm bg-orange-600 text-white border border-orange-400">
                                     @foreach($availableYears as $year)
                                         <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
                                             Year: {{ $year }}
@@ -42,7 +42,7 @@
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}" class="flex space-x-2">
                                 <input type="hidden" name="year" value="{{ $selectedYear }}">
                                 <select name="fund_cluster" onchange="this.form.submit()"
-                                    class="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white border border-blue-400">
+                                    class="px-4 py-2 rounded-lg text-sm bg-orange-600 text-white border border-orange-400">
                                     @foreach($fundClusters as $fc)
                                         <option value="{{ $fc }}" {{ $fundCluster == $fc ? 'selected' : '' }}>
                                             Fund Cluster: {{ $fc }}

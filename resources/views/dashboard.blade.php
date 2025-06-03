@@ -178,7 +178,7 @@
                 <div id="users-table" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 dark:text-white inline-flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 mr-2 text-orange-400" fill="currentColor" viewBox="0 0 20 20"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
@@ -206,11 +206,11 @@
                                     </div>
                                     <input type="search" id="user-search" name="search"
                                         value="{{ $search ?? '' }}"
-                                        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                                         placeholder="Search users...">
                                 </div>
                                 <button type="submit"
-                                    class="inline-flex items-center py-3.5 px-3.5 ml-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+                                    class="inline-flex items-center py-3.5 px-3.5 ml-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd"
@@ -230,7 +230,7 @@
                         <!-- Add Button -->
                         <button type="button" data-modal-target="createUserModal"
                             data-modal-toggle="createUserModal"
-                            class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
@@ -297,7 +297,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead
-                                class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900 sticky top-0 z-10">
+                                class="text-xs text-white uppercase bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-700 dark:to-orange-900 sticky top-0 z-10">
                                 <tr>
                                     <th scope="col" class="px-6 py-3">ID</th>
                                     <th scope="col" class="px-6 py-3">Name</th>
