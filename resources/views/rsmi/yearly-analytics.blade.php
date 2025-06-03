@@ -32,94 +32,145 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Yearly Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Value</dt>
-                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">₱{{ number_format($yearlyData['summary']['total_value'], 2) }}</dd>
-                            </dl>
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full mb-8">
+
+                <!-- Total Value Card (Blue) -->
+                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-blue-300 dark:bg-blue-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-blue-400 dark:bg-blue-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
+                        <dl class="space-y-2">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                                Total Value
+                            </dt>
+                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
+                                ₱{{ number_format($yearlyData['summary']['total_value'], 2) }}
+                            </dd>
+                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">
+                                <span>Yearly total</span>
+                            </dd>
+                        </dl>
+                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white dark:group-hover:bg-blue-600">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-500 dark:text-blue-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Items</dt>
-                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($yearlyData['summary']['total_items']) }}</dd>
-                            </dl>
+                <!-- Total Items Card (Green) -->
+                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-green-300 dark:bg-green-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-green-400 dark:bg-green-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
+                        <dl class="space-y-2">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                                Total Items
+                            </dt>
+                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
+                                {{ number_format($yearlyData['summary']['total_items']) }}
+                            </dd>
+                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
+                                <span>Items processed</span>
+                            </dd>
+                        </dl>
+                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-green-500 group-hover:text-white dark:group-hover:bg-green-600">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-green-500 dark:text-green-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total RIS</dt>
-                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($yearlyData['summary']['total_ris']) }}</dd>
-                            </dl>
+                <!-- Total RIS Card (Purple) -->
+                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-purple-300 dark:bg-purple-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-purple-400 dark:bg-purple-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
+                        <dl class="space-y-2">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                                Total RIS
+                            </dt>
+                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
+                                {{ number_format($yearlyData['summary']['total_ris']) }}
+                            </dd>
+                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400">
+                                <span>Requisitions</span>
+                            </dd>
+                        </dl>
+                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white dark:group-hover:bg-purple-600">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-500 dark:text-purple-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm2 0h8v6H6V5z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Avg Monthly</dt>
-                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">₱{{ number_format($yearlyData['summary']['avg_monthly'], 2) }}</dd>
-                            </dl>
+                <!-- Avg Monthly Card (Yellow) -->
+                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-yellow-300 dark:bg-yellow-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-yellow-400 dark:bg-yellow-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
+                        <dl class="space-y-2">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                                Avg Monthly
+                            </dt>
+                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
+                                ₱{{ number_format($yearlyData['summary']['avg_monthly'], 2) }}
+                            </dd>
+                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                                <span>Per month</span>
+                            </dd>
+                        </dl>
+                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-yellow-500 group-hover:text-white dark:group-hover:bg-yellow-600">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-yellow-500 dark:text-yellow-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm2 0h8v6H6V5z" clip-rule="evenodd"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Peak Month</dt>
-                                <dd class="text-lg font-bold text-gray-900 dark:text-white">{{ $yearlyData['summary']['peak_month'] }}</dd>
-                            </dl>
+                <!-- Peak Month Card (Red/Teal) -->
+                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
+                    <!-- Background with gradient and subtle pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-100 to-teal-200 dark:from-teal-900 dark:to-teal-800 opacity-90"></div>
+                    <!-- Decorative shapes -->
+                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-teal-300 dark:bg-teal-700 opacity-40"></div>
+                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-teal-400 dark:bg-teal-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
+
+                    <div class="flex justify-between relative z-10">
+                        <dl class="space-y-2">
+                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                                Peak Month
+                            </dt>
+                            <dd class="text-lg sm:text-xl lg:text-2xl font-light text-gray-900 dark:text-white">
+                                {{ $yearlyData['summary']['peak_month'] }}
+                            </dd>
+                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-teal-600 dark:text-teal-400">
+                                <span>Highest activity</span>
+                            </dd>
+                        </dl>
+                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-teal-500 group-hover:text-white dark:group-hover:bg-teal-600">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-teal-500 dark:text-teal-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>

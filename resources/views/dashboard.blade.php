@@ -296,17 +296,16 @@
                 <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead
-                                class="text-xs text-white uppercase bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-700 dark:to-orange-900 sticky top-0 z-10">
+                            <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-transparent border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">ID</th>
-                                    <th scope="col" class="px-6 py-3">Name</th>
-                                    <th scope="col" class="px-6 py-3">Email</th>
-                                    <th scope="col" class="px-6 py-3">Role</th>
-                                    <th scope="col" class="px-6 py-3">Department</th>
-                                    <th scope="col" class="px-6 py-3">Designation</th>
-                                    <th scope="col" class="px-6 py-3">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">ID</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Name</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Email</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Role</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Department</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Designation</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

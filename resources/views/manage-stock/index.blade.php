@@ -68,9 +68,9 @@
                                 <span>Ledger Cards</span>
                             </a>
 
-                            <!-- Add Stock button - keeping blue as it's the primary action -->
+                            <!-- Add Stock button - simple orange styling -->
                             <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
-                                class="py-2 px-3 text-white bg-gradient-to-r from-orange-600 to-orange-800 hover:from-orange-700 hover:to-orange-900 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 inline-flex items-center">
+                                class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 transform hover:scale-105 inline-flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />

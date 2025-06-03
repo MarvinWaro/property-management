@@ -44,7 +44,7 @@
                                 <select name="fund_cluster" onchange="this.form.submit()"
                                     class="px-4 py-2 rounded-lg text-sm bg-orange-600 text-white border border-orange-400">
                                     @foreach($fundClusters as $fc)
-                                        <option value="{{ $fc }}" {{ $fundCluster == $fc ? 'selected' : '' }}>
+                                        <option value="{{ $fc }}" {{ $fundCluster == $fc ? 'selected' : '' }} >
                                             Fund Cluster: {{ $fc }}
                                         </option>
                                     @endforeach
@@ -56,19 +56,19 @@
 
                 <div class="p-5">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Unit</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ $supply->unit_of_measurement }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Category</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ $supply->category->name ?? 'N/A' }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Current Balance</p>
                             <p class="font-medium text-gray-800 dark:text-white">{{ number_format($currentStock) }}</p>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Moving Average Cost</p>
                             <p class="font-medium text-gray-800 dark:text-white">...</p>
                         </div>
