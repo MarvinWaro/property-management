@@ -107,19 +107,19 @@
                     <!-- Transactions Table -->
                     <div class="relative overflow-x-auto sm:rounded-lg">
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-white uppercase bg-blue-600 dark:bg-blue-700">
+                            <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-transparent border-b border-gray-200 dark:border-gray-700">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">ID</th>
-                                    <th scope="col" class="px-6 py-3">Date & Time</th>
-                                    <th scope="col" class="px-6 py-3">Type</th>
-                                    <th scope="col" class="px-6 py-3">Stock No</th>
-                                    <th scope="col" class="px-6 py-3">Item Name</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Qty</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Balance</th>
-                                    <th scope="col" class="px-6 py-3">Ref No</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">ID</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Date & Time</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Type</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Stock No</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Item Name</th>
+                                    <th scope="col" class="px-6 py-3 text-right font-bold">Qty</th>
+                                    <th scope="col" class="px-6 py-3 text-right font-bold">Balance</th>
+                                    <th scope="col" class="px-6 py-3 font-bold">Ref No</th>
                                     {{-- <th scope="col" class="px-6 py-3">Department</th> --}}
                                     {{-- <th scope="col" class="px-6 py-3">User/Staffs</th> --}}
-                                    <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                    <th scope="col" class="px-6 py-3 text-center font-bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
