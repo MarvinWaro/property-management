@@ -670,78 +670,70 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ];
     }
 
-        /**
-     * Export RSMI to PDF with proper COA format
-     * Add this method to your App\Http\Controllers\ReportSuppliesMaterialsIssuedController class
-     */
     public function exportPdfFormatted(Request $request)
     {
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
+        $month        = $request->get('month', Carbon::now()->format('Y-m'));
         $departmentId = $request->get('department_id');
-        $fundCluster = $request->get('fund_cluster', '101');
+        $fundCluster  = $request->get('fund_cluster', '101');
 
         // Parse month
-        $startDate = Carbon::parse($month . '-01')->startOfMonth();
-        $endDate = Carbon::parse($month . '-01')->endOfMonth();
+        $startDate = Carbon::parse("{$month}-01")->startOfMonth();
+        $endDate   = Carbon::parse("{$month}-01")->endOfMonth();
 
-        // Get transactions for the period
-        $transactionsQuery = SupplyTransaction::with(['supply.category', 'department'])
-            ->where('transaction_type', 'issue')
+        // Pull transactions
+        $transactionsQuery = SupplyTransaction::with(['supply', 'department'])
+            ->where('transaction_type','issue')
             ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->whereHas('supply.stocks', function($q) use ($fundCluster) {
-                $q->where('fund_cluster', $fundCluster);
-            });
+            ->whereHas('supply.stocks', fn($q) => $q->where('fund_cluster',$fundCluster));
 
         if ($departmentId) {
-            $transactionsQuery->where('department_id', $departmentId);
+            $transactionsQuery->where('department_id',$departmentId);
         }
 
         $transactions = $transactionsQuery->get();
 
         // Group by RIS number
-        $reportData = $transactions->groupBy('reference_no')->map(function($items, $risNo) {
-            $firstItem = $items->first();
-            return [
-                'ris_no' => $risNo,
-                'department' => 'CHEDRO XII', // Use constant responsibility center code
-                'issued_date' => $firstItem->transaction_date,
-                'items' => $items->map(function($item) {
-                    return [
-                        'stock_no' => $item->supply->stock_no,
-                        'item_name' => $item->supply->item_name,
-                        'unit' => $item->supply->unit_of_measurement,
-                        'quantity_issued' => $item->quantity,
-                        'unit_cost' => $item->unit_cost,
-                        'total_cost' => $item->total_cost
-                    ];
-                })
-            ];
-        })->sortKeys(); // Sort by RIS number (ascending)
+        $reportData = $transactions
+            ->groupBy('reference_no')
+            ->map(fn($items, $risNo) => [
+                'ris_no'       => $risNo,
+                'department'   => 'CHEDRO XII',
+                'issued_date'  => $items->first()->transaction_date,
+                'items'        => $items->map(fn($tx) => [
+                    'stock_no'        => $tx->supply->stock_no,
+                    // **combine name + description here**:
+                    'item_name'       => trim(
+                                            $tx->supply->item_name
+                                            . (
+                                                $tx->supply->description
+                                                ? ', '.$tx->supply->description
+                                                : ''
+                                            )
+                                        ),
+                    'unit'            => $tx->supply->unit_of_measurement,
+                    'quantity_issued' => $tx->quantity,
+                    'unit_cost'       => $tx->unit_cost,
+                    'total_cost'      => $tx->total_cost,
+                ]),
+            ])
+            ->sortKeys();
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
-        // Generate PDF using the formatted view
+        // Render PDF
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('rsmi.pdf-formatted', compact(
-            'reportData',
-            'month',
-            'startDate',
-            'endDate',
-            'entityName',
-            'fundCluster'
+            'reportData','month','startDate','endDate','entityName','fundCluster'
         ));
-
-        // Set paper size to legal landscape for proper formatting
-        $pdf->setPaper('legal', 'landscape');
-
-        // Set additional options for better rendering
+        $pdf->setPaper('legal','landscape');
         $pdf->setOptions([
             'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'Arial'
+            'isRemoteEnabled'      => true,
+            'defaultFont'          => 'Arial'
         ]);
 
-        $filename = "RSMI-" . strtoupper($startDate->format('F-Y')) . "-FC{$fundCluster}.pdf";
+        $filename = "RSMI-".strtoupper($startDate->format('F-Y'))."-FC{$fundCluster}.pdf";
         return $pdf->download($filename);
     }
+
 }
