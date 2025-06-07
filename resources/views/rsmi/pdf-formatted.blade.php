@@ -4,84 +4,77 @@
     <meta charset="utf-8">
     <title>Report of Supplies and Materials Issued</title>
     <style>
+        /* 1-inch margins on A4 landscape */
         @page {
-            size: 13in 8.5in;
-            margin: 0.75in;
+            size: A4 landscape;
+            margin: 0.5in !important;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @media print {
+            html, body { margin: 0; padding: 0; }
         }
+
+        /* Reset */
+        * { margin:0; padding:0; box-sizing:border-box; }
+
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
             line-height: 1.2;
         }
 
-        /* Header */
-        .header-title {
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 25px;
-            margin-top: 15px;
-        }
+        /* Appendix (top-right) */
         .appendix {
             position: absolute;
-            top: 15px;
-            right: 25px;
+            top: 0.25in;
+            right: 0.25in;
             font-size: 12px;
             font-style: italic;
         }
 
-        /* Entity Info Section */
-        .entity-section {
-            margin-bottom: 20px;
-        }
-        .entity-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .entity-left, .entity-right {
-            display: flex;
-            align-items: center;
-        }
-        .label {
-            font-size: 11px;
-            margin-right: 8px;
-            font-weight: bold;
-        }
-        .value {
-            font-size: 11px;
-            font-weight: bold;
-            border-bottom: 1px solid #000;
-            min-width: 350px;
-            padding: 2px 8px;
-        }
-        .serial-date-value {
-            font-size: 11px;
-            border-bottom: 1px solid #000;
-            min-width: 220px;
-            padding: 2px 8px;
+        /* Title */
+        .header-title {
             text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0.5in 0 0.3in;
+        }
+
+        /* Two-column header info */
+        .header-info {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.3in;
+        }
+        .header-info td {
+            vertical-align: top;
+            padding: 2px 8px;
+        }
+        .header-info .label {
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 4px;
+        }
+        .header-info .value {
+            font-size: 11px;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1px;
         }
 
         /* Instructions */
         .instructions {
+            font-style: italic;
             font-size: 11px;
-            margin: 20px 0;
             display: flex;
             justify-content: space-between;
-            font-style: italic;
+            margin-bottom: 0.3in;
         }
 
-        /* Main Table */
+        /* Main table */
         .main-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 0.3in;
         }
         .main-table th, .main-table td {
             border: 1px solid #000;
@@ -94,32 +87,27 @@
             background-color: #f0f0f0;
             font-weight: bold;
         }
-        .text-left {
-            text-align: left !important;
-            padding-left: 8px;
-        }
-        .text-right {
-            text-align: right !important;
-            padding-right: 8px;
-        }
+        .text-left { text-align: left!important; padding-left:8px; }
+        .text-right { text-align: right!important; padding-right:8px; }
 
         /* Column widths */
-        .col-ris { width: 12%; }
-        .col-rcc { width: 15%; }
-        .col-stock { width: 10%; }
-        .col-item { width: 28%; }
-        .col-unit { width: 8%; }
-        .col-qty { width: 10%; }
-        .col-cost { width: 10%; }
-        .col-amount { width: 12%; }
+        .col-ris   { width:12%; }
+        .col-rcc   { width:15%; }
+        .col-stock { width:10%; }
+        .col-item  { width:28%; }
+        .col-unit  { width:8%;  }
+        .col-qty   { width:10%; }
+        .col-cost  { width:10%; }
+        .col-amount{ width:12%; }
+
         .total-row {
-            font-weight: bold;
             background-color: #f0f0f0;
+            font-weight: bold;
         }
 
         /* Recapitulation */
         .recapitulation {
-            margin-top: 10px;
+            margin-bottom: 0.3in;
         }
         .recap-table {
             width: 100%;
@@ -130,12 +118,6 @@
             padding: 4px;
             font-size: 10px;
             text-align: center;
-            min-height: 18px;
-        }
-        .recap-header {
-            background-color: #f0f0f0;
-            font-weight: bold;
-            font-size: 11px;
         }
         .recap-title {
             background-color: #f0f0f0;
@@ -144,10 +126,15 @@
             text-align: left;
             padding-left: 8px;
         }
+        .recap-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 11px;
+        }
 
         /* Signatures */
         .signatures {
-            margin-top: 30px;
+            margin-top: 0.5in;
         }
         .signature-table {
             width: 100%;
@@ -158,38 +145,37 @@
             padding: 15px;
             vertical-align: top;
         }
-        .left-sig-box {
-            width: 50%;
-        }
-        .right-sig-section {
-            width: 50%;
-        }
         .cert-text {
             font-size: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 0.4in;
             text-align: left;
         }
-        .posted-by {
-            font-size: 10px;
-            margin-bottom: 15px;
-            text-align: left;
+
+        /* Centered, text‐width underline */
+        .signature-left {
+            text-align: center;
         }
         .signature-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             margin-top: 20px;
         }
-        .sig-name, .sig-title {
-            width: 100%;
-            text-align: center;
+        .sig-name {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            font-size: 12px;
             font-weight: bold;
+            text-align: center;
         }
         .sig-title {
-            font-weight: normal;
             font-size: 10px;
+            text-align: center;
             margin-top: 5px;
+        }
+
+        .posted-by {
+            font-size: 10px;
+            margin-bottom: 0.2in;
+            text-align: left;
         }
         .simple-signatures {
             display: flex;
@@ -216,28 +202,22 @@
 
     <div class="header-title">REPORT OF SUPPLIES AND MATERIALS ISSUED</div>
 
-    <div class="entity-section">
-        <div class="entity-row">
-            <div class="entity-left">
+    <table class="header-info">
+        <tr>
+            <td style="width:60%;">
                 <span class="label">Entity Name:</span>
-                <span class="value">{{ strtoupper($entityName) }}</span>
-            </div>
-            <div class="entity-right">
-                <span class="label">Serial No.:</span>
-                <span class="serial-date-value">&nbsp;</span>
-            </div>
-        </div>
-        <div class="entity-row">
-            <div class="entity-left">
+                <span class="value">{{ strtoupper($entityName) }}</span><br>
                 <span class="label">Fund Cluster:</span>
-                <span class="value" style="min-width: 250px;">{{ $fundCluster }}</span>
-            </div>
-            <div class="entity-right">
+                <span class="value">{{ $fundCluster }}</span>
+            </td>
+            <td style="width:40%;">
+                <span class="label">Serial No.:</span>
+                <span class="value">&nbsp;</span><br>
                 <span class="label">Date:</span>
-                <span class="serial-date-value">{{ $startDate->format('F Y') }}</span>
-            </div>
-        </div>
-    </div>
+                <span class="value">{{ $startDate->format('F Y') }}</span>
+            </td>
+        </tr>
+    </table>
 
     <div class="instructions">
         <span>To be filled up by the Supply and/or Property Division/Unit</span>
@@ -260,7 +240,6 @@
         <tbody>
             @php
                 $totalAmount = 0;
-                $rowCount = 0;
                 $recapData = [];
             @endphp
 
@@ -268,7 +247,6 @@
                 @foreach($risData['items'] as $item)
                     @php
                         $totalAmount += $item['total_cost'];
-                        $rowCount++;
                         $stockNo = $item['stock_no'];
                         if (!isset($recapData[$stockNo])) {
                             $recapData[$stockNo] = [
@@ -293,21 +271,8 @@
                 @endforeach
             @endforeach
 
-            @for($i = $rowCount; $i < 12; $i++)
-                <tr>
-                    <td class="col-ris">&nbsp;</td>
-                    <td class="col-rcc">&nbsp;</td>
-                    <td class="col-stock">&nbsp;</td>
-                    <td class="col-item">&nbsp;</td>
-                    <td class="col-unit">&nbsp;</td>
-                    <td class="col-qty">&nbsp;</td>
-                    <td class="col-cost">&nbsp;</td>
-                    <td class="col-amount">&nbsp;</td>
-                </tr>
-            @endfor
-
             <tr class="total-row">
-                <td colspan="7" class="text-right">&nbsp;</td>
+                <td colspan="7"></td>
                 <td class="text-right">{{ number_format($totalAmount, 2) }}</td>
             </tr>
         </tbody>
@@ -334,15 +299,7 @@
                 </tr>
                 @php $recapCount++; @endphp
             @endforeach
-            @for($i = $recapCount; $i < 15; $i++)
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                </tr>
-            @endfor
-            <tr style="border-top:2px solid #000;">
+            <tr style="border-top: 2px solid #000;">
                 <td colspan="3" class="text-right">Total:</td>
                 <td class="text-right">{{ number_format($totalAmount, 2) }}</td>
             </tr>
@@ -352,7 +309,7 @@
     <div class="signatures">
         <table class="signature-table">
             <tr>
-                <td class="left-sig-box">
+                <td class="signature-left">
                     <div class="cert-text">
                         I hereby certify to the correctness of the above information.
                     </div>
@@ -361,7 +318,7 @@
                         <div class="sig-title">Supply and/or Property Custodian</div>
                     </div>
                 </td>
-                <td class="right-sig-section">
+                <td>
                     <div class="posted-by">Posted by:</div>
                     <div class="simple-signatures">
                         <div class="signature-line">

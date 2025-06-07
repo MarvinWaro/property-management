@@ -42,7 +42,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Report Header -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow mb-6">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-blue-700">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-800 to-orange-800">
                     <div class="text-white text-center">
                         <h3 class="text-xl font-bold">REPORT OF SUPPLIES AND MATERIALS ISSUED</h3>
                         <p class="text-blue-100 mt-1">{{ $entityName }}</p>
