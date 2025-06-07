@@ -4,11 +4,14 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Report of Supplies and Materials Issued - {{ $startDate->format('F Y') }}
             </h2>
+            {{-- Replace the export button section in your blade file with this: --}}
             <div class="flex space-x-2">
                 <a href="{{ route('rsmi.index') }}"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                     Back to RSMI
                 </a>
+
+                {{-- Existing Export Button --}}
                 <a href="{{ route('rsmi.export-pdf') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
                     <span class="flex items-center space-x-2">
@@ -16,7 +19,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        <span>Export as PDF</span>
+                        <span>Export PDF (Simple)</span>
+                    </span>
+                </a>
+
+                {{-- NEW COA Format Export Button --}}
+                <a href="{{ route('rsmi.export-pdf-formatted') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Export PDF (COA Format)</span>
                     </span>
                 </a>
             </div>
@@ -27,7 +42,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Report Header -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow mb-6">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-blue-700">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-800 to-orange-800">
                     <div class="text-white text-center">
                         <h3 class="text-xl font-bold">REPORT OF SUPPLIES AND MATERIALS ISSUED</h3>
                         <p class="text-blue-100 mt-1">{{ $entityName }}</p>

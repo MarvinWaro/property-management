@@ -108,6 +108,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/rsmi/summary', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'summary'])->name('rsmi.summary');
         Route::get('/rsmi/export-pdf', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'exportPdf'])->name('rsmi.export-pdf');
         Route::get('/rsmi/monthly-comparison', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'monthlyComparison'])->name('rsmi.monthly-comparison');
+        Route::get('/rsmi/export-pdf-formatted', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'exportPdfFormatted'])->name('rsmi.export-pdf-formatted');
 
         // Departments
         Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
