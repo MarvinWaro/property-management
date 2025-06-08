@@ -19,13 +19,13 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                        focus:ring-1 focus:ring-orange-500 focus:border-orange-500
+                                        focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f]
                                         dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                        dark:focus:ring-orange-500 dark:focus:border-orange-500" />
+                                        dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f] transition-all duration-200" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
-                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-[#ce201f] focus:outline-none transition-colors duration-200">
                                     <!-- X Icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -38,10 +38,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
-                                    hover:bg-orange-800 focus:ring-1 focus:outline-none
-                                    focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
-                                    dark:focus:ring-orange-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-[#ce201f] rounded-lg
+                                    hover:bg-[#a01b1a] focus:ring-1 focus:outline-none
+                                    focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]
+                                    dark:focus:ring-[#ce201f]/30 flex items-center transition-all duration-200">
                                 <!-- Search Icon -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
@@ -57,7 +57,7 @@
                         <!-- Changed to match supplier button style -->
                         <button data-modal-target="createCategoryModal" data-modal-toggle="createCategoryModal"
                             type="button"
-                            class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg transform hover:scale-105 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 ml-2 inline-flex items-center">
+                            class="py-2 px-3 text-white bg-[#ce201f] hover:bg-[#a01b1a] hover:shadow-lg transform hover:scale-105 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:focus:ring-[#ce201f]/30 transition-all duration-200 ml-2 inline-flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -239,16 +239,16 @@
                                     <thead
                                         class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3">ID</th>
-                                            <th scope="col" class="px-6 py-3">Name</th>
-                                            <th scope="col" class="px-6 py-3">Description</th>
-                                            <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Name</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Description</th>
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($categories as $category)
                                             <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                                 <th scope="row"
                                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $category->id }}
@@ -268,15 +268,13 @@
                                                             data-category-id="{{ $category->id }}"
                                                             data-category-name="{{ $category->name }}"
                                                             data-category-description="{{ $category->description }}"
-                                                            class="edit-category-btn p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200">
+                                                            class="edit-category-btn p-2 text-[#f59e0b] rounded-lg hover:bg-[#f59e0b]/10 focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24] dark:hover:bg-[#f59e0b]/20 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path
-                                                                    d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                             </svg>
                                                         </button>
 
@@ -284,7 +282,7 @@
                                                         <button type="button"
                                                             data-modal-target="deleteCategoryModal{{ $category->id }}"
                                                             data-modal-toggle="deleteCategoryModal{{ $category->id }}"
-                                                            class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
+                                                            class="p-2 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/10 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/20 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -292,11 +290,9 @@
                                                                 <path d="M3 6h18" />
                                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                <line x1="10" x2="10" y1="11"
-                                                                    y2="17" />
-                                                                <line x1="14" x2="14" y1="11"
-                                                                    y2="17" />
-                                        orange    </svg>
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -321,7 +317,7 @@
                                                             started by adding a new category</p>
                                                         <button type="button" data-modal-target="createCategoryModal"
                                                             data-modal-toggle="createCategoryModal"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30">
                                                             <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                 viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">
