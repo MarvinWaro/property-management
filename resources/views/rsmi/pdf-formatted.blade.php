@@ -244,7 +244,7 @@
             @endphp
 
             @foreach($reportData as $risData)
-                @foreach($risData['items'] as $item)
+                @foreach($risData['items'] as $index => $item)
                     @php
                         $totalAmount += $item['total_cost'];
                         $stockNo = $item['stock_no'];
@@ -252,15 +252,16 @@
                             $recapData[$stockNo] = [
                                 'quantity'   => 0,
                                 'unit_cost'  => $item['unit_cost'],
-                                'total_cost' => 0
+                                'total_cost' => 0,
                             ];
                         }
                         $recapData[$stockNo]['quantity']   += $item['quantity_issued'];
                         $recapData[$stockNo]['total_cost'] += $item['total_cost'];
                     @endphp
+
                     <tr>
                         <td class="col-ris">{{ $risData['ris_no'] }}</td>
-                        <td class="col-rcc">{{ $risData['department'] }}</td>
+                        <td class="col-rcc">&nbsp;</td> {{-- blank Responsibility Center Code --}}
                         <td class="col-stock">{{ $item['stock_no'] }}</td>
                         <td class="text-left col-item">{{ $item['item_name'] }}</td>
                         <td class="col-unit">{{ $item['unit'] }}</td>
@@ -277,6 +278,7 @@
             </tr>
         </tbody>
     </table>
+
 
     <div class="recapitulation">
         <table class="recap-table">

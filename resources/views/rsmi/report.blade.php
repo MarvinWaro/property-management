@@ -101,11 +101,11 @@
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             @if($index === 0)
-                                                {{ $risData['department'] }}
+                                                &nbsp; {{-- Responsibility Center Code intentionally left blank --}}
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">{{ $item['stock_no'] }}</td>
-                                        <td class="px-4 py-3">{{ $item['item_name'] }}</td>
+                                        <td class="px-4 py-3">{{ $item['item_name'] }}@if(!empty($item['description'])), {{ $item['description'] }}@endif</td>
                                         <td class="px-4 py-3 text-center">{{ $item['unit'] }}</td>
                                         <td class="px-4 py-3 text-center font-medium">{{ number_format($item['quantity_issued']) }}</td>
                                         <td class="px-4 py-3 text-center">{{ number_format($item['unit_cost'], 2) }}</td>
