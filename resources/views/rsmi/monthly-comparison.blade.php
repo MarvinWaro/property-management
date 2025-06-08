@@ -27,9 +27,15 @@
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300 w-16">Year:</label>
                                 <select name="year" onchange="this.form.submit()"
                                     class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                                    @php
+                                        $currentYear = date('Y');
+                                        // Always show from current year down to 2024
+                                        $startYear = 2024;
+                                        $years = range($currentYear, $startYear);
+                                    @endphp
+                                    @foreach($years as $y)
                                         <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endfor
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="flex items-center space-x-3">
@@ -37,7 +43,7 @@
                                 <select name="fund_cluster" onchange="this.form.submit()"
                                     class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                                     <option value="101" {{ $fundCluster == '101' ? 'selected' : '' }}>101</option>
-                                    <option value="102" {{ $fundCluster == '102' ? 'selected' : '' }}>102</option>
+                                    <option value="151" {{ $fundCluster == '151' ? 'selected' : '' }}>151</option>
                                 </select>
                             </div>
                         </form>
