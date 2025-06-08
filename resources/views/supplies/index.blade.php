@@ -42,13 +42,13 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                            focus:ring-1 focus:ring-orange-500 focus:border-orange-500
+                                            focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f]
                                             dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                            dark:focus:ring-orange-500 dark:focus:border-orange-500" />
+                                            dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f] transition-all duration-200" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
-                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-[#ce201f] focus:outline-none transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
@@ -60,10 +60,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
-                                           hover:bg-orange-800 focus:ring-1 focus:outline-none
-                                           focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
-                                           dark:focus:ring-orange-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-[#ce201f] rounded-lg
+                                           hover:bg-[#a01b1a] focus:ring-1 focus:outline-none
+                                           focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]
+                                           dark:focus:ring-[#ce201f]/30 flex items-center transition-all duration-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -75,7 +75,7 @@
 
                         <button data-modal-target="createSupplyModal" data-modal-toggle="createSupplyModal"
                             type="button"
-                            class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 transform hover:scale-105 ml-2 inline-flex items-center">
+                            class="py-2 px-3 text-white bg-[#ce201f] hover:bg-[#a01b1a] hover:shadow-lg rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:focus:ring-[#ce201f]/30 transition-all duration-200 transform hover:scale-105 ml-2 inline-flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
