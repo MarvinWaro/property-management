@@ -178,7 +178,7 @@
                 <div id="users-table" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 dark:text-white inline-flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-orange-400" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-6 h-6 mr-2 text-[#ce201f]" fill="currentColor" viewBox="0 0 20 20"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
@@ -206,11 +206,11 @@
                                     </div>
                                     <input type="search" id="user-search" name="search"
                                         value="{{ $search ?? '' }}"
-                                        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                         placeholder="Search users...">
                                 </div>
                                 <button type="submit"
-                                    class="inline-flex items-center py-3.5 px-3.5 ml-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300">
+                                    class="inline-flex items-center py-3.5 px-3.5 ml-2 text-sm font-medium text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a] dark:focus:ring-[#ce201f]/30 transition-all duration-200">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd"
@@ -230,7 +230,7 @@
                         <!-- Add Button -->
                         <button type="button" data-modal-target="createUserModal"
                             data-modal-toggle="createUserModal"
-                            class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800">
+                            class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a] dark:focus:ring-[#ce201f]/30 transition-all duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
@@ -327,7 +327,7 @@
                                                         class="w-8 h-8 mr-3 rounded-full object-cover">
                                                 @else
                                                     <div
-                                                        class="w-8 h-8 mr-3 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold">
+                                                        class="w-8 h-8 mr-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
                                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                                     </div>
                                                 @endif
@@ -341,7 +341,7 @@
                                         <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $user->email }}</td>
                                         <td class="px-6 py-4">
                                             @if ($user->role === 'admin')
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f]">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                                                         <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
                                                         <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
@@ -350,7 +350,7 @@
                                                     Admin
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                                         <circle cx="9" cy="7" r="4"/>
@@ -385,14 +385,14 @@
                                         <td class="px-6 py-4">
                                             @if ($user->status)
                                                 <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                    <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#10b981]/10 text-[#10b981] dark:bg-[#10b981]/20 dark:text-[#34d399]">
+                                                    <span class="w-2 h-2 mr-1 bg-[#10b981] rounded-full"></span>
                                                     Active
                                                 </span>
                                             @else
                                                 <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                                    <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f]">
+                                                    <span class="w-2 h-2 mr-1 bg-[#ce201f] rounded-full"></span>
                                                     Inactive
                                                 </span>
                                             @endif
@@ -403,7 +403,7 @@
                                                 <button type="button"
                                                     data-modal-target="editUserModal{{ $user->id }}"
                                                     data-modal-toggle="editUserModal{{ $user->id }}"
-                                                    class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-all duration-200">
+                                                    class="p-2 bg-[#ce201f]/10 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/20 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                         height="16" viewBox="0 0 24 24" fill="none"
                                                         stroke="currentColor" stroke-width="2"
@@ -416,11 +416,10 @@
                                                 </button>
 
                                                 <!-- View Button -->
-                                                <!-- View Button in your existing table -->
                                                 <button type="button"
                                                     data-modal-target="viewUserModal{{ $user->id }}"
                                                     data-modal-toggle="viewUserModal{{ $user->id }}"
-                                                    class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-300 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-all duration-200">
+                                                    class="p-2 bg-[#10b981]/10 text-[#10b981] rounded-lg hover:bg-[#10b981]/20 focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:bg-[#10b981]/20 dark:text-[#34d399] dark:hover:bg-[#10b981]/30 transition-all duration-200">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                         height="16" viewBox="0 0 24 24" fill="none"
                                                         stroke="currentColor" stroke-width="2"
@@ -438,7 +437,7 @@
                                                         <!-- Modal content -->
                                                         <div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
                                                             <!-- Modal header -->
-                                                            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-gradient-to-r from-green-600 to-green-800">
+                                                            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-[#10b981]">
                                                                 <h3 class="text-xl font-semibold text-white flex items-center">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                                                                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
@@ -447,7 +446,7 @@
                                                                     User Details
                                                                 </h3>
                                                                 <button type="button"
-                                                                    class="text-white bg-green-700 hover:bg-green-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
+                                                                    class="text-white bg-[#10b981] hover:bg-[#059669] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
                                                                     data-modal-hide="viewUserModal{{ $user->id }}">
                                                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -461,17 +460,17 @@
                                                                 <!-- User Profile Card -->
                                                                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden mb-5">
                                                                     <!-- User Profile Header with Gradient Background -->
-                                                                    <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 dark:from-green-900/30 dark:to-blue-900/30 p-5 relative h-24">
+                                                                    <div class="bg-gradient-to-r from-[#10b981]/20 to-gray-100/50 dark:from-[#10b981]/30 dark:to-gray-800/30 p-5 relative h-24">
                                                                         <!-- User Status Badge - Positioned Absolutely -->
                                                                         <div class="absolute right-5 top-5">
                                                                             @if ($user->status)
-                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 shadow-sm">
-                                                                                    <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/10 text-[#10b981] dark:bg-[#10b981]/20 dark:text-[#34d399] shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-[#10b981] rounded-full"></span>
                                                                                     Active
                                                                                 </span>
                                                                             @else
-                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 shadow-sm">
-                                                                                    <span class="w-2 h-2 mr-1 bg-red-500 rounded-full"></span>
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-[#ce201f] rounded-full"></span>
                                                                                     Inactive
                                                                                 </span>
                                                                             @endif
@@ -484,7 +483,7 @@
                                                                             <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
                                                                                 class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
                                                                         @else
-                                                                            <div class="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
+                                                                            <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
                                                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                                                             </div>
                                                                         @endif
@@ -498,7 +497,7 @@
                                                                         <!-- Role Badge - Centered -->
                                                                         <div class="flex justify-center mt-2">
                                                                             @if ($user->role === 'admin')
-                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 shadow-sm">
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
                                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                                                                                         <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
                                                                                         <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
@@ -507,7 +506,7 @@
                                                                                     Administrator
                                                                                 </span>
                                                                             @else
-                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 shadow-sm">
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
                                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                                                                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                                                                                         <circle cx="9" cy="7" r="4"/>
@@ -524,7 +523,7 @@
                                                                 <!-- Work Information Card -->
                                                                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5">
                                                                     <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center pb-2 border-b border-gray-200 dark:border-gray-600">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-green-500">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-[#10b981]">
                                                                             <rect width="18" height="18" x="3" y="3" rx="2"/>
                                                                             <path d="M9 17V9l7 4-7 4Z"/>
                                                                         </svg>
@@ -533,7 +532,7 @@
 
                                                                     <!-- Work Info in Grid Layout -->
                                                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                                                        <div class="border-l-2 border-green-500 pl-3 py-1">
+                                                                        <div class="border-l-2 border-[#10b981] pl-3 py-1">
                                                                             <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
                                                                             <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
                                                                                 @if ($user->department)
@@ -544,7 +543,7 @@
                                                                             </p>
                                                                         </div>
 
-                                                                        <div class="border-l-2 border-blue-500 pl-3 py-1">
+                                                                        <div class="border-l-2 border-gray-400 pl-3 py-1">
                                                                             <p class="text-xs text-gray-500 dark:text-gray-400">Designation</p>
                                                                             <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
                                                                                 @if ($user->designation)
@@ -555,12 +554,12 @@
                                                                             </p>
                                                                         </div>
 
-                                                                        <div class="border-l-2 border-purple-500 pl-3 py-1">
+                                                                        <div class="border-l-2 border-[#ce201f] pl-3 py-1">
                                                                             <p class="text-xs text-gray-500 dark:text-gray-400">Employee ID</p>
                                                                             <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">#{{ $user->id }}</p>
                                                                         </div>
 
-                                                                        <div class="border-l-2 border-amber-500 pl-3 py-1">
+                                                                        <div class="border-l-2 border-[#f59e0b] pl-3 py-1">
                                                                             <p class="text-xs text-gray-500 dark:text-gray-400">Joined Date</p>
                                                                             <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
                                                                                 {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
@@ -573,7 +572,7 @@
                                                                 @if(isset($user->qr_code) && $user->qr_code)
                                                                 <div class="mt-5 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5 text-center">
                                                                     <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-green-500">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-[#10b981]">
                                                                             <rect width="5" height="5" x="3" y="3" rx="1"/>
                                                                             <rect width="5" height="5" x="16" y="3" rx="1"/>
                                                                             <rect width="5" height="5" x="3" y="16" rx="1"/>
@@ -606,7 +605,7 @@
                                                                         data-modal-target="editUserModal{{ $user->id }}"
                                                                         data-modal-toggle="editUserModal{{ $user->id }}"
                                                                         type="button"
-                                                                        class="text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 dark:focus:ring-blue-800 transition-all duration-200">
+                                                                        class="text-[#ce201f] bg-[#ce201f]/10 hover:bg-[#ce201f]/20 focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                                                         <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
@@ -616,7 +615,7 @@
 
                                                                 <!-- Close Button -->
                                                                 <button data-modal-hide="viewUserModal{{ $user->id }}" type="button"
-                                                                    class="text-white bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-green-800 transition-all duration-200">
+                                                                    class="text-white bg-[#10b981] hover:bg-[#059669] focus:ring-4 focus:outline-none focus:ring-[#10b981]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center transition-all duration-200">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                                                                         <path d="M18 6 6 18"/>
@@ -701,7 +700,7 @@
                                                         <!-- Modal header -->
                                                         <div
                                                             class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
-                                                                                            dark:border-gray-600 border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800">
+                                                                                            dark:border-gray-600 border-gray-200 bg-[#ce201f]">
                                                             <h3
                                                                 class="text-xl font-semibold text-white flex items-center">
                                                                 <svg class="w-5 h-5 mr-2" fill="currentColor"
@@ -714,7 +713,7 @@
                                                                 Edit User: {{ $user->name }}
                                                             </h3>
                                                             <button type="button"
-                                                                class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                                                class="text-white bg-[#ce201f] hover:bg-[#a01b1a] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
                                                                                                 dark:hover:bg-gray-600 transition-all duration-200"
                                                                 data-modal-hide="editUserModal{{ $user->id }}">
                                                                 <svg class="w-5 h-5"
@@ -739,7 +738,7 @@
                                                             <!-- Improved User Information Section -->
                                                             <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
                                                                 <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-                                                                    <svg class="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <svg class="w-4 h-4 mr-1 text-[#ce201f]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     User Information
@@ -751,10 +750,10 @@
                                                                         @if ($user->profile_photo_url)
                                                                             <img src="{{ $user->profile_photo_url }}"
                                                                                 alt="{{ $user->name }}"
-                                                                                class="w-16 h-16 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900">
+                                                                                class="w-16 h-16 rounded-full object-cover border-2 border-gray-100 dark:border-gray-600">
                                                                         @else
                                                                             <div
-                                                                                class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl">
+                                                                                class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-xl">
                                                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                                                             </div>
                                                                         @endif
@@ -786,12 +785,12 @@
                                                                 </div>
 
                                                                 <!-- QR Code Warning Notice -->
-                                                                <div class="flex items-start bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-                                                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                <div class="flex items-start bg-[#f59e0b]/10 dark:bg-[#f59e0b]/20 p-3 rounded-lg border border-[#f59e0b]/20 dark:border-[#f59e0b]/30">
+                                                                    <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     <div>
-                                                                        <p class="text-xs text-blue-700 dark:text-blue-400">
+                                                                        <p class="text-xs text-[#f59e0b]">
                                                                             <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
                                                                         </p>
                                                                     </div>
@@ -822,9 +821,9 @@
                                                                             <select id="role_{{ $user->id }}"
                                                                                 name="role"
                                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
                                                                                                             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
                                                                                 <option value="admin"
                                                                                     {{ $user->role === 'admin' ? 'selected' : '' }}>
                                                                                     Admin</option>
@@ -858,9 +857,9 @@
                                                                                 id="department_id_{{ $user->id }}"
                                                                                 name="department_id"
                                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
                                                                                                             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
                                                                                 @foreach ($departments as $dept)
                                                                                     <option
                                                                                         value="{{ $dept->id }}"
@@ -898,9 +897,9 @@
                                                                                 id="designation_id_{{ $user->id }}"
                                                                                 name="designation_id"
                                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
                                                                                                             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
                                                                                 @foreach ($designations as $desig)
                                                                                     <option
                                                                                         value="{{ $desig->id }}"
@@ -934,9 +933,9 @@
                                                                                 id="status_{{ $user->id }}"
                                                                                 name="status"
                                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
                                                                                                             dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
                                                                                 <option value="1"
                                                                                     {{ $user->status ? 'selected' : '' }}>
                                                                                     Active</option>
@@ -951,9 +950,9 @@
 
                                                             <!-- Important Notice -->
                                                             <div
-                                                                class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-900">
+                                                                class="p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg dark:bg-[#f59e0b]/20 dark:border-[#f59e0b]/30">
                                                                 <div class="flex items-center mb-2">
-                                                                    <svg class="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-500"
+                                                                    <svg class="w-5 h-5 mr-2 text-[#f59e0b]"
                                                                         fill="currentColor" viewBox="0 0 20 20"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path fill-rule="evenodd"
@@ -961,11 +960,11 @@
                                                                             clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     <h5
-                                                                        class="text-sm font-medium text-yellow-700 dark:text-yellow-500">
+                                                                        class="text-sm font-medium text-[#f59e0b]">
                                                                         Important Notice</h5>
                                                                 </div>
                                                                 <p
-                                                                    class="text-xs text-yellow-700 dark:text-yellow-500">
+                                                                    class="text-xs text-[#f59e0b]">
                                                                     Changing a user's role will affect their
                                                                     permissions in the system. Make sure you verify
                                                                     this change before saving.
@@ -979,7 +978,7 @@
                                                                     data-modal-hide="editUserModal{{ $user->id }}"
                                                                     type="button"
                                                                     class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                                                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-gray-700
                                                                                                 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
                                                                                                 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
                                                                                                 dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
@@ -988,10 +987,10 @@
                                                                 <button
                                                                     data-modal-hide="editUserModal{{ $user->id }}"
                                                                     type="submit"
-                                                                    class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                                                                focus:ring-4 focus:outline-none focus:ring-blue-300
+                                                                    class="text-white bg-[#ce201f] hover:bg-[#a01b1a]
+                                                                                                focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30
                                                                                                 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                                                                dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                                                                                transition-all duration-200">
                                                                     <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                         viewBox="0 0 20 20"
                                                                         xmlns="http://www.w3.org/2000/svg">
@@ -1029,7 +1028,7 @@
                                                     started by creating a new user</p>
                                                 <button type="button" data-modal-target="createUserModal"
                                                     data-modal-toggle="createUserModal"
-                                                    class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                    class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30">
                                                     <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                         <path fill-rule="evenodd"

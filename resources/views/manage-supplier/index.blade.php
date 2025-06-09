@@ -19,13 +19,13 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                        focus:ring-1 focus:ring-orange-500 focus:border-orange-500
+                                        focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f]
                                         dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                        dark:focus:ring-orange-500 dark:focus:border-orange-500" />
+                                        dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f] transition-all duration-200" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
-                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-[#ce201f] focus:outline-none transition-colors duration-200">
                                     <!-- X Icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -38,10 +38,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
-                                    hover:bg-orange-800 focus:ring-1 focus:outline-none
-                                    focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
-                                    dark:focus:ring-orange-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-[#ce201f] rounded-lg
+                                    hover:bg-[#a01b1a] focus:ring-1 focus:outline-none
+                                    focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]
+                                    dark:focus:ring-[#ce201f]/30 flex items-center transition-all duration-200">
                                 <!-- Search Icon -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
@@ -57,7 +57,7 @@
                         <!-- Flat Icon Button for Adding Supplier -->
                         <button data-modal-target="createSupplierModal" data-modal-toggle="createSupplierModal"
                             type="button"
-                            class="py-2 px-3 text-white bg-orange-600 hover:bg-orange-700 hover:shadow-lg transform hover:scale-105 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 transition-all duration-200 ml-2 inline-flex items-center">
+                            class="py-2 px-3 text-white bg-[#ce201f] hover:bg-[#a01b1a] hover:shadow-lg transform hover:scale-105 rounded-lg text-sm font-medium focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:focus:ring-[#ce201f]/30 transition-all duration-200 ml-2 inline-flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -98,17 +98,17 @@
                                     <thead
                                         <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3">ID</th>
-                                            <th scope="col" class="px-6 py-3">Name / Email</th>
-                                            <th scope="col" class="px-6 py-3">Contact Person</th>
-                                            <th scope="col" class="px-6 py-3">Contact No</th>
-                                            <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Name / Email</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Contact Person</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Contact No</th>
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($suppliers as $supplier)
                                             <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                                 <th scope="row"
                                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                     {{ $supplier->id }}
@@ -129,13 +129,12 @@
                                                         <button type="button"
                                                             data-modal-target="viewSupplierModal{{ $supplier->id }}"
                                                             data-modal-toggle="viewSupplierModal{{ $supplier->id }}"
-                                                            class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-all duration-200">
+                                                            class="p-2 text-[#10b981] rounded-lg hover:bg-[#10b981]/10 focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:text-[#34d399] dark:hover:bg-[#10b981]/20 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                                                                 <circle cx="12" cy="12" r="3" />
                                                             </svg>
                                                         </button>
@@ -144,15 +143,13 @@
                                                         <button type="button"
                                                             data-modal-target="editSupplierModal{{ $supplier->id }}"
                                                             data-modal-toggle="editSupplierModal{{ $supplier->id }}"
-                                                            class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200">
+                                                            class="p-2 text-[#f59e0b] rounded-lg hover:bg-[#f59e0b]/10 focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24] dark:hover:bg-[#f59e0b]/20 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path
-                                                                    d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                             </svg>
                                                         </button>
 
@@ -160,7 +157,7 @@
                                                         <button type="button"
                                                             data-modal-target="deleteSupplierModal{{ $supplier->id }}"
                                                             data-modal-toggle="deleteSupplierModal{{ $supplier->id }}"
-                                                            class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-all duration-200">
+                                                            class="p-2 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/10 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/20 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -181,12 +178,12 @@
                                                         <div class="relative p-4 w-full max-w-md max-h-full">
                                                             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                                                                 <!-- Modal header -->
-                                                                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-blue-500 to-blue-700">
+                                                                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-[#10b981]">
                                                                     <h3 class="text-lg font-semibold text-white">
                                                                         Supplier Details
                                                                     </h3>
                                                                     <button type="button"
-                                                                        class="text-white bg-transparent hover:bg-blue-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600"
+                                                                        class="text-white bg-transparent hover:bg-[#059669] hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 transition-all duration-200"
                                                                         data-modal-hide="viewSupplierModal{{ $supplier->id }}">
                                                                         <svg class="w-3 h-3" aria-hidden="true"
                                                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -203,7 +200,7 @@
                                                                         <div class="flex items-center">
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981] mr-2">
                                                                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                                                                 <circle cx="12" cy="7" r="4"></circle>
                                                                             </svg>
@@ -218,7 +215,7 @@
                                                                         <div class="flex items-center">
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981] mr-2">
                                                                                 <rect width="20" height="16" x="2" y="4" rx="2"></rect>
                                                                                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                                                                             </svg>
@@ -234,7 +231,7 @@
                                                                             <!-- A generic user icon for contact person -->
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981] mr-2">
                                                                                 <path d="M16 21v-2a4 4 0 0 0-4-4H12a4 4 0 0 0-4 4v2"></path>
                                                                                 <circle cx="12" cy="7" r="4"></circle>
                                                                             </svg>
@@ -249,7 +246,7 @@
                                                                         <div class="flex items-center">
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981] mr-2">
                                                                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                                                             </svg>
                                                                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Number</p>
@@ -263,7 +260,7 @@
                                                                         <div class="flex items-center">
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mr-2">
+                                                                                stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981] mr-2">
                                                                                 <circle cx="12" cy="12" r="10"></circle>
                                                                                 <polyline points="12 6 12 12 16 14"></polyline>
                                                                             </svg>
@@ -277,7 +274,7 @@
                                                                 <!-- Modal footer -->
                                                                 <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                                                                     <button data-modal-hide="viewSupplierModal{{ $supplier->id }}" type="button"
-                                                                        class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                                        class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-[#10b981] rounded-lg hover:bg-[#059669] focus:ring-4 focus:outline-none focus:ring-[#10b981]/30 dark:bg-[#10b981] dark:hover:bg-[#059669] dark:focus:ring-[#10b981]/30 transition-all duration-200">
                                                                         Close
                                                                     </button>
                                                                 </div>
@@ -293,12 +290,12 @@
                                                             <div
                                                                 class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                                                                 <div
-                                                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-yellow-400 to-yellow-600">
+                                                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-[#f59e0b]">
                                                                     <h3 class="text-lg font-semibold text-white">
                                                                         Edit Supplier
                                                                     </h3>
                                                                     <button type="button"
-                                                                        class="text-white bg-transparent hover:bg-yellow-600 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600"
+                                                                        class="text-white bg-transparent hover:bg-[#d97706] hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 transition-all duration-200"
                                                                         data-modal-hide="editSupplierModal{{ $supplier->id }}">
                                                                         <svg class="w-3 h-3" aria-hidden="true"
                                                                             xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +321,7 @@
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                                                                             <input type="text" name="name"
                                                                                 id="edit-name-{{ $supplier->id }}"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                                                                 value="{{ $supplier->name }}"
                                                                                 required>
                                                                         </div>
@@ -333,7 +330,7 @@
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
                                                                             <input type="email" name="email"
                                                                                 id="edit-email-{{ $supplier->id }}"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                                                                 value="{{ $supplier->email }}">
                                                                         </div>
                                                                         <div>
@@ -342,7 +339,7 @@
                                                                                 Number</label>
                                                                             <input type="text" name="contact_no"
                                                                                 id="edit-contact-{{ $supplier->id }}"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                                                                 value="{{ $supplier->contact_number }}"
                                                                                 required>
                                                                         </div>
@@ -352,7 +349,7 @@
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
                                                                             <input type="text" name="address"
                                                                                 id="edit-address-{{ $supplier->id }}"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                                                                 value="{{ $supplier->address }}"
                                                                                 placeholder="Enter address">
                                                                         </div>
@@ -362,7 +359,7 @@
                                                                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contact Person</label>
                                                                             <input type="text" name="contact_person"
                                                                                 id="edit-contact-person-{{ $supplier->id }}"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]"
                                                                                 value="{{ $supplier->contact_person }}"
                                                                                 placeholder="Enter contact person">
                                                                         </div>
@@ -373,9 +370,9 @@
                                                                         <button
                                                                             data-modal-hide="editSupplierModal{{ $supplier->id }}"
                                                                             type="button"
-                                                                            class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Cancel</button>
+                                                                            class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-gray-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">Cancel</button>
                                                                         <button type="submit"
-                                                                            class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:ring-4 focus:outline-none focus:ring-yellow-300 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800">Update
+                                                                            class="py-2.5 px-5 ms-3 text-sm font-medium text-white bg-[#f59e0b] rounded-lg hover:bg-[#d97706] focus:ring-4 focus:outline-none focus:ring-[#f59e0b]/30 dark:bg-[#f59e0b] dark:hover:bg-[#d97706] dark:focus:ring-[#f59e0b]/30 transition-all duration-200">Update
                                                                             Supplier</button>
                                                                     </div>
                                                                 </form>
@@ -389,7 +386,7 @@
                                                             <div
                                                                 class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                                                                 <div
-                                                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-gradient-to-r from-red-500 to-red-700">
+                                                                    class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 bg-[#ce201f]">
                                                                     <h3
                                                                         class="text-lg font-semibold text-white flex items-center">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -413,7 +410,7 @@
                                                                         Delete Supplier
                                                                     </h3>
                                                                     <button type="button"
-                                                                        class="text-white bg-transparent hover:bg-red-800 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                                                        class="text-white bg-transparent hover:bg-[#a01b1a] hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-all duration-200"
                                                                         data-modal-hide="deleteSupplierModal{{ $supplier->id }}">
                                                                         <svg class="w-3 h-3" aria-hidden="true"
                                                                             xmlns="http://www.w3.org/2000/svg"
@@ -430,9 +427,9 @@
                                                                 <div class="p-6">
                                                                     <div class="mb-5 text-center">
                                                                         <div
-                                                                            class="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                                                                            class="w-16 h-16 mx-auto bg-[#ce201f]/10 rounded-full flex items-center justify-center">
                                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                class="h-10 w-10 text-red-600"
+                                                                                class="h-10 w-10 text-[#ce201f]"
                                                                                 fill="none" viewBox="0 0 24 24"
                                                                                 stroke="currentColor">
                                                                                 <path stroke-linecap="round"
@@ -452,7 +449,7 @@
                                                                                 class="font-semibold text-gray-800 dark:text-white mt-1">
                                                                                 "{{ $supplier->name }}"</p>
                                                                         </div>
-                                                                        <p class="mt-3 text-sm text-red-500">This
+                                                                        <p class="mt-3 text-sm text-[#ce201f]">This
                                                                             action cannot be undone.</p>
                                                                     </div>
 
@@ -466,11 +463,11 @@
                                                                             <button
                                                                                 data-modal-hide="deleteSupplierModal{{ $supplier->id }}"
                                                                                 type="button"
-                                                                                class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                                                                class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-gray-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
                                                                                 Cancel
                                                                             </button>
                                                                             <button type="submit"
-                                                                                class="py-2.5 px-5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center">
+                                                                                class="py-2.5 px-5 text-sm font-medium text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a] dark:focus:ring-[#ce201f]/30 inline-flex items-center transition-all duration-200">
                                                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                                                     width="16" height="16"
                                                                                     viewBox="0 0 24 24" fill="none"
@@ -496,7 +493,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-6 py-8 text-center">
+                                                <td colspan="5" class="px-6 py-8 text-center">
                                                     <!-- Empty state content -->
                                                     <div class="flex flex-col items-center justify-center">
                                                         <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
@@ -514,7 +511,7 @@
                                                             started by adding a new supplier</p>
                                                         <button type="button" data-modal-target="createSupplierModal"
                                                             data-modal-toggle="createSupplierModal"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-blue-300">
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30">
                                                             <svg class="w-4 h-4 mr-2" fill="currentColor"
                                                                 viewBox="0 0 20 20"
                                                                 xmlns="http://www.w3.org/2000/svg">

@@ -37,7 +37,7 @@
 
                             <div
                                 class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <span class="w-3 h-3 mr-2 rounded-full bg-blue-400 dark:bg-blue-500"></span>
+                                <span class="w-3 h-3 mr-2 rounded-full bg-[#6366f1] dark:bg-[#818cf8]"></span>
                                 <span>Approved: </span>
                                 <span
                                     class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
@@ -45,7 +45,7 @@
 
                             <div
                                 class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <span class="w-3 h-3 mr-2 rounded-full bg-green-400 dark:bg-green-500"></span>
+                                <span class="w-3 h-3 mr-2 rounded-full bg-[#10b981] dark:bg-[#34d399]"></span>
                                 <span>Issued: </span>
                                 <span
                                     class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
@@ -60,13 +60,13 @@
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
                                     placeholder="Search RIS number, requestor..."
                                     class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                        focus:ring-1 focus:ring-orange-500 focus:border-orange-500
+                                        focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f]
                                         dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                        dark:focus:ring-orange-500 dark:focus:border-orange-500" />
+                                        dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f] transition-all duration-200" />
 
                                 <!-- The 'X' Button (hidden by default) -->
                                 <button type="button" id="clearButton" onclick="clearSearch()" style="display: none;"
-                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none">
+                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-[#ce201f] focus:outline-none transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
@@ -78,10 +78,10 @@
 
                             <!-- Separate Search Button -->
                             <button type="submit"
-                                class="px-3 py-2 text-sm text-white bg-orange-600 rounded-lg
-                                    hover:bg-orange-800 focus:ring-1 focus:outline-none
-                                    focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700
-                                    dark:focus:ring-orange-800 flex items-center">
+                                class="px-3 py-2 text-sm text-white bg-[#ce201f] rounded-lg
+                                    hover:bg-[#a01b1a] focus:ring-1 focus:outline-none
+                                    focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]
+                                    dark:focus:ring-[#ce201f]/30 flex items-center transition-all duration-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
                                     <path fill-rule="evenodd"
@@ -97,7 +97,7 @@
                     <!-- Alert Messages -->
                     @if (session('success'))
                         <div id="alert-success"
-                            class="flex items-center p-4 mb-5 text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+                            class="flex items-center p-4 mb-5 text-[#10b981] rounded-lg bg-[#10b981]/10 dark:bg-gray-800 dark:text-[#34d399]"
                             role="alert">
                             <svg class="flex-shrink-0 w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                 fill="currentColor" viewBox="0 0 20 20">
@@ -107,7 +107,7 @@
                             <span class="sr-only">Success</span>
                             <div class="ml-3 text-sm font-medium">{{ session('success') }}</div>
                             <button type="button"
-                                class="ml-auto -mx-1.5 -my-1.5 bg-green-50 text-green-500 rounded-lg focus:ring-2 focus:ring-green-400 p-1.5 hover:bg-green-200 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700"
+                                class="ml-auto -mx-1.5 -my-1.5 bg-[#10b981]/10 text-[#10b981] rounded-lg focus:ring-2 focus:ring-[#10b981]/30 p-1.5 hover:bg-[#10b981]/20 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-[#34d399] dark:hover:bg-gray-700 transition-all duration-200"
                                 data-dismiss-target="#alert-success" aria-label="Close">
                                 <span class="sr-only">Close</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -162,14 +162,14 @@
                                                             Pending
                                                         </span>
                                                     @elseif($ris->status === 'approved')
-                                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                                        <span class="bg-[#6366f1]/10 text-[#6366f1] text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-[#6366f1]/20 dark:text-[#818cf8]">
                                                             <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
                                                             </svg>
                                                             Approved
                                                         </span>
                                                     @elseif($ris->status === 'posted')
-                                                        <span class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                                        <span class="bg-[#10b981]/10 text-[#10b981] text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-[#10b981]/20 dark:text-[#34d399]">
                                                             <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path d="m18.774 8.245-.892-.893a1.5 1.5 0 0 1-.437-1.052V5.036a2.484 2.484 0 0 0-2.48-2.48H13.7a1.5 1.5 0 0 1-1.052-.438l-.893-.892a2.484 2.484 0 0 0-3.51 0l-.893.892a1.5 1.5 0 0 1-1.052.437H5.036a2.484 2.484 0 0 0-2.48 2.481V6.3a1.5 1.5 0 0 1-.438 1.052l-.892.893a2.484 2.484 0 0 0 0 3.51l.892.893a1.5 1.5 0 0 1 .437 1.052v1.264a2.484 2.484 0 0 0 2.481 2.481H6.3a1.5 1.5 0 0 1 1.052.437l.893.892a2.484 2.484 0 0 0 3.51 0l.893-.892a1.5 1.5 0 0 1 1.052-.437h1.264a2.484 2.484 0 0 0 2.481-2.48V13.7a1.5 1.5 0 0 1 .437-1.052l.892-.893a2.484 2.484 0 0 0 0-3.51Z" />
                                                                 <path d="M8 13a1 1 0 0 1-.707-.293l-2-2a1 1 0 1 1 1.414-1.414L8 10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-5 5A1 1 0 0 1 8 13Z" />
@@ -180,9 +180,9 @@
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <a href="{{ route('ris.show', $ris->ris_id) }}"
-                                                    class="p-2 text-orange-600 hover:bg-orange-50 rounded-lg inline-flex items-center justify-center
-                                                    focus:outline-none focus:ring-2 focus:ring-orange-300 dark:text-orange-400
-                                                    dark:hover:bg-gray-700 transition-all duration-200"
+                                                    class="p-2 text-[#10b981] hover:bg-[#10b981]/10 rounded-lg inline-flex items-center justify-center
+                                                    focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:text-[#34d399]
+                                                    dark:hover:bg-[#10b981]/20 transition-all duration-200"
                                                     data-tooltip-target="tooltip-view-{{ $ris->ris_id }}"
                                                     data-tooltip-placement="left">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">

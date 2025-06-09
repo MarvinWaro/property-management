@@ -160,7 +160,7 @@
                                                         </a>
 
                                                         <!-- Edit Button -->
-                                                        <a href="{{ route('property.edit', $property) }}">
+                                                        <a href="{{ route('property.edit', $property) }}" 
                                                            class="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-800 transition-all duration-200">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                  height="16" viewBox="0 0 24 24" fill="none"
