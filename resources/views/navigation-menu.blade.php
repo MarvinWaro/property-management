@@ -1,449 +1,350 @@
-<nav x-data="{ open: false }" class="bg-[#a01b1a] dark:bg-[#a01b1a] border-b border-[#a01b1a] dark:border-gray-800 shadow-sm">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex items-center justify-between w-full">
-                <!-- Left Side (Logo & Navigation Links) -->
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-900 shadow-sm">
+    <!-- Main Header Bar -->
+    <div class="bg-[#a01b1a] dark:bg-[#a01b1a]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Left Side (Logo & Title) -->
                 <div class="flex items-center">
-                    <!-- Logo -->
                     <div class="shrink-0 flex items-center">
-                        <a href="{{ route('dashboard') }}">
+                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
                             <x-application-mark class="block h-9 w-auto" />
+                            <div class="hidden md:block text-white">
+                                <div class="text-lg font-semibold leading-tight">COMMISSION ON HIGHER EDUCATION - REGIONAL OFFICE XII</div>
+                                <div class="text-sm font-medium leading-tight">CHED Inventory Management System (CIMS)</div>
+                            </div>
                         </a>
                     </div>
-
-                    @php
-                        // "Assets mode" vs. "Supplies mode" logic
-                        // Adjust route checks or session logic as needed for your app
-                        $isAssetsMode =
-                            request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-                            (request()->routeIs('profile.show') && session('from_assets_mode', false));
-                    @endphp
-
-                    <!-- NAV BAR LINKS ONLY (for example within <nav> ... ) -->
-
-                    <!-- Replace the four separate nav links with this dropdown -->
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <!-- Admin: 'Supplies mode' -->
-                        @if (auth()->user()->role === 'admin' && !$isAssetsMode)
-                            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('dashboard') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Dashboard') }}
-                            </x-nav-link>
-                            <x-nav-link href="{{ route('supplies.index') }}" :active="request()->routeIs('supplies.index')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('supplies.index') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Supplies') }}
-                            </x-nav-link>
-                            <x-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('stocks.index') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Supply Stocks') }}
-                            </x-nav-link>
-                            {{-- <x-nav-link href="{{ route('supply-transactions.index') }}" :active="request()->routeIs('supply-transactions.*')">
-                                {{ __('Transactions') }}
-                            </x-nav-link> --}}
-                            <x-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')" class="relative text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('ris.*') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200" id="requisition-nav-link">
-                                {{ __('Requisitions (RIS)') }}
-                                @if(isset($pendingRisCount) && $pendingRisCount > 0)
-                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-2 -right-2">
-                                        {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
-                                    </span>
-                                @else
-                                    <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-2 -right-2 hidden"></span>
-                                @endif
-                            </x-nav-link>
-                            <x-nav-link href="{{ route('rsmi.index') }}" :active="request()->routeIs('rsmi.*')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('rsmi.*') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('RSMI') }}
-                            </x-nav-link>
-                            <!-- Management Dropdown -->
-                            <div class="relative" x-data="{ open: false }" @mouseenter="open = true"
-                                @mouseleave="open = false">
-                                <button type="button"
-                                    class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition-all duration-200 {{ request()->routeIs('supplier.index') || request()->routeIs('categories.index') || request()->routeIs('departments.index') || request()->routeIs('designations.index') ? 'border-white text-white font-semibold' : 'border-transparent text-white/90 hover:text-white hover:border-white/60' }}">
-                                    <span>{{ __('Management') }}</span>
-                                    <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-
-                                <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="transform opacity-0 scale-95"
-                                    x-transition:enter-end="transform opacity-100 scale-100"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="transform opacity-100 scale-100"
-                                    x-transition:leave-end="transform opacity-0 scale-95"
-                                    class="absolute z-50 mt-2 w-48 rounded-lg shadow-lg origin-top-right right-0 border border-gray-200 dark:border-gray-600"
-                                    style="display: none;">
-                                    <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-[#111111]">
-                                        <a href="{{ route('supplier.index') }}"
-                                            class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1f2937] hover:text-[#ce201f] focus:outline-none focus:bg-gray-50 dark:focus:bg-[#1f2937] focus:text-[#ce201f] transition-all duration-150 {{ request()->routeIs('supplier.index') ? 'bg-gray-50 dark:bg-[#1f2937] text-[#ce201f]' : '' }}">
-                                            {{ __('Supplier') }}
-                                        </a>
-                                        <a href="{{ route('categories.index') }}"
-                                            class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1f2937] hover:text-[#ce201f] focus:outline-none focus:bg-gray-50 dark:focus:bg-[#1f2937] focus:text-[#ce201f] transition-all duration-150 {{ request()->routeIs('categories.index') ? 'bg-gray-50 dark:bg-[#1f2937] text-[#ce201f]' : '' }}">
-                                            {{ __('Categories') }}
-                                        </a>
-                                        <a href="{{ route('departments.index') }}"
-                                            class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1f2937] hover:text-[#ce201f] focus:outline-none focus:bg-gray-50 dark:focus:bg-[#1f2937] focus:text-[#ce201f] transition-all duration-150 {{ request()->routeIs('departments.index') ? 'bg-gray-50 dark:bg-[#1f2937] text-[#ce201f]' : '' }}">
-                                            {{ __('Division') }}
-                                        </a>
-                                        <a href="{{ route('designations.index') }}"
-                                            class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1f2937] hover:text-[#ce201f] focus:outline-none focus:bg-gray-50 dark:focus:bg-[#1f2937] focus:text-[#ce201f] transition-all duration-150 {{ request()->routeIs('designations.index') ? 'bg-gray-50 dark:bg-[#1f2937] text-[#ce201f]' : '' }}">
-                                            {{ __('Designation') }}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Admin: 'Assets mode' -->
-                        @if (auth()->user()->role === 'admin' && $isAssetsMode)
-                            <x-nav-link href="{{ route('assets.dashboard') }}" :active="request()->routeIs('assets.dashboard')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('assets.dashboard') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Assets Dashboard') }}
-                            </x-nav-link>
-                            <x-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('property.index') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Property') }}
-                            </x-nav-link>
-                            <x-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('location.index') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Location') }}
-                            </x-nav-link>
-                        @endif
-
-                        <!-- Staff-only links -->
-                        @if (auth()->user()->role === 'staff')
-                            <x-nav-link href="{{ route('staff.dashboard') }}" :active="request()->routeIs('staff.dashboard')" class="text-white/90 hover:text-white border-b-2 border-transparent hover:border-white/60 {{ request()->routeIs('staff.dashboard') ? 'border-white text-white font-semibold' : '' }} transition-all duration-200">
-                                {{ __('Home') }}
-                            </x-nav-link>
-                            <!-- Add other staff links here, if needed -->
-                        @endif
-                    </div>
-
-
                 </div>
 
-                <!-- Right Side (Dark Mode Toggle Button) -->
-                <div class="flex items-center">
+                <!-- Right Side (User Controls) -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
                     <button id="theme-toggle" type="button"
                         class="p-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg focus:outline-none transition-all duration-200">
                         <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M14.438 10.148c.19-.425-.321-.787-.748-.601A5.5 5.5 0 0 1 6.453 2.31c.186-.427-.176-.938-.6-.748a6.501 6.501 0 1 0 8.585 8.586Z" />
+                            <path d="M14.438 10.148c.19-.425-.321-.787-.748-.601A5.5 5.5 0 0 1 6.453 2.31c.186-.427-.176-.938-.6-.748a6.501 6.501 0 1 0 8.585 8.586Z" />
                         </svg>
                         <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16" fill="currentColor">
-                            <path
-                                d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1ZM10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM12.95 4.11a.75.75 0 1 0-1.06-1.06l-1.062 1.06a.75.75 0 0 0 1.061 1.062l1.06-1.061ZM15 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 15 8ZM11.89 12.95a.75.75 0 0 0 1.06-1.06l-1.06-1.062a.75.75 0 0 0-1.062 1.061l1.061 1.06ZM8 12a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 12ZM5.172 11.89a.75.75 0 0 0-1.061-1.062L3.05 11.89a.75.75 0 1 0 1.06 1.06l1.06-1.06ZM4 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 4 8ZM4.11 5.172A.75.75 0 0 0 5.173 4.11L4.11 3.05a.75.75 0 1 0-1.06 1.06l1.06 1.06Z" />
+                            <path d="M8 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 1ZM10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM12.95 4.11a.75.75 0 1 0-1.06-1.06l-1.062 1.06a.75.75 0 0 0 1.061 1.062l1.06-1.061ZM15 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 15 8ZM11.89 12.95a.75.75 0 0 0 1.06-1.06l-1.06-1.062a.75.75 0 0 0-1.062 1.061l1.061 1.06ZM8 12a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 12ZM5.172 11.89a.75.75 0 0 0-1.061-1.062L3.05 11.89a.75.75 0 1 0 1.06 1.06l1.06-1.06ZM4 8a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 4 8ZM4.11 5.172A.75.75 0 0 0 5.173 4.11L4.11 3.05a.75.75 0 1 0-1.06 1.06l1.06 1.06Z" />
                         </svg>
                     </button>
-                </div>
-            </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <!-- Teams Dropdown -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="ms-3 relative">
-                        <x-dropdown align="right" width="60">
+                    <!-- Teams Dropdown (if applicable) -->
+                    @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
+                        <div class="relative">
+                            <x-dropdown align="right" width="60">
+                                <x-slot name="trigger">
+                                    <span class="inline-flex rounded-md">
+                                        <button type="button"
+                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 active:bg-white/10 transition-all duration-200">
+                                            {{ Auth::user()->currentTeam->name }}
+                                            <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </x-slot>
+                                <!-- Team dropdown content here -->
+                            </x-dropdown>
+                        </div>
+                    @endif
+
+                    <!-- User Dropdown -->
+                    <div class="relative">
+                        <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <span class="inline-flex rounded-md">
-                                    <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 active:bg-white/10 transition-all duration-200">
-                                        {{ Auth::user()->currentTeam->name }}
-
-                                        <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
-                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                        </svg>
+                                @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                                    <button
+                                        class="flex text-sm border-2 border-white/20 hover:border-white/40 rounded-full focus:outline-none focus:border-white transition-all duration-200">
+                                        <img class="size-8 rounded-full object-cover"
+                                            src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                                     </button>
-                                </span>
+                                @else
+                                    <span class="inline-flex rounded-md">
+                                        <button type="button"
+                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none transition-all duration-200">
+                                            {{ Auth::user()->name }}
+                                            <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                @endif
                             </x-slot>
 
                             <x-slot name="content">
-                                <div class="w-60">
-                                    <!-- Team Management -->
-                                    <div class="block px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                        {{ __('Manage Team') }}
-                                    </div>
+                                <!-- Account Management -->
+                                <div class="block px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('Manage Account') }}
+                                </div>
+                                <x-dropdown-link href="{{ route('profile.show') }}">
+                                    {{ __('Profile') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link href="{{ route('profile.show') }}#signature-section">
+                                    {{ __('E-Signature') }}
+                                </x-dropdown-link>
 
-                                    <!-- Team Settings -->
-                                    <x-dropdown-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
-                                        {{ __('Team Settings') }}
+                                @if (auth()->user()->role === 'admin')
+                                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                    <x-dropdown-link href="{{ route('supply-transactions.index') }}">
+                                        {{ __('Transactions') }}
                                     </x-dropdown-link>
 
-                                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
-                                        <x-dropdown-link href="{{ route('teams.create') }}">
-                                            {{ __('Create New Team') }}
-                                        </x-dropdown-link>
-                                    @endcan
+                                    @php
+                                        $isAssetsMode = request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+                                            (request()->routeIs('profile.show') && session('from_assets_mode', false));
+                                    @endphp
 
-                                    <!-- Team Switcher -->
-                                    @if (Auth::user()->allTeams()->count() > 1)
-                                        <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                    <x-dropdown-link href="{{ $isAssetsMode ? route('dashboard') : route('assets.dashboard') }}">
+                                        {{ $isAssetsMode ? __('Supplies') : __('Assets | Properties') }}
+                                    </x-dropdown-link>
+                                @endif
 
-                                        <div class="block px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                            {{ __('Switch Teams') }}
-                                        </div>
-
-                                        @foreach (Auth::user()->allTeams() as $team)
-                                            <x-switchable-team :team="$team" />
-                                        @endforeach
-                                    @endif
-                                </div>
+                                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                <!-- Logout -->
+                                <form method="POST" action="{{ route('logout') }}" x-data>
+                                    @csrf
+                                    <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
+                                        <span class="text-[#ce201f]">{{ __('Log Out') }}</span>
+                                    </x-dropdown-link>
+                                </form>
                             </x-slot>
                         </x-dropdown>
                     </div>
-                @endif
 
-                @php
-                    // Determine if we're in "Assets mode" vs. "Supplies mode"
-                    $isAssetsMode =
-                        request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-                        (request()->routeIs('profile.show') && session('from_assets_mode', false));
-                                    @endphp
-
-                <div class="ms-3 relative">
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                                <button
-                                    class="flex text-sm border-2 border-white/20 hover:border-white/40 rounded-full focus:outline-none focus:border-white transition-all duration-200">
-                                    <img class="size-8 rounded-full object-cover"
-                                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                                </button>
-                            @else
-                                <span class="inline-flex rounded-md">
-                                    <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none transition-all duration-200">
-                                        {{ Auth::user()->name }}
-                                        <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
-                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                </span>
-                            @endif
-                        </x-slot>
-
-                        <x-slot name="content">
-                            <!-- Everyone sees this "Manage Account" label -->
-                            <div class="block px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                {{ __('Manage Account') }}
-                            </div>
-
-                            <!-- Everyone sees their Profile -->
-                            <x-dropdown-link href="{{ route('profile.show') }}">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-
-                            <!-- E-Signature Management (available to everyone) -->
-                            <x-dropdown-link href="{{ route('profile.show') }}#signature-section">
-                                {{ __('E-Signature') }}
-                            </x-dropdown-link>
-
-                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
-
-                            @if (auth()->user()->role === 'admin')
-                                <x-dropdown-link href="{{ route('supply-transactions.index') }}">
-                                    {{ __('Transactions') }}
-                                </x-dropdown-link>
-                            @endif
-
-                            <!-- Only admins see the toggle to switch between "Supplies" and "Assets" -->
-                            @if (auth()->user()->role === 'admin')
-                                <x-dropdown-link
-                                    href="{{ $isAssetsMode ? route('dashboard') : route('assets.dashboard') }}">
-                                    {{ $isAssetsMode ? __('Supplies') : __('Assets | Properties') }}
-                                </x-dropdown-link>
-
-                                @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                                    <x-dropdown-link href="{{ route('api-tokens.index') }}">
-                                        {{ __('API Tokens') }}
-                                    </x-dropdown-link>
-                                @endif
-                            @endif
-
-                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
-
-                            <!-- Everyone sees Logout -->
-                            <form method="POST" action="{{ route('logout') }}" x-data>
-                                @csrf
-                                <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                                    <span class="text-[#ce201f]">{{ __('Log Out') }}</span>
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
+                    <!-- Mobile menu button -->
+                    <div class="sm:hidden">
+                        <button @click="open = ! open"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:text-white transition-all duration-200">
+                            <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                                <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:text-white transition-all duration-200">
-                    <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-[#a01b1a] dark:bg-[#8a1615] border-t border-[#8a1615] dark:border-gray-800">
-        <div class="pt-2 pb-3 space-y-1">
-            @php
-                $isAssetsMode =
-                    request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-                    (request()->routeIs('profile.show') && session('from_assets_mode', false));
-            @endphp
+    <!-- Navigation Tabs Section -->
+    @php
+        $isAssetsMode = request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+            (request()->routeIs('profile.show') && session('from_assets_mode', false));
+    @endphp
 
+    <div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Desktop Navigation Tabs -->
+            <div class="hidden sm:flex space-x-8 -mb-px">
+                @if (auth()->user()->role === 'admin' && !$isAssetsMode)
+                    <!-- Supplies Mode Tabs -->
+                    <a href="{{ route('dashboard') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span>Dashboard</span>
+                        </span>
+                    </a>
+
+                    <a href="{{ route('supplies.index') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('supplies.index') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            <span>Supplies</span>
+                        </span>
+                    </a>
+
+                    <a href="{{ route('stocks.index') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('stocks.index') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m3 0H4a1 1 0 00-1 1v14a1 1 0 001 1h16a1 1 0 001-1V5a1 1 0 00-1-1zm-8 2v2m0 4v2m0 4v2"></path>
+                            </svg>
+                            <span>Supply Stocks</span>
+                        </span>
+                    </a>
+
+                    <a href="{{ route('ris.index') }}"
+                       class="relative border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}" id="requisition-nav-link">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Requisitions (RIS)</span>
+                        </span>
+                        @if(isset($pendingRisCount) && $pendingRisCount > 0)
+                            <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-1 -right-1">
+                                {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('rsmi.index') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('rsmi.*') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span>RSMI</span>
+                        </span>
+                    </a>
+
+                    <!-- Management Dropdown -->
+                    <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                        <button type="button"
+                            class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('supplier.index') || request()->routeIs('categories.index') || request()->routeIs('departments.index') || request()->routeIs('designations.index') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }} flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Management</span>
+                            <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-transition class="absolute z-50 mt-1 w-48 rounded-lg shadow-lg origin-top-right right-0 border border-gray-200 dark:border-gray-600" style="display: none;">
+                            <div class="rounded-lg ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-800">
+                                <a href="{{ route('supplier.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] transition-all duration-150">
+                                    Supplier
+                                </a>
+                                <a href="{{ route('categories.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] transition-all duration-150">
+                                    Categories
+                                </a>
+                                <a href="{{ route('departments.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] transition-all duration-150">
+                                    Division
+                                </a>
+                                <a href="{{ route('designations.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] transition-all duration-150">
+                                    Designation
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if (auth()->user()->role === 'admin' && $isAssetsMode)
+                    <!-- Assets Mode Tabs -->
+                    <a href="{{ route('assets.dashboard') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span>Assets Dashboard</span>
+                        </span>
+                    </a>
+
+                    <a href="{{ route('property.index') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('property.index') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <span>Property</span>
+                        </span>
+                    </a>
+
+                    <a href="{{ route('location.index') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('location.index') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Location</span>
+                        </span>
+                    </a>
+                @endif
+
+                @if (auth()->user()->role === 'staff')
+                    <!-- Staff Tabs -->
+                    <a href="{{ route('staff.dashboard') }}"
+                       class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('staff.dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : '' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span>Home</span>
+                        </span>
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <div class="pt-2 pb-3 space-y-1">
             @if (!$isAssetsMode && auth()->user()->role === 'admin')
-                <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('dashboard') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    <div>{{ __('Dashboard') }}</div>
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('supplies.index') }}" :active="request()->routeIs('supplies.index')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('supplies.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Supplies') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('stocks.index') }}" :active="request()->routeIs('stocks.index')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('stocks.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Supply Stocks') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('ris.index') }}" :active="request()->routeIs('ris.*')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('ris.*') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Requisitions (RIS)') }}
-                </x-responsive-nav-link>
+                <a href="{{ route('dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Dashboard
+                </a>
+                <a href="{{ route('supplies.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('supplies.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Supplies
+                </a>
+                <a href="{{ route('stocks.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('stocks.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Supply Stocks
+                </a>
+                <a href="{{ route('ris.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Requisitions (RIS)
+                </a>
+                <a href="{{ route('rsmi.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('rsmi.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    RSMI
+                </a>
+
                 <!-- Management section for mobile -->
-                <div class="block px-4 py-2 text-xs text-white/70 font-semibold uppercase tracking-wider">
-                    {{ __('Management') }}
+                <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
+                    <div class="px-4">
+                        <div class="font-medium text-base text-gray-800 dark:text-gray-200">Management</div>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <a href="{{ route('supplier.index') }}" class="block pl-6 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('supplier.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                            Supplier
+                        </a>
+                        <a href="{{ route('categories.index') }}" class="block pl-6 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('categories.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                            Categories
+                        </a>
+                        <a href="{{ route('departments.index') }}" class="block pl-6 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('departments.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                            Division
+                        </a>
+                        <a href="{{ route('designations.index') }}" class="block pl-6 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('designations.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                            Designation
+                        </a>
+                    </div>
                 </div>
-                <x-responsive-nav-link href="{{ route('supplier.index') }}" :active="request()->routeIs('supplier.index')" class="text-white/80 hover:text-white hover:bg-white/10 {{ request()->routeIs('supplier.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} pl-8 transition-all duration-200">
-                    {{ __('Supplier') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.index')" class="text-white/80 hover:text-white hover:bg-white/10 {{ request()->routeIs('categories.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} pl-8 transition-all duration-200">
-                    {{ __('Categories') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('departments.index') }}" :active="request()->routeIs('departments.index')" class="text-white/80 hover:text-white hover:bg-white/10 {{ request()->routeIs('departments.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} pl-8 transition-all duration-200">
-                    {{ __('Division') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link href="{{ route('designations.index') }}" :active="request()->routeIs('designations.index')" class="text-white/80 hover:text-white hover:bg-white/10 {{ request()->routeIs('designations.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} pl-8 transition-all duration-200">
-                    {{ __('Designation') }}
-                </x-responsive-nav-link>
             @endif
 
             @if ($isAssetsMode && auth()->user()->role === 'admin')
-                <x-responsive-nav-link href="{{ route('assets.dashboard') }}" :active="request()->routeIs('assets.dashboard')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('assets.dashboard') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Assets Dashboard') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link href="{{ route('property.index') }}" :active="request()->routeIs('property.index')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('property.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Property') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link href="{{ route('location.index') }}" :active="request()->routeIs('location.index')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('location.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Location') }}
-                </x-responsive-nav-link>
+                <a href="{{ route('assets.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Assets Dashboard
+                </a>
+                <a href="{{ route('property.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('property.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Property
+                </a>
+                <a href="{{ route('location.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('location.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Location
+                </a>
             @endif
 
             @if (auth()->user()->role === 'staff')
-                <x-responsive-nav-link href="{{ route('staff.dashboard') }}" :active="request()->routeIs('staff.dashboard')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('staff.dashboard') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Home') }}
-                </x-responsive-nav-link>
+                <a href="{{ route('staff.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('staff.dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Home
+                </a>
             @endif
         </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-[#8a1615] dark:border-gray-800">
-            <div class="flex items-center px-4">
-                @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                    <div class="shrink-0 me-3">
-                        <img class="size-10 rounded-full object-cover border-2 border-white/20" src="{{ Auth::user()->profile_photo_url }}"
-                            alt="{{ Auth::user()->name }}" />
-                    </div>
-                @endif
-
-                <div>
-                    <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-white/70">{{ Auth::user()->email }}</div>
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <!-- Account Management -->
-                <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('profile.show') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- E-Signature Management -->
-                <x-responsive-nav-link href="{{ route('profile.show') }}#signature-section" class="text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200">
-                    {{ __('E-Signature') }}
-                </x-responsive-nav-link>
-
-                @if (auth()->user()->role === 'admin')
-                    <x-responsive-nav-link href="{{ route('supply-transactions.index') }}" class="text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200">
-                        {{ __('Transactions') }}
-                    </x-responsive-nav-link>
-
-                    <!-- Remove :active from Supplies/Assets | Properties to match dropdown behavior -->
-                    <x-responsive-nav-link
-                        href="{{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? route('dashboard') : route('assets.dashboard') }}" class="text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200">
-                        {{ request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ? __('Supplies') : __('Assets | Properties') }}
-                    </x-responsive-nav-link>
-                @endif
-
-                @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                    <x-responsive-nav-link href="{{ route('api-tokens.index') }}" :active="request()->routeIs('api-tokens.index')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('api-tokens.index') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                        {{ __('API Tokens') }}
-                    </x-responsive-nav-link>
-                @endif
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}" x-data>
-                    @csrf
-                    <x-responsive-nav-link href="{{ route('logout') }}" @click.prevent="$root.submit();" class="text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200">
-                        <span class="text-white font-semibold">{{ __('Log Out') }}</span>
-                    </x-responsive-nav-link>
-                </form>
-
-                <!-- Team Management -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="border-t border-[#8a1615] dark:border-gray-800"></div>
-
-                    <div class="block px-4 py-2 text-xs text-white/70 uppercase tracking-wider">
-                        {{ __('Manage Team') }}
-                    </div>
-
-                    <!-- Team Settings -->
-                    <x-responsive-nav-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}"
-                        :active="request()->routeIs('teams.show')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('teams.show') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                        {{ __('Team Settings') }}
-                    </x-responsive-nav-link>
-
-                    @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
-                        <x-responsive-nav-link href="{{ route('teams.create') }}" :active="request()->routeIs('teams.create')" class="text-white/90 hover:text-white hover:bg-white/10 {{ request()->routeIs('teams.create') ? 'text-white bg-white/20 border-l-4 border-white font-semibold' : '' }} transition-all duration-200">
-                            {{ __('Create New Team') }}
-                        </x-responsive-nav-link>
-                    @endcan
-
-                    <!-- Team Switcher -->
-                    @if (Auth::user()->allTeams()->count() > 1)
-                        <div class="border-t border-[#8a1615] dark:border-gray-800"></div>
-
-                        <div class="block px-4 py-2 text-xs text-white/70 uppercase tracking-wider">
-                            {{ __('Switch Teams') }}
-                        </div>
-
-                        @foreach (Auth::user()->allTeams() as $team)
-                            <x-switchable-team :team="$team" component="responsive-nav-link" />
-                        @endforeach
-                    @endif
-                @endif
-            </div>
-        </div>
     </div>
-
 </nav>
