@@ -31,44 +31,135 @@
 
                         <!-- Left sidebar with profile and navigation -->
                         <div class="col-span-4 sm:col-span-3">
-                            <!-- Dynamic Profile Card -->
-                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
-                                <div class="flex flex-col items-center">
-                                    <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"
-                                        class="w-32 h-32 object-cover object-center bg-gray-300 dark:bg-gray-600 rounded-full mb-4 shrink-0">
-                                    <h1 class="text-xl font-bold dark:text-white">{{ Auth::user()->name }}</h1>
-                                    <p class="text-gray-700 dark:text-gray-300">
-                                        {{ optional(Auth::user()->designation)->name }}</p>
-                                    <p class="text-gray-700 dark:text-gray-300">
-                                        {{ optional(Auth::user()->department)->name }}</p>
+                            <!-- Minimal Profile Card -->
+                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 mb-6">
+                                <div class="flex flex-col items-center text-center">
+                                    <!-- Profile Photo -->
+                                    <div class="relative mb-4">
+                                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"
+                                            class="w-24 h-24 object-cover rounded-full border-2 border-gray-200 dark:border-gray-600">
+                                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                                    </div>
+
+                                    <!-- User Info -->
+                                    <div class="space-y-1">
+                                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white">{{ Auth::user()->name }}</h1>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ optional(Auth::user()->designation)->name }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-500">{{ optional(Auth::user()->department)->name }}</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Navigation Menu -->
-                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                                <h3
-                                    class="text-md font-semibold px-6 py-3 border-b border-gray-200 dark:border-gray-700 dark:text-white">
-                                    Profile Navigation
-                                </h3>
-                                <nav id="profile-nav" class="flex flex-col">
+                            <!-- Minimal Navigation Menu -->
+                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Profile Navigation</h3>
+                                </div>
+
+                                <nav id="profile-nav" class="p-2">
                                     <a href="#"
-                                        class="profile-nav-link px-6 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-l-4 border-transparent transition duration-300 ease-in-out"
+                                        class="profile-nav-link flex items-center space-x-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
                                         data-target="requests">
-                                        Requests
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <span>Requests</span>
                                     </a>
+
                                     <a href="#"
-                                        class="profile-nav-link px-6 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-l-4 border-transparent transition duration-300 ease-in-out"
+                                        class="profile-nav-link flex items-center space-x-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
                                         data-target="received-supplies">
-                                        Received Supplies
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span>Received Supplies</span>
                                     </a>
+
                                     <a href="#"
-                                        class="profile-nav-link px-6 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-l-4 border-transparent transition duration-300 ease-in-out"
+                                        class="profile-nav-link flex items-center space-x-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
                                         data-target="properties">
-                                        Properties
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                        <span>Properties</span>
                                     </a>
                                 </nav>
                             </div>
                         </div>
+
+                        <!-- Alternative Compact Version -->
+                        {{-- <div class=" col-span-4 sm:col-span-3">
+                            <!-- Compact Profile Card -->
+                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Profile Photo -->
+                                    <div class="relative">
+                                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"
+                                            class="w-16 h-16 object-cover rounded-full border border-gray-200 dark:border-gray-600">
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                                    </div>
+
+                                    <!-- User Info -->
+                                    <div class="flex-1 min-w-0">
+                                        <h1 class="text-base font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</h1>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ optional(Auth::user()->designation)->name }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-500 truncate">{{ optional(Auth::user()->department)->name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Compact Navigation Menu -->
+                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                                <nav id="profile-nav" class="p-3 space-y-1">
+                                    <a href="#"
+                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
+                                        data-target="requests">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <span>Requests</span>
+                                    </a>
+
+                                    <a href="#"
+                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
+                                        data-target="received-supplies">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span>Received Supplies</span>
+                                    </a>
+
+                                    <a href="#"
+                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
+                                        data-target="properties">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                        <span>Properties</span>
+                                    </a>
+                                </nav>
+                            </div>
+                        </div> --}}
+
+                        <style>
+                            /* Active state styling */
+                            .profile-nav-link.active {
+                                background-color: #fef2f2;
+                                color: #ce201f;
+                                border-left-color: #ce201f;
+                            }
+
+                            .dark .profile-nav-link.active {
+                                background-color: #1f2937;
+                                color: #ce201f;
+                            }
+
+                            /* Custom focus states */
+                            .profile-nav-link:focus {
+                                outline: none;
+                                box-shadow: 0 0 0 2px #ce201f33;
+                            }
+                        </style>
 
                         <!-- Main content area -->
                         <div class="details col-span-4 sm:col-span-9">
@@ -91,16 +182,15 @@
                                 @endif
 
                                 <!-- Header with Button and Search -->
-                                <div
-                                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-                                    <h2 class="text-xl font-bold dark:text-white">My Requests</h2>
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">My Requests</h2>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Track and manage your supply requisition requests</p>
+                                    </div>
 
                                     <button id="openRequestModal"
-                                        class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br
-                                            focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800
-                                            font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-[#ce201f] hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 rounded-lg transition-all duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                         </svg>
                                         Request Supply
@@ -108,34 +198,31 @@
                                 </div>
 
                                 <!-- Filter & Search Section -->
-                                <div
-                                    class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-600">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
                                     <div class="flex flex-wrap gap-4 items-center justify-between">
                                         <!-- Status Filters -->
                                         <div class="flex flex-wrap gap-2">
                                             <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 active-filter"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg bg-[#ce201f] text-white active-filter transition-all duration-200"
                                                 data-status="all">
                                                 All
                                             </button>
                                             <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:text-yellow-800 dark:hover:text-yellow-300"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
                                                 data-status="draft">
-                                                <span
-                                                    class="w-2 h-2 mr-1 inline-block rounded-full bg-yellow-400"></span>
+                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-yellow-500"></span>
                                                 Pending
                                             </button>
                                             <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-300"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
                                                 data-status="approved">
-                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-blue-400"></span>
+                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-blue-500"></span>
                                                 Approved
                                             </button>
                                             <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900 hover:text-green-800 dark:hover:text-green-300"
+                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
                                                 data-status="posted">
-                                                <span
-                                                    class="w-2 h-2 mr-1 inline-block rounded-full bg-green-400"></span>
+                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-green-500"></span>
                                                 Issued
                                             </button>
                                         </div>
@@ -146,23 +233,15 @@
                                                 <input type="text" id="request-search-input"
                                                     oninput="toggleClearRequestButton()"
                                                     placeholder="Search by RIS number..."
-                                                    class="px-4 py-2 w-full border text-sm font-medium border-gray-300 rounded-lg
-                                                        focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-                                                        dark:bg-gray-800 dark:border-gray-700 dark:text-white
-                                                        dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                                    class="px-4 py-2 w-full border text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-[#ce201f] focus:border-[#ce201f] transition-all duration-200" />
 
-                                                <!-- The 'X' Button (hidden by default) -->
+                                                <!-- Clear Button -->
                                                 <button type="button" id="clearRequestButton"
                                                     onclick="clearRequestSearch()" style="display: none;"
-                                                    class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-red-500 focus:outline-none dark:text-gray-400 dark:hover:text-red-400">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                        height="16" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" class="lucide lucide-x">
-                                                        <line x1="18" x2="6" y1="6"
-                                                            y2="18" />
-                                                        <line x1="6" x2="18" y1="6"
-                                                            y2="18" />
+                                                    class="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-[#ce201f] focus:outline-none transition-colors duration-200">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" x2="6" y1="6" y2="18" />
+                                                        <line x1="6" x2="18" y1="6" y2="18" />
                                                     </svg>
                                                 </button>
                                             </div>
@@ -170,74 +249,80 @@
                                     </div>
                                 </div>
 
-                                <!-- Table Description Caption -->
-
-                                <div
-                                    class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Supply
-                                        Requisition Management</h3>
-                                    <p>
-                                        Track and manage your supply requisition requests. You can filter by status,
-                                        search for specific requisitions,
-                                        and view detailed information about each request.
-                                    </p>
-                                </div>
-
                                 <!-- Requests Table -->
-                                <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                            <!-- Clean Table Header -->
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
                                                 <tr>
-                                                    <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
-                                                    <th class="px-6 py-3 text-left tracking-wider">DATE</th>
-                                                    <th class="px-6 py-3 text-left tracking-wider">STATUS</th>
-                                                    <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        RIS No
+                                                    </th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Date
+                                                    </th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Status
+                                                    </th>
+                                                    <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Actions
+                                                    </th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700" id="requests-table-body">
+
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="requests-table-body">
                                                 @forelse($myRequests as $request)
-                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row" data-status="{{ $request->status }}">
-                                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                            {{ $request->ris_no }}
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row transition-colors duration-200" data-status="{{ $request->status }}">
+                                                        <!-- RIS Number -->
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ $request->ris_no }}
+                                                            </div>
                                                         </td>
+
+                                                        <!-- Date -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="flex flex-col">
-                                                                <span class="dark:text-gray-300">{{ $request->ris_date->format('M d, Y') }}</span>
+                                                                <span class="text-sm text-gray-900 dark:text-gray-300">{{ $request->ris_date->format('M d, Y') }}</span>
                                                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $request->created_at->format('h:i A') }}</span>
                                                             </div>
                                                         </td>
+
+                                                        <!-- Status -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             @if ($request->status === 'draft')
-                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 font-medium inline-flex items-center">
-                                                                    <span class="relative flex h-2 w-2 mr-1">
+                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300">
+                                                                    <span class="relative flex h-2 w-2 mr-1.5">
                                                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
                                                                         <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                                                                     </span>
                                                                     Pending
                                                                 </span>
                                                             @elseif($request->status === 'approved')
-                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium inline-flex items-center">
-                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
+                                                                    <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     Approved
                                                                 </span>
                                                             @elseif($request->status === 'posted')
-                                                                <span class="px-2.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 font-medium inline-flex items-center">
-                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">
+                                                                    <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     Issued
                                                                 </span>
                                                             @endif
                                                         </td>
+
+                                                        <!-- Actions -->
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                                             <a href="{{ route('ris.show', $request->ris_id) }}"
-                                                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg"
+                                                                class="inline-flex items-center justify-center w-8 h-8 text-[#ce201f] dark:text-[#ce201f] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                                                 data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
                                                                 data-tooltip-placement="top">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                                 </svg>
@@ -251,13 +336,16 @@
                                                     </tr>
                                                 @empty
                                                     <tr id="no-requests-row">
-                                                        <td colspan="4" class="px-6 py-8 text-center">
-                                                            <div class="flex flex-col items-center justify-center py-8">
-                                                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                                </svg>
-                                                                <p class="text-lg font-medium text-gray-500 dark:text-gray-400">No requisitions found</p>
-                                                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get started by clicking the "Request Supply" button</p>
+                                                        <td colspan="4" class="px-6 py-12 text-center">
+                                                            <!-- Modern Empty State -->
+                                                            <div class="flex flex-col items-center justify-center">
+                                                                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                                                                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No requests found</h3>
+                                                                <p class="text-sm text-gray-500 dark:text-gray-400">Get started by clicking the "Request Supply" button</p>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -266,6 +354,20 @@
                                         </table>
                                     </div>
                                 </div>
+
+                                <style>
+                                    /* Active filter styling */
+                                    .status-filter.active-filter {
+                                        background-color: #ce201f !important;
+                                        color: white !important;
+                                        border-color: #ce201f !important;
+                                    }
+
+                                    /* Non-active filter hover states */
+                                    .status-filter:not(.active-filter):hover {
+                                        border-color: #ce201f;
+                                    }
+                                </style>
 
                                 <!-- Pagination Section (Same as RIS style) -->
                                 @if($myRequests->hasPages())
@@ -1571,146 +1673,132 @@
                             </div>
 
                             <!-- Received Supplies Section (initially hidden) -->
-                            <div id="received-supplies"
-                                class="content-section bg-white dark:bg-gray-800 shadow rounded-lg p-6 hidden">
-                                <h2 class="text-xl font-bold mb-4 dark:text-white">Supplies Received</h2>
-
-                                <!-- Table Description Caption -->
-                                <div
-                                    class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                                    <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">Received
-                                        Supplies Management</h3>
-                                    <p>
-                                        View and manage supplies that have been issued to you. Track all requisitions
-                                        you've received across different departments.
-                                    </p>
+                            <div id="received-supplies" class="content-section bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 hidden">
+                                <!-- Header -->
+                                <div class="mb-6">
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Supplies Received</h2>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">View and manage supplies that have been issued to you. Track all requisitions you've received across different departments.</p>
                                 </div>
 
-                                <!-- Received Supplies Table -->
-                                <div
-                                    class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                                <!-- Modern Table Container -->
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead
-                                                class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-700 dark:to-blue-900">
+                                            <!-- Minimal Table Header -->
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
                                                 <tr>
-                                                    <th class="px-6 py-3 text-left tracking-wider">RIS NO</th>
-                                                    <th class="px-6 py-3 text-left tracking-wider">DATE</th>
-                                                    <th class="px-6 py-3 text-left tracking-wider">REQUESTED BY</th>
-                                                    <th class="px-6 py-3 text-center tracking-wider">ACTIONS</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        RIS No
+                                                    </th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Date
+                                                    </th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Requested By
+                                                    </th>
+                                                    <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Actions
+                                                    </th>
                                                 </tr>
                                             </thead>
-                                            <tbody
-                                                class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                                 @forelse($receivedRequisitions as $requisition)
-                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td
-                                                            class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                                            {{ $requisition->ris_no }}
-                                                        </td>
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                                        <!-- RIS Number -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
-                                                            <div class="flex flex-col">
-                                                                <span
-                                                                    class="dark:text-gray-300">{{ $requisition->ris_date->format('M d, Y') }}</span>
-                                                                <span
-                                                                    class="text-xs text-gray-500 dark:text-gray-400">{{ $requisition->created_at->format('h:i A') }}</span>
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ $requisition->ris_no }}
                                                             </div>
                                                         </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap dark:text-gray-300">
-                                                            {{ optional($requisition->requester)->name ?? 'N/A' }}
+
+                                                        <!-- Date -->
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="flex flex-col">
+                                                                <span class="text-sm text-gray-900 dark:text-gray-300">
+                                                                    {{ $requisition->ris_date->format('M d, Y') }}
+                                                                </span>
+                                                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                                    {{ $requisition->created_at->format('h:i A') }}
+                                                                </span>
+                                                            </div>
                                                         </td>
+
+                                                        <!-- Requested By -->
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <div class="text-sm text-gray-900 dark:text-gray-300">
+                                                                {{ optional($requisition->requester)->name ?? 'N/A' }}
+                                                            </div>
+                                                        </td>
+
+                                                        <!-- Actions -->
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                                             @php
-                                                                $canReceive =
-                                                                    $requisition->received_by == Auth::id() &&
-                                                                    !$requisition->received_at &&
-                                                                    $requisition->status === 'posted' &&
-                                                                    $requisition->issued_at;
+                                                                $canReceive = $requisition->received_by == Auth::id() &&
+                                                                            !$requisition->received_at &&
+                                                                            $requisition->status === 'posted' &&
+                                                                            $requisition->issued_at;
                                                             @endphp
 
                                                             <div class="flex items-center justify-center gap-2">
+                                                                <!-- View Button -->
                                                                 <a href="{{ route('ris.show', $requisition->ris_id) }}"
-                                                                    class="inline-flex items-center justify-center w-8 h-8 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg"
+                                                                    class="inline-flex items-center justify-center w-8 h-8 text-[#ce201f] dark:text-[#ce201f] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                                                     data-tooltip-target="tooltip-view-{{ $loop->index }}"
                                                                     data-tooltip-placement="top">
-                                                                    <svg class="w-4 h-4" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                                                        </path>
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                                     </svg>
                                                                 </a>
-                                                                <div id="tooltip-view-{{ $loop->index }}"
-                                                                    role="tooltip"
+                                                                <div id="tooltip-view-{{ $loop->index }}" role="tooltip"
                                                                     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
                                                                     View Details
                                                                     <div class="tooltip-arrow" data-popper-arrow></div>
                                                                 </div>
 
+                                                                <!-- Receive Button -->
                                                                 @if ($canReceive)
-                                                                    <form
-                                                                        action="{{ route('ris.receive', $requisition) }}"
-                                                                        method="POST" class="inline"
-                                                                        id="receive-form-{{ $requisition->ris_id }}">
+                                                                    <form action="{{ route('ris.receive', $requisition) }}" method="POST" class="inline" id="receive-form-{{ $requisition->ris_id }}">
                                                                         @csrf
                                                                         <button type="button"
-                                                                            class="inline-flex items-center justify-center w-8 h-8 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 rounded-lg"
+                                                                            class="inline-flex items-center justify-center w-8 h-8 text-white bg-[#ce201f] hover:bg-[#a01b1a] rounded-lg transition-all duration-200"
                                                                             data-tooltip-target="tooltip-receive-{{ $loop->index }}"
                                                                             data-tooltip-placement="top"
                                                                             onclick="confirmReceive({{ $requisition->ris_id }})">
-                                                                            <svg class="w-4 h-4" fill="none"
-                                                                                stroke="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                                <path stroke-linecap="round"
-                                                                                    stroke-linejoin="round"
-                                                                                    stroke-width="2"
-                                                                                    d="M5 13l4 4L19 7"></path>
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                                             </svg>
                                                                         </button>
                                                                     </form>
-                                                                    <div id="tooltip-receive-{{ $loop->index }}"
-                                                                        role="tooltip"
+                                                                    <div id="tooltip-receive-{{ $loop->index }}" role="tooltip"
                                                                         class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
                                                                         Receive Supplies
-                                                                        <div class="tooltip-arrow" data-popper-arrow>
-                                                                        </div>
+                                                                        <div class="tooltip-arrow" data-popper-arrow></div>
                                                                     </div>
                                                                 @elseif($requisition->received_at)
-                                                                    <span
-                                                                        class="text-xs text-green-600 dark:text-green-400">
-                                                                        Received
-                                                                        {{ $requisition->received_at->format('M d, Y') }}
-                                                                    </span>
+                                                                    <div class="flex items-center space-x-2">
+                                                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                        <span class="text-xs text-gray-600 dark:text-gray-400">
+                                                                            Received {{ $requisition->received_at->format('M d, Y') }}
+                                                                        </span>
+                                                                    </div>
                                                                 @endif
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="4" class="px-6 py-8 text-center">
-                                                            <!-- Empty state content -->
-                                                            <div
-                                                                class="flex flex-col items-center justify-center py-8">
-                                                                <svg class="w-12 h-12 text-gray-400 mb-4"
-                                                                    fill="none" stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="1.5"
-                                                                        d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4">
-                                                                    </path>
-                                                                </svg>
-                                                                <p
-                                                                    class="text-lg font-medium text-gray-500 dark:text-gray-400">
-                                                                    No received supplies found</p>
-                                                                <p
-                                                                    class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-                                                                    You haven't received any supplies yet</p>
+                                                        <td colspan="4" class="px-6 py-12 text-center">
+                                                            <!-- Modern Empty State -->
+                                                            <div class="flex flex-col items-center justify-center">
+                                                                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                                                                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8 4-8-4V5l8 4 8-4m0 5l-8 4-8-4"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No supplies received</h3>
+                                                                <p class="text-sm text-gray-500 dark:text-gray-400">You haven't received any supplies yet</p>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -1722,7 +1810,7 @@
 
                                 <!-- Pagination -->
                                 @if ($receivedRequisitions->hasPages())
-                                    <div class="mt-4">
+                                    <div class="mt-6">
                                         {{ $receivedRequisitions->links() }}
                                     </div>
                                 @endif

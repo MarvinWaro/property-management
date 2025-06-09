@@ -431,8 +431,10 @@
             </div>
 
             <div class="powered-by">
-                Powered by: CHEDRO XII
+                <p>&copy; 2025 Commission on Higher Education – Regional Office 12. All rights reserved.</p>
             </div>
+
+
         </div>
 
         <!-- Right Panel - Register Form -->
