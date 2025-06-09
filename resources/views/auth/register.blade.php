@@ -403,7 +403,7 @@
                     <img src="{{ asset('img/ched-logo.png') }}" alt="CHED Logo" />
                 </div>
 
-                <h1 class="system-title">CISMS XII</h1>
+                <h1 class="system-title">CIMS XII</h1>
                 <p class="system-subtitle">
                     Comprehensive Inventory and Supply Management System
                 </p>
@@ -571,7 +571,7 @@
             particlesJS('particles-js', {
                 "particles": {
                     "number": {
-                        "value": 60,
+                        "value": 80,
                         "density": {
                             "enable": true,
                             "value_area": 1000
@@ -588,40 +588,45 @@
                         }
                     },
                     "opacity": {
-                        "value": 0.3,
+                        "value": 0.6,
                         "random": true,
                         "anim": {
                             "enable": true,
                             "speed": 1,
-                            "opacity_min": 0.1,
+                            "opacity_min": 0.3,
                             "sync": false
                         }
                     },
                     "size": {
-                        "value": 2,
+                        "value": 3,
                         "random": true,
                         "anim": {
                             "enable": true,
                             "speed": 2,
-                            "size_min": 0.5,
+                            "size_min": 1,
                             "sync": false
                         }
                     },
                     "line_linked": {
                         "enable": true,
-                        "distance": 120,
+                        "distance": 150,
                         "color": "#ffffff",
-                        "opacity": 0.2,
+                        "opacity": 0.4,
                         "width": 1
                     },
                     "move": {
                         "enable": true,
-                        "speed": 1.5,
+                        "speed": 2,
                         "direction": "none",
                         "random": true,
                         "straight": false,
                         "out_mode": "out",
-                        "bounce": false
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
                     }
                 },
                 "interactivity": {
@@ -639,16 +644,16 @@
                     },
                     "modes": {
                         "grab": {
-                            "distance": 100,
+                            "distance": 140,
                             "line_linked": {
-                                "opacity": 0.4
+                                "opacity": 0.8
                             }
                         },
                         "bubble": {
                             "distance": 200,
-                            "size": 4,
+                            "size": 6,
                             "duration": 2,
-                            "opacity": 0.5,
+                            "opacity": 0.8,
                             "speed": 3
                         }
                     }
@@ -657,4 +662,5 @@
             });
         });
     </script>
+
 </x-guest-layout>

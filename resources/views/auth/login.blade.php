@@ -268,6 +268,10 @@
                 padding: 2rem 1rem;
             }
 
+            .branding-content {
+                min-height: 30vh;
+            }
+
             .system-title {
                 font-size: 2rem;
             }
@@ -286,12 +290,17 @@
                 left: auto;
                 transform: none;
                 margin-top: 2rem;
+                text-align: center;
             }
         }
 
         @media (max-width: 480px) {
             .branding-panel {
                 padding: 1.5rem 1rem;
+            }
+
+            .branding-content {
+                min-height: 25vh;
             }
 
             .system-title {
@@ -470,7 +479,7 @@
             particlesJS('particles-js', {
                 "particles": {
                     "number": {
-                        "value": 60,
+                        "value": 80,
                         "density": {
                             "enable": true,
                             "value_area": 1000
@@ -487,35 +496,35 @@
                         }
                     },
                     "opacity": {
-                        "value": 0.3,
+                        "value": 0.6,
                         "random": true,
                         "anim": {
                             "enable": true,
                             "speed": 1,
-                            "opacity_min": 0.1,
+                            "opacity_min": 0.3,
                             "sync": false
                         }
                     },
                     "size": {
-                        "value": 2,
+                        "value": 3,
                         "random": true,
                         "anim": {
                             "enable": true,
                             "speed": 2,
-                            "size_min": 0.5,
+                            "size_min": 1,
                             "sync": false
                         }
                     },
                     "line_linked": {
                         "enable": true,
-                        "distance": 120,
+                        "distance": 150,
                         "color": "#ffffff",
-                        "opacity": 0.2,
+                        "opacity": 0.4,
                         "width": 1
                     },
                     "move": {
                         "enable": true,
-                        "speed": 1.5,
+                        "speed": 2,
                         "direction": "none",
                         "random": true,
                         "straight": false,
@@ -543,16 +552,16 @@
                     },
                     "modes": {
                         "grab": {
-                            "distance": 100,
+                            "distance": 140,
                             "line_linked": {
-                                "opacity": 0.4
+                                "opacity": 0.8
                             }
                         },
                         "bubble": {
                             "distance": 200,
-                            "size": 4,
+                            "size": 6,
                             "duration": 2,
-                            "opacity": 0.5,
+                            "opacity": 0.8,
                             "speed": 3
                         }
                     }
