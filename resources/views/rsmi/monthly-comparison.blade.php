@@ -18,15 +18,15 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
                 <div class="p-6">
                     <!-- Filter Controls -->
-                    <div class="mb-8 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div class="mb-8 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                         <form method="GET" action="{{ route('rsmi.monthly-comparison') }}" class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
                             <div class="flex items-center space-x-3">
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300 w-16">Year:</label>
                                 <select name="year" onchange="this.form.submit()"
-                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-all duration-200">
                                     @php
                                         $currentYear = date('Y');
                                         // Always show from current year down to 2024
@@ -41,7 +41,7 @@
                             <div class="flex items-center space-x-3">
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Fund Cluster:</label>
                                 <select name="fund_cluster" onchange="this.form.submit()"
-                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    class="flex-grow px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-all duration-200">
                                     <option value="101" {{ $fundCluster == '101' ? 'selected' : '' }}>101</option>
                                     <option value="151" {{ $fundCluster == '151' ? 'selected' : '' }}>151</option>
                                 </select>
@@ -80,17 +80,17 @@
                                 @php $yearTotal = 0; @endphp
                                 @foreach($monthlyData as $data)
                                     @php $yearTotal += $data['total']; @endphp
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                             {{ $data['month'] }}
                                         </td>
-                                        <td class="px-6 py-4 text-right {{ $data['total'] > 0 ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-600 dark:text-gray-400' }}">
+                                        <td class="px-6 py-4 text-right {{ $data['total'] > 0 ? 'text-[#10b981] font-medium' : 'text-gray-600 dark:text-gray-400' }}">
                                             ₱{{ number_format($data['total'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             @if($data['total'] > 0)
                                                 <a href="{{ route('rsmi.generate') }}?month={{ $year }}-{{ str_pad(array_search($data['month'], ['January','February','March','April','May','June','July','August','September','October','November','December']) + 1, 2, '0', STR_PAD_LEFT) }}"
-                                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700 transition-all duration-200 inline-flex items-center justify-center"
+                                                    class="p-2 text-[#10b981] hover:bg-[#10b981]/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 transition-all duration-200 inline-flex items-center justify-center"
                                                     data-tooltip-target="tooltip-view-report-{{ str_replace(' ', '-', strtolower($data['month'])) }}"
                                                     data-tooltip-placement="left">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
@@ -115,7 +115,7 @@
                             <tfoot>
                                 <tr class="bg-gray-50 dark:bg-gray-700 font-bold">
                                     <td class="px-6 py-4 text-gray-800 dark:text-gray-200">YEAR TOTAL</td>
-                                    <td class="px-6 py-4 text-right text-blue-600 dark:text-blue-400 font-bold">
+                                    <td class="px-6 py-4 text-right text-[#10b981] font-bold">
                                         ₱{{ number_format($yearTotal, 2) }}
                                     </td>
                                     <td></td>
@@ -159,11 +159,11 @@
                         datasets: [{
                             label: 'Total Amount Issued',
                             data: monthlyValues,
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            borderColor: 'rgb(16, 185, 129)',
                             borderWidth: 1,
                             borderRadius: 4,
-                            hoverBackgroundColor: 'rgba(59, 130, 246, 0.4)'
+                            hoverBackgroundColor: 'rgba(16, 185, 129, 0.4)'
                         }]
                     },
                     options: {
