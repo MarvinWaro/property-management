@@ -3,15 +3,40 @@
         html, body {
             height: 100%;
             margin: 0;
+            font-family: 'Inter', sans-serif;
         }
+
         .login-container {
-            position: relative;
-            height: 100vh; /* Full viewport height */
-            /* Gradient: light blue at top, dark blue at bottom, over the background image */
-            background: linear-gradient(to bottom, rgba(173,216,230, 0.7), rgba(0,0,139, 0.8)),
-                        url('{{ asset("img/bg-login.jpg") }}') no-repeat center center;
-            background-size: cover;
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
         }
+
+        /* Left Panel - Branding */
+        .branding-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .branding-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('{{ asset("img/bg-login.jpg") }}') center/cover;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
         /* Particles.js container */
         #particles-js {
             position: absolute;
@@ -19,66 +44,356 @@
             height: 100%;
             top: 0;
             left: 0;
-            z-index: 1;
-        }
-        /* Center content above the particles */
-        .content-container {
-            position: relative;
             z-index: 2;
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
         }
-        /* Enhanced authentication card (glassmorphism style) */
-        .authentication-card {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            border-radius: 1rem;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 2rem;
+
+        .logo-container img,
+        .logo-container svg {
+            width: 100px;
+            height: 100px;
+            /* Use filter if logo appears too dark on red background */
+            /* filter: brightness(0) invert(1); */
         }
-        /* Input styling with focus effect */
-        .custom-input {
-            border: 1px solid #e2e8f0 !important;
-            background-color: #f8fafc !important;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .custom-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
-        /* Enhanced button styling with gradient and hover effect */
-        .login-button {
-            background: linear-gradient(45deg, #3b82f6, #2563eb) !important;
-            transition: background 0.3s;
-        }
-        .login-button:hover {
-            background: linear-gradient(45deg, #2563eb, #1e40af) !important;
-        }
-        /* Welcome text style */
-        .welcome-text {
-            color: #1e3a8a;
+
+        .system-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
             text-align: center;
+        }
+
+        .system-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 400px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-list {
+            text-align: left;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+            color: #34d399;
+        }
+
+        .powered-by {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            z-index: 3;
+        }
+
+        /* Right Panel - Login Form */
+        .login-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: #ffffff;
+        }
+
+        .login-form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Form Styling */
+        .form-group {
             margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: bold;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background-color: #f9fafb;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #b91c1c;
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
+            background-color: #ffffff;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: #b91c1c;
+        }
+
+        .remember-me label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .forgot-password {
+            font-size: 0.875rem;
+            color: #b91c1c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-button:hover {
+            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .signup-prompt {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .signup-link {
+            color: #b91c1c;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+
+            .branding-panel {
+                min-height: 40vh;
+                padding: 2rem 1rem;
+            }
+
+            .system-title {
+                font-size: 2rem;
+            }
+
+            .features-list {
+                display: none;
+            }
+
+            .login-panel {
+                padding: 1.5rem;
+            }
+
+            .powered-by {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .branding-panel {
+                padding: 1.5rem 1rem;
+            }
+
+            .system-title {
+                font-size: 1.75rem;
+            }
+
+            .login-panel {
+                padding: 1rem;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .login-panel {
+                background: #111827;
+            }
+
+            .welcome-title {
+                color: #ffffff;
+            }
+
+            .welcome-subtitle {
+                color: #9ca3af;
+            }
+
+            .form-label {
+                color: #d1d5db;
+            }
+
+            .form-input {
+                background-color: #1f2937;
+                border-color: #374151;
+                color: #ffffff;
+            }
+
+            .form-input:focus {
+                background-color: #1f2937;
+                border-color: #b91c1c;
+            }
+
+            .remember-me label {
+                color: #9ca3af;
+            }
+
+            .signup-prompt {
+                color: #9ca3af;
+            }
         }
     </style>
 
     <div class="login-container">
-        <!-- Particles.js background -->
-        <div id="particles-js"></div>
+        <!-- Left Panel - Branding -->
+        <div class="branding-panel">
+            <!-- Particles.js background -->
+            <div id="particles-js"></div>
 
-        <div class="content-container">
-            <div class="w-full sm:max-w-md authentication-card">
-                <div class="flex justify-center">
-                    <x-authentication-card-logo />
+            <div class="branding-content">
+                <div class="logo-container">
+                    <img src="{{ asset('img/ched-logo.png') }}"
+                         alt="CHED Logo"
+                         style="width: 100px; height: 100px;" />
                 </div>
 
-                <h1 class="welcome-text mt-2">CISMS XII</h1>
+                <h1 class="system-title">CIMS XII</h1>
+                <p class="system-subtitle">
+                    CHED Inventory Management System
+                </p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Streamlined inventory management</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span>Real-time stock monitoring</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <span>Secure data management</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="powered-by">
+                Powered by: CHEDRO XII
+            </div>
+        </div>
+
+        <!-- Right Panel - Login Form -->
+        <div class="login-panel">
+            <div class="login-form-container">
+                <div class="login-header">
+                    <h2 class="welcome-title">Welcome Back</h2>
+                    <p class="welcome-subtitle">Please sign in to your account</p>
+                </div>
 
                 <x-validation-errors class="mb-4" />
 
@@ -92,55 +407,54 @@
                     @csrf
 
                     <!-- Email Address -->
-                    <div>
-                        <x-label for="email" value="{{ __('Email') }}" />
-                        <x-input id="email" class="block mt-1 w-full h-10 custom-input"
-                                 type="email"
-                                 name="email"
-                                 :value="old('email')"
-                                 required autofocus autocomplete="username" />
+                    <div class="form-group">
+                        <label for="email" class="form-label">{{ __('Email') }}</label>
+                        <input id="email"
+                               class="form-input"
+                               type="email"
+                               name="email"
+                               value="{{ old('email') }}"
+                               required
+                               autofocus
+                               autocomplete="username"
+                               placeholder="Enter your email address" />
                     </div>
 
                     <!-- Password -->
-                    <div class="mt-4">
-                        <x-label for="password" value="{{ __('Password') }}" />
-                        <x-input id="password" class="block mt-1 w-full h-10 custom-input"
-                                 type="password"
-                                 name="password"
-                                 required autocomplete="current-password" />
+                    <div class="form-group">
+                        <label for="password" class="form-label">{{ __('Password') }}</label>
+                        <input id="password"
+                               class="form-input"
+                               type="password"
+                               name="password"
+                               required
+                               autocomplete="current-password"
+                               placeholder="Enter your password" />
                     </div>
 
                     <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between mt-4">
-                        <label for="remember_me" class="flex items-center">
-                            <x-checkbox id="remember_me" name="remember" />
-                            <span class="ml-2 text-sm text-gray-600">
-                                {{ __('Remember me') }}
-                            </span>
+                    <div class="form-row">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember_me" name="remember" />
+                            <span class="text-white">{{ __('Remember me') }}</span>
                         </label>
 
                         @if (Route::has('password.request'))
-                            <a class="underline text-sm text-gray-600 hover:text-gray-900"
-                               href="{{ route('password.request') }}">
-                                {{ __('Forgot your password?') }}
+                            <a class="forgot-password" href="{{ route('password.request') }}">
+                                {{ __('Forgot password?') }}
                             </a>
                         @endif
                     </div>
 
                     <!-- Login Button -->
-                    <div class="mt-6">
-                        <x-button class="w-full h-10 login-button">
-                            <span class="block text-center w-full">{{ __('Log in') }}</span>
-                        </x-button>
-                    </div>
+                    <button type="submit" class="login-button">
+                        {{ __('Sign In') }}
+                    </button>
 
                     <!-- Signup Prompt -->
-                    <div class="mt-4 text-center">
-                        <span class="text-sm text-gray-600">
-                            {{ __("Don't have an account?") }}
-                        </span>
-                        <a class="underline text-sm text-gray-600 hover:text-gray-900 ml-1"
-                           href="{{ route('register') }}">
+                    <div class="signup-prompt">
+                        {{ __("Don't have an account?") }}
+                        <a class="signup-link" href="{{ route('register') }}">
                             {{ __('Sign up here') }}
                         </a>
                     </div>
@@ -156,10 +470,10 @@
             particlesJS('particles-js', {
                 "particles": {
                     "number": {
-                        "value": 80,
+                        "value": 60,
                         "density": {
                             "enable": true,
-                            "value_area": 800
+                            "value_area": 1000
                         }
                     },
                     "color": {
@@ -173,28 +487,45 @@
                         }
                     },
                     "opacity": {
-                        "value": 0.5,
-                        "random": false
+                        "value": 0.3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
                     },
                     "size": {
-                        "value": 3,
-                        "random": true
+                        "value": 2,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.5,
+                            "sync": false
+                        }
                     },
                     "line_linked": {
                         "enable": true,
-                        "distance": 150,
+                        "distance": 120,
                         "color": "#ffffff",
-                        "opacity": 0.4,
+                        "opacity": 0.2,
                         "width": 1
                     },
                     "move": {
                         "enable": true,
-                        "speed": 2,
+                        "speed": 1.5,
                         "direction": "none",
-                        "random": false,
+                        "random": true,
                         "straight": false,
                         "out_mode": "out",
-                        "bounce": false
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
                     }
                 },
                 "interactivity": {
@@ -206,19 +537,23 @@
                         },
                         "onclick": {
                             "enable": true,
-                            "mode": "push"
+                            "mode": "bubble"
                         },
                         "resize": true
                     },
                     "modes": {
                         "grab": {
-                            "distance": 140,
+                            "distance": 100,
                             "line_linked": {
-                                "opacity": 1
+                                "opacity": 0.4
                             }
                         },
-                        "push": {
-                            "particles_nb": 4
+                        "bubble": {
+                            "distance": 200,
+                            "size": 4,
+                            "duration": 2,
+                            "opacity": 0.5,
+                            "speed": 3
                         }
                     }
                 },
