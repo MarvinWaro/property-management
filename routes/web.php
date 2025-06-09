@@ -25,6 +25,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/run-storage-link', function () {
+    Artisan::call('storage:link');
+    return 'Symlink created!';
+});
+
 // Combine admin + staff under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
