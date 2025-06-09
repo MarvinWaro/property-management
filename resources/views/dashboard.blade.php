@@ -7,170 +7,162 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <!-- Floating Cards Section (Separate) -->
-            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
+            <!-- Minimal Dashboard Cards Section -->
+            <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
 
-                <!-- Employees Card (Purple) - Staff Only Count -->
-                <a href="#user-section">
-                    <div
-                        class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                        <!-- Background with gradient and subtle pattern -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 opacity-90"></div>
-                        <!-- Decorative shapes -->
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-purple-300 dark:bg-purple-700 opacity-40"></div>
-                        <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-purple-400 dark:bg-purple-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                        <div class="flex justify-between relative z-10">
-                            <dl class="space-y-2">
-                                <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                    Employees
-                                </dt>
-                                <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                    {{ $staffCount }}
-                                </dd>
-                                @if ($lastUpdated)
-                                    <dd
-                                        class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <polyline points="12 6 12 12 16 14"/>
+                <!-- Employees Card -->
+                <a href="#user-section" class="group">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-[#ce201f] transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="9" cy="7" r="4"/>
+                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
-                                        <span>Updated {{ $lastUpdated->diffForHumans() }}</span>
-                                    </dd>
-                                @endif
-                            </dl>
-                            <div
-                                class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
-                                transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white dark:group-hover:bg-purple-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-400 group-hover:text-white">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Employees</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">{{ $staffCount }}</p>
+                                    @if ($lastUpdated)
+                                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <polyline points="12 6 12 12 16 14"/>
+                                            </svg>
+                                            Updated {{ $lastUpdated->diffForHumans() }}
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
                 </a>
 
-                <!-- Total Supplies (Blue) -->
-                <a href="{{ route('supplies.index') }}">
-                    <div
-                        class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                        <!-- Background with gradient and subtle pattern -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 opacity-90"></div>
-                        <!-- Decorative shapes -->
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-blue-300 dark:bg-blue-700 opacity-40"></div>
-                        <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-blue-400 dark:bg-blue-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                        <div class="flex justify-between relative z-10">
-                            <dl class="space-y-2">
-                                <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                    Total Supplies
-                                </dt>
-                                <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                    {{ number_format($totalSupplies) }}
-                                </dd>
-                                <dd
-                                    class="flex items-center space-x-1 text-xs sm:text-sm font-medium {{ $lowStockItems > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
-                                    {{-- <span>{{ $lowStockItems > 0 ? $lowStockItems . ' items low' : 'All stocked' }}</span> --}}
-                                    ...
-                                </dd>
-                            </dl>
-                            <div
-                                class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
-                                transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white dark:group-hover:bg-blue-600">
-                                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500 dark:text-blue-400 group-hover:text-white"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                </svg>
+                <!-- Total Supplies Card -->
+                <a href="{{ route('supplies.index') }}" class="group">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-[#ce201f] transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Supplies</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">{{ number_format($totalSupplies) }}</p>
+                                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                        <div class="w-2 h-2 rounded-full {{ $lowStockItems > 0 ? 'bg-red-400' : 'bg-green-400' }} mr-2"></div>
+                                        {{-- {{ $lowStockItems > 0 ? $lowStockItems . ' items low' : 'All stocked' }} --}}...
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </a>
 
-                <!-- Total Stock Value (Teal) -->
-                <a href="{{ url('/stocks') }}">
-                    <div
-                        class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                        <!-- Background with gradient and subtle pattern -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-teal-100 to-teal-200 dark:from-teal-900 dark:to-teal-800 opacity-90"></div>
-                        <!-- Decorative shapes -->
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-teal-300 dark:bg-teal-700 opacity-40"></div>
-                        <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-teal-400 dark:bg-teal-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                        <div class="flex justify-between relative z-10">
-                            <dl class="space-y-2">
-                                <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                    Total Stock Value
-                                </dt>
-                                <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                    ₱{{ number_format($totalStockValue, 2) }}
-                                </dd>
-                                <dd
-                                    class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-teal-600 dark:text-teal-400">
-                                    <span>Current inventory value</span>
-                                </dd>
-                            </dl>
-                            <div
-                                class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
-                                transition-all duration-300 group-hover:bg-teal-500 group-hover:text-white dark:group-hover:bg-teal-600">
-                                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-teal-500 dark:text-teal-400 group-hover:text-white"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12c0-1.657-1.343-3-3-3H6c-1.657
-                                    0-3 1.343-3 3v6c0 1.657 1.343 3 3
-                                    3h12c1.657 0 3-1.343 3-3v-6zM3
-                                    9V6c0-1.657 1.343-3 3-3h12c1.657
-                                    0 3 1.343 3 3v3M8.25 12a2.25 2.25
-                                    0 104.5 0 2.25 2.25 0 00-4.5 0z" />
-                                </svg>
+                <!-- Total Stock Value Card -->
+                <a href="{{ url('/stocks') }}" class="group">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-[#ce201f] transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0-1.657-1.343-3-3-3H6c-1.657 0-3 1.343-3 3v6c0 1.657 1.343 3 3 3h12c1.657 0 3-1.343 3-3v-6zM3 9V6c0-1.657 1.343-3 3-3h12c1.657 0 3 1.343 3 3v3M8.25 12a2.25 2.25 0 104.5 0 2.25 2.25 0 00-4.5 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Stock Value</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">₱{{ number_format($totalStockValue, 2) }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Current inventory value</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </a>
 
-                <!-- Transactions This Month (Orange) -->
-                <a href="{{ route('supply-transactions.index') }}">
-                    <div
-                        class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                        <!-- Background with gradient and subtle pattern -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 opacity-90"></div>
-                        <!-- Decorative shapes -->
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-orange-300 dark:bg-orange-700 opacity-40"></div>
-                        <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-orange-400 dark:bg-orange-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                        <div class="flex justify-between relative z-10">
-                            <dl class="space-y-2">
-                                <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                    Transactions This Month
-                                </dt>
-                                <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                    {{ number_format($transactionsThisMonth) }}
-                                </dd>
-                                <dd
-                                    class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
-                                    </svg>
-                                    <span>Updated {{ $lastTransactionUpdateTime ? $lastTransactionUpdateTime->diffForHumans() : 'recently' }}</span>
-                                </dd>
-                            </dl>
-                            <div
-                                class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md
-                                transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white dark:group-hover:bg-orange-600">
-                                <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-orange-500 dark:text-orange-400 group-hover:text-white"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                                </svg>
+                <!-- Transactions This Month Card -->
+                <a href="{{ route('supply-transactions.index') }}" class="group">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-[#ce201f] transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Transactions This Month</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">{{ number_format($transactionsThisMonth) }}</p>
+                                    @if ($lastTransactionUpdateTime)
+                                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <polyline points="12 6 12 12 16 14"/>
+                                            </svg>
+                                            Updated {{ $lastTransactionUpdateTime->diffForHumans() }}
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
                 </a>
+
             </div>
+
+            <!-- Alternative Version with Accent Colors (Optional) -->
+            {{-- <div class="hidden grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
+
+                <!-- Employees Card with Blue Accent -->
+                <a href="#user-section" class="group">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border-l-4 border-blue-500 shadow-sm p-6 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-4">
+                                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Employees</p>
+                                    <div class="w-8 h-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="9" cy="7" r="4"/>
+                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $staffCount }}</p>
+                                    @if ($lastUpdated)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Updated {{ $lastUpdated->diffForHumans() }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Add other cards with different accent colors: green, yellow, red -->
+
+            </div> --}}
 
             <!-- New Section: List of Registered Users -->
             <div id="user-section" class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
