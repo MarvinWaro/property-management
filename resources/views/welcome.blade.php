@@ -742,12 +742,9 @@
                 <p>
                     CHED Inventory and Supply Management System
                 </p>
-                <p>
-                    Empowering educational institutions with efficient, compliant inventory management solutions.
-                </p>
                 <div class="footer-info">
                     <p>Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})</p>
-                    <p>Powered by: CHEDR09</p>
+                    <p>&copy; 2025 Commission on Higher Education – Regional Office 12. All rights reserved.</p>
                 </div>
             </div>
         </footer>
