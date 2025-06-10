@@ -557,7 +557,7 @@
                                                             @endforeach
                                                         </div>
 
-                                                        <!-- Selected Items View (Initially Hidden) -->
+                                                        <!-- Selected Itemsss View (Initially Hidden) -->
                                                         <div id="selected-items-container" class="hidden mt-6">
                                                             <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3 sm:p-4">
                                                                 <h5 class="font-medium text-gray-900 dark:text-white mb-3 text-sm sm:text-base">Selected Items</h5>
