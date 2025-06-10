@@ -430,7 +430,7 @@
                 </div>
             </div>
 
-            <div class="powered-by">
+            <div class="powered-by text-center">
                 <p>&copy; 2025 Commission on Higher Education – Regional Office 12. All rights reserved.</p>
             </div>
 
