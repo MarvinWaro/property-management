@@ -390,16 +390,19 @@
                                 @endif
 
                                 <!-- RIS Request Modal with Only Items Section Scrollable -->
+
                                 <div id="requestModal"
-                                    class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden">
-                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[90vh] flex flex-col">
-                                        <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 shrink-0">
-                                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                                Create Requisition and Issue Slip
+                                    class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden p-1 sm:p-4">
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[98vh] sm:h-[90vh] flex flex-col">
+                                        <!-- Fixed Header -->
+                                        <div class="flex items-center justify-between p-3 sm:p-4 border-b dark:border-gray-700 shrink-0">
+                                            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                                <span class="hidden sm:inline">Create Requisition and Issue Slip</span>
+                                                <span class="sm:hidden">Create RIS</span>
                                             </h3>
                                             <button id="closeRequestModal"
-                                                class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400">
-                                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 p-1">
+                                                <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
@@ -407,183 +410,193 @@
 
                                         <form action="{{ route('ris.store') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
                                             @csrf
-                                            <!-- Fixed Upper Section -->
-                                            <div class="p-6 pb-0 shrink-0">
-                                                <!-- Header Information -->
-                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entity Name</label>
-                                                        <input type="text" name="entity_name" value="CHEDRO 12"
-                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
-                                                            required>
-                                                    </div>
 
-                                                    <!-- Hidden Fund Cluster field that admin will fill later -->
-                                                    <input type="hidden" name="fund_cluster" value="">
-
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Division</label>
-                                                        <select name="division"
-                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
-                                                            required>
-                                                            @foreach ($departments as $department)
-                                                                <option value="{{ $department->id }}"
-                                                                    {{ Auth::user()->department_id == $department->id ? 'selected' : '' }}>
-                                                                    {{ $department->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Office</label>
-                                                        <input type="text" name="office"
-                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Responsibility Center Code</label>
-                                                        <input type="text" name="responsibility_center_code"
-                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
-                                                    </div>
-
-                                                    <div class="md:col-span-2">
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
-                                                        <textarea name="purpose" rows="1"
-                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
-                                                            required></textarea>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Items Header (Also Fixed) -->
-                                                <div class="flex justify-between items-center mb-4">
-                                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Select Items to Request</h4>
-
-                                                    <div class="flex items-center">
-                                                        <div class="relative mr-2">
-                                                            <input type="text" id="item-search"
-                                                                placeholder="Search items..."
-                                                                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
-                                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                                                </svg>
-                                                            </div>
+                                            <!-- Scrollable Content Area -->
+                                            <div class="flex-1 overflow-y-auto">
+                                                <div class="p-3 sm:p-6">
+                                                    <!-- Header Information -->
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                                                        <div class="sm:col-span-2 lg:col-span-1">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entity Name</label>
+                                                            <input type="text" name="entity_name" value="CHEDRO 12"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
+                                                                required>
                                                         </div>
 
-                                                        <button type="button" id="viewCartBtn"
-                                                            class="px-3 py-2 bg-[#ce201f] text-white rounded-md hover:bg-[#a01b1a] flex items-center shadow-sm">
-                                                            <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                            </svg>
-                                                            View Selected (<span id="itemCount">0</span>)
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                        <!-- Hidden Fund Cluster field that admin will fill later -->
+                                                        <input type="hidden" name="fund_cluster" value="">
 
-                                            <!-- Scrollable Items Section -->
-                                            <div class="px-6 overflow-y-auto flex-1">
-                                                <!-- Supply Items -->
-                                                <div class="mb-6">
-                                                    <!-- Product Grid View with Fund Cluster Information -->
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="products-grid">
-                                                        @foreach ($stocks as $stock)
-                                                            <div class="product-card border dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
-                                                                data-supply-id="{{ $stock->supply_id }}"
-                                                                data-name="{{ $stock->supply->item_name }}"
-                                                                data-available="{{ $stock->available_for_request }}"
-                                                                data-fund-cluster="{{ $stock->fund_cluster }}">
-                                                                <div class="p-4 flex flex-col h-full">
-                                                                    <div class="flex-1">
-                                                                        <h5 class="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">
-                                                                            {{ $stock->supply->item_name }}</h5>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                                                                            Stock No: {{ $stock->supply->stock_no ?? 'N/A' }}</p>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                                                                            Description: {{ $stock->supply->description ?? 'N/A' }}
-                                                                        </p>
-                                                                        <div class="flex items-center justify-between mb-2">
-                                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300') }}">
-                                                                                {{ $stock->available_for_request }} available
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="text-xs text-gray-600 dark:text-gray-400">
-                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                                                                                Fund: {{ $stock->fund_cluster ?: 'Unspecified' }}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="mt-3 pt-3 border-t dark:border-gray-700 flex items-center">
-                                                                        <div class="flex items-center border dark:border-gray-600 rounded-md">
-                                                                            <button type="button"
-                                                                                class="quantity-btn minus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50"
-                                                                                data-action="decrease"
-                                                                                {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
-                                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                            <input type="number"
-                                                                                class="quantity-input w-12 text-center border-none dark:bg-gray-700 dark:text-white focus:ring-0"
-                                                                                value="0" min="0"
-                                                                                max="{{ $stock->quantity_on_hand }}"
-                                                                                {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
-                                                                            <button type="button"
-                                                                                class="quantity-btn plus px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50"
-                                                                                data-action="increase"
-                                                                                {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
-                                                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
-                                                                                </svg>
-                                                                            </button>
-                                                                        </div>
-                                                                        <button type="button"
-                                                                            class="add-to-cart ml-2 px-3 py-1 bg-[#ce201f] text-white text-sm rounded hover:bg-[#a01b1a] flex-grow text-center disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                            {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
-                                                                            Add to Request
-                                                                        </button>
-                                                                    </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Division</label>
+                                                            <select name="division"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
+                                                                required>
+                                                                @foreach ($departments as $department)
+                                                                    <option value="{{ $department->id }}"
+                                                                        {{ Auth::user()->department_id == $department->id ? 'selected' : '' }}>
+                                                                        {{ $department->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Office</label>
+                                                            <input type="text" name="office"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                        </div>
+
+                                                        <div class="sm:col-span-2 lg:col-span-1">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                                <span class="hidden sm:inline">Responsibility Center Code</span>
+                                                                <span class="sm:hidden">Center Code</span>
+                                                            </label>
+                                                            <input type="text" name="responsibility_center_code"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                        </div>
+
+                                                        <div class="sm:col-span-2">
+                                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
+                                                            <textarea name="purpose" rows="2"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f] resize-none"
+                                                                required></textarea>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Items Header with Controls -->
+                                                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                                                        <h4 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                                                            <span class="hidden sm:inline">Select Items to Request</span>
+                                                            <span class="sm:hidden">Select Items</span>
+                                                        </h4>
+
+                                                        <div class="flex items-center w-full sm:w-auto gap-2">
+                                                            <div class="relative flex-1 sm:flex-none sm:w-48">
+                                                                <input type="text" id="item-search"
+                                                                    placeholder="Search items..."
+                                                                    class="w-full pl-8 sm:pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                                <div class="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                                                                    <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                                    </svg>
                                                                 </div>
                                                             </div>
-                                                        @endforeach
-                                                    </div>
 
-                                                    <!-- Selected Items View (Initially Hidden) -->
-                                                    <div id="selected-items-container" class="hidden">
-                                                        <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-4 mb-4">
-                                                            <h5 class="font-medium text-gray-900 dark:text-white mb-3">Selected Items</h5>
-                                                            <div class="overflow-x-auto">
-                                                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Item</th>
-                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
-                                                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody id="selected-items-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                                                        <!-- Selected items will be added here via JavaScript -->
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
+                                                            <button type="button" id="viewCartBtn"
+                                                                class="px-2 sm:px-3 py-2 bg-[#ce201f] text-white rounded-md hover:bg-[#a01b1a] flex items-center shadow-sm whitespace-nowrap text-sm">
+                                                                <svg class="h-4 w-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                                </svg>
+                                                                <span class="hidden sm:inline">View Selected</span>
+                                                                <span class="ml-1">(<span id="itemCount">0</span>)</span>
+                                                            </button>
                                                         </div>
                                                     </div>
 
-                                                    <!-- Hidden container for form submission -->
-                                                    <div id="request-items-container" class="hidden">
-                                                        <!-- Form inputs will be added here dynamically -->
+                                                    <!-- Supply Items -->
+                                                    <div class="mb-6">
+                                                        <!-- Product Grid View with Fund Cluster Information -->
+                                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="products-grid">
+                                                            @foreach ($stocks as $stock)
+                                                                <div class="product-card border dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+                                                                    data-supply-id="{{ $stock->supply_id }}"
+                                                                    data-name="{{ $stock->supply->item_name }}"
+                                                                    data-available="{{ $stock->available_for_request }}"
+                                                                    data-fund-cluster="{{ $stock->fund_cluster }}">
+                                                                    <div class="p-3 sm:p-4 flex flex-col h-full">
+                                                                        <div class="flex-1">
+                                                                            <h5 class="font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 text-sm sm:text-base leading-tight">
+                                                                                {{ $stock->supply->item_name }}</h5>
+                                                                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                                                                <span class="font-medium">Stock No:</span> {{ $stock->supply->stock_no ?? 'N/A' }}</p>
+                                                                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                                                                                <span class="font-medium">Description:</span> {{ $stock->supply->description ?? 'N/A' }}
+                                                                            </p>
+                                                                            <div class="flex flex-col gap-2 mb-3">
+                                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit {{ $stock->quantity_on_hand > 10 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ($stock->quantity_on_hand > 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300') }}">
+                                                                                    {{ $stock->available_for_request }} available
+                                                                                </span>
+                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 w-fit">
+                                                                                    Fund: {{ $stock->fund_cluster ?: 'Unspecified' }}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-2 pt-2 border-t dark:border-gray-700">
+                                                                            <div class="flex items-center border dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
+                                                                                <button type="button"
+                                                                                    class="quantity-btn minus px-2 py-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50 transition-colors"
+                                                                                    data-action="decrease"
+                                                                                    {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                                    </svg>
+                                                                                </button>
+                                                                                <input type="number"
+                                                                                    class="quantity-input w-12 sm:w-16 text-center text-sm py-1.5 border-none dark:bg-gray-800 dark:text-white focus:ring-0 focus:outline-none"
+                                                                                    value="0" min="0"
+                                                                                    max="{{ $stock->quantity_on_hand }}"
+                                                                                    {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                <button type="button"
+                                                                                    class="quantity-btn plus px-2 py-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50 transition-colors"
+                                                                                    data-action="increase"
+                                                                                    {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                    <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                                                                                    </svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <button type="button"
+                                                                                class="add-to-cart flex-1 px-3 py-1.5 bg-[#ce201f] text-white text-xs sm:text-sm rounded hover:bg-[#a01b1a] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                                                {{ $stock->quantity_on_hand <= 0 ? 'disabled' : '' }}>
+                                                                                <span class="hidden sm:inline">Add to Request</span>
+                                                                                <span class="sm:hidden">Add</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <!-- Selected Items View (Initially Hidden) -->
+                                                        <div id="selected-items-container" class="hidden mt-6">
+                                                            <div class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3 sm:p-4">
+                                                                <h5 class="font-medium text-gray-900 dark:text-white mb-3 text-sm sm:text-base">Selected Items</h5>
+                                                                <div class="overflow-x-auto">
+                                                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Item</th>
+                                                                                <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                                    <span class="hidden sm:inline">Quantity</span>
+                                                                                    <span class="sm:hidden">Qty</span>
+                                                                                </th>
+                                                                                <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="selected-items-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                                                            <!-- Selected items will be added here via JavaScript -->
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Hidden container for form submission -->
+                                                        <div id="request-items-container" class="hidden">
+                                                            <!-- Form inputs will be added here dynamically -->
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div class="px-6 py-3 border-t dark:border-gray-700 flex justify-end shrink-0">
+                                            <!-- Fixed Footer -->
+                                            <div class="px-3 sm:px-6 py-3 sm:py-4 border-t dark:border-gray-700 flex flex-col sm:flex-row justify-end gap-2 sm:gap-0 shrink-0 bg-gray-50 dark:bg-gray-800">
                                                 <button type="button" id="cancelRequest"
-                                                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
+                                                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 sm:mr-3 transition-colors">
                                                     Cancel
                                                 </button>
                                                 <button type="submit"
-                                                    class="px-4 py-2 bg-[#ce201f] border border-transparent rounded-md text-sm font-medium text-white hover:bg-[#a01b1a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ce201f]">
+                                                    class="w-full sm:w-auto px-4 py-2 bg-[#ce201f] border border-transparent rounded-md text-sm font-medium text-white hover:bg-[#a01b1a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ce201f] transition-colors">
                                                     Submit Request
                                                 </button>
                                             </div>
@@ -694,18 +707,24 @@
                                             }
                                         });
 
+                                        // Update this section in your existing JavaScript code:
+                                        // Replace the "Create Add All to Request button" section with this responsive version:
+
                                         // Create "Add All to Request" button to add all selected quantities at once
-                                        const itemsHeaderDiv = document.querySelector('.flex.justify-between.items-center.mb-4');
+                                        const itemsHeaderDiv = document.querySelector('.flex.flex-col.sm\\:flex-row.justify-between.items-start.sm\\:items-center.gap-3.mb-4');
                                         if (itemsHeaderDiv) {
                                             const addAllToRequestBtn = document.createElement('button');
                                             addAllToRequestBtn.type = 'button';
+                                            // Updated responsive classes
                                             addAllToRequestBtn.className =
-                                                'px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-900 flex items-center shadow-sm mr-2';
+                                                'px-2 sm:px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-900 flex items-center shadow-sm mr-2 whitespace-nowrap text-sm';
+                                            // Updated responsive HTML with mobile/desktop text variations
                                             addAllToRequestBtn.innerHTML = `
-                                                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="h-4 w-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                     </svg>
-                                                    Add All to Request
+                                                    <span class="hidden sm:inline">Add All to Request</span>
+                                                    <span class="sm:hidden">Add All</span>
                                                 `;
 
                                             // Find the container that has the viewCartBtn and insert our button before it
@@ -715,7 +734,7 @@
                                             // Insert before the viewCartBtn
                                             buttonsContainer.insertBefore(addAllToRequestBtn, viewCartBtn);
 
-                                            // Add event listener to the button
+                                            // Add event listener to the button (keep your existing functionality)
                                             addAllToRequestBtn.addEventListener('click', function() {
                                                 let anyItemsAdded = false;
 
