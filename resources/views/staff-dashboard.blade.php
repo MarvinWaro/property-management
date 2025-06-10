@@ -393,7 +393,7 @@
 
                                 <div id="requestModal"
                                     class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden p-1 sm:p-4">
-                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[98vh] sm:h-[90vh] flex flex-col">
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[90vh] sm:h-[90vh] flex flex-col mx-3">
                                         <!-- Fixed Header -->
                                         <div class="flex items-center justify-between p-3 sm:p-4 border-b dark:border-gray-700 shrink-0">
                                             <h3 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
