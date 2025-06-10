@@ -615,10 +615,12 @@
 
                                         openRequestModal.addEventListener('click', function() {
                                             requestModal.classList.remove('hidden');
+                                            document.body.classList.add('overflow-hidden');  // <--- Prevent background scroll
                                         });
 
                                         function closeModal() {
                                             requestModal.classList.add('hidden');
+                                            document.body.classList.remove('overflow-hidden');  // <--- Restore background scroll
                                             // Reset all product quantities when closing the modal
                                             resetProductQuantities();
                                         }
