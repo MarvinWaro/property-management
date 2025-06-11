@@ -782,7 +782,7 @@
                                                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     <div>
-                                                                        <p class="text-xs text-[#f59e0b]">
+                                                                        <p class="text-xs text-[#f5610b]">
                                                                             <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
                                                                         </p>
                                                                     </div>
@@ -952,11 +952,11 @@
                                                                             clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     <h5
-                                                                        class="text-sm font-medium text-[#f59e0b]">
+                                                                        class="text-sm font-medium text-[#f5610b]">
                                                                         Important Notice</h5>
                                                                 </div>
                                                                 <p
-                                                                    class="text-xs text-[#f59e0b]">
+                                                                    class="text-xs text-[#f5610b]">
                                                                     Changing a user's role will affect their
                                                                     permissions in the system. Make sure you verify
                                                                     this change before saving.
