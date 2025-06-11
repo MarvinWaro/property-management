@@ -392,8 +392,10 @@
                                 <!-- RIS Request Modal with Only Items Section Scrollable -->
 
                                 <div id="requestModal"
-                                    class="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center hidden p-1 sm:p-4">
-                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl h-[90vh] sm:h-[90vh] flex flex-col mx-3">
+                                    class="fixed inset-0 z-50 overflow-y-auto -webkit-overflow-scrolling-touch bg-black bg-opacity-50
+                                        flex items-start sm:items-center justify-center hidden p-1 sm:p-4">
+                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl
+                                            w-full max-w-5xl mx-3 mt-8 sm:mt-0 sm:max-h-[90vh] flex flex-col pb-8 sm:pb-0">
                                         <!-- Fixed Header -->
                                         <div class="flex items-center justify-between p-3 sm:p-4 border-b dark:border-gray-700 shrink-0">
                                             <h3 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
