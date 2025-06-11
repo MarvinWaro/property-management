@@ -636,7 +636,6 @@
                                                             <circle cx="5" cy="12" r="1" />
                                                         </svg>
                                                     </button>
-                                                    <!-- Dropdown menu markup goes here -->
                                                     <!-- Dropdown menu -->
                                                     <div id="dropdown-{{ $user->id }}"
                                                         class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">

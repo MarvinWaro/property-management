@@ -15,11 +15,12 @@ class SupplyController extends Controller
      */
     public function index(Request $request)
     {
-        // Fetch all categories from the database
-        $categories = Category::all();
-
-        // Fetch all suppliers and departments for the dropdowns
+        // Only fetch suppliers for the dropdown
         $suppliers = Supplier::orderBy('name')->get();
+
+        // You can still fetch categories and departments if needed for display purposes
+        // but not for the form dropdowns
+        $categories = Category::all();
         $departments = Department::orderBy('name')->get();
 
         // Start building the query for supplies with related category, supplier, and department
@@ -58,9 +59,9 @@ class SupplyController extends Controller
                 'item_name'           => 'required|string|max:255',
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
-                'category_id'         => 'required|exists:categories,id',
+                'category_id'         => 'nullable|exists:categories,id', // Made optional
                 'supplier_id'         => 'required|exists:suppliers,id',
-                'department_id'       => 'required|exists:departments,id',
+                'department_id'       => 'nullable|exists:departments,id', // Made optional
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
@@ -88,9 +89,9 @@ class SupplyController extends Controller
                 'item_name'           => 'required|string|max:255',
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
-                'category_id'         => 'required|exists:categories,id',
+                'category_id'         => 'nullable|exists:categories,id', // Made optional
                 'supplier_id'         => 'required|exists:suppliers,id',
-                'department_id'       => 'required|exists:departments,id',
+                'department_id'       => 'nullable|exists:departments,id', // Made optional
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
