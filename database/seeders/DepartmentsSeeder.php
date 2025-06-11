@@ -14,8 +14,17 @@ class DepartmentsSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            'Admin Division',
-            'Scholarship Division',
+            'Office of the Regional Director',
+            'Administrative Division - CAO',
+            'Administrative Division - Accounting',
+            'Administrative Division - Records',
+            'Administrative Division - HEMIS',
+            'Administrative Division - Cashier',
+            'Scholarship Division - UniFAST Region XII',
+            'Scholarship Division - UniFAST BARMM',
+            'Scholarship Division - StuFAPs',
+            'LGSO',
+            'HECBOL',
             'Technical Division',
         ];
 
