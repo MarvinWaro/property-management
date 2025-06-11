@@ -360,9 +360,9 @@
                                                         <input type="text" name="stock_no" id="stock_no"
                                                             placeholder="Enter Stock No"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                                     </div>
                                                     @error('stock_no')
                                                         <p class="mt-1 text-sm text-red-600 dark:text-red-500">
@@ -426,7 +426,7 @@
                                                 @enderror
                                             </div>
 
-                                            <!-- Measurement & Category Section -->
+                                            <!-- Unit of Measurement Section -->
                                             <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                                 <h4
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
@@ -436,7 +436,7 @@
                                                             d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                                                             clip-rule="evenodd"></path>
                                                     </svg>
-                                                    Classification
+                                                    Measurement & Classification
                                                 </h4>
 
                                                 <!-- Unit of Measurement -->
@@ -485,11 +485,11 @@
                                                     @enderror
                                                 </div>
 
-                                                <!-- Category -->
+                                                <!-- Category (Optional) -->
                                                 <div class="mb-4">
                                                     <label for="category_id"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Category <span class="text-red-500">*</span>
+                                                        Category <span class="text-gray-500 text-xs">(Optional)</span>
                                                     </label>
                                                     <div class="relative">
                                                         <div
@@ -507,8 +507,7 @@
                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                 dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                            <option value="" disabled selected>Select Category
-                                                            </option>
+                                                            <option value="" selected>Select Category</option>
                                                             @foreach ($categories as $category)
                                                                 <option value="{{ $category->id }}">
                                                                     {{ $category->name }}
@@ -526,15 +525,15 @@
 
                                         <!-- Right Column -->
                                         <div class="space-y-5">
-                                            <!-- Supply Source Section (New) -->
+                                            <!-- Supply Source Section -->
                                             <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                                 <h4
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
                                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                            clip-rule="evenodd"></path>
+                                                        <path
+                                                            d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z">
+                                                        </path>
                                                     </svg>
                                                     Supply Source
                                                 </h4>
@@ -576,11 +575,11 @@
                                                     @enderror
                                                 </div>
 
-                                                <!-- Department -->
+                                                <!-- Department (Optional) -->
                                                 <div class="mb-4">
                                                     <label for="department_id"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Department <span class="text-red-500">*</span>
+                                                        Department <span class="text-gray-500 text-xs">(Optional)</span>
                                                     </label>
                                                     <div class="relative">
                                                         <div
@@ -598,8 +597,7 @@
                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                 dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                            <option value="" disabled selected>Select Department
-                                                            </option>
+                                                            <option value="" selected>Select Department</option>
                                                             @foreach ($departments as $department)
                                                                 <option value="{{ $department->id }}">
                                                                     {{ $department->name }}
@@ -650,9 +648,9 @@
                                                         <input type="number" name="reorder_point" id="reorder_point"
                                                             value="0" min="0" required
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     </div>
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum
                                                         quantity before reordering is required</p>
@@ -717,11 +715,11 @@
                                                     class="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-6 list-disc">
                                                     <li>All fields marked with <span class="text-red-500">*</span> are
                                                         required</li>
+                                                    <li>Category and Department fields are optional</li>
                                                     <li>Stock numbers should be unique to avoid confusion</li>
                                                     <li>Set appropriate reorder points to avoid stockouts</li>
                                                     <li>Acquisition costs help track budget and inventory value</li>
-                                                    <li>Select the correct department and supplier for tracking purposes
-                                                    </li>
+                                                    <li>Select the correct supplier for tracking purposes</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -909,7 +907,7 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Measurement & Category Section -->
+                                            <!-- Unit of Measurement Section -->
                                             <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                                 <h4
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
@@ -919,7 +917,7 @@
                                                             d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                                                             clip-rule="evenodd"></path>
                                                     </svg>
-                                                    Classification
+                                                    Measurement & Classification
                                                 </h4>
 
                                                 <!-- Unit of Measurement -->
@@ -946,16 +944,20 @@
                                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                 dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                             <option value="" disabled>Select unit</option>
-                                                            <option value="PCS">Pieces (pcs)</option>
-                                                            <option value="BOX">Box</option>
-                                                            <option value="REAM">Ream</option>
-                                                            <option value="KG">Kilogram (kg)</option>
-                                                            <option value="LITRE">Litre (L)</option>
-                                                            <option value="PACK">Pack</option>
-                                                            <option value="PAIR">Pair</option>
-                                                            <option value="CARTON">Carton</option>
-                                                            <option value="SET">Set</option>
-                                                            <option value="DOZEN">Dozen</option>
+                                                            <option value="PIECES">PIECES (PCS)</option>
+                                                            <option value="BOX">BOX</option>
+                                                            <option value="REAM">REAM</option>
+                                                            <option value="GALLON">GALLON</option>
+                                                            <option value="LITRE">LITRE (L)</option>
+                                                            <option value="PACK">PACK</option>
+                                                            <option value="PAIR">PAIR</option>
+                                                            <option value="CAN">CAN</option>
+                                                            <option value="SET">SET</option>
+                                                            <option value="ROLL">ROLL</option>
+                                                            <option value="BOTTLE">BOTTLE</option>
+                                                            <option value="PAD">PAD</option>
+                                                            <option value="POUCH">POUCH</option>
+                                                            <option value="SHEET">SHEET</option>
                                                         </select>
                                                     </div>
                                                     @error('unit_of_measurement')
@@ -964,11 +966,11 @@
                                                     @enderror
                                                 </div>
 
-                                                <!-- Category -->
+                                                <!-- Category (Optional) -->
                                                 <div class="mb-4">
                                                     <label for="edit_category_id"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Category <span class="text-red-500">*</span>
+                                                        Category <span class="text-gray-500 text-xs">(Optional)</span>
                                                     </label>
                                                     <div class="relative">
                                                         <div
@@ -981,12 +983,12 @@
                                                                 </path>
                                                             </svg>
                                                         </div>
-                                                        <select name="category_id" id="edit_category_id" required
+                                                        <select name="category_id" id="edit_category_id"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                 dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                            <option value="" disabled>Select Category</option>
+                                                            <option value="">Select Category</option>
                                                             @foreach ($categories as $category)
                                                                 <option value="{{ $category->id }}">
                                                                     {{ $category->name }}
@@ -1010,9 +1012,9 @@
                                                     class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
                                                     <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
                                                         viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                            clip-rule="evenodd"></path>
+                                                        <path
+                                                            d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z">
+                                                        </path>
                                                     </svg>
                                                     Supply Source
                                                 </h4>
@@ -1053,11 +1055,11 @@
                                                     @enderror
                                                 </div>
 
-                                                <!-- Department -->
+                                                <!-- Department (Optional) -->
                                                 <div class="mb-4">
                                                     <label for="edit_department_id"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Department <span class="text-red-500">*</span>
+                                                        Department <span class="text-gray-500 text-xs">(Optional)</span>
                                                     </label>
                                                     <div class="relative">
                                                         <div
@@ -1070,12 +1072,12 @@
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
                                                         </div>
-                                                        <select name="department_id" id="edit_department_id" required
+                                                        <select name="department_id" id="edit_department_id"
                                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                                 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
                                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                 dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                            <option value="" disabled>Select Department</option>
+                                                            <option value="">Select Department</option>
                                                             @foreach ($departments as $department)
                                                                 <option value="{{ $department->id }}">
                                                                     {{ $department->name }}
@@ -1142,7 +1144,7 @@
                                                 <div class="mb-4">
                                                     <label for="edit_acquisition_cost"
                                                         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        Acquisition Cost <span class="text-red-500">*</span>
+                                                        Acquisition Cost
                                                     </label>
                                                     <div class="relative">
                                                         <div
@@ -1191,10 +1193,11 @@
                                                     class="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 ml-6 list-disc">
                                                     <li>All fields marked with <span class="text-red-500">*</span> are
                                                         required</li>
+                                                    <li>Category and Department fields are optional</li>
                                                     <li>Changes will be applied immediately upon saving</li>
                                                     <li>Updating a supply item will not affect any related inventory
                                                         transactions</li>
-                                                    <li>Make sure to select the correct department and supplier</li>
+                                                    <li>Make sure to select the correct supplier</li>
                                                 </ul>
                                             </div>
                                         </div>
