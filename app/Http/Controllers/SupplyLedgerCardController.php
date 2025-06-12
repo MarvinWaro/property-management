@@ -123,8 +123,8 @@ class SupplyLedgerCardController extends Controller
     {
         $entries = [];
         $runningBalance = 0;
-        $runningTotalCost = 0; // Add this to track cumulative total cost
-        $hasBeginningBalance = false;
+        $runningTotalCost = 0;
+        $weightedAverageUnitCost = 0;
 
         // Filter transactions by selected year and previous years (for beginning balance)
         $yearStartDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
@@ -138,16 +138,21 @@ class SupplyLedgerCardController extends Controller
         foreach ($prevYearTransactions as $txn) {
             if ($txn->transaction_type == 'receipt') {
                 $runningBalance += $txn->quantity;
-                $runningTotalCost += $txn->quantity * $txn->unit_cost; // Add to total cost
+                $runningTotalCost += $txn->total_cost; // Use total_cost from transaction
             } elseif ($txn->transaction_type == 'issue') {
+                // For issues, calculate cost based on weighted average
+                if ($runningBalance > 0) {
+                    $costToDeduct = ($runningTotalCost / $runningBalance) * $txn->quantity;
+                    $runningTotalCost = max(0, $runningTotalCost - $costToDeduct);
+                }
                 $runningBalance -= $txn->quantity;
-                $runningTotalCost -= $txn->quantity * $txn->unit_cost; // Subtract from total cost
             }
         }
 
-        // Add beginning balance entry for selected year
-        $calculatedUnitCost = $runningBalance > 0 ? $runningTotalCost / $runningBalance : null;
+        // Calculate weighted average for beginning balance
+        $weightedAverageUnitCost = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
 
+        // Add beginning balance entry
         $entries[] = [
             'date' => $yearStartDate->format('Y-m-d'),
             'reference' => 'Beginning Balance',
@@ -158,13 +163,11 @@ class SupplyLedgerCardController extends Controller
             'issue_unit_cost' => null,
             'issue_total_cost' => null,
             'balance_qty' => $runningBalance,
-            'balance_unit_cost' => $calculatedUnitCost,
+            'balance_unit_cost' => $weightedAverageUnitCost,
             'balance_total_cost' => $runningTotalCost,
             'days_to_consume' => null,
             'transaction_id' => null,
         ];
-
-        $hasBeginningBalance = true;
 
         // Filter transactions for selected year
         $yearTransactions = $transactions->filter(function ($txn) use ($yearStartDate, $yearEndDate) {
@@ -173,48 +176,57 @@ class SupplyLedgerCardController extends Controller
 
         // Process each transaction for the selected year
         foreach ($yearTransactions as $transaction) {
-            // Get unit cost from transaction or use average
-            $unitCost = $transaction->unit_cost ?? $averageUnitCost;
-
-            // Update running balance based on transaction type
             if ($transaction->transaction_type == 'receipt') {
+                // For receipts, use the actual transaction values
                 $receiptQty = $transaction->quantity;
-                $receiptUnitCost = $unitCost;
-                $receiptTotalCost = $receiptQty * $receiptUnitCost;
+                $receiptUnitCost = $transaction->unit_cost;
+                $receiptTotalCost = $transaction->total_cost;
 
                 $issueQty = null;
                 $issueUnitCost = null;
                 $issueTotalCost = null;
 
                 $runningBalance += $transaction->quantity;
-                $runningTotalCost += $receiptTotalCost; // Add to total cost
+                $runningTotalCost += $receiptTotalCost;
+
             } elseif ($transaction->transaction_type == 'issue') {
                 $receiptQty = null;
                 $receiptUnitCost = null;
                 $receiptTotalCost = null;
 
                 $issueQty = $transaction->quantity;
-                $issueUnitCost = $unitCost;
+
+                // Calculate the weighted average unit cost BEFORE the issue
+                if ($runningBalance > 0) {
+                    $weightedAverageUnitCost = $runningTotalCost / $runningBalance;
+                } else {
+                    $weightedAverageUnitCost = 0;
+                }
+
+                $issueUnitCost = $weightedAverageUnitCost;
                 $issueTotalCost = $issueQty * $issueUnitCost;
 
+                // Update running totals
                 $runningBalance -= $transaction->quantity;
-                $runningTotalCost -= $issueTotalCost; // Subtract from total cost
+                $runningTotalCost = max(0, $runningTotalCost - $issueTotalCost);
+
             } else {
-                // For adjustments, just use the balance from the transaction
+                // For adjustments
                 $receiptQty = null;
                 $receiptUnitCost = null;
                 $receiptTotalCost = null;
-
                 $issueQty = null;
                 $issueUnitCost = null;
                 $issueTotalCost = null;
 
                 $runningBalance = $transaction->balance_quantity;
-                $runningTotalCost = $runningBalance * $unitCost; // Recalculate total for adjustments
+                if ($runningBalance > 0 && $transaction->unit_cost) {
+                    $runningTotalCost = $runningBalance * $transaction->unit_cost;
+                }
             }
 
-            // Calculate weighted average unit cost only if we have quantity
-            $calculatedUnitCost = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
+            // Recalculate weighted average after the transaction
+            $newWeightedAverage = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
 
             $entries[] = [
                 'date' => $transaction->transaction_date->format('Y-m-d'),
@@ -226,8 +238,8 @@ class SupplyLedgerCardController extends Controller
                 'issue_unit_cost' => $issueUnitCost,
                 'issue_total_cost' => $issueTotalCost,
                 'balance_qty' => $runningBalance,
-                'balance_unit_cost' => $calculatedUnitCost,
-                'balance_total_cost' => $runningTotalCost, // Use cumulative total cost
+                'balance_unit_cost' => $newWeightedAverage,
+                'balance_total_cost' => $runningTotalCost,
                 'days_to_consume' => $transaction->transaction_type == 'receipt' ?
                     ($transaction->days_to_consume ?? null) : null,
                 'transaction_id' => $transaction->transaction_id,

@@ -1,6 +1,6 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-900 shadow-sm">
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-900 shadow-sm ">
     <!-- Main Header Bar -->
-    <div class="bg-[#a01b1a] dark:bg-[#a01b1a]">
+    <div class="bg-[#a01b1a] dark:bg-[#a01b1a] py-1">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <!-- Left Side (Logo & Title) -->
@@ -9,8 +9,8 @@
                         <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
                             <x-application-mark class="block h-9 w-auto" />
                             <div class="hidden md:block text-white">
-                                <div class="text-lg font-semibold leading-tight">COMMISSION ON HIGHER EDUCATION - REGIONAL OFFICE XII</div>
-                                <div class="text-sm font-medium leading-tight">CHED Inventory Management System (CIMS)</div>
+                                <div class="text-md font-semibold leading-tight">COMMISSION ON HIGHER EDUCATION - REGIONAL OFFICE XII</div>
+                                <div class="text-sm font-medium leading-tight text-blue-100">Inventory Management System (CIMS)</div>
                             </div>
                         </a>
                     </div>
