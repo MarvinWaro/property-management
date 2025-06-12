@@ -26,15 +26,15 @@ class StaffDashboardController extends Controller
         $departments = Department::orderBy('name')->get(['id','name']);
 
         // 3. calculate real-time available for each stock
+        // CHANGED: Include both 'available' and 'depleted' status to show all items
         $stocks = SupplyStock::with('supply')
-            ->where('status', 'available')
-            ->where('quantity_on_hand', '>', 0)
+            ->whereIn('status', ['available', 'depleted'])  // Show both available and out-of-stock items
             ->get();
 
         foreach ($stocks as $stock) {
             $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
                 ->whereHas('risSlip', function($q) {
-                    // count BOTH draft and approved slips as “reserved”
+                    // count BOTH draft and approved slips as "reserved"
                     $q->whereIn('status', ['draft','approved']);
                 })
                 ->sum('quantity_requested');

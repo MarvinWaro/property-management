@@ -390,7 +390,6 @@
                                 @endif
 
                                 <!-- RIS Request Modal with Only Items Section Scrollable -->
-
                                 <div id="requestModal"
                                     class="fixed inset-0 z-50 overflow-y-auto -webkit-overflow-scrolling-touch bg-black bg-opacity-50
                                         flex items-start sm:items-center justify-center hidden p-1 sm:p-4">
