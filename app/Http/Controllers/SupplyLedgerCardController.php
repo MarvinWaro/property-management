@@ -27,7 +27,7 @@ class SupplyLedgerCardController extends Controller
         if ($search) {
             $suppliesQuery->where(function($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
-                ->orWhere('stock_no', 'like', "%{$search}%");
+                  ->orWhere('stock_no', 'like', "%{$search}%");
             });
         }
 
@@ -102,7 +102,16 @@ class SupplyLedgerCardController extends Controller
             ->avg('unit_cost') ?? 0;
 
         // Prepare the ledger card data
-        $ledgerCardEntries = $this->prepareLedgerCardEntries($transactions, $fundCluster, $averageUnitCost, $selectedYear);
+        $ledgerCardEntries = $this->prepareLedgerCardEntries(
+            $transactions,
+            $fundCluster,
+            $averageUnitCost,
+            $selectedYear
+        );
+
+        // --- NEW: Determine the current moving average cost ---
+        $lastEntry = end($ledgerCardEntries);
+        $movingAverageCost = $lastEntry['balance_unit_cost'] ?? 0;
 
         return view('supply-ledger-cards.show', compact(
             'supply',
@@ -112,7 +121,8 @@ class SupplyLedgerCardController extends Controller
             'currentStock',
             'averageUnitCost',
             'availableYears',
-            'selectedYear'
+            'selectedYear',
+            'movingAverageCost'   // pass new variable to view
         ));
     }
 
@@ -128,7 +138,7 @@ class SupplyLedgerCardController extends Controller
 
         // Filter transactions by selected year and previous years (for beginning balance)
         $yearStartDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
-        $yearEndDate = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
+        $yearEndDate   = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
 
         // Calculate beginning balance from all transactions before selected year
         $prevYearTransactions = $transactions->filter(function ($txn) use ($yearStartDate) {
@@ -154,19 +164,19 @@ class SupplyLedgerCardController extends Controller
 
         // Add beginning balance entry
         $entries[] = [
-            'date' => $yearStartDate->format('Y-m-d'),
-            'reference' => 'Beginning Balance',
-            'receipt_qty' => null,
-            'receipt_unit_cost' => null,
+            'date'               => $yearStartDate->format('Y-m-d'),
+            'reference'          => 'Beginning Balance',
+            'receipt_qty'        => null,
+            'receipt_unit_cost'  => null,
             'receipt_total_cost' => null,
-            'issue_qty' => null,
-            'issue_unit_cost' => null,
-            'issue_total_cost' => null,
-            'balance_qty' => $runningBalance,
-            'balance_unit_cost' => $weightedAverageUnitCost,
+            'issue_qty'          => null,
+            'issue_unit_cost'    => null,
+            'issue_total_cost'   => null,
+            'balance_qty'        => $runningBalance,
+            'balance_unit_cost'  => $weightedAverageUnitCost,
             'balance_total_cost' => $runningTotalCost,
-            'days_to_consume' => null,
-            'transaction_id' => null,
+            'days_to_consume'    => null,
+            'transaction_id'     => null,
         ];
 
         // Filter transactions for selected year
@@ -178,46 +188,44 @@ class SupplyLedgerCardController extends Controller
         foreach ($yearTransactions as $transaction) {
             if ($transaction->transaction_type == 'receipt') {
                 // For receipts, use the actual transaction values
-                $receiptQty = $transaction->quantity;
-                $receiptUnitCost = $transaction->unit_cost;
+                $receiptQty       = $transaction->quantity;
+                $receiptUnitCost  = $transaction->unit_cost;
                 $receiptTotalCost = $transaction->total_cost;
 
-                $issueQty = null;
-                $issueUnitCost = null;
-                $issueTotalCost = null;
+                $issueQty        = null;
+                $issueUnitCost   = null;
+                $issueTotalCost  = null;
 
-                $runningBalance += $transaction->quantity;
+                $runningBalance   += $receiptQty;
                 $runningTotalCost += $receiptTotalCost;
 
             } elseif ($transaction->transaction_type == 'issue') {
-                $receiptQty = null;
-                $receiptUnitCost = null;
+                $receiptQty       = null;
+                $receiptUnitCost  = null;
                 $receiptTotalCost = null;
 
                 $issueQty = $transaction->quantity;
 
                 // Calculate the weighted average unit cost BEFORE the issue
-                if ($runningBalance > 0) {
-                    $weightedAverageUnitCost = $runningTotalCost / $runningBalance;
-                } else {
-                    $weightedAverageUnitCost = 0;
-                }
+                $weightedAverageUnitCost = $runningBalance > 0
+                    ? $runningTotalCost / $runningBalance
+                    : 0;
 
-                $issueUnitCost = $weightedAverageUnitCost;
+                $issueUnitCost  = $weightedAverageUnitCost;
                 $issueTotalCost = $issueQty * $issueUnitCost;
 
                 // Update running totals
-                $runningBalance -= $transaction->quantity;
+                $runningBalance   -= $issueQty;
                 $runningTotalCost = max(0, $runningTotalCost - $issueTotalCost);
 
             } else {
                 // For adjustments
-                $receiptQty = null;
-                $receiptUnitCost = null;
+                $receiptQty       = null;
+                $receiptUnitCost  = null;
                 $receiptTotalCost = null;
-                $issueQty = null;
-                $issueUnitCost = null;
-                $issueTotalCost = null;
+                $issueQty         = null;
+                $issueUnitCost    = null;
+                $issueTotalCost   = null;
 
                 $runningBalance = $transaction->balance_quantity;
                 if ($runningBalance > 0 && $transaction->unit_cost) {
@@ -226,23 +234,26 @@ class SupplyLedgerCardController extends Controller
             }
 
             // Recalculate weighted average after the transaction
-            $newWeightedAverage = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
+            $newWeightedAverage = $runningBalance > 0
+                ? $runningTotalCost / $runningBalance
+                : 0;
 
             $entries[] = [
-                'date' => $transaction->transaction_date->format('Y-m-d'),
-                'reference' => $transaction->reference_no,
-                'receipt_qty' => $receiptQty,
-                'receipt_unit_cost' => $receiptUnitCost,
+                'date'               => $transaction->transaction_date->format('Y-m-d'),
+                'reference'          => $transaction->reference_no,
+                'receipt_qty'        => $receiptQty,
+                'receipt_unit_cost'  => $receiptUnitCost,
                 'receipt_total_cost' => $receiptTotalCost,
-                'issue_qty' => $issueQty,
-                'issue_unit_cost' => $issueUnitCost,
-                'issue_total_cost' => $issueTotalCost,
-                'balance_qty' => $runningBalance,
-                'balance_unit_cost' => $newWeightedAverage,
+                'issue_qty'          => $issueQty,
+                'issue_unit_cost'    => $issueUnitCost,
+                'issue_total_cost'   => $issueTotalCost,
+                'balance_qty'        => $runningBalance,
+                'balance_unit_cost'  => $newWeightedAverage,
                 'balance_total_cost' => $runningTotalCost,
-                'days_to_consume' => $transaction->transaction_type == 'receipt' ?
-                    ($transaction->days_to_consume ?? null) : null,
-                'transaction_id' => $transaction->transaction_id,
+                'days_to_consume'    => $transaction->transaction_type == 'receipt'
+                    ? ($transaction->days_to_consume ?? null)
+                    : null,
+                'transaction_id'     => $transaction->transaction_id,
             ];
         }
 
