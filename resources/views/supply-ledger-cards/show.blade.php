@@ -70,6 +70,8 @@
 
 
                 <div class="p-5">
+                    <!-- resources/views/supply-ledger-cards/show.blade.php -->
+
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Unit</p>
@@ -77,8 +79,7 @@
                         </div>
                         <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Category</p>
-                            <p class="font-medium text-gray-800 dark:text-white">{{ $supply->category->name ?? 'N/A' }}
-                            </p>
+                            <p class="font-medium text-gray-800 dark:text-white">{{ $supply->category->name ?? 'N/A' }}</p>
                         </div>
                         <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Current Balance</p>
@@ -86,7 +87,7 @@
                         </div>
                         <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Moving Average Cost</p>
-                            <p class="font-medium text-gray-800 dark:text-white">...</p>
+                            <p class="font-medium text-gray-800 dark:text-white">₱{{ number_format($movingAverageCost, 2) }}</p>
                         </div>
                     </div>
                 </div>
