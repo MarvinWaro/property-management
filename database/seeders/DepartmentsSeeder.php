@@ -19,6 +19,7 @@ class DepartmentsSeeder extends Seeder
             'Administrative Division - Accounting',
             'Administrative Division - Records',
             'Administrative Division - HEMIS',
+            'Administrative Division - Supply and Procurement',
             'Administrative Division - Cashier',
             'Scholarship Division - UniFAST Region XII',
             'Scholarship Division - UniFAST BARMM',
