@@ -22,27 +22,29 @@ class NotificationController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Get the last viewed timestamp from session
+        // Always return the total count of draft requisitions
+        $pendingCount = RisSlip::where('status', 'draft')->count();
+
+        // Optional: Still track new ones for other features
         $lastViewed = Session::get('last_viewed_requisitions', null);
+        $newCount = 0;
 
-        // Base query for pending requisitions
-        $query = RisSlip::where('status', 'draft');
-
-        // If we have a last viewed timestamp, only count requisitions after that time
         if ($lastViewed) {
-            $query->where('created_at', '>', $lastViewed);
+            $newCount = RisSlip::where('status', 'draft')
+                ->where('created_at', '>', $lastViewed)
+                ->count();
         }
 
-        // Get the count
-        $pendingCount = $query->count();
-
         return response()->json([
-            'count' => $pendingCount
+            'count' => $pendingCount,      // Always show total for badge
+            'new_count' => $newCount,      // Optional: for highlighting new items
+            'has_new' => $newCount > 0
         ]);
     }
 
     /**
      * Mark all pending requisitions as viewed
+     * This now only tracks viewing history without affecting badge count
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -57,9 +59,13 @@ class NotificationController extends Controller
         // Store the current timestamp in the session
         Session::put('last_viewed_requisitions', now());
 
+        // Still return the current total count
+        $pendingCount = RisSlip::where('status', 'draft')->count();
+
         return response()->json([
             'success' => true,
-            'message' => 'All requisitions marked as viewed'
+            'message' => 'Viewing history updated',
+            'count' => $pendingCount
         ]);
     }
 }

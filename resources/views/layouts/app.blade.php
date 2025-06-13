@@ -76,18 +76,9 @@
             const requisitionNavLink = document.getElementById('requisition-nav-link');
             if (!requisitionNavLink) return;
 
-            const isRequisitionPage = window.location.pathname.includes('/ris') ||
-                                      window.location.href.includes('ris.index');
-
-            // Poll for new drafts
+            // Check for pending requisitions and update badge
             const checkPendingRequisitions = async () => {
                 try {
-                    if (isRequisitionPage) {
-                        hideBadge();
-                        markRequisitionsAsViewed();
-                        return;
-                    }
-
                     const response = await fetch('/pending-requisitions', {
                         method: 'GET',
                         headers: {
@@ -106,23 +97,26 @@
                 }
             };
 
+            // Update badge visibility based on count
             const updateBadge = (count) => {
-                const badge = document.getElementById('ris-notification-badge');
-                if (!badge) return;
+                let badge = document.getElementById('ris-notification-badge');
 
                 if (count > 0) {
+                    if (!badge) {
+                        // Create badge if it doesn't exist
+                        badge = document.createElement('span');
+                        badge.id = 'ris-notification-badge';
+                        badge.className = 'absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-1 -right-1';
+                        requisitionNavLink.appendChild(badge);
+                    }
                     badge.textContent = count > 99 ? '99+' : count;
                     badge.classList.remove('hidden');
-                } else {
+                } else if (badge) {
                     badge.classList.add('hidden');
                 }
             };
 
-            const hideBadge = () => {
-                const badge = document.getElementById('ris-notification-badge');
-                if (badge) badge.classList.add('hidden');
-            };
-
+            // Optional: Mark requisitions as viewed (but don't call automatically)
             const markRequisitionsAsViewed = async () => {
                 try {
                     await fetch('/mark-requisitions-viewed', {
@@ -136,23 +130,31 @@
                         },
                         credentials: 'include'
                     });
+                    // After marking as viewed, still check the actual count
+                    checkPendingRequisitions();
                 } catch (error) {
                     console.error('Error marking requisitions as viewed:', error);
                 }
             };
 
-            if (!isRequisitionPage) {
-                checkPendingRequisitions();
-                setInterval(checkPendingRequisitions, 30000);
-            } else {
-                hideBadge();
-                markRequisitionsAsViewed();
-            }
+            // Initial check
+            checkPendingRequisitions();
 
-            requisitionNavLink.addEventListener('click', function() {
-                hideBadge();
-                markRequisitionsAsViewed();
+            // Poll every 30 seconds
+            setInterval(checkPendingRequisitions, 30000);
+
+            // Update when page becomes visible again
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    checkPendingRequisitions();
+                }
             });
+
+            // Optional: Add a manual "Mark as Read" functionality
+            // You can add a button in your RIS index page that calls this function
+            window.markAllRequisitionsAsRead = function() {
+                markRequisitionsAsViewed();
+            };
         });
     </script>
     @endif
@@ -231,33 +233,5 @@
         });
     });
 </script>
-
-{{-- Loader script
-<script>
-    function showLoader() {
-        const loader = document.getElementById('loader-container');
-        if (loader) loader.classList.add('show');
-    }
-
-    function hideLoader() {
-        const loader = document.getElementById('loader-container');
-        if (loader) loader.classList.remove('show');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        showLoader();
-        setTimeout(hideLoader, 2000);
-    });
-
-    document.addEventListener('livewire:navigating', showLoader);
-    document.addEventListener('livewire:navigated', () => setTimeout(hideLoader, 800));
-    document.addEventListener('livewire:request-finished', () => setTimeout(hideLoader, 500));
-
-    document.addEventListener('submit', function(e) {
-        if (!e.target.hasAttribute('data-no-loader')) {
-            showLoader();
-        }
-    });
-</script> --}}
 
 </html>
