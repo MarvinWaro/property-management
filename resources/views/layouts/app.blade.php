@@ -72,7 +72,7 @@
             z-index: 10;
         }
     </style>
-    
+
 </head>
 
 <body class="font-sans antialiased">
@@ -111,6 +111,15 @@
             const requisitionNavLink = document.getElementById('requisition-nav-link');
             if (!requisitionNavLink) return;
 
+            // Initialize notification sound
+            const notificationSound = new Audio('/sounds/ding.mp3'); // Update with your file extension
+            notificationSound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+
+            // Store previous counts to detect new requests
+            let previousDraftCount = 0;
+            let previousApprovedCount = 0;
+            let isFirstCheck = true;
+
             // Check for pending requisitions and update badges
             const checkPendingRequisitions = async () => {
                 try {
@@ -125,10 +134,81 @@
 
                     if (response.ok) {
                         const data = await response.json();
+
+                        // Check if there are new requests
+                        const hasNewDrafts = data.draft_count > previousDraftCount;
+                        const hasNewApproved = data.approved_count > previousApprovedCount;
+
+                        // Play sound if there are new requests (but not on first load)
+                        if (!isFirstCheck && (hasNewDrafts || hasNewApproved)) {
+                            playNotificationSound();
+
+                            // Optional: Show browser notification
+                            if (hasNewDrafts) {
+                                showBrowserNotification(
+                                    'New Requisition Request',
+                                    `You have ${data.draft_count - previousDraftCount} new requisition(s) pending approval`
+                                );
+                            }
+                            if (hasNewApproved) {
+                                showBrowserNotification(
+                                    'Requisition Approved',
+                                    `${data.approved_count - previousApprovedCount} requisition(s) approved and awaiting issue`
+                                );
+                            }
+                        }
+
+                        // Update the badges
                         updateBadges(data);
+
+                        // Store current counts for next comparison
+                        previousDraftCount = data.draft_count;
+                        previousApprovedCount = data.approved_count;
+                        isFirstCheck = false;
                     }
                 } catch (error) {
                     console.error('Error checking for pending requisitions:', error);
+                }
+            };
+
+            // Play notification sound
+            const playNotificationSound = () => {
+                // Clone the audio to allow multiple plays
+                const sound = notificationSound.cloneNode();
+                sound.volume = notificationSound.volume;
+                sound.play().catch(e => {
+                    console.log('Could not play notification sound:', e);
+                });
+            };
+
+            // Show browser notification (optional)
+            const showBrowserNotification = (title, body) => {
+                // Check if browser supports notifications
+                if (!("Notification" in window)) {
+                    return;
+                }
+
+                // Check if permission is granted
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/favicon.ico', // Update with your app icon
+                        tag: 'ris-notification', // Prevents duplicate notifications
+                        renotify: true
+                    });
+                }
+                // Request permission if not denied
+                else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification(title, {
+                                body: body,
+                                icon: '/favicon.ico',
+                                tag: 'ris-notification',
+                                renotify: true
+                            });
+                        }
+                    });
                 }
             };
 
@@ -167,7 +247,7 @@
                     badge.style.display = 'inline-flex';
 
                     // Add subtle animation for new items
-                    if (badgeId === 'ris-draft-badge') {
+                    if (badgeId === 'ris-draft-badge' && count > previousDraftCount) {
                         badge.classList.add('animate-pulse');
                         setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
                     }
@@ -197,6 +277,23 @@
                 }
             };
 
+            // Load saved notification preferences
+            const loadNotificationPreferences = () => {
+                const savedVolume = localStorage.getItem('notificationVolume');
+                const soundEnabled = localStorage.getItem('notificationSoundEnabled');
+
+                if (savedVolume !== null) {
+                    notificationSound.volume = parseFloat(savedVolume);
+                }
+
+                if (soundEnabled === 'false') {
+                    notificationSound.volume = 0;
+                }
+            };
+
+            // Initialize preferences
+            loadNotificationPreferences();
+
             // Initial check
             checkPendingRequisitions();
 
@@ -213,6 +310,26 @@
             // Optional: Add a manual "Mark as Read" functionality
             window.markAllRequisitionsAsRead = function() {
                 markRequisitionsAsViewed();
+            };
+
+            // Expose sound control functions
+            window.setNotificationVolume = function(volume) {
+                notificationSound.volume = volume;
+                localStorage.setItem('notificationVolume', volume);
+            };
+
+            window.toggleNotificationSound = function(enabled) {
+                localStorage.setItem('notificationSoundEnabled', enabled);
+                if (!enabled) {
+                    notificationSound.volume = 0;
+                } else {
+                    loadNotificationPreferences();
+                }
+            };
+
+            // Test notification sound
+            window.testNotificationSound = function() {
+                playNotificationSound();
             };
         });
     </script>
