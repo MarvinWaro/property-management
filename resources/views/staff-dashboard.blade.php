@@ -420,7 +420,7 @@
                                                         <div class="sm:col-span-2 lg:col-span-1">
                                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entity Name</label>
                                                             <input type="text" name="entity_name" value="CHEDRO 12"
-                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63]"
                                                                 required>
                                                         </div>
 
@@ -430,7 +430,7 @@
                                                         <div>
                                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Division</label>
                                                             <select name="division"
-                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63]"
                                                                 required>
                                                                 @foreach ($departments as $department)
                                                                     <option value="{{ $department->id }}"
@@ -444,7 +444,7 @@
                                                         <div>
                                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Office</label>
                                                             <input type="text" name="office"
-                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63]">
                                                         </div>
 
                                                         <div class="sm:col-span-2 lg:col-span-1">
@@ -453,13 +453,13 @@
                                                                 <span class="sm:hidden">Center Code</span>
                                                             </label>
                                                             <input type="text" name="responsibility_center_code"
-                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63]">
                                                         </div>
 
                                                         <div class="sm:col-span-2">
                                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
                                                             <textarea name="purpose" rows="2"
-                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f] resize-none"
+                                                                class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63] resize-none"
                                                                 required></textarea>
                                                         </div>
                                                     </div>
@@ -475,7 +475,7 @@
                                                             <div class="relative flex-1 sm:flex-none sm:w-48">
                                                                 <input type="text" id="item-search"
                                                                     placeholder="Search items..."
-                                                                    class="w-full pl-8 sm:pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#ce201f] focus:border-[#ce201f]">
+                                                                    class="w-full pl-8 sm:pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-[#45be63] focus:border-[#45be63]">
                                                                 <div class="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
                                                                     <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>

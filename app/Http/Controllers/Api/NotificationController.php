@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Session;
 class NotificationController extends Controller
 {
     /**
-     * Get the count of pending requisitions
+     * Get the count of pending requisitions by status
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -22,22 +22,29 @@ class NotificationController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Get the last viewed timestamp from session
+        // Get counts for different statuses
+        $draftCount = RisSlip::where('status', 'draft')->count();
+        $approvedCount = RisSlip::where('status', 'approved')->count();
+
+        // Total count that needs attention (not yet issued)
+        $totalPending = $draftCount + $approvedCount;
+
+        // Optional: Still track new ones for other features
         $lastViewed = Session::get('last_viewed_requisitions', null);
+        $newCount = 0;
 
-        // Base query for pending requisitions
-        $query = RisSlip::where('status', 'draft');
-
-        // If we have a last viewed timestamp, only count requisitions after that time
         if ($lastViewed) {
-            $query->where('created_at', '>', $lastViewed);
+            $newCount = RisSlip::whereIn('status', ['draft', 'approved'])
+                ->where('created_at', '>', $lastViewed)
+                ->count();
         }
 
-        // Get the count
-        $pendingCount = $query->count();
-
         return response()->json([
-            'count' => $pendingCount
+            'count' => $totalPending,          // Total needing attention
+            'draft_count' => $draftCount,      // Pending approval
+            'approved_count' => $approvedCount, // Approved but not issued
+            'new_count' => $newCount,          // New since last viewed
+            'has_new' => $newCount > 0
         ]);
     }
 
@@ -57,9 +64,16 @@ class NotificationController extends Controller
         // Store the current timestamp in the session
         Session::put('last_viewed_requisitions', now());
 
+        // Return current counts
+        $draftCount = RisSlip::where('status', 'draft')->count();
+        $approvedCount = RisSlip::where('status', 'approved')->count();
+
         return response()->json([
             'success' => true,
-            'message' => 'All requisitions marked as viewed'
+            'message' => 'Viewing history updated',
+            'draft_count' => $draftCount,
+            'approved_count' => $approvedCount,
+            'count' => $draftCount + $approvedCount
         ]);
     }
 }

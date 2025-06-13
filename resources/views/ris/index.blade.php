@@ -20,35 +20,29 @@
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <!-- Stats Summary -->
+                        <!-- Update the stats summary section in your ris/index.blade.php -->
                         <div class="flex flex-wrap gap-3">
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="mr-1">Total:</span>
                                 <span class="font-semibold">{{ $risSlips->total() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <span class="w-3 h-3 mr-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
-                                <span>Pending: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                <span class="w-3 h-3 mr-2 rounded-full bg-[#f59e0b]"></span>
+                                <span>Pending Approval: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#6366f1] dark:bg-[#818cf8]"></span>
-                                <span>Approved: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
+                                <span>Awaiting Issue: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#10b981] dark:bg-[#34d399]"></span>
                                 <span>Issued: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
                             </div>
                         </div>
 
@@ -267,6 +261,50 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             toggleClearButton();
+        });
+    </script>
+
+    <!-- Add this to your ris/index.blade.php if you want to show new items -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for new items and add visual indicator
+            fetch('/pending-requisitions', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.new_count > 0) {
+                    // Add a "new" indicator to the page
+                    const headerElement = document.querySelector('h2');
+                    if (headerElement && !document.getElementById('new-indicator')) {
+                        const newIndicator = document.createElement('span');
+                        newIndicator.id = 'new-indicator';
+                        newIndicator.className = 'ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                        newIndicator.textContent = `${data.new_count} new`;
+                        headerElement.appendChild(newIndicator);
+                    }
+                }
+            });
+
+            // Optional: Add a button to mark all as read
+            const statsDiv = document.querySelector('.flex.flex-wrap.gap-3');
+            if (statsDiv) {
+                const markReadBtn = document.createElement('button');
+                markReadBtn.className = 'inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors';
+                markReadBtn.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Mark All as Read';
+                markReadBtn.onclick = function() {
+                    if (window.markAllRequisitionsAsRead) {
+                        window.markAllRequisitionsAsRead();
+                        // Remove the new indicator
+                        const indicator = document.getElementById('new-indicator');
+                        if (indicator) indicator.remove();
+                    }
+                };
+                statsDiv.appendChild(markReadBtn);
+            }
         });
     </script>
 </x-app-layout>

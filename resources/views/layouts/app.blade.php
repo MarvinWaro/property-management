@@ -38,6 +38,41 @@
             window.axios.defaults.withCredentials = true;
         });
     </script>
+
+    <style>
+        /* Tooltip styles */
+        .badge-tooltip {
+            position: relative;
+        }
+
+        .badge-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .badge-tooltip:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+            z-index: 10;
+        }
+    </style>
+
 </head>
 
 <body class="font-sans antialiased">
@@ -76,18 +111,18 @@
             const requisitionNavLink = document.getElementById('requisition-nav-link');
             if (!requisitionNavLink) return;
 
-            const isRequisitionPage = window.location.pathname.includes('/ris') ||
-                                      window.location.href.includes('ris.index');
+            // Initialize notification sound
+            const notificationSound = new Audio('/sounds/ding.mp3'); // Update with your file extension
+            notificationSound.volume = 0.5; // Adjust volume (0.0 to 1.0)
 
-            // Poll for new drafts
+            // Store previous counts to detect new requests
+            let previousDraftCount = 0;
+            let previousApprovedCount = 0;
+            let isFirstCheck = true;
+
+            // Check for pending requisitions and update badges
             const checkPendingRequisitions = async () => {
                 try {
-                    if (isRequisitionPage) {
-                        hideBadge();
-                        markRequisitionsAsViewed();
-                        return;
-                    }
-
                     const response = await fetch('/pending-requisitions', {
                         method: 'GET',
                         headers: {
@@ -99,30 +134,129 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        updateBadge(data.count);
+
+                        // Check if there are new requests
+                        const hasNewDrafts = data.draft_count > previousDraftCount;
+                        const hasNewApproved = data.approved_count > previousApprovedCount;
+
+                        // Play sound if there are new requests (but not on first load)
+                        if (!isFirstCheck && (hasNewDrafts || hasNewApproved)) {
+                            playNotificationSound();
+
+                            // Optional: Show browser notification
+                            if (hasNewDrafts) {
+                                showBrowserNotification(
+                                    'New Requisition Request',
+                                    `You have ${data.draft_count - previousDraftCount} new requisition(s) pending approval`
+                                );
+                            }
+                            if (hasNewApproved) {
+                                showBrowserNotification(
+                                    'Requisition Approved',
+                                    `${data.approved_count - previousApprovedCount} requisition(s) approved and awaiting issue`
+                                );
+                            }
+                        }
+
+                        // Update the badges
+                        updateBadges(data);
+
+                        // Store current counts for next comparison
+                        previousDraftCount = data.draft_count;
+                        previousApprovedCount = data.approved_count;
+                        isFirstCheck = false;
                     }
                 } catch (error) {
                     console.error('Error checking for pending requisitions:', error);
                 }
             };
 
-            const updateBadge = (count) => {
-                const badge = document.getElementById('ris-notification-badge');
-                if (!badge) return;
+            // Play notification sound
+            const playNotificationSound = () => {
+                // Clone the audio to allow multiple plays
+                const sound = notificationSound.cloneNode();
+                sound.volume = notificationSound.volume;
+                sound.play().catch(e => {
+                    console.log('Could not play notification sound:', e);
+                });
+            };
 
-                if (count > 0) {
-                    badge.textContent = count > 99 ? '99+' : count;
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
+            // Show browser notification (optional)
+            const showBrowserNotification = (title, body) => {
+                // Check if browser supports notifications
+                if (!("Notification" in window)) {
+                    return;
+                }
+
+                // Check if permission is granted
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/favicon.ico', // Update with your app icon
+                        tag: 'ris-notification', // Prevents duplicate notifications
+                        renotify: true
+                    });
+                }
+                // Request permission if not denied
+                else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification(title, {
+                                body: body,
+                                icon: '/favicon.ico',
+                                tag: 'ris-notification',
+                                renotify: true
+                            });
+                        }
+                    });
                 }
             };
 
-            const hideBadge = () => {
-                const badge = document.getElementById('ris-notification-badge');
-                if (badge) badge.classList.add('hidden');
+            // Update badges visibility based on counts
+            const updateBadges = (data) => {
+                // Get or create badge container
+                let badgeContainer = document.getElementById('ris-badges-container');
+                if (!badgeContainer) {
+                    badgeContainer = document.createElement('div');
+                    badgeContainer.id = 'ris-badges-container';
+                    badgeContainer.className = 'absolute -top-1 -right-1 flex space-x-1';
+                    requisitionNavLink.appendChild(badgeContainer);
+                }
+
+                // Update draft badge (orange)
+                updateBadge('ris-draft-badge', data.draft_count, '#f59e0b', badgeContainer);
+
+                // Update approved badge (blue/indigo)
+                updateBadge('ris-approved-badge', data.approved_count, '#6366f1', badgeContainer);
             };
 
+            // Helper function to update individual badge
+            const updateBadge = (badgeId, count, bgColor, container) => {
+                let badge = document.getElementById(badgeId);
+
+                if (count > 0) {
+                    if (!badge) {
+                        // Create badge if it doesn't exist
+                        badge = document.createElement('span');
+                        badge.id = badgeId;
+                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white border-2 border-white rounded-full`;
+                        badge.style.backgroundColor = bgColor;
+                        container.appendChild(badge);
+                    }
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'inline-flex';
+
+                    // Add subtle animation for new items
+                    if (badgeId === 'ris-draft-badge' && count > previousDraftCount) {
+                        badge.classList.add('animate-pulse');
+                        setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            };
+
+            // Optional: Mark requisitions as viewed
             const markRequisitionsAsViewed = async () => {
                 try {
                     await fetch('/mark-requisitions-viewed', {
@@ -136,23 +270,67 @@
                         },
                         credentials: 'include'
                     });
+                    // After marking as viewed, still check the actual counts
+                    checkPendingRequisitions();
                 } catch (error) {
                     console.error('Error marking requisitions as viewed:', error);
                 }
             };
 
-            if (!isRequisitionPage) {
-                checkPendingRequisitions();
-                setInterval(checkPendingRequisitions, 30000);
-            } else {
-                hideBadge();
-                markRequisitionsAsViewed();
-            }
+            // Load saved notification preferences
+            const loadNotificationPreferences = () => {
+                const savedVolume = localStorage.getItem('notificationVolume');
+                const soundEnabled = localStorage.getItem('notificationSoundEnabled');
 
-            requisitionNavLink.addEventListener('click', function() {
-                hideBadge();
-                markRequisitionsAsViewed();
+                if (savedVolume !== null) {
+                    notificationSound.volume = parseFloat(savedVolume);
+                }
+
+                if (soundEnabled === 'false') {
+                    notificationSound.volume = 0;
+                }
+            };
+
+            // Initialize preferences
+            loadNotificationPreferences();
+
+            // Initial check
+            checkPendingRequisitions();
+
+            // Poll every 30 seconds
+            setInterval(checkPendingRequisitions, 30000);
+
+            // Update when page becomes visible again
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    checkPendingRequisitions();
+                }
             });
+
+            // Optional: Add a manual "Mark as Read" functionality
+            window.markAllRequisitionsAsRead = function() {
+                markRequisitionsAsViewed();
+            };
+
+            // Expose sound control functions
+            window.setNotificationVolume = function(volume) {
+                notificationSound.volume = volume;
+                localStorage.setItem('notificationVolume', volume);
+            };
+
+            window.toggleNotificationSound = function(enabled) {
+                localStorage.setItem('notificationSoundEnabled', enabled);
+                if (!enabled) {
+                    notificationSound.volume = 0;
+                } else {
+                    loadNotificationPreferences();
+                }
+            };
+
+            // Test notification sound
+            window.testNotificationSound = function() {
+                playNotificationSound();
+            };
         });
     </script>
     @endif
@@ -231,33 +409,5 @@
         });
     });
 </script>
-
-{{-- Loader script
-<script>
-    function showLoader() {
-        const loader = document.getElementById('loader-container');
-        if (loader) loader.classList.add('show');
-    }
-
-    function hideLoader() {
-        const loader = document.getElementById('loader-container');
-        if (loader) loader.classList.remove('show');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        showLoader();
-        setTimeout(hideLoader, 2000);
-    });
-
-    document.addEventListener('livewire:navigating', showLoader);
-    document.addEventListener('livewire:navigated', () => setTimeout(hideLoader, 800));
-    document.addEventListener('livewire:request-finished', () => setTimeout(hideLoader, 500));
-
-    document.addEventListener('submit', function(e) {
-        if (!e.target.hasAttribute('data-no-loader')) {
-            showLoader();
-        }
-    });
-</script> --}}
 
 </html>
