@@ -20,35 +20,29 @@
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <!-- Stats Summary -->
+                        <!-- Update the stats summary section in your ris/index.blade.php -->
                         <div class="flex flex-wrap gap-3">
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="mr-1">Total:</span>
                                 <span class="font-semibold">{{ $risSlips->total() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <span class="w-3 h-3 mr-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
-                                <span>Pending: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                <span class="w-3 h-3 mr-2 rounded-full bg-[#f59e0b]"></span>
+                                <span>Pending Approval: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#6366f1] dark:bg-[#818cf8]"></span>
-                                <span>Approved: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
+                                <span>Awaiting Issue: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
                             </div>
 
-                            <div
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#10b981] dark:bg-[#34d399]"></span>
                                 <span>Issued: </span>
-                                <span
-                                    class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
                             </div>
                         </div>
 

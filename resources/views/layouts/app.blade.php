@@ -38,6 +38,41 @@
             window.axios.defaults.withCredentials = true;
         });
     </script>
+
+    <style>
+        /* Tooltip styles */
+        .badge-tooltip {
+            position: relative;
+        }
+
+        .badge-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .badge-tooltip:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+            z-index: 10;
+        }
+    </style>
+    
 </head>
 
 <body class="font-sans antialiased">
@@ -76,7 +111,7 @@
             const requisitionNavLink = document.getElementById('requisition-nav-link');
             if (!requisitionNavLink) return;
 
-            // Check for pending requisitions and update badge
+            // Check for pending requisitions and update badges
             const checkPendingRequisitions = async () => {
                 try {
                     const response = await fetch('/pending-requisitions', {
@@ -90,33 +125,58 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        updateBadge(data.count);
+                        updateBadges(data);
                     }
                 } catch (error) {
                     console.error('Error checking for pending requisitions:', error);
                 }
             };
 
-            // Update badge visibility based on count
-            const updateBadge = (count) => {
-                let badge = document.getElementById('ris-notification-badge');
+            // Update badges visibility based on counts
+            const updateBadges = (data) => {
+                // Get or create badge container
+                let badgeContainer = document.getElementById('ris-badges-container');
+                if (!badgeContainer) {
+                    badgeContainer = document.createElement('div');
+                    badgeContainer.id = 'ris-badges-container';
+                    badgeContainer.className = 'absolute -top-1 -right-1 flex space-x-1';
+                    requisitionNavLink.appendChild(badgeContainer);
+                }
+
+                // Update draft badge (orange)
+                updateBadge('ris-draft-badge', data.draft_count, '#f59e0b', badgeContainer);
+
+                // Update approved badge (blue/indigo)
+                updateBadge('ris-approved-badge', data.approved_count, '#6366f1', badgeContainer);
+            };
+
+            // Helper function to update individual badge
+            const updateBadge = (badgeId, count, bgColor, container) => {
+                let badge = document.getElementById(badgeId);
 
                 if (count > 0) {
                     if (!badge) {
                         // Create badge if it doesn't exist
                         badge = document.createElement('span');
-                        badge.id = 'ris-notification-badge';
-                        badge.className = 'absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-1 -right-1';
-                        requisitionNavLink.appendChild(badge);
+                        badge.id = badgeId;
+                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white border-2 border-white rounded-full`;
+                        badge.style.backgroundColor = bgColor;
+                        container.appendChild(badge);
                     }
                     badge.textContent = count > 99 ? '99+' : count;
-                    badge.classList.remove('hidden');
+                    badge.style.display = 'inline-flex';
+
+                    // Add subtle animation for new items
+                    if (badgeId === 'ris-draft-badge') {
+                        badge.classList.add('animate-pulse');
+                        setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
+                    }
                 } else if (badge) {
-                    badge.classList.add('hidden');
+                    badge.remove();
                 }
             };
 
-            // Optional: Mark requisitions as viewed (but don't call automatically)
+            // Optional: Mark requisitions as viewed
             const markRequisitionsAsViewed = async () => {
                 try {
                     await fetch('/mark-requisitions-viewed', {
@@ -130,7 +190,7 @@
                         },
                         credentials: 'include'
                     });
-                    // After marking as viewed, still check the actual count
+                    // After marking as viewed, still check the actual counts
                     checkPendingRequisitions();
                 } catch (error) {
                     console.error('Error marking requisitions as viewed:', error);
@@ -151,7 +211,6 @@
             });
 
             // Optional: Add a manual "Mark as Read" functionality
-            // You can add a button in your RIS index page that calls this function
             window.markAllRequisitionsAsRead = function() {
                 markRequisitionsAsViewed();
             };

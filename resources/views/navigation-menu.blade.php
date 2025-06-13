@@ -178,19 +178,36 @@
                         </span>
                     </a>
 
+                    <!-- Replace the RIS navigation link in your navigation blade with this -->
                     <a href="{{ route('ris.index') }}"
-                       class="relative dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent' }}" id="requisition-nav-link">
+                    class="relative dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent' }}"
+                    id="requisition-nav-link">
                         <span class="flex items-center space-x-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <span>Requisitions (RIS)</span>
                         </span>
-                        @if(isset($pendingRisCount) && $pendingRisCount > 0)
-                            <span id="ris-notification-badge" class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full -top-1 -right-1">
-                                {{ $pendingRisCount > 99 ? '99+' : $pendingRisCount }}
-                            </span>
-                        @endif
+
+                        <!-- Badge Container for multiple badges -->
+                        <div id="ris-badges-container" class="absolute -top-1 -right-1 flex space-x-1">
+                            @php
+                                $draftCount = \App\Models\RisSlip::where('status', 'draft')->count();
+                                $approvedCount = \App\Models\RisSlip::where('status', 'approved')->count();
+                            @endphp
+
+                            @if($draftCount > 0)
+                                <span id="ris-draft-badge" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] border-2 border-white rounded-full">
+                                    {{ $draftCount > 99 ? '99+' : $draftCount }}
+                                </span>
+                            @endif
+
+                            @if($approvedCount > 0)
+                                <span id="ris-approved-badge" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#6366f1] border-2 border-white rounded-full">
+                                    {{ $approvedCount > 99 ? '99+' : $approvedCount }}
+                                </span>
+                            @endif
+                        </div>
                     </a>
 
                     <a href="{{ route('rsmi.index') }}"
@@ -299,8 +316,29 @@
                 <a href="{{ route('stocks.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('stocks.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Supply Stocks
                 </a>
-                <a href="{{ route('ris.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
-                    Requisitions (RIS)
+                <a href="{{ route('ris.index') }}"
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('ris.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    <span class="flex items-center justify-between">
+                        <span>Requisitions (RIS)</span>
+                        <span class="flex space-x-1">
+                            @php
+                                $draftCount = \App\Models\RisSlip::where('status', 'draft')->count();
+                                $approvedCount = \App\Models\RisSlip::where('status', 'approved')->count();
+                            @endphp
+
+                            @if($draftCount > 0)
+                                <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-[#f59e0b] rounded-full">
+                                    {{ $draftCount > 99 ? '99+' : $draftCount }}
+                                </span>
+                            @endif
+
+                            @if($approvedCount > 0)
+                                <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-[#6366f1] rounded-full">
+                                    {{ $approvedCount > 99 ? '99+' : $approvedCount }}
+                                </span>
+                            @endif
+                        </span>
+                    </span>
                 </a>
                 <a href="{{ route('rsmi.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('rsmi.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     RSMI
