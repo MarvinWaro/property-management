@@ -5,52 +5,95 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Department;
-use App\Models\Supply;
-use App\Models\RisSlip;
 use App\Models\SupplyStock;
+use App\Models\RisSlip;
 use App\Models\RisItem;
-use Illuminate\Support\Facades\DB;
 
 class StaffDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        $user   = Auth::user();
+        $userId = $user->id;
 
-        // 1. force‑change‑password banner
+        // 1. Force-change-password banner
         $forceChangePassword = Hash::check('12345678', $user->password);
 
-        // 2. dropdown data for the modal
+        // 2. Dropdown data for the modal
         $departments = Department::orderBy('name')->get(['id','name']);
 
-        // 3. calculate real-time available for each stock
-        // CHANGED: Include both 'available' and 'depleted' status to show all items
+        // 3. Calculate real-time available for each stock
         $stocks = SupplyStock::with('supply')
-            ->whereIn('status', ['available', 'depleted'])  // Show both available and out-of-stock items
+            ->whereIn('status', ['available', 'depleted'])
             ->get();
 
         foreach ($stocks as $stock) {
             $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
-                ->whereHas('risSlip', function($q) {
-                    // count BOTH draft and approved slips as "reserved"
-                    $q->whereIn('status', ['draft','approved']);
-                })
+                ->whereHas('risSlip', fn($q) =>
+                    $q->whereIn('status', ['draft','approved'])
+                )
                 ->sum('quantity_requested');
 
-            $stock->available_for_request = max(0, $stock->quantity_on_hand - $pendingRequested);
+            $stock->available_for_request = max(
+                0,
+                $stock->quantity_on_hand - $pendingRequested
+            );
         }
 
-        // 3. the staff member's own slips with pagination
-        $myRequests = RisSlip::where('requested_by', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'requests');
+        // 4. Stats for the status filters (calculated BEFORE applying filters)
+        $totalRequests       = RisSlip::where('requested_by', $userId)->count();
+        $pendingCount        = RisSlip::where('requested_by', $userId)
+                                  ->where('status', 'draft')
+                                  ->count();
+        $approvedCount       = RisSlip::where('requested_by', $userId)
+                                  ->where('status', 'approved')
+                                  ->count();
+        $pendingReceiptCount = RisSlip::where('requested_by', $userId)
+                                  ->where('status', 'posted')
+                                  ->whereNull('received_at')
+                                  ->count();
+        $completedCount      = RisSlip::where('requested_by', $userId)
+                                  ->where('status', 'posted')
+                                  ->whereNotNull('received_at')
+                                  ->count();
 
-        // 4. Get received supplies with pagination
+        // 5. Build query for "My Requests" with filters and search
+        // Note: Search only happens when form is submitted (search button clicked)
+        $query = RisSlip::where('requested_by', $userId)
+            ->with(['department', 'items.supply'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply status filter if present
+        if ($request->filled('status')) {
+            match($request->status) {
+                'draft'           => $query->where('status', 'draft'),
+                'approved'        => $query->where('status', 'approved'),
+                'pending-receipt' => $query->where('status','posted')
+                                           ->whereNull('received_at'),
+                'completed'       => $query->where('status','posted')
+                                           ->whereNotNull('received_at'),
+                default           => null,
+            };
+        }
+
+        // Apply search filter if present (only when search form is submitted)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('ris_no', 'like', "%{$search}%");
+        }
+
+        // Paginate with preserved query parameters
+        $myRequests = $query
+            ->paginate(5, ['*'], 'requests')
+            ->appends($request->only(['status','search']));
+
+        // 6. Received requisitions (unchanged)
         $risNumbers = DB::table('supply_transactions')
             ->join('user_transactions', 'supply_transactions.transaction_id', '=', 'user_transactions.transaction_id')
-            ->where('user_transactions.user_id', Auth::id())
+            ->where('user_transactions.user_id', $userId)
             ->where('user_transactions.role', 'receiver')
             ->select('reference_no')
             ->distinct()
@@ -62,7 +105,7 @@ class StaffDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'received');
 
-        // 5. Get user properties with pagination
+        // 7. User properties (unchanged)
         $properties = $user->properties()
             ->with('images')
             ->orderBy('created_at', 'desc')
@@ -74,7 +117,12 @@ class StaffDashboardController extends Controller
             'stocks',
             'myRequests',
             'receivedRequisitions',
-            'properties'
+            'properties',
+            'totalRequests',
+            'pendingCount',
+            'approvedCount',
+            'pendingReceiptCount',
+            'completedCount'
         ));
     }
 
@@ -85,16 +133,16 @@ class StaffDashboardController extends Controller
 
     public function updatePassword(Request $request)
     {
-        // Validate new password
         $request->validate([
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = Auth::user();
-        // Hash and save
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return redirect()->route('staff.dashboard')->with('success', 'Password changed successfully!');
+        return redirect()
+            ->route('staff.dashboard')
+            ->with('success', 'Password changed successfully!');
     }
 }

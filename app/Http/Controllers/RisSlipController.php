@@ -20,10 +20,36 @@ class RisSlipController extends Controller
      */
     public function index(Request $request)
     {
+        // Get total counts for stats (before applying filters)
+        $totalCount = RisSlip::count();
+        $pendingCount = RisSlip::where('status', 'draft')->count();
+        $approvedCount = RisSlip::where('status', 'approved')->count();
+        $pendingReceiptCount = RisSlip::where('status', 'posted')->whereNull('received_at')->count();
+        $completedCount = RisSlip::where('status', 'posted')->whereNotNull('received_at')->count();
+
+        // Start building the query
         $query = RisSlip::with(['department', 'requester'])
                     ->orderBy('created_at', 'desc');
 
-        // Add search functionality
+        // Apply status filter
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'draft':
+                    $query->where('status', 'draft');
+                    break;
+                case 'approved':
+                    $query->where('status', 'approved');
+                    break;
+                case 'pending-receipt':
+                    $query->where('status', 'posted')->whereNull('received_at');
+                    break;
+                case 'completed':
+                    $query->where('status', 'posted')->whereNotNull('received_at');
+                    break;
+            }
+        }
+
+        // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -31,14 +57,23 @@ class RisSlipController extends Controller
                 ->orWhereHas('requester', function($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%");
                 })
-                    ->orWhereHas('department', function($subQuery) use ($search) {
+                ->orWhereHas('department', function($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%");
                 });
             });
         }
 
-        $risSlips = $query->paginate(5)->withQueryString();
-        return view('ris.index', compact('risSlips'));
+        // Paginate with query string preservation
+        $risSlips = $query->paginate(5)->appends($request->query());
+
+        return view('ris.index', compact(
+            'risSlips',
+            'totalCount',
+            'pendingCount',
+            'approvedCount',
+            'pendingReceiptCount',
+            'completedCount'
+        ));
     }
 
     /**

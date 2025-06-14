@@ -14,47 +14,55 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Main Card -->
-            <div
-                class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                 <!-- Filter & Controls Section -->
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-wrap items-center justify-between gap-4">
-                        <!-- Stats Summary -->
-                        <!-- Update the stats summary section in your ris/index.blade.php -->
+                        <!-- Stats Summary - Now Clickable -->
                         <div class="flex flex-wrap gap-3">
-                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <a href="{{ route('ris.index') }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ !request('status') ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                 <span class="mr-1">Total:</span>
-                                <span class="font-semibold">{{ $risSlips->total() }}</span>
-                            </div>
+                                <span class="font-semibold">{{ $totalCount ?? $risSlips->total() }}</span>
+                            </a>
 
-                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <a href="{{ route('ris.index', ['status' => 'draft']) }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request('status') === 'draft' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
                                 <span>Pending: </span>
-                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
-                            </div>
+                                <span class="font-semibold ml-1">{{ $pendingCount ?? 0 }}</span>
+                            </a>
 
-                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <a href="{{ route('ris.index', ['status' => 'approved']) }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request('status') === 'approved' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#6366f1] dark:bg-[#818cf8]"></span>
                                 <span>Approved: </span>
-                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
-                            </div>
+                                <span class="font-semibold ml-1">{{ $approvedCount ?? 0 }}</span>
+                            </a>
 
-                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <a href="{{ route('ris.index', ['status' => 'pending-receipt']) }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request('status') === 'pending-receipt' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-yellow-500"></span>
                                 <span>Pending Receipt: </span>
-                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->whereNull('received_at')->count() }}</span>
-                            </div>
+                                <span class="font-semibold ml-1">{{ $pendingReceiptCount ?? 0 }}</span>
+                            </a>
 
-                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                            <a href="{{ route('ris.index', ['status' => 'completed']) }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request('status') === 'completed' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#10b981] dark:bg-[#34d399]"></span>
                                 <span>Completed: </span>
-                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->whereNotNull('received_at')->count() }}</span>
-                            </div>
+                                <span class="font-semibold ml-1">{{ $completedCount ?? 0 }}</span>
+                            </a>
                         </div>
 
                         <!-- Search Form -->
                         <form method="GET" action="{{ route('ris.index') }}"
                             class="w-full max-w-sm flex items-center space-x-2">
+                            <!-- Preserve status filter when searching -->
+                            @if(request('status'))
+                                <input type="hidden" name="status" value="{{ request('status') }}">
+                            @endif
+
                             <div class="relative flex-grow">
                                 <input type="text" name="search" id="search-input"
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
@@ -216,8 +224,13 @@
                                                         </svg>
                                                         <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
                                                             No requisitions found</p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">There
-                                                            are no requisition slips in the system yet.</p>
+                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                            @if(request('status') || request('search'))
+                                                                Try adjusting your filters or search term.
+                                                            @else
+                                                                There are no requisition slips in the system yet.
+                                                            @endif
+                                                        </p>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -239,7 +252,36 @@
         </div>
     </div>
 
-    <!-- JavaScript for Alert Dismissal -->
+    <style>
+        /* Hover effects for stat filters */
+        .flex.flex-wrap.gap-3 a {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flex.flex-wrap.gap-3 a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+        }
+
+        .flex.flex-wrap.gap-3 a:hover::before {
+            left: 0;
+        }
+
+        /* Active filter indicator */
+        .flex.flex-wrap.gap-3 a.bg-\[\#ce201f\] {
+            box-shadow: 0 2px 4px rgba(206, 32, 31, 0.2);
+        }
+    </style>
+
+    <!-- JavaScript for Alert Dismissal and Search -->
     <script>
         // Alert auto-dismissal after 5 seconds
         document.addEventListener('DOMContentLoaded', () => {
@@ -268,7 +310,16 @@
             if (input) {
                 input.value = '';
                 document.getElementById('clearButton').style.display = 'none';
-                window.location.href = window.location.pathname;
+
+                // Preserve status filter when clearing search
+                const currentUrl = new URL(window.location.href);
+                const status = currentUrl.searchParams.get('status');
+
+                if (status) {
+                    window.location.href = window.location.pathname + '?status=' + status;
+                } else {
+                    window.location.href = window.location.pathname;
+                }
             }
         }
 
@@ -277,7 +328,7 @@
         });
     </script>
 
-    <!-- Add this to your ris/index.blade.php if you want to show new items -->
+    <!-- New Items Indicator Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Check for new items and add visual indicator
