@@ -113,7 +113,7 @@
 
             // Initialize notification sound
             const notificationSound = new Audio('/sounds/ding.mp3'); // Update with your file extension
-            notificationSound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+            notificationSound.volume = 1.0; // Adjust volume (0.0 to 1.0)
 
             // Store previous counts to detect new requests
             let previousDraftCount = 0;
@@ -298,7 +298,7 @@
             checkPendingRequisitions();
 
             // Poll every 30 seconds
-            setInterval(checkPendingRequisitions, 30000);
+            setInterval(checkPendingRequisitions, 5000);
 
             // Update when page becomes visible again
             document.addEventListener('visibilitychange', function() {
@@ -334,6 +334,175 @@
         });
     </script>
     @endif
+
+    {{-- <!-- Add this JavaScript to your user dashboard or main layout for non-admin users -->
+    @if(auth()->check() && auth()->user()->role !== 'admin')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize notification sound
+            const notificationSound = new Audio('/sounds/ding.mp3');
+            notificationSound.volume = 0.5;
+
+            // Store previous counts to detect changes
+            let previousApprovedCount = 0;
+            let previousPendingReceiptCount = 0;
+            let isFirstCheck = true;
+
+            // Check for user notifications
+            const checkUserNotifications = async () => {
+                try {
+                    const response = await fetch('/user-notifications', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        // Check for new notifications
+                        const hasNewApproved = data.approved_requests_count > previousApprovedCount;
+                        const hasNewPending = data.pending_receipt_count > previousPendingReceiptCount;
+
+                        // Play sound if there are new notifications (but not on first load)
+                        if (!isFirstCheck && (hasNewApproved || hasNewPending)) {
+                            playNotificationSound();
+
+                            // Show browser notification
+                            if (hasNewApproved) {
+                                showBrowserNotification(
+                                    'Request Approved!',
+                                    `Your requisition has been approved and is ready for issuance.`
+                                );
+                            }
+                            if (hasNewPending) {
+                                showBrowserNotification(
+                                    'Supplies Ready for Pickup!',
+                                    `You have supplies waiting to be received.`
+                                );
+                            }
+                        }
+
+                        // Update badges
+                        updateUserBadges(data);
+
+                        // Store current counts
+                        previousApprovedCount = data.approved_requests_count;
+                        previousPendingReceiptCount = data.pending_receipt_count;
+                        isFirstCheck = false;
+                    }
+                } catch (error) {
+                    console.error('Error checking user notifications:', error);
+                }
+            };
+
+            // Update user badges
+            const updateUserBadges = (data) => {
+                // Update approved requests badge
+                updateBadge('user-approved-badge', data.approved_requests_count, '#6366f1');
+
+                // Update pending receipt badge (with pulse animation)
+                updateBadge('user-pending-badge', data.pending_receipt_count, '#f59e0b', true);
+            };
+
+            // Helper function to update individual badge
+            const updateBadge = (badgeId, count, bgColor, shouldPulse = false) => {
+                let badge = document.getElementById(badgeId);
+                const parentLink = badge ? badge.closest('a') : document.querySelector(`a[data-target="${badgeId.includes('approved') ? 'requests' : 'received-supplies'}"]`);
+
+                if (count > 0) {
+                    if (!badge && parentLink) {
+                        // Create badge if it doesn't exist
+                        badge = document.createElement('span');
+                        badge.id = badgeId;
+                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full${shouldPulse ? ' animate-pulse' : ''}`;
+                        badge.style.backgroundColor = bgColor;
+                        parentLink.appendChild(badge);
+                    }
+
+                    if (badge) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.style.display = 'inline-flex';
+
+                        // Add pulse animation for urgent items
+                        if (shouldPulse && count > previousPendingReceiptCount) {
+                            badge.classList.add('animate-pulse');
+                        }
+                    }
+                } else if (badge) {
+                    badge.style.display = 'none';
+                }
+            };
+
+            // Play notification sound
+            const playNotificationSound = () => {
+                const sound = notificationSound.cloneNode();
+                sound.volume = notificationSound.volume;
+                sound.play().catch(e => {
+                    console.log('Could not play notification sound:', e);
+                });
+            };
+
+            // Show browser notification
+            const showBrowserNotification = (title, body) => {
+                if (!("Notification" in window)) {
+                    return;
+                }
+
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/favicon.ico',
+                        tag: 'user-notification',
+                        renotify: true
+                    });
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification(title, {
+                                body: body,
+                                icon: '/favicon.ico',
+                                tag: 'user-notification',
+                                renotify: true
+                            });
+                        }
+                    });
+                }
+            };
+
+            // Load saved notification preferences
+            const loadNotificationPreferences = () => {
+                const savedVolume = localStorage.getItem('notificationVolume');
+                const soundEnabled = localStorage.getItem('notificationSoundEnabled');
+
+                if (savedVolume !== null) {
+                    notificationSound.volume = parseFloat(savedVolume);
+                }
+
+                if (soundEnabled === 'false') {
+                    notificationSound.volume = 0;
+                }
+            };
+
+            // Initialize
+            loadNotificationPreferences();
+            checkUserNotifications();
+
+            // Check every 30 seconds
+            setInterval(checkUserNotifications, 30000);
+
+            // Update when page becomes visible
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    checkUserNotifications();
+                }
+            });
+        });
+    </script>
+    @endif --}}
 
 </body>
 

@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\Session;
 class NotificationController extends Controller
 {
     /**
-     * Get the count of pending requisitions by status
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Get the count of pending requisitions by status (ADMIN)
+     * [Keep existing getPendingCount method as is]
      */
     public function getPendingCount(Request $request)
     {
@@ -49,10 +47,58 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark all pending requisitions as viewed
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Get user-specific notification counts (FOR REGULAR USERS)
+     */
+    public function getUserNotifications(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        // Count approved requests created by this user
+        $approvedRequestsCount = RisSlip::where('requested_by', $userId)
+            ->where('status', 'approved')
+            ->count();
+
+        // Count issued supplies waiting for this user to confirm receipt
+        $pendingReceiptCount = RisSlip::where('received_by', $userId)
+            ->where('status', 'posted')
+            ->whereNull('received_at')
+            ->count();
+
+        // Get details if needed (optional)
+        $approvedRequests = [];
+        $pendingReceipts = [];
+
+        if ($approvedRequestsCount > 0) {
+            $approvedRequests = RisSlip::where('requested_by', $userId)
+                ->where('status', 'approved')
+                ->select('ris_id', 'ris_no', 'approved_at')
+                ->orderBy('approved_at', 'desc')
+                ->limit(5)
+                ->get();
+        }
+
+        if ($pendingReceiptCount > 0) {
+            $pendingReceipts = RisSlip::where('received_by', $userId)
+                ->where('status', 'posted')
+                ->whereNull('received_at')
+                ->select('ris_id', 'ris_no', 'issued_at')
+                ->orderBy('issued_at', 'desc')
+                ->limit(5)
+                ->get();
+        }
+
+        return response()->json([
+            'approved_requests_count' => $approvedRequestsCount,
+            'pending_receipt_count' => $pendingReceiptCount,
+            'approved_requests' => $approvedRequests,
+            'pending_receipts' => $pendingReceipts,
+            'total_notifications' => $approvedRequestsCount + $pendingReceiptCount
+        ]);
+    }
+
+    /**
+     * Mark all pending requisitions as viewed (ADMIN)
+     * [Keep existing markAsViewed method as is]
      */
     public function markAsViewed(Request $request)
     {

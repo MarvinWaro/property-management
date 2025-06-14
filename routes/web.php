@@ -61,6 +61,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
     Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
+    Route::get('/user-notifications', [NotificationController::class, 'getUserNotifications'])->middleware(['auth:sanctum', 'verified']);
+    
+
     /**
      * ------------------
      *  ADMIN ROUTES

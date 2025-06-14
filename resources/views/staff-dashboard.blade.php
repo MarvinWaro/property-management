@@ -30,6 +30,7 @@
                         @endif
 
                         <!-- Left sidebar with profile and navigation -->
+                        <!-- Left sidebar with profile and navigation -->
                         <div class="col-span-4 sm:col-span-3">
                             <!-- Minimal Profile Card -->
                             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 mb-6">
@@ -56,23 +57,53 @@
                                     <h3 class="text-sm font-medium text-gray-900 dark:text-white">Profile Navigation</h3>
                                 </div>
 
+                                @php
+                                    // Get counts for the current user
+                                    $userId = Auth::id();
+
+                                    // Count approved requests by this user
+                                    $approvedRequestsCount = \App\Models\RisSlip::where('requested_by', $userId)
+                                        ->where('status', 'approved')
+                                        ->count();
+
+                                    // Count issued supplies waiting for this user to receive
+                                    $pendingReceiptCount = \App\Models\RisSlip::where('received_by', $userId)
+                                        ->where('status', 'posted')
+                                        ->whereNull('received_at')
+                                        ->count();
+                                @endphp
+
                                 <nav id="profile-nav" class="p-2">
                                     <a href="#"
-                                        class="profile-nav-link flex items-center space-x-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
+                                        class="profile-nav-link flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
                                         data-target="requests">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                        </svg>
-                                        <span>Requests</span>
+                                        <div class="flex items-center space-x-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <span>Requests</span>
+                                        </div>
+                                        @if($approvedRequestsCount > 0)
+                                            <span id="user-approved-badge" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#6366f1] rounded-full">
+                                                {{ $approvedRequestsCount > 99 ? '99+' : $approvedRequestsCount }}
+                                            </span>
+                                        @endif
                                     </a>
 
                                     <a href="#"
-                                        class="profile-nav-link flex items-center space-x-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
+                                        class="profile-nav-link flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200 border-l-4 border-transparent"
                                         data-target="received-supplies">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        <span>Received Supplies</span>
+                                        <div class="flex items-center space-x-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                            <span>Received Supplies</span>
+                                        </div>
+                                        @if($pendingReceiptCount > 0)
+                                            <span id="user-pending-badge" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#f59e0b] rounded-full animate-pulse">
+                                                {{ $pendingReceiptCount > 99 ? '99+' : $pendingReceiptCount }}
+                                            </span>
+                                        @endif
                                     </a>
 
                                     <a href="#"
@@ -86,60 +117,6 @@
                                 </nav>
                             </div>
                         </div>
-
-                        <!-- Alternative Compact Version -->
-                        {{-- <div class=" col-span-4 sm:col-span-3">
-                            <!-- Compact Profile Card -->
-                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
-                                <div class="flex items-center space-x-4">
-                                    <!-- Profile Photo -->
-                                    <div class="relative">
-                                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}"
-                                            class="w-16 h-16 object-cover rounded-full border border-gray-200 dark:border-gray-600">
-                                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
-                                    </div>
-
-                                    <!-- User Info -->
-                                    <div class="flex-1 min-w-0">
-                                        <h1 class="text-base font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</h1>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ optional(Auth::user()->designation)->name }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-500 truncate">{{ optional(Auth::user()->department)->name }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Compact Navigation Menu -->
-                            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                                <nav id="profile-nav" class="p-3 space-y-1">
-                                    <a href="#"
-                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
-                                        data-target="requests">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                        </svg>
-                                        <span>Requests</span>
-                                    </a>
-
-                                    <a href="#"
-                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
-                                        data-target="received-supplies">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        <span>Received Supplies</span>
-                                    </a>
-
-                                    <a href="#"
-                                        class="profile-nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#ce201f] dark:hover:text-[#ce201f] transition-all duration-200"
-                                        data-target="properties">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                        </svg>
-                                        <span>Properties</span>
-                                    </a>
-                                </nav>
-                            </div>
-                        </div> --}}
 
                         <style>
                             /* Active state styling */
