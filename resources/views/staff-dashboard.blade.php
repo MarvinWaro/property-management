@@ -178,30 +178,53 @@
                                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
                                     <div class="flex flex-wrap gap-4 items-center justify-between">
                                         <!-- Status Filters -->
-                                        <div class="flex flex-wrap gap-2">
-                                            <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg bg-[#ce201f] text-white active-filter transition-all duration-200"
-                                                data-status="all">
-                                                All
-                                            </button>
-                                            <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
-                                                data-status="draft">
-                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-yellow-500"></span>
-                                                Pending
-                                            </button>
-                                            <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
-                                                data-status="approved">
-                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-blue-500"></span>
-                                                Approved
-                                            </button>
-                                            <button type="button"
-                                                class="status-filter px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 border border-gray-200 dark:border-gray-600 transition-all duration-200"
-                                                data-status="posted">
-                                                <span class="w-2 h-2 mr-1 inline-block rounded-full bg-green-500"></span>
-                                                Issued
-                                            </button>
+                                        <!-- Summary counts section for user dashboard -->
+                                        <div class="flex flex-wrap gap-3 mb-4">
+                                            @php
+                                                $totalRequests = $myRequests->count();
+                                                $pendingCount = $myRequests->where('status', 'draft')->count();
+                                                $approvedCount = $myRequests->where('status', 'approved')->count();
+                                                $pendingReceiptCount = $myRequests->where('status', 'posted')->whereNull('received_at')->count();
+                                                $completedCount = $myRequests->where('status', 'posted')->whereNotNull('received_at')->count();
+                                            @endphp
+
+                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                <span class="font-medium">Total:</span>
+                                                <span class="ml-1 font-semibold">{{ $totalRequests }}</span>
+                                            </div>
+
+                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                <span class="w-2 h-2 mr-2 rounded-full bg-yellow-500"></span>
+                                                <span>Pending:</span>
+                                                <span class="ml-1 font-semibold">{{ $pendingCount }}</span>
+                                            </div>
+
+                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                <span class="w-2 h-2 mr-2 rounded-full bg-blue-500"></span>
+                                                <span>Approved:</span>
+                                                <span class="ml-1 font-semibold">{{ $approvedCount }}</span>
+                                            </div>
+
+                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                <span class="w-2 h-2 mr-2 rounded-full bg-orange-500"></span>
+                                                <span>Pending Receipt:</span>
+                                                <span class="ml-1 font-semibold">{{ $pendingReceiptCount }}</span>
+                                            </div>
+
+                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                <span class="w-2 h-2 mr-2 rounded-full bg-green-500"></span>
+                                                <span>Completed:</span>
+                                                <span class="ml-1 font-semibold">{{ $completedCount }}</span>
+                                            </div>
+
+                                            {{-- @if($pendingReceiptCount > 0)
+                                                <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-[#ce201f] text-white hover:bg-[#a01b1a] transition-all duration-200">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Mark All as Read
+                                                </button>
+                                            @endif --}}
                                         </div>
 
                                         <!-- Search Form -->
@@ -247,10 +270,10 @@
                                                     </th>
                                                 </tr>
                                             </thead>
-
                                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="requests-table-body">
                                                 @forelse($myRequests as $request)
-                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row transition-colors duration-200" data-status="{{ $request->status }}">
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row transition-colors duration-200"
+                                                        data-status="{{ $request->status === 'posted' && !$request->received_at ? 'pending-receipt' : $request->status }}">
                                                         <!-- RIS Number -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="text-sm font-medium text-gray-900 dark:text-white">
@@ -283,12 +306,19 @@
                                                                     </svg>
                                                                     Approved
                                                                 </span>
-                                                            @elseif($request->status === 'posted')
+                                                            @elseif($request->status === 'posted' && !$request->received_at)
+                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300">
+                                                                    <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z"/>
+                                                                    </svg>
+                                                                    Issued - Pending Receipt
+                                                                </span>
+                                                            @elseif($request->status === 'posted' && $request->received_at)
                                                                 <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">
                                                                     <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                                                     </svg>
-                                                                    Issued
+                                                                    Completed
                                                                 </span>
                                                             @endif
                                                         </td>
@@ -331,6 +361,111 @@
                                         </table>
                                     </div>
                                 </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Status filter functionality
+                                        const statusFilters = document.querySelectorAll('.status-filter');
+                                        const requestRows = document.querySelectorAll('.request-row');
+                                        const searchInput = document.getElementById('request-search-input');
+
+                                        // Add data attributes to rows for filtering
+                                        requestRows.forEach(row => {
+                                            const statusCell = row.querySelector('td:nth-child(3)');
+                                            const statusText = statusCell.textContent.trim();
+
+                                            // Set appropriate data-status based on the actual status
+                                            if (statusText.includes('Pending') && !statusText.includes('Receipt')) {
+                                                row.setAttribute('data-status', 'draft');
+                                            } else if (statusText.includes('Approved')) {
+                                                row.setAttribute('data-status', 'approved');
+                                            } else if (statusText.includes('Issued - Pending Receipt')) {
+                                                row.setAttribute('data-status', 'pending-receipt');
+                                            } else if (statusText.includes('Completed')) {
+                                                row.setAttribute('data-status', 'completed');
+                                            }
+                                        });
+
+                                        // Filter functionality
+                                        statusFilters.forEach(filter => {
+                                            filter.addEventListener('click', function() {
+                                                // Update active filter styling
+                                                statusFilters.forEach(f => {
+                                                    f.classList.remove('bg-[#ce201f]', 'text-white', 'active-filter');
+                                                    f.classList.add('text-gray-700', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-600');
+                                                });
+
+                                                this.classList.remove('text-gray-700', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-600');
+                                                this.classList.add('bg-[#ce201f]', 'text-white', 'active-filter');
+
+                                                const filterStatus = this.getAttribute('data-status');
+                                                filterRequests(filterStatus);
+                                            });
+                                        });
+
+                                        function filterRequests(status) {
+                                            let visibleCount = 0;
+
+                                            requestRows.forEach(row => {
+                                                const rowStatus = row.getAttribute('data-status');
+                                                const risNo = row.querySelector('td:first-child').textContent.toLowerCase();
+                                                const searchTerm = searchInput.value.toLowerCase();
+
+                                                // Check if row matches search
+                                                const matchesSearch = searchTerm === '' || risNo.includes(searchTerm);
+
+                                                // Check if row matches status filter
+                                                const matchesStatus = status === 'all' || rowStatus === status;
+
+                                                if (matchesSearch && matchesStatus) {
+                                                    row.style.display = '';
+                                                    visibleCount++;
+                                                } else {
+                                                    row.style.display = 'none';
+                                                }
+                                            });
+
+                                            // Show/hide no results message
+                                            const noResultsRow = document.getElementById('no-requests-row');
+                                            if (noResultsRow) {
+                                                if (visibleCount === 0 && requestRows.length > 0) {
+                                                    noResultsRow.style.display = '';
+                                                } else {
+                                                    noResultsRow.style.display = 'none';
+                                                }
+                                            }
+                                        }
+
+                                        // Search functionality
+                                        searchInput.addEventListener('input', function() {
+                                            const activeFilter = document.querySelector('.status-filter.active-filter');
+                                            const filterStatus = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
+                                            filterRequests(filterStatus);
+                                        });
+                                    });
+
+                                    // Clear search functions
+                                    function toggleClearRequestButton() {
+                                        const input = document.getElementById('request-search-input');
+                                        const clearBtn = document.getElementById('clearRequestButton');
+                                        if (input && clearBtn) {
+                                            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+                                        }
+                                    }
+
+                                    function clearRequestSearch() {
+                                        const input = document.getElementById('request-search-input');
+                                        if (input) {
+                                            input.value = '';
+                                            document.getElementById('clearRequestButton').style.display = 'none';
+                                            // Re-run filter with current status
+                                            const activeFilter = document.querySelector('.status-filter.active-filter');
+                                            const filterStatus = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
+                                            const event = new Event('input');
+                                            input.dispatchEvent(event);
+                                        }
+                                    }
+                                </script>
 
                                 <style>
                                     /* Active filter styling */
