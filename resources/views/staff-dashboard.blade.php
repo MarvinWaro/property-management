@@ -174,64 +174,55 @@
                                     </button>
                                 </div>
 
-                                <!-- Filter & Search Section -->
                                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
                                     <div class="flex flex-wrap gap-4 items-center justify-between">
-                                        <!-- Status Filters -->
-                                        <!-- Summary counts section for user dashboard -->
-                                        <div class="flex flex-wrap gap-3 mb-4">
-                                            @php
-                                                $totalRequests = $myRequests->count();
-                                                $pendingCount = $myRequests->where('status', 'draft')->count();
-                                                $approvedCount = $myRequests->where('status', 'approved')->count();
-                                                $pendingReceiptCount = $myRequests->where('status', 'posted')->whereNull('received_at')->count();
-                                                $completedCount = $myRequests->where('status', 'posted')->whereNotNull('received_at')->count();
-                                            @endphp
-
-                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                        <!-- Status Filters - Clickable -->
+                                        <div class="flex flex-wrap gap-3">
+                                            <a href="{{ route('staff.dashboard') }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ !request('status') ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                                 <span class="font-medium">Total:</span>
-                                                <span class="ml-1 font-semibold">{{ $totalRequests }}</span>
-                                            </div>
+                                                <span class="ml-1 font-semibold">{{ $totalRequests ?? 0 }}</span>
+                                            </a>
 
-                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <a href="{{ route('staff.dashboard', ['status' => 'draft']) }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ request('status') === 'draft' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                                 <span class="w-2 h-2 mr-2 rounded-full bg-yellow-500"></span>
                                                 <span>Pending:</span>
-                                                <span class="ml-1 font-semibold">{{ $pendingCount }}</span>
-                                            </div>
+                                                <span class="ml-1 font-semibold">{{ $pendingCount ?? 0 }}</span>
+                                            </a>
 
-                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <a href="{{ route('staff.dashboard', ['status' => 'approved']) }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ request('status') === 'approved' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                                 <span class="w-2 h-2 mr-2 rounded-full bg-blue-500"></span>
                                                 <span>Approved:</span>
-                                                <span class="ml-1 font-semibold">{{ $approvedCount }}</span>
-                                            </div>
+                                                <span class="ml-1 font-semibold">{{ $approvedCount ?? 0 }}</span>
+                                            </a>
 
-                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <a href="{{ route('staff.dashboard', ['status' => 'pending-receipt']) }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ request('status') === 'pending-receipt' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                                 <span class="w-2 h-2 mr-2 rounded-full bg-orange-500"></span>
                                                 <span>Pending Receipt:</span>
-                                                <span class="ml-1 font-semibold">{{ $pendingReceiptCount }}</span>
-                                            </div>
+                                                <span class="ml-1 font-semibold">{{ $pendingReceiptCount ?? 0 }}</span>
+                                            </a>
 
-                                            <div class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <a href="{{ route('staff.dashboard', ['status' => 'completed']) }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ request('status') === 'completed' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
                                                 <span class="w-2 h-2 mr-2 rounded-full bg-green-500"></span>
                                                 <span>Completed:</span>
-                                                <span class="ml-1 font-semibold">{{ $completedCount }}</span>
-                                            </div>
-
-                                            {{-- @if($pendingReceiptCount > 0)
-                                                <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-[#ce201f] text-white hover:bg-[#a01b1a] transition-all duration-200">
-                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    Mark All as Read
-                                                </button>
-                                            @endif --}}
+                                                <span class="ml-1 font-semibold">{{ $completedCount ?? 0 }}</span>
+                                            </a>
                                         </div>
 
                                         <!-- Search Form -->
-                                        <div class="relative w-full max-w-sm">
+                                        <form method="GET" action="{{ route('staff.dashboard') }}"
+                                            class="w-full max-w-sm flex items-center space-x-2">
+                                            @if(request('status'))
+                                                <input type="hidden" name="status" value="{{ request('status') }}">
+                                            @endif
+
                                             <div class="relative flex-grow">
-                                                <input type="text" id="request-search-input"
-                                                    oninput="toggleClearRequestButton()"
+                                                <input type="text" name="search" id="request-search-input"
+                                                    value="{{ request()->get('search') }}"
                                                     placeholder="Search by RIS number..."
                                                     class="px-4 py-2 w-full border text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-[#ce201f] focus:border-[#ce201f] transition-all duration-200" />
 
@@ -245,7 +236,15 @@
                                                     </svg>
                                                 </button>
                                             </div>
-                                        </div>
+
+                                            <!-- Search Button -->
+                                            <button type="submit"
+                                                class="px-3 py-2 text-sm text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-1 focus:outline-none focus:ring-[#ce201f]/30 flex items-center transition-all duration-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
 
@@ -253,43 +252,28 @@
                                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <!-- Clean Table Header -->
                                             <thead class="bg-gray-50 dark:bg-gray-700">
                                                 <tr>
-                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                        RIS No
-                                                    </th>
-                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                        Date
-                                                    </th>
-                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                        Status
-                                                    </th>
-                                                    <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                        Actions
-                                                    </th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RIS No</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                                    <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="requests-table-body">
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                                 @forelse($myRequests as $request)
-                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 request-row transition-colors duration-200"
-                                                        data-status="{{ $request->status === 'posted' && !$request->received_at ? 'pending-receipt' : $request->status }}">
-                                                        <!-- RIS Number -->
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="text-sm font-medium text-gray-900 dark:text-white">
                                                                 {{ $request->ris_no }}
                                                             </div>
                                                         </td>
-
-                                                        <!-- Date -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             <div class="flex flex-col">
                                                                 <span class="text-sm text-gray-900 dark:text-gray-300">{{ $request->ris_date->format('M d, Y') }}</span>
                                                                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $request->created_at->format('h:i A') }}</span>
                                                             </div>
                                                         </td>
-
-                                                        <!-- Status -->
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             @if ($request->status === 'draft')
                                                                 <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300">
@@ -322,15 +306,13 @@
                                                                 </span>
                                                             @endif
                                                         </td>
-
-                                                        <!-- Actions -->
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                                             <a href="{{ route('ris.show', $request->ris_id) }}"
                                                                 class="inline-flex items-center justify-center w-8 h-8 text-[#ce201f] dark:text-[#ce201f] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                                                 data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
                                                                 data-tooltip-placement="top">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                    {{-- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z"></path> --}}
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                                 </svg>
                                                             </a>
@@ -342,9 +324,8 @@
                                                         </td>
                                                     </tr>
                                                 @empty
-                                                    <tr id="no-requests-row">
+                                                    <tr>
                                                         <td colspan="4" class="px-6 py-12 text-center">
-                                                            <!-- Modern Empty State -->
                                                             <div class="flex flex-col items-center justify-center">
                                                                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                                                     <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,7 +333,13 @@
                                                                     </svg>
                                                                 </div>
                                                                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No requests found</h3>
-                                                                <p class="text-sm text-gray-500 dark:text-gray-400">Get started by clicking the "Request Supply" button</p>
+                                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                                    @if(request('status') || request('search'))
+                                                                        Try adjusting your filters or search term.
+                                                                    @else
+                                                                        Get started by clicking the "Request Supply" button
+                                                                    @endif
+                                                                </p>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -362,89 +349,15 @@
                                     </div>
                                 </div>
 
+                                <!-- Pagination -->
+                                @if($myRequests->hasPages())
+                                    <div class="mt-4">
+                                        {{ $myRequests->links() }}
+                                    </div>
+                                @endif
+
+                                <!-- JavaScript - ONLY for clear button, NO filtering -->
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        // Status filter functionality
-                                        const statusFilters = document.querySelectorAll('.status-filter');
-                                        const requestRows = document.querySelectorAll('.request-row');
-                                        const searchInput = document.getElementById('request-search-input');
-
-                                        // Add data attributes to rows for filtering
-                                        requestRows.forEach(row => {
-                                            const statusCell = row.querySelector('td:nth-child(3)');
-                                            const statusText = statusCell.textContent.trim();
-
-                                            // Set appropriate data-status based on the actual status
-                                            if (statusText.includes('Pending') && !statusText.includes('Receipt')) {
-                                                row.setAttribute('data-status', 'draft');
-                                            } else if (statusText.includes('Approved')) {
-                                                row.setAttribute('data-status', 'approved');
-                                            } else if (statusText.includes('Issued - Pending Receipt')) {
-                                                row.setAttribute('data-status', 'pending-receipt');
-                                            } else if (statusText.includes('Completed')) {
-                                                row.setAttribute('data-status', 'completed');
-                                            }
-                                        });
-
-                                        // Filter functionality
-                                        statusFilters.forEach(filter => {
-                                            filter.addEventListener('click', function() {
-                                                // Update active filter styling
-                                                statusFilters.forEach(f => {
-                                                    f.classList.remove('bg-[#ce201f]', 'text-white', 'active-filter');
-                                                    f.classList.add('text-gray-700', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-600');
-                                                });
-
-                                                this.classList.remove('text-gray-700', 'dark:text-gray-300', 'border', 'border-gray-200', 'dark:border-gray-600');
-                                                this.classList.add('bg-[#ce201f]', 'text-white', 'active-filter');
-
-                                                const filterStatus = this.getAttribute('data-status');
-                                                filterRequests(filterStatus);
-                                            });
-                                        });
-
-                                        function filterRequests(status) {
-                                            let visibleCount = 0;
-
-                                            requestRows.forEach(row => {
-                                                const rowStatus = row.getAttribute('data-status');
-                                                const risNo = row.querySelector('td:first-child').textContent.toLowerCase();
-                                                const searchTerm = searchInput.value.toLowerCase();
-
-                                                // Check if row matches search
-                                                const matchesSearch = searchTerm === '' || risNo.includes(searchTerm);
-
-                                                // Check if row matches status filter
-                                                const matchesStatus = status === 'all' || rowStatus === status;
-
-                                                if (matchesSearch && matchesStatus) {
-                                                    row.style.display = '';
-                                                    visibleCount++;
-                                                } else {
-                                                    row.style.display = 'none';
-                                                }
-                                            });
-
-                                            // Show/hide no results message
-                                            const noResultsRow = document.getElementById('no-requests-row');
-                                            if (noResultsRow) {
-                                                if (visibleCount === 0 && requestRows.length > 0) {
-                                                    noResultsRow.style.display = '';
-                                                } else {
-                                                    noResultsRow.style.display = 'none';
-                                                }
-                                            }
-                                        }
-
-                                        // Search functionality
-                                        searchInput.addEventListener('input', function() {
-                                            const activeFilter = document.querySelector('.status-filter.active-filter');
-                                            const filterStatus = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
-                                            filterRequests(filterStatus);
-                                        });
-                                    });
-
-                                    // Clear search functions
                                     function toggleClearRequestButton() {
                                         const input = document.getElementById('request-search-input');
                                         const clearBtn = document.getElementById('clearRequestButton');
@@ -457,49 +370,72 @@
                                         const input = document.getElementById('request-search-input');
                                         if (input) {
                                             input.value = '';
-                                            document.getElementById('clearRequestButton').style.display = 'none';
-                                            // Re-run filter with current status
-                                            const activeFilter = document.querySelector('.status-filter.active-filter');
-                                            const filterStatus = activeFilter ? activeFilter.getAttribute('data-status') : 'all';
-                                            const event = new Event('input');
-                                            input.dispatchEvent(event);
+                                            const clearBtn = document.getElementById('clearRequestButton');
+                                            if (clearBtn) {
+                                                clearBtn.style.display = 'none';
+                                            }
+
+                                            const currentUrl = new URL(window.location.href);
+                                            const status = currentUrl.searchParams.get('status');
+
+                                            if (status) {
+                                                window.location.href = window.location.pathname + '?status=' + status;
+                                            } else {
+                                                window.location.href = window.location.pathname;
+                                            }
                                         }
                                     }
+
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        toggleClearRequestButton();
+
+                                        const searchInput = document.getElementById('request-search-input');
+                                        if (searchInput) {
+                                            // ONLY toggle clear button - NO filtering
+                                            searchInput.addEventListener('input', toggleClearRequestButton);
+
+                                            // Enter key submits form
+                                            searchInput.addEventListener('keypress', function(e) {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    const form = this.closest('form');
+                                                    if (form) {
+                                                        form.submit();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
                                 </script>
 
                                 <style>
-                                    /* Active filter styling */
-                                    .status-filter.active-filter {
-                                        background-color: #ce201f !important;
-                                        color: white !important;
-                                        border-color: #ce201f !important;
+                                    /* Hover effects for stat filters */
+                                    .flex.flex-wrap.gap-3 a {
+                                        cursor: pointer;
+                                        position: relative;
+                                        overflow: hidden;
                                     }
 
-                                    /* Non-active filter hover states */
-                                    .status-filter:not(.active-filter):hover {
-                                        border-color: #ce201f;
+                                    .flex.flex-wrap.gap-3 a::before {
+                                        content: '';
+                                        position: absolute;
+                                        top: 0;
+                                        left: -100%;
+                                        width: 100%;
+                                        height: 100%;
+                                        background: rgba(255, 255, 255, 0.1);
+                                        transition: left 0.3s ease;
+                                    }
+
+                                    .flex.flex-wrap.gap-3 a:hover::before {
+                                        left: 0;
+                                    }
+
+                                    /* Active filter indicator */
+                                    .flex.flex-wrap.gap-3 a.bg-\[\#ce201f\] {
+                                        box-shadow: 0 2px 4px rgba(206, 32, 31, 0.2);
                                     }
                                 </style>
-
-                                <!-- Pagination Section (Same as RIS style) -->
-                                @if($myRequests->hasPages())
-                                    {{-- <div class="flex items-center justify-between mt-4">
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            @if ($myRequests->count() > 0)
-                                                Showing {{ $myRequests->firstItem() }} to {{ $myRequests->lastItem() }} of {{ $myRequests->total() }} results
-                                            @endif
-                                        </div>
-
-                                    </div> --}}
-
-                                    {{-- <div class="flex justify-center">
-
-                                    </div> --}}
-
-                                    <div class="mt-2 sm:mt-0">
-                                        {{ $myRequests->appends(request()->query())->links() }}
-                                    </div>
-                                @endif
 
                                 <!-- RIS Request Modal with Only Items Section Scrollable -->
                                 <div id="requestModal"
