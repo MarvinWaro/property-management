@@ -28,21 +28,27 @@
                             </div>
 
                             <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <span class="w-3 h-3 mr-2 rounded-full bg-[#f59e0b]"></span>
-                                <span>Pending Approval: </span>
+                                <span class="w-3 h-3 mr-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                                <span>Pending: </span>
                                 <span class="font-semibold ml-1">{{ $risSlips->where('status', 'draft')->count() }}</span>
                             </div>
 
                             <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#6366f1] dark:bg-[#818cf8]"></span>
-                                <span>Awaiting Issue: </span>
+                                <span>Approved: </span>
                                 <span class="font-semibold ml-1">{{ $risSlips->where('status', 'approved')->count() }}</span>
                             </div>
 
                             <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                <span class="w-3 h-3 mr-2 rounded-full bg-yellow-500"></span>
+                                <span>Pending Receipt: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->whereNull('received_at')->count() }}</span>
+                            </div>
+
+                            <div class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 <span class="w-3 h-3 mr-2 rounded-full bg-[#10b981] dark:bg-[#34d399]"></span>
-                                <span>Issued: </span>
-                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->count() }}</span>
+                                <span>Completed: </span>
+                                <span class="font-semibold ml-1">{{ $risSlips->where('status', 'posted')->whereNotNull('received_at')->count() }}</span>
                             </div>
                         </div>
 
@@ -146,7 +152,6 @@
                                                 <td class="px-6 py-4 text-gray-900 dark:text-white">
                                                     {{ $ris->requester->name ?? 'N/A' }}
                                                 </td>
-                                                <!-- In your ris/index.blade.php, replace the status cell with this: -->
                                                 <td class="px-6 py-4">
                                                     @if ($ris->status === 'draft')
                                                         <span class="bg-gray-100 text-gray-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
