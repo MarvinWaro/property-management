@@ -105,6 +105,18 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
+    // Check if user has admin-level privileges (admin or cao)
+    public function hasAdminPrivileges()
+    {
+        return in_array($this->role, ['admin', 'cao']);
+    }
+
+    // Check if user has any of the specified roles
+    public function hasAnyRole(array $roles)
+    {
+        return in_array($this->role, $roles);
+    }
+
     public function transactions()
     {
         return $this->belongsToMany(SupplyTransaction::class, 'user_transactions', 'user_id', 'transaction_id')

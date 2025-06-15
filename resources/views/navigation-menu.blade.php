@@ -90,7 +90,7 @@
                                     {{ __('E-Signature') }}
                                 </x-dropdown-link>
 
-                                @if (auth()->user()->role === 'admin')
+                                @if (in_array(auth()->user()->role, ['admin', 'cao']))
                                     <div class="border-t border-gray-200 dark:border-gray-600"></div>
                                     <x-dropdown-link href="{{ route('supply-transactions.index') }}">
                                         {{ __('Transactions') }}
@@ -146,7 +146,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Desktop Navigation Tabs -->
             <div class="hidden sm:flex space-x-8 -mb-px">
-                @if (auth()->user()->role === 'admin' && !$isAssetsMode)
+                @if (in_array(auth()->user()->role, ['admin', 'cao']) && !$isAssetsMode)
                     <!-- Supplies Mode Tabs -->
                     <a href="{{ route('dashboard') }}"
                        class="dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300  border-transparent' }}">
@@ -253,7 +253,7 @@
                     </div>
                 @endif
 
-                @if (auth()->user()->role === 'admin' && $isAssetsMode)
+                @if (in_array(auth()->user()->role, ['admin', 'cao']) && $isAssetsMode)
                     <!-- Assets Mode Tabs -->
                     <a href="{{ route('assets.dashboard') }}"
                        class=" dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent' }}">
@@ -306,7 +306,7 @@
     <!-- Mobile Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div class="pt-2 pb-3 space-y-1">
-            @if (!$isAssetsMode && auth()->user()->role === 'admin')
+            @if (!$isAssetsMode && in_array(auth()->user()->role, ['admin', 'cao']))
                 <a href="{{ route('dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Dashboard
                 </a>
@@ -366,7 +366,7 @@
                 </div>
             @endif
 
-            @if ($isAssetsMode && auth()->user()->role === 'admin')
+            @if ($isAssetsMode && in_array(auth()->user()->role, ['admin', 'cao']))
                 <a href="{{ route('assets.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Assets Dashboard
                 </a>

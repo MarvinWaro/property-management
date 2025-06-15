@@ -30,11 +30,11 @@ Route::get('/run-storage-link', function () {
     return 'Symlink created!';
 });
 
-// Combine admin + staff under one main group, but nest role checks
+// Combine admin + staff + cao under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
 
-    // Shared routes (accessible by both admin and staff)
+    // Shared routes (accessible by admin, cao, and staff)
     Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
     Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store');
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
@@ -62,14 +62,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
     Route::get('/user-notifications', [NotificationController::class, 'getUserNotifications'])->middleware(['auth:sanctum', 'verified']);
-    
+
 
     /**
      * ------------------
-     *  ADMIN ROUTES
+     *  ADMIN & CAO ROUTES (Same access level)
      * ------------------
      */
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['admin-cao'])->group(function () {
 
          // these now share your normal web session cookie
         Route::get('/pending-requisitions', [NotificationController::class, 'getPendingCount']);
@@ -195,4 +195,3 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     });
 
 });
-
