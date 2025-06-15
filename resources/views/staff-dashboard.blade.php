@@ -276,7 +276,7 @@
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap">
                                                             @if ($request->status === 'draft')
-                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300">
+                                                                <span class="bg-yellow-100 text-yellow-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded dark:bg-yellow-900/20 dark:text-yellow-300">
                                                                     <span class="relative flex h-2 w-2 mr-1.5">
                                                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
                                                                         <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
@@ -284,21 +284,21 @@
                                                                     Pending
                                                                 </span>
                                                             @elseif($request->status === 'approved')
-                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
+                                                                <span class="bg-[#6366f1]/10 text-[#6366f1] text-xs font-medium inline-flex items-center px-2.5 py-1 rounded dark:bg-[#6366f1]/20 dark:text-[#818cf8]">
                                                                     <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                     Approved
                                                                 </span>
                                                             @elseif($request->status === 'posted' && !$request->received_at)
-                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300">
+                                                                <span class="bg-orange-100 text-orange-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded dark:bg-orange-900/20 dark:text-orange-300">
                                                                     <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z"/>
                                                                     </svg>
                                                                     Issued - Pending Receipt
                                                                 </span>
                                                             @elseif($request->status === 'posted' && $request->received_at)
-                                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">
+                                                                <span class="bg-[#10b981]/10 text-[#10b981] text-xs font-medium inline-flex items-center px-2.5 py-1 rounded dark:bg-[#10b981]/20 dark:text-[#34d399]">
                                                                     <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                                                     </svg>
@@ -308,12 +308,12 @@
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                                             <a href="{{ route('ris.show', $request->ris_id) }}"
-                                                                class="inline-flex items-center justify-center w-8 h-8 text-[#ce201f] dark:text-[#ce201f] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                                                                class="inline-flex items-center justify-center w-8 h-8 text-[#10b981] dark:text-[#34d399] hover:bg-[#10b981]/10 dark:hover:bg-[#10b981]/20 rounded-lg transition-all duration-200"
                                                                 data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
                                                                 data-tooltip-placement="top">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    {{-- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z"></path> --}}
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                    <circle cx="12" cy="12" r="3"></circle>
                                                                 </svg>
                                                             </a>
                                                             <div id="tooltip-view-request-{{ $loop->index }}" role="tooltip"
