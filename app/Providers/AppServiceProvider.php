@@ -21,9 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share pending RIS count with all views
+        // Share pending RIS count with all views for admin and cao roles
         View::composer('*', function ($view) {
-            if (auth()->check() && auth()->user()->role === 'admin') {
+            if (auth()->check() && in_array(auth()->user()->role, ['admin', 'cao'])) {
                 $pendingRisCount = RisSlip::where('status', 'draft')->count();
                 $view->with('pendingRisCount', $pendingRisCount);
             }

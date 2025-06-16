@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\TrackAssetsMode;
 use App\Http\Middleware\RoleMiddleware; // Import your RoleMiddleware
+use App\Http\Middleware\AdminCaoMiddleware; // Import your AdminCaoMiddleware
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,7 +24,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
         //
     })->create();
 
-// Register the route middleware alias for 'role'
+// Register the route middleware aliases
 $app->router->aliasMiddleware('role', RoleMiddleware::class);
+$app->router->aliasMiddleware('admin-cao', AdminCaoMiddleware::class);
 
 return $app;
