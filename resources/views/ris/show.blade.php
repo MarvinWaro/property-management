@@ -43,12 +43,14 @@
                         Print RIS
                     </a>
 
-                    @if(auth()->user()->hasRole('admin') && $risSlip->status === 'draft')
+                    {{-- Both Admin and CAO can approve --}}
+                    @if(auth()->user()->hasAdminPrivileges() && $risSlip->status === 'draft')
                         <button id="openApproveModal" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             Approve Request
                         </button>
                     @endif
 
+                    {{-- Only Admin can issue --}}
                     @if(auth()->user()->hasRole('admin') && $risSlip->status === 'approved')
                         <button id="openIssueModal" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             Process Issuance
@@ -57,7 +59,7 @@
                 </div>
 
                 <!-- Approve Modal -->
-                @if(auth()->user()->hasRole('admin'))
+                @if(auth()->user()->hasAdminPrivileges())
                     <div id="approveModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
                             <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
