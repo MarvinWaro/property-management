@@ -82,6 +82,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // Example route, adjusting the URI as you see fit:
         Route::post('/users', [UserController::class, 'storeUser'])->name('users.store');
         Route::put('/users/{id}', [UserController::class, 'updateUser'])->name('users.update');
+        // Add this line inside the admin-cao middleware group
+        Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         // routes/web.php
 
         // Supplies

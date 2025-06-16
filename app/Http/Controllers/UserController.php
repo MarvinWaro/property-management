@@ -33,9 +33,6 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User created successfully!');
     }
 
-
-
-
     public function updateUser(Request $request, $id)
     {
         $validated = $request->validate([
@@ -54,5 +51,22 @@ class UserController extends Controller
 
         // Redirect back with a success message
         return redirect()->back()->with('success', 'User updated successfully!');
+    }
+
+    public function resetPassword($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Set the default password
+            $defaultPassword = '12345678';
+            $user->password = \Illuminate\Support\Facades\Hash::make($defaultPassword);
+            $user->needs_password_change = true; // Force password change on next login
+            $user->save();
+
+            return redirect()->back()->with('success', "Password reset successfully for {$user->name}! New password: 12345678");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to reset password. Please try again.');
+        }
     }
 }
