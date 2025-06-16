@@ -25,23 +25,38 @@ class StaffDashboardController extends Controller
         // 2. Dropdown data for the modal
         $departments = Department::orderBy('name')->get(['id','name']);
 
-        // 3. Calculate real-time available for each stock
+        // 3. Get all stocks (available and depleted) for better UX
         $stocks = SupplyStock::with('supply')
             ->whereIn('status', ['available', 'depleted'])
-            ->get();
+            ->get()
+            ->map(function ($stock) {
+                // Calculate pending requests for this supply
+                $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
+                    ->whereHas('risSlip', function($q) {
+                        $q->whereIn('status', ['draft', 'approved']);
+                    })
+                    ->sum('quantity_requested');
 
-        foreach ($stocks as $stock) {
-            $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
-                ->whereHas('risSlip', fn($q) =>
-                    $q->whereIn('status', ['draft','approved'])
-                )
-                ->sum('quantity_requested');
+                // Calculate available for request
+                if ($stock->status === 'depleted' || $stock->quantity_on_hand <= 0) {
+                    // Depleted or zero quantity = not available for request
+                    $available = 0;
+                } else {
+                    $available = max(0, $stock->quantity_on_hand - $pendingRequested);
+                }
 
-            $stock->available_for_request = max(
-                0,
-                $stock->quantity_on_hand - $pendingRequested
-            );
-        }
+                $stock->available_for_request = $available;
+
+                // Add a flag to easily identify if this item can be requested
+                $stock->is_requestable = $available > 0;
+
+                return $stock;
+            })
+            ->sortBy(function ($stock) {
+                // Sort: requestable items first, then depleted items
+                return $stock->is_requestable ? 0 : 1;
+            })
+            ->values(); // Reset collection keys
 
         // 4. Stats for the status filters (calculated BEFORE applying filters)
         $totalRequests       = RisSlip::where('requested_by', $userId)->count();
