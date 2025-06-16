@@ -254,6 +254,7 @@
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">Filter by Role</option>
                         <option value="admin">Admin</option>
+                        <option value="cao">CAO</option>
                         <option value="staff">Staff</option>
                     </select>
 
@@ -340,6 +341,17 @@
                                                         <circle cx="12" cy="11" r="4"/>
                                                     </svg>
                                                     Admin
+                                                </span>
+                                            @elseif ($user->role === 'cao')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f59e0b]/10 text-[#f59e0b] dark:bg-[#f59e0b]/20 dark:text-[#f59e0b]">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                        <circle cx="9" cy="7" r="4"/>
+                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                        <circle cx="17" cy="8" r="2"/>
+                                                    </svg>
+                                                    CAO
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
@@ -496,6 +508,17 @@
                                                                                         <circle cx="12" cy="11" r="4"/>
                                                                                     </svg>
                                                                                     Administrator
+                                                                                </span>
+                                                                            @elseif ($user->role === 'cao')
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f59e0b]/10 text-[#f59e0b] dark:bg-[#f59e0b]/20 dark:text-[#f59e0b] shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                                                        <circle cx="9" cy="7" r="4"/>
+                                                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                                                        <circle cx="17" cy="8" r="2"/>
+                                                                                    </svg>
+                                                                                    Chief Administrative Officer
                                                                                 </span>
                                                                             @else
                                                                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
@@ -818,6 +841,9 @@
                                                                                 <option value="admin"
                                                                                     {{ $user->role === 'admin' ? 'selected' : '' }}>
                                                                                     Admin</option>
+                                                                                <option value="cao"
+                                                                                    {{ $user->role === 'cao' ? 'selected' : '' }}>
+                                                                                    CAO</option>
                                                                                 <option value="staff"
                                                                                     {{ $user->role === 'staff' ? 'selected' : '' }}>
                                                                                     Staff</option>
@@ -1270,6 +1296,8 @@
                                                         {{ old('role') ? '' : 'selected' }}>Select role</option>
                                                     <option value="admin"
                                                         {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                    <option value="cao"
+                                                        {{ old('role') === 'cao' ? 'selected' : '' }}>CAO</option>
                                                     <option value="staff"
                                                         {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
                                                 </select>
