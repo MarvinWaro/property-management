@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Rules\ChedEmailRule; // Add this import
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -12,16 +13,11 @@ class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
 
-    /**
-     * Validate and create a newly registered user.
-     *
-     * @param  array<string, string>  $input
-     */
     public function create(array $input): User
     {
         Validator::make($input, [
             'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users', new ChedEmailRule()],
             'password'      => $this->passwordRules(),
             'department_id' => ['required', 'exists:departments,id'],
             'designation_id'=> ['required', 'exists:designations,id'],
@@ -34,8 +30,7 @@ class CreateNewUser implements CreatesNewUsers
             'password'      => Hash::make($input['password']),
             'department_id' => $input['department_id'],
             'designation_id'=> $input['designation_id'],
-            'status'        => false, // <-- newly registered = inactive
+            'status'        => false,
         ]);
-
     }
 }
