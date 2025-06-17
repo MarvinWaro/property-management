@@ -335,7 +335,7 @@
     </script>
     @endif
 
-    {{-- <!-- Add this JavaScript to your user dashboard or main layout for non-admin users -->
+    <!-- Add this JavaScript to your user dashboard or main layout for non-admin users -->
     @if(auth()->check() && auth()->user()->role !== 'admin')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -502,7 +502,7 @@
             });
         });
     </script>
-    @endif --}}
+    @endif
 
 </body>
 
