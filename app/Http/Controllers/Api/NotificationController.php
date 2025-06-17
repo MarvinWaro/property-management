@@ -10,13 +10,12 @@ use Illuminate\Support\Facades\Session;
 class NotificationController extends Controller
 {
     /**
-     * Get the count of pending requisitions by status (ADMIN)
-     * [Keep existing getPendingCount method as is]
+     * Get the count of pending requisitions by status (ADMIN & CAO)
      */
     public function getPendingCount(Request $request)
     {
-        // Check if user is admin
-        if ($request->user()->role !== 'admin') {
+        // Check if user is admin or cao
+        if (!in_array($request->user()->role, ['admin', 'cao'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -97,13 +96,12 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark all pending requisitions as viewed (ADMIN)
-     * [Keep existing markAsViewed method as is]
+     * Mark all pending requisitions as viewed (ADMIN & CAO)
      */
     public function markAsViewed(Request $request)
     {
-        // Check if user is admin
-        if ($request->user()->role !== 'admin') {
+        // Check if user is admin or cao
+        if (!in_array($request->user()->role, ['admin', 'cao'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

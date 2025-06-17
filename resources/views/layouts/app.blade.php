@@ -105,7 +105,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
 
-    @if(auth()->check() && auth()->user()->role === 'admin')
+    @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'cao']))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const requisitionNavLink = document.getElementById('requisition-nav-link');
@@ -165,6 +165,8 @@
                         previousDraftCount = data.draft_count;
                         previousApprovedCount = data.approved_count;
                         isFirstCheck = false;
+                    } else {
+                        console.error('Error response:', response.status, response.statusText);
                     }
                 } catch (error) {
                     console.error('Error checking for pending requisitions:', error);
@@ -297,7 +299,7 @@
             // Initial check
             checkPendingRequisitions();
 
-            // Poll every 30 seconds
+            // Poll every 5 seconds
             setInterval(checkPendingRequisitions, 5000);
 
             // Update when page becomes visible again
@@ -336,7 +338,7 @@
     @endif
 
     <!-- Add this JavaScript to your user dashboard or main layout for non-admin users -->
-    @if(auth()->check() && auth()->user()->role !== 'admin')
+    @if(auth()->check() && !in_array(auth()->user()->role, ['admin', 'cao']))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize notification sound
