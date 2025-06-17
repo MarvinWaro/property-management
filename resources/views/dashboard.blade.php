@@ -220,18 +220,20 @@
                         </div>
 
                         <!-- Add Button -->
-                        <button type="button" data-modal-target="createUserModal"
-                            data-modal-toggle="createUserModal"
-                            class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a] dark:focus:ring-[#ce201f]/30 transition-all duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <line x1="19" x2="19" y1="8" y2="14" />
-                                <line x1="22" x2="16" y1="11" y2="11" />
-                            </svg>
-                        </button>
+                        @if(auth()->user()->hasRole('admin'))
+                            <button type="button" data-modal-target="createUserModal"
+                                data-modal-toggle="createUserModal"
+                                class="inline-flex items-center py-2.5 px-3.5 text-sm font-medium text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a] focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 dark:bg-[#ce201f] dark:hover:bg-[#a01b1a] dark:focus:ring-[#ce201f]/30 transition-all duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <line x1="19" x2="19" y1="8" y2="14" />
+                                    <line x1="22" x2="16" y1="11" y2="11" />
+                                </svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
 
@@ -298,7 +300,9 @@
                                     <th scope="col" class="px-6 py-3 font-bold">Department</th>
                                     <th scope="col" class="px-6 py-3 font-bold">Designation</th>
                                     <th scope="col" class="px-6 py-3 font-bold">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-center font-bold">Actions</th>
+                                    @if(auth()->user()->hasRole('admin'))
+                                        <th scope="col" class="px-6 py-3 text-center font-bold">Actions</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -401,632 +405,632 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <div class="flex items-center justify-center space-x-2">
-                                                <!-- Edit Button -->
-                                                <button type="button"
-                                                    data-modal-target="editUserModal{{ $user->id }}"
-                                                    data-modal-toggle="editUserModal{{ $user->id }}"
-                                                    class="p-2 bg-[#ce201f]/10 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/20 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                        height="16" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round"
-                                                        class="lucide lucide-pen-square">
-                                                        <path
-                                                            d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                        <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                    </svg>
-                                                </button>
-
-                                                <!-- View Button -->
-                                                <button type="button"
-                                                    data-modal-target="viewUserModal{{ $user->id }}"
-                                                    data-modal-toggle="viewUserModal{{ $user->id }}"
-                                                    class="p-2 bg-[#10b981]/10 text-[#10b981] rounded-lg hover:bg-[#10b981]/20 focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:bg-[#10b981]/20 dark:text-[#34d399] dark:hover:bg-[#10b981]/30 transition-all duration-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                        height="16" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round"
-                                                        class="lucide lucide-eye">
-                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                        <circle cx="12" cy="12" r="3" />
-                                                    </svg>
-                                                </button>
-
-                                                <!-- More Actions Dropdown -->
-                                                <div class="relative inline-block text-left">
-                                                    <button id="dropdownButton-{{ $user->id }}"
-                                                        data-dropdown-toggle="dropdown-{{ $user->id }}"
-                                                        type="button"
-                                                        class="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
+                                        @if(auth()->user()->hasRole('admin'))
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center space-x-2">
+                                                    <!-- Edit Button -->
+                                                    <button type="button"
+                                                        data-modal-target="editUserModal{{ $user->id }}"
+                                                        data-modal-toggle="editUserModal{{ $user->id }}"
+                                                        class="p-2 bg-[#ce201f]/10 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/20 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                             height="16" viewBox="0 0 24 24" fill="none"
                                                             stroke="currentColor" stroke-width="2"
                                                             stroke-linecap="round" stroke-linejoin="round"
-                                                            class="lucide lucide-more-horizontal">
-                                                            <circle cx="12" cy="12" r="1" />
-                                                            <circle cx="19" cy="12" r="1" />
-                                                            <circle cx="5" cy="12" r="1" />
+                                                            class="lucide lucide-pen-square">
+                                                            <path
+                                                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                            <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                         </svg>
                                                     </button>
-                                                    <!-- Dropdown menu -->
-                                                    <div id="dropdown-{{ $user->id }}"
-                                                        class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
-                                                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                                                            aria-labelledby="dropdownButton-{{ $user->id }}">
-                                                            <li>
-                                                                <button type="button"
-                                                                    data-modal-target="viewUserModal{{ $user->id }}"
-                                                                    data-modal-toggle="viewUserModal{{ $user->id }}"
-                                                                    class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                    <svg class="w-4 h-4 mr-2 inline-block"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                        </path>
+
+                                                    <!-- View Button -->
+                                                    <button type="button"
+                                                        data-modal-target="viewUserModal{{ $user->id }}"
+                                                        data-modal-toggle="viewUserModal{{ $user->id }}"
+                                                        class="p-2 bg-[#10b981]/10 text-[#10b981] rounded-lg hover:bg-[#10b981]/20 focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:bg-[#10b981]/20 dark:text-[#34d399] dark:hover:bg-[#10b981]/30 transition-all duration-200">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                            height="16" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            class="lucide lucide-eye">
+                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </button>
+
+                                                    <!-- More Actions Dropdown -->
+                                                    <div class="relative inline-block text-left">
+                                                        <button id="dropdownButton-{{ $user->id }}"
+                                                            data-dropdown-toggle="dropdown-{{ $user->id }}"
+                                                            type="button"
+                                                            class="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                class="lucide lucide-more-horizontal">
+                                                                <circle cx="12" cy="12" r="1" />
+                                                                <circle cx="19" cy="12" r="1" />
+                                                                <circle cx="5" cy="12" r="1" />
+                                                            </svg>
+                                                        </button>
+                                                        <!-- Dropdown menu -->
+                                                        <div id="dropdown-{{ $user->id }}"
+                                                            class="hidden z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+                                                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                                                aria-labelledby="dropdownButton-{{ $user->id }}">
+                                                                <li>
+                                                                    <button type="button"
+                                                                        data-modal-target="viewUserModal{{ $user->id }}"
+                                                                        data-modal-toggle="viewUserModal{{ $user->id }}"
+                                                                        class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                        <svg class="w-4 h-4 mr-2 inline-block"
+                                                                            fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                                            </path>
+                                                                        </svg>
+                                                                        User Details
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <button type="button"
+                                                                        onclick="confirmResetPassword({{ $user->id }}, '{{ $user->name }}')"
+                                                                        class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-600 dark:text-red-400">
+                                                                        <svg class="w-4 h-4 mr-2 inline-block"
+                                                                            fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                                                            </path>
+                                                                        </svg>
+                                                                        Reset Password
+                                                                    </button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- View User Modal -->
+                                                <div id="viewUserModal{{ $user->id }}" tabindex="-1" aria-hidden="true"
+                                                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                    <div class="relative p-4 w-full max-w-xl max-h-full">
+                                                        <!-- Modal content -->
+                                                        <div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
+                                                            <!-- Modal header -->
+                                                            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-[#10b981]">
+                                                                <h3 class="text-xl font-semibold text-white flex items-center">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                                        <circle cx="12" cy="12" r="3" />
                                                                     </svg>
                                                                     User Details
-                                                                </button>
-                                                            </li>
-                                                            <li>
+                                                                </h3>
                                                                 <button type="button"
-                                                                    onclick="confirmResetPassword({{ $user->id }}, '{{ $user->name }}')"
-                                                                    class="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-600 dark:text-red-400">
-                                                                    <svg class="w-4 h-4 mr-2 inline-block"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                                                        </path>
+                                                                    class="text-white bg-[#10b981] hover:bg-[#059669] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
+                                                                    data-modal-hide="viewUserModal{{ $user->id }}">
+                                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                                     </svg>
-                                                                    Reset Password
+                                                                    <span class="sr-only">Close modal</span>
                                                                 </button>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                            </div>
 
-                                            <!-- View User Modal -->
-                                            <div id="viewUserModal{{ $user->id }}" tabindex="-1" aria-hidden="true"
-                                                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                <div class="relative p-4 w-full max-w-xl max-h-full">
-                                                    <!-- Modal content -->
-                                                    <div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
-                                                        <!-- Modal header -->
-                                                        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200 bg-[#10b981]">
-                                                            <h3 class="text-xl font-semibold text-white flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                                    <circle cx="12" cy="12" r="3" />
-                                                                </svg>
-                                                                User Details
-                                                            </h3>
-                                                            <button type="button"
-                                                                class="text-white bg-[#10b981] hover:bg-[#059669] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 transition-all duration-200"
-                                                                data-modal-hide="viewUserModal{{ $user->id }}">
-                                                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                                </svg>
-                                                                <span class="sr-only">Close modal</span>
-                                                            </button>
-                                                        </div>
-
-                                                        <!-- Modal body -->
-                                                        <div class="p-4 md:p-5 bg-gray-50 dark:bg-gray-800">
-                                                            <!-- User Profile Card -->
-                                                            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden mb-5">
-                                                                <!-- User Profile Header with Gradient Background -->
-                                                                <div class="bg-gradient-to-r from-[#10b981]/20 to-gray-100/50 dark:from-[#10b981]/30 dark:to-gray-800/30 p-5 relative h-24">
-                                                                    <!-- User Status Badge - Positioned Absolutely -->
-                                                                    <div class="absolute right-5 top-5">
-                                                                        @if ($user->status)
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/10 text-[#10b981] dark:bg-[#10b981]/20 dark:text-[#34d399] shadow-sm">
-                                                                                <span class="w-2 h-2 mr-1 bg-[#10b981] rounded-full"></span>
-                                                                                Active
-                                                                            </span>
-                                                                        @else
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
-                                                                                <span class="w-2 h-2 mr-1 bg-[#ce201f] rounded-full"></span>
-                                                                                Inactive
-                                                                            </span>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-
-                                                                <!-- User Avatar - Overlapping the gradient and white sections -->
-                                                                <div class="flex justify-center -mt-12">
-                                                                    @if ($user->profile_photo_url)
-                                                                        <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
-                                                                            class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
-                                                                    @else
-                                                                        <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
-                                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                            <!-- Modal body -->
+                                                            <div class="p-4 md:p-5 bg-gray-50 dark:bg-gray-800">
+                                                                <!-- User Profile Card -->
+                                                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden mb-5">
+                                                                    <!-- User Profile Header with Gradient Background -->
+                                                                    <div class="bg-gradient-to-r from-[#10b981]/20 to-gray-100/50 dark:from-[#10b981]/30 dark:to-gray-800/30 p-5 relative h-24">
+                                                                        <!-- User Status Badge - Positioned Absolutely -->
+                                                                        <div class="absolute right-5 top-5">
+                                                                            @if ($user->status)
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#10b981]/10 text-[#10b981] dark:bg-[#10b981]/20 dark:text-[#34d399] shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-[#10b981] rounded-full"></span>
+                                                                                    Active
+                                                                                </span>
+                                                                            @else
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
+                                                                                    <span class="w-2 h-2 mr-1 bg-[#ce201f] rounded-full"></span>
+                                                                                    Inactive
+                                                                                </span>
+                                                                            @endif
                                                                         </div>
-                                                                    @endif
-                                                                </div>
-
-                                                                <!-- User Info Content -->
-                                                                <div class="p-5 text-center">
-                                                                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $user->name }}</h4>
-                                                                    <p class="text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ $user->email }}</p>
-
-                                                                    <!-- Role Badge - Centered -->
-                                                                    <div class="flex justify-center mt-2">
-                                                                        @if ($user->role === 'admin')
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                                                    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-                                                                                    <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
-                                                                                    <circle cx="12" cy="11" r="4"/>
-                                                                                </svg>
-                                                                                Administrator
-                                                                            </span>
-                                                                        @elseif ($user->role === 'cao')
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f59e0b]/10 text-[#f59e0b] dark:bg-[#f59e0b]/20 dark:text-[#f59e0b] shadow-sm">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                                                                    <circle cx="9" cy="7" r="4"/>
-                                                                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                                                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                                                                    <circle cx="17" cy="8" r="2"/>
-                                                                                </svg>
-                                                                                Chief Administrative Officer
-                                                                            </span>
-                                                                        @else
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                                                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                                                                    <circle cx="9" cy="7" r="4"/>
-                                                                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                                                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                                                                </svg>
-                                                                                Staff Member
-                                                                            </span>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Work Information Card -->
-                                                            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5">
-                                                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center pb-2 border-b border-gray-200 dark:border-gray-600">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-[#10b981]">
-                                                                        <rect width="18" height="18" x="3" y="3" rx="2"/>
-                                                                        <path d="M9 17V9l7 4-7 4Z"/>
-                                                                    </svg>
-                                                                    Work Information
-                                                                </h5>
-
-                                                                <!-- Work Info in Grid Layout -->
-                                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                                                    <div class="border-l-2 border-[#10b981] pl-3 py-1">
-                                                                        <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                            @if ($user->department)
-                                                                                {{ $user->department->name }}
-                                                                            @else
-                                                                                <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
-                                                                            @endif
-                                                                        </p>
                                                                     </div>
 
-                                                                    <div class="border-l-2 border-gray-400 pl-3 py-1">
-                                                                        <p class="text-xs text-gray-500 dark:text-gray-400">Designation</p>
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                            @if ($user->designation)
-                                                                                {{ $user->designation->name }}
-                                                                            @else
-                                                                                <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
-                                                                            @endif
-                                                                        </p>
-                                                                    </div>
-
-                                                                    <div class="border-l-2 border-[#ce201f] pl-3 py-1">
-                                                                        <p class="text-xs text-gray-500 dark:text-gray-400">Employee ID</p>
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">#{{ $user->id }}</p>
-                                                                    </div>
-
-                                                                    <div class="border-l-2 border-[#f59e0b] pl-3 py-1">
-                                                                        <p class="text-xs text-gray-500 dark:text-gray-400">Joined Date</p>
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                                                                            {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- QR Code Section (if applicable) -->
-                                                            @if(isset($user->qr_code) && $user->qr_code)
-                                                            <div class="mt-5 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5 text-center">
-                                                                <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-[#10b981]">
-                                                                        <rect width="5" height="5" x="3" y="3" rx="1"/>
-                                                                        <rect width="5" height="5" x="16" y="3" rx="1"/>
-                                                                        <rect width="5" height="5" x="3" y="16" rx="1"/>
-                                                                        <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
-                                                                        <path d="M21 21v.01"/>
-                                                                        <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
-                                                                        <path d="M3 12h.01"/>
-                                                                        <path d="M12 3h.01"/>
-                                                                        <path d="M12 16v.01"/>
-                                                                        <path d="M16 12h1"/>
-                                                                        <path d="M21 12v.01"/>
-                                                                    </svg>
-                                                                    User QR Code
-                                                                </h5>
-
-                                                                <div class="flex justify-center">
-                                                                    <div class="bg-white p-2 rounded-lg shadow-sm inline-block">
-                                                                        <img src="{{ $user->qr_code }}" alt="QR Code" class="w-32 h-32">
-                                                                    </div>
-                                                                </div>
-                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Scan for user identification</p>
-                                                            </div>
-                                                            @endif
-                                                        </div>
-
-                                                        <!-- Modal footer -->
-                                                        <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
-                                                            <!-- Edit Button -->
-                                                            <button data-modal-hide="viewUserModal{{ $user->id }}"
-                                                                    data-modal-target="editUserModal{{ $user->id }}"
-                                                                    data-modal-toggle="editUserModal{{ $user->id }}"
-                                                                    type="button"
-                                                                    class="text-[#ce201f] bg-[#ce201f]/10 hover:bg-[#ce201f]/20 focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                                </svg>
-                                                                Edit
-                                                            </button>
-
-                                                            <!-- Close Button -->
-                                                            <button data-modal-hide="viewUserModal{{ $user->id }}" type="button"
-                                                                class="text-white bg-[#10b981] hover:bg-[#059669] focus:ring-4 focus:outline-none focus:ring-[#10b981]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center transition-all duration-200">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                                                                    <path d="M18 6 6 18"/>
-                                                                    <path d="m6 6 12 12"/>
-                                                                </svg>
-                                                                Close
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Edit User Modal -->
-                                            <div id="editUserModal{{ $user->id }}" tabindex="-1"
-                                                aria-hidden="true"
-                                                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
-                                                                                                justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                <div class="relative p-4 w-full max-w-2xl max-h-full">
-                                                    <!-- Modal content -->
-                                                    <div
-                                                        class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
-                                                        <!-- Modal header -->
-                                                        <div
-                                                            class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
-                                                                                            dark:border-gray-600 border-gray-200 bg-[#ce201f]">
-                                                            <h3
-                                                                class="text-xl font-semibold text-white flex items-center">
-                                                                <svg class="w-5 h-5 mr-2" fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path
-                                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z">
-                                                                    </path>
-                                                                </svg>
-                                                                Edit User: {{ $user->name }}
-                                                            </h3>
-                                                            <button type="button"
-                                                                class="text-white bg-[#ce201f] hover:bg-[#a01b1a] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                                                                                dark:hover:bg-gray-600 transition-all duration-200"
-                                                                data-modal-hide="editUserModal{{ $user->id }}">
-                                                                <svg class="w-5 h-5"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M6 18L18 6M6 6l12 12" />
-                                                                </svg>
-                                                                <span class="sr-only">Close modal</span>
-                                                            </button>
-                                                        </div>
-
-                                                        <!-- Modal body: The Form with improved styling -->
-                                                        <form action="{{ route('users.update', $user->id) }}"
-                                                            method="POST"
-                                                            class="p-4 md:p-5 space-y-4 bg-gray-50 dark:bg-gray-800">
-                                                            @csrf
-                                                            @method('PUT')
-
-                                                            <!-- Improved User Information Section -->
-                                                            <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
-                                                                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
-                                                                    <svg class="w-4 h-4 mr-1 text-[#ce201f]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                    User Information
-                                                                </h4>
-
-                                                                <div class="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 dark:border-gray-600 pb-3 mb-3">
-                                                                    <!-- User profile photo column -->
-                                                                    <div class="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 flex justify-center">
+                                                                    <!-- User Avatar - Overlapping the gradient and white sections -->
+                                                                    <div class="flex justify-center -mt-12">
                                                                         @if ($user->profile_photo_url)
-                                                                            <img src="{{ $user->profile_photo_url }}"
-                                                                                alt="{{ $user->name }}"
-                                                                                class="w-16 h-16 rounded-full object-cover border-2 border-gray-100 dark:border-gray-600">
+                                                                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}"
+                                                                                class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
                                                                         @else
-                                                                            <div
-                                                                                class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-xl">
+                                                                            <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-3xl border-4 border-white dark:border-gray-700 shadow-md">
                                                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                                                             </div>
                                                                         @endif
                                                                     </div>
 
-                                                                    <!-- User details column -->
-                                                                    <div class="flex-grow">
-                                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                                            <div>
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
-                                                                            </div>
-                                                                            <div>
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->email }}</p>
-                                                                            </div>
-                                                                            <div>
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">User ID</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ $user->id }}</p>
-                                                                            </div>
-                                                                            <div>
-                                                                                <p class="text-xs text-gray-500 dark:text-gray-400">Created</p>
-                                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                                    {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
-                                                                                </p>
-                                                                            </div>
+                                                                    <!-- User Info Content -->
+                                                                    <div class="p-5 text-center">
+                                                                        <h4 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $user->name }}</h4>
+                                                                        <p class="text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ $user->email }}</p>
+
+                                                                        <!-- Role Badge - Centered -->
+                                                                        <div class="flex justify-center mt-2">
+                                                                            @if ($user->role === 'admin')
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#ce201f]/10 text-[#ce201f] dark:bg-[#ce201f]/20 dark:text-[#ce201f] shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                                                                                        <path d="M6.376 18.91a6 6 0 0 1 11.249.003"/>
+                                                                                        <circle cx="12" cy="11" r="4"/>
+                                                                                    </svg>
+                                                                                    Administrator
+                                                                                </span>
+                                                                            @elseif ($user->role === 'cao')
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f59e0b]/10 text-[#f59e0b] dark:bg-[#f59e0b]/20 dark:text-[#f59e0b] shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                                                        <circle cx="9" cy="7" r="4"/>
+                                                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                                                        <circle cx="17" cy="8" r="2"/>
+                                                                                    </svg>
+                                                                                    Chief Administrative Officer
+                                                                                </span>
+                                                                            @else
+                                                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                                                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                                                                        <circle cx="9" cy="7" r="4"/>
+                                                                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                                                                    </svg>
+                                                                                    Staff Member
+                                                                                </span>
+                                                                            @endif
                                                                         </div>
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- QR Code Warning Notice -->
-                                                                <div class="flex items-start bg-[#f59e0b]/10 dark:bg-[#f59e0b]/20 p-3 rounded-lg border border-[#f59e0b]/20 dark:border-[#f59e0b]/30">
-                                                                    <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                    <div>
-                                                                        <p class="text-xs text-[#f5610b]">
-                                                                            <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                                <!-- Work Information Card -->
+                                                                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5">
+                                                                    <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center pb-2 border-b border-gray-200 dark:border-gray-600">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-[#10b981]">
+                                                                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                                                            <path d="M9 17V9l7 4-7 4Z"/>
+                                                                        </svg>
+                                                                        Work Information
+                                                                    </h5>
 
-                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                <!-- Left Column -->
-                                                                <div>
-                                                                    <!-- Role -->
-                                                                    <div class="mb-4">
-                                                                        <label for="role_{{ $user->id }}"
-                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                            Role
-                                                                        </label>
-                                                                        <div class="relative">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 20 20"
-                                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path
-                                                                                        d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
-                                                                                    </path>
-                                                                                </svg>
-                                                                            </div>
-                                                                            <select id="role_{{ $user->id }}"
-                                                                                name="role"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
-                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
-                                                                                <option value="admin"
-                                                                                    {{ $user->role === 'admin' ? 'selected' : '' }}>
-                                                                                    Admin</option>
-                                                                                <option value="cao"
-                                                                                    {{ $user->role === 'cao' ? 'selected' : '' }}>
-                                                                                    CAO</option>
-                                                                                <option value="staff"
-                                                                                    {{ $user->role === 'staff' ? 'selected' : '' }}>
-                                                                                    Staff</option>
-                                                                            </select>
+                                                                    <!-- Work Info in Grid Layout -->
+                                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                                                        <div class="border-l-2 border-[#10b981] pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                @if ($user->department)
+                                                                                    {{ $user->department->name }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
+                                                                                @endif
+                                                                            </p>
                                                                         </div>
-                                                                    </div>
 
-                                                                    <!-- Department -->
-                                                                    <div class="mb-4">
-                                                                        <label
-                                                                            for="department_id_{{ $user->id }}"
-                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                            Department
-                                                                        </label>
-                                                                        <div class="relative">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 20 20"
-                                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path fill-rule="evenodd"
-                                                                                        d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
-                                                                                        clip-rule="evenodd"></path>
-                                                                                </svg>
-                                                                            </div>
-                                                                            <select
-                                                                                id="department_id_{{ $user->id }}"
-                                                                                name="department_id"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
-                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
-                                                                                @foreach ($departments as $dept)
-                                                                                    <option
-                                                                                        value="{{ $dept->id }}"
-                                                                                        {{ $dept->id == $user->department_id ? 'selected' : '' }}>
-                                                                                        {{ $dept->name }}
-                                                                                    </option>
-                                                                                @endforeach
-                                                                            </select>
+                                                                        <div class="border-l-2 border-gray-400 pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Designation</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                @if ($user->designation)
+                                                                                    {{ $user->designation->name }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 dark:text-gray-500">Not Assigned</span>
+                                                                                @endif
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div class="border-l-2 border-[#ce201f] pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Employee ID</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">#{{ $user->id }}</p>
+                                                                        </div>
+
+                                                                        <div class="border-l-2 border-[#f59e0b] pl-3 py-1">
+                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Joined Date</p>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                                                                {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
+                                                                            </p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Right Column -->
-                                                                <div>
-                                                                    <!-- Designation -->
-                                                                    <div class="mb-4">
-                                                                        <label
-                                                                            for="designation_id_{{ $user->id }}"
-                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                            Designation
-                                                                        </label>
-                                                                        <div class="relative">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 20 20"
-                                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path fill-rule="evenodd"
-                                                                                        d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5z"
-                                                                                        clip-rule="evenodd"></path>
-                                                                                </svg>
-                                                                            </div>
-                                                                            <select
-                                                                                id="designation_id_{{ $user->id }}"
-                                                                                name="designation_id"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
-                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
-                                                                                @foreach ($designations as $desig)
-                                                                                    <option
-                                                                                        value="{{ $desig->id }}"
-                                                                                        {{ $desig->id == $user->designation_id ? 'selected' : '' }}>
-                                                                                        {{ $desig->name }}
-                                                                                    </option>
-                                                                                @endforeach
-                                                                            </select>
+                                                                <!-- QR Code Section (if applicable) -->
+                                                                @if(isset($user->qr_code) && $user->qr_code)
+                                                                <div class="mt-5 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-5 text-center">
+                                                                    <h5 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-[#10b981]">
+                                                                            <rect width="5" height="5" x="3" y="3" rx="1"/>
+                                                                            <rect width="5" height="5" x="16" y="3" rx="1"/>
+                                                                            <rect width="5" height="5" x="3" y="16" rx="1"/>
+                                                                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
+                                                                            <path d="M21 21v.01"/>
+                                                                            <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
+                                                                            <path d="M3 12h.01"/>
+                                                                            <path d="M12 3h.01"/>
+                                                                            <path d="M12 16v.01"/>
+                                                                            <path d="M16 12h1"/>
+                                                                            <path d="M21 12v.01"/>
+                                                                        </svg>
+                                                                        User QR Code
+                                                                    </h5>
+
+                                                                    <div class="flex justify-center">
+                                                                        <div class="bg-white p-2 rounded-lg shadow-sm inline-block">
+                                                                            <img src="{{ $user->qr_code }}" alt="QR Code" class="w-32 h-32">
                                                                         </div>
                                                                     </div>
-
-                                                                    <!-- Status -->
-                                                                    <div class="mb-4">
-                                                                        <label for="status_{{ $user->id }}"
-                                                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                                            Status
-                                                                        </label>
-                                                                        <div class="relative">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 20 20"
-                                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                                    <path fill-rule="evenodd"
-                                                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                                                        clip-rule="evenodd"></path>
-                                                                                </svg>
-                                                                            </div>
-                                                                            <select
-                                                                                id="status_{{ $user->id }}"
-                                                                                name="status"
-                                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                                                            focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
-                                                                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                                                            dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
-                                                                                <option value="1"
-                                                                                    {{ $user->status ? 'selected' : '' }}>
-                                                                                    Active</option>
-                                                                                <option value="0"
-                                                                                    {{ !$user->status ? 'selected' : '' }}>
-                                                                                    Inactive</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
+                                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Scan for user identification</p>
                                                                 </div>
-                                                            </div>
-
-                                                            <!-- Important Notice -->
-                                                            <div
-                                                                class="p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg dark:bg-[#f59e0b]/20 dark:border-[#f59e0b]/30">
-                                                                <div class="flex items-center mb-2">
-                                                                    <svg class="w-5 h-5 mr-2 text-[#f59e0b]"
-                                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                                            clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                    <h5
-                                                                        class="text-sm font-medium text-[#f5610b]">
-                                                                        Important Notice</h5>
-                                                                </div>
-                                                                <p
-                                                                    class="text-xs text-[#f5610b]">
-                                                                    Changing a user's role will affect their
-                                                                    permissions in the system. Make sure you verify
-                                                                    this change before saving.
-                                                                </p>
+                                                                @endif
                                                             </div>
 
                                                             <!-- Modal footer -->
-                                                            <div
-                                                                class="flex items-center justify-end pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                                                                <button
-                                                                    data-modal-hide="editUserModal{{ $user->id }}"
-                                                                    type="button"
-                                                                    class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                                                                bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-gray-700
-                                                                                                focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                                                                dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                                                                dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
-                                                                    Cancel
-                                                                </button>
-                                                                <button
-                                                                    data-modal-hide="editUserModal{{ $user->id }}"
-                                                                    type="submit"
-                                                                    class="text-white bg-[#ce201f] hover:bg-[#a01b1a]
-                                                                                                focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30
-                                                                                                font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                                                                transition-all duration-200">
-                                                                    <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                        viewBox="0 0 20 20"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd"
-                                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                            clip-rule="evenodd"></path>
+                                                            <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
+                                                                <!-- Edit Button -->
+                                                                <button data-modal-hide="viewUserModal{{ $user->id }}"
+                                                                        data-modal-target="editUserModal{{ $user->id }}"
+                                                                        data-modal-toggle="editUserModal{{ $user->id }}"
+                                                                        type="button"
+                                                                        class="text-[#ce201f] bg-[#ce201f]/10 hover:bg-[#ce201f]/20 focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mr-3 dark:bg-[#ce201f]/20 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/30 transition-all duration-200">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                        <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                                     </svg>
-                                                                    Save Changes
+                                                                    Edit
+                                                                </button>
+
+                                                                <!-- Close Button -->
+                                                                <button data-modal-hide="viewUserModal{{ $user->id }}" type="button"
+                                                                    class="text-white bg-[#10b981] hover:bg-[#059669] focus:ring-4 focus:outline-none focus:ring-[#10b981]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center transition-all duration-200">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                                                        <path d="M18 6 6 18"/>
+                                                                        <path d="m6 6 12 12"/>
+                                                                    </svg>
+                                                                    Close
                                                                 </button>
                                                             </div>
-                                                        </form>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <!-- End of Edit Modal -->
 
-                                        </td>
+                                                <!-- Edit User Modal -->
+                                                <div id="editUserModal{{ $user->id }}" tabindex="-1"
+                                                    aria-hidden="true"
+                                                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50
+                                                                                                    justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                    <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                                        <!-- Modal content -->
+                                                        <div
+                                                            class="relative bg-white rounded-lg shadow-lg dark:bg-gray-700">
+                                                            <!-- Modal header -->
+                                                            <div
+                                                                class="flex items-center justify-between p-4 md:p-5 border-b rounded-t
+                                                                                                dark:border-gray-600 border-gray-200 bg-[#ce201f]">
+                                                                <h3
+                                                                    class="text-xl font-semibold text-white flex items-center">
+                                                                    <svg class="w-5 h-5 mr-2" fill="currentColor"
+                                                                        viewBox="0 0 20 20"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path
+                                                                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Edit User: {{ $user->name }}
+                                                                </h3>
+                                                                <button type="button"
+                                                                    class="text-white bg-[#ce201f] hover:bg-[#a01b1a] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                                                                                    dark:hover:bg-gray-600 transition-all duration-200"
+                                                                    data-modal-hide="editUserModal{{ $user->id }}">
+                                                                    <svg class="w-5 h-5"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M6 18L18 6M6 6l12 12" />
+                                                                    </svg>
+                                                                    <span class="sr-only">Close modal</span>
+                                                                </button>
+                                                            </div>
+
+                                                            <!-- Modal body: The Form with improved styling -->
+                                                            <form action="{{ route('users.update', $user->id) }}"
+                                                                method="POST"
+                                                                class="p-4 md:p-5 space-y-4 bg-gray-50 dark:bg-gray-800">
+                                                                @csrf
+                                                                @method('PUT')
+
+                                                                <!-- Improved User Information Section -->
+                                                                <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-700 mb-4">
+                                                                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center">
+                                                                        <svg class="w-4 h-4 mr-1 text-[#ce201f]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        User Information
+                                                                    </h4>
+
+                                                                    <div class="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 dark:border-gray-600 pb-3 mb-3">
+                                                                        <!-- User profile photo column -->
+                                                                        <div class="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 flex justify-center">
+                                                                            @if ($user->profile_photo_url)
+                                                                                <img src="{{ $user->profile_photo_url }}"
+                                                                                    alt="{{ $user->name }}"
+                                                                                    class="w-16 h-16 rounded-full object-cover border-2 border-gray-100 dark:border-gray-600">
+                                                                            @else
+                                                                                <div
+                                                                                    class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-xl">
+                                                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
+
+                                                                        <!-- User details column -->
+                                                                        <div class="flex-grow">
+                                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->email }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">User ID</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">#{{ $user->id }}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Created</p>
+                                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                                        {{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- QR Code Warning Notice -->
+                                                                    <div class="flex items-start bg-[#f59e0b]/10 dark:bg-[#f59e0b]/20 p-3 rounded-lg border border-[#f59e0b]/20 dark:border-[#f59e0b]/30">
+                                                                        <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        <div>
+                                                                            <p class="text-xs text-[#f5610b]">
+                                                                                <span class="font-medium">Important:</span> Modifying this user's information may regenerate their QR code. Please ensure the user updates any printed or saved QR codes after these changes.
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    <!-- Left Column -->
+                                                                    <div>
+                                                                        <!-- Role -->
+                                                                        <div class="mb-4">
+                                                                            <label for="role_{{ $user->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                                Role
+                                                                            </label>
+                                                                            <div class="relative">
+                                                                                <div
+                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 20 20"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path
+                                                                                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
+                                                                                        </path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <select id="role_{{ $user->id }}"
+                                                                                    name="role"
+                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                                focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
+                                                                                    <option value="admin"
+                                                                                        {{ $user->role === 'admin' ? 'selected' : '' }}>
+                                                                                        Admin</option>
+                                                                                    <option value="cao"
+                                                                                        {{ $user->role === 'cao' ? 'selected' : '' }}>
+                                                                                        CAO</option>
+                                                                                    <option value="staff"
+                                                                                        {{ $user->role === 'staff' ? 'selected' : '' }}>
+                                                                                        Staff</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Department -->
+                                                                        <div class="mb-4">
+                                                                            <label
+                                                                                for="department_id_{{ $user->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                                Department
+                                                                            </label>
+                                                                            <div class="relative">
+                                                                                <div
+                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 20 20"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path fill-rule="evenodd"
+                                                                                            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
+                                                                                            clip-rule="evenodd"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <select
+                                                                                    id="department_id_{{ $user->id }}"
+                                                                                    name="department_id"
+                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                                focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
+                                                                                    @foreach ($departments as $dept)
+                                                                                        <option
+                                                                                            value="{{ $dept->id }}"
+                                                                                            {{ $dept->id == $user->department_id ? 'selected' : '' }}>
+                                                                                            {{ $dept->name }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Right Column -->
+                                                                    <div>
+                                                                        <!-- Designation -->
+                                                                        <div class="mb-4">
+                                                                            <label
+                                                                                for="designation_id_{{ $user->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                                Designation
+                                                                            </label>
+                                                                            <div class="relative">
+                                                                                <div
+                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 20 20"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path fill-rule="evenodd"
+                                                                                            d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5z"
+                                                                                            clip-rule="evenodd"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <select
+                                                                                    id="designation_id_{{ $user->id }}"
+                                                                                    name="designation_id"
+                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                                focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
+                                                                                    @foreach ($designations as $desig)
+                                                                                        <option
+                                                                                            value="{{ $desig->id }}"
+                                                                                            {{ $desig->id == $user->designation_id ? 'selected' : '' }}>
+                                                                                            {{ $desig->name }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Status -->
+                                                                        <div class="mb-4">
+                                                                            <label for="status_{{ $user->id }}"
+                                                                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                                                Status
+                                                                            </label>
+                                                                            <div class="relative">
+                                                                                <div
+                                                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 20 20"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path fill-rule="evenodd"
+                                                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                                                            clip-rule="evenodd"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <select
+                                                                                    id="status_{{ $user->id }}"
+                                                                                    name="status"
+                                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                                                                focus:ring-[#ce201f] focus:border-[#ce201f] block w-full pl-10 p-2.5
+                                                                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                                                                                dark:text-white dark:focus:ring-[#ce201f] dark:focus:border-[#ce201f]">
+                                                                                    <option value="1"
+                                                                                        {{ $user->status ? 'selected' : '' }}>
+                                                                                        Active</option>
+                                                                                    <option value="0"
+                                                                                        {{ !$user->status ? 'selected' : '' }}>
+                                                                                        Inactive</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Important Notice -->
+                                                                <div
+                                                                    class="p-4 bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg dark:bg-[#f59e0b]/20 dark:border-[#f59e0b]/30">
+                                                                    <div class="flex items-center mb-2">
+                                                                        <svg class="w-5 h-5 mr-2 text-[#f59e0b]"
+                                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd"
+                                                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                                                clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        <h5
+                                                                            class="text-sm font-medium text-[#f5610b]">
+                                                                            Important Notice</h5>
+                                                                    </div>
+                                                                    <p
+                                                                        class="text-xs text-[#f5610b]">
+                                                                        Changing a user's role will affect their
+                                                                        permissions in the system. Make sure you verify
+                                                                        this change before saving.
+                                                                    </p>
+                                                                </div>
+
+                                                                <!-- Modal footer -->
+                                                                <div
+                                                                    class="flex items-center justify-end pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                                                                    <button
+                                                                        data-modal-hide="editUserModal{{ $user->id }}"
+                                                                        type="button"
+                                                                        class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
+                                                                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-gray-700
+                                                                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                                                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                                                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button
+                                                                        data-modal-hide="editUserModal{{ $user->id }}"
+                                                                        type="submit"
+                                                                        class="text-white bg-[#ce201f] hover:bg-[#a01b1a]
+                                                                                                    focus:ring-4 focus:outline-none focus:ring-[#ce201f]/30
+                                                                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                                                                                    transition-all duration-200">
+                                                                        <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                                            viewBox="0 0 20 20"
+                                                                            xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fill-rule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clip-rule="evenodd"></path>
+                                                                        </svg>
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- End of Edit Modal -->
+                                            </td>
+                                        @endif
                                     </tr>
                                 @empty
                                     <tr>
@@ -1131,381 +1135,370 @@
                     </div>
                 </div>
 
-                <script>
-                    function confirmResetPassword(userId, userName) {
-                        document.getElementById('resetUserName').textContent = userName;
-                        document.getElementById('resetPasswordForm').action = '{{ url("/users") }}/' + userId + '/reset-password';
-                        document.getElementById('resetPasswordModal').classList.remove('hidden');
-                        document.getElementById('resetPasswordModal').classList.add('flex');
-                    }
-
-                    function closeResetPasswordModal() {
-                        document.getElementById('resetPasswordModal').classList.add('hidden');
-                        document.getElementById('resetPasswordModal').classList.remove('flex');
-                    }
-                </script>
 
             </div>
 
             <!-- CREATE USER MODAL -->
-            <div id="createUserModal" tabindex="-1" aria-hidden="true"
-                class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+            @if(auth()->user()->hasRole('admin'))
+                <div id="createUserModal" tabindex="-1" aria-hidden="true"
+                    class="hidden fixed top-0 right-0 left-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
 
-                <div class="relative w-full max-w-3xl max-h-full">
-                    <!-- Modal content -->
-                    <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
-                        <!-- Modal header -->
-                        <div
-                            class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
-                            <h3 class="text-2xl font-bold text-white flex items-center">
-                                <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 016 6H2a6 6 0 016-6z"></path>
-                                </svg>
-                                Create New User
-                            </h3>
-                            <button type="button"
-                                class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                dark:hover:bg-gray-600 transition-all duration-200"
-                                data-modal-hide="createUserModal">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                <span class="sr-only">Close modal</span>
-                            </button>
-                        </div>
-
-                        <!-- Modal body -> Form -->
-                        <form action="{{ route('users.store') }}" method="POST"
-                            class="p-6 bg-gray-50 dark:bg-gray-800">
-                            @csrf
-                            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information below to
-                                create a new user account.</p>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Left Column -->
-                                <div class="space-y-5">
-                                    <!-- Personal Information Section -->
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                        <h4
-                                            class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
-                                                viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
-                                            Personal Information
-                                        </h4>
-
-                                        <!-- Name -->
-                                        <div class="mb-4">
-                                            <label for="name"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Full Name <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <input type="text" name="name" id="name"
-                                                    placeholder="John Doe"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required />
-                                            </div>
-                                        </div>
-
-                                        <!-- Email -->
-                                        <div class="mb-4">
-                                            <label for="email"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Email Address <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z">
-                                                        </path>
-                                                        <path
-                                                            d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                                <input type="email" name="email" id="email"
-                                                    placeholder="john@example.com"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Password Section -->
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                        <h4
-                                            class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
-                                                viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd"
-                                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
-                                            Security
-                                        </h4>
-
-                                        <!-- Password -->
-                                        <div class="mb-4">
-                                            <label for="password"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Password <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <input type="password" name="password" id="password"
-                                                    value="12345678"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required />
-                                            </div>
-                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Password must be
-                                                at least 8 characters</p>
-                                        </div>
-
-                                        <!-- Confirm Password -->
-                                        <div class="mb-4">
-                                            <label for="password_confirmation"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Confirm Password <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <input type="password" name="password_confirmation"
-                                                    id="password_confirmation" value="12345678"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column -->
-                                <div class="space-y-5">
-                                    <!-- Role & Organization Section -->
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                        <h4
-                                            class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
-                                                viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
-                                            Role & Organization
-                                        </h4>
-
-                                        <!-- Role -->
-                                        <div class="mb-4">
-                                            <label for="role"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Role <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                                <select name="role" id="role"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required>
-                                                    <option value="" disabled
-                                                        {{ old('role') ? '' : 'selected' }}>Select role</option>
-                                                    <option value="admin"
-                                                        {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                                                    <option value="cao"
-                                                        {{ old('role') === 'cao' ? 'selected' : '' }}>CAO</option>
-                                                    <option value="staff"
-                                                        {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Department -->
-                                        <div class="mb-4">
-                                            <label for="department_id"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Division <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <select name="department_id" id="department_id"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required>
-                                                    <option value="" disabled selected>Select division</option>
-                                                    @foreach ($departments as $dept)
-                                                        <option value="{{ $dept->id }}">{{ $dept->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            @error('department_id')
-                                                <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <!-- Designation -->
-                                        <div class="mb-4">
-                                            <label for="designation_id"
-                                                class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                Designation <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                        fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
-                                                            clip-rule="evenodd"></path>
-                                                        <path
-                                                            d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                                <select name="designation_id" id="designation_id"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                    required>
-                                                    <option value="" disabled selected>Select designation
-                                                    </option>
-                                                    @foreach ($designations as $desig)
-                                                        <option value="{{ $desig->id }}">{{ $desig->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            @error('designation_id')
-                                                <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <!-- Notes & Tips -->
-                                    <div
-                                        class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-blue-900">
-                                        <h4
-                                            class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center">
-                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd"
-                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
-                                            Important Information
-                                        </h4>
-                                        <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-6 list-disc">
-                                            <li>Default password will be set to "12345678"</li>
-                                            <li>New users will be prompted to update their password on first login</li>
-                                            <li>All fields marked with <span class="text-red-500">*</span> are required
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Modal Footer -->
+                    <div class="relative w-full max-w-3xl max-h-full">
+                        <!-- Modal content -->
+                        <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+                            <!-- Modal header -->
                             <div
-                                class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
-                                <button type="button" data-modal-hide="createUserModal"
-                                    class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                        bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                        focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                        dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                        dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
-                                    Cancel
-                                </button>
-                                <button type="submit" data-modal-hide="createUserModal"
-                                    class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                        focus:ring-4 focus:outline-none focus:ring-blue-300
-                                        font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                        dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
+                                <h3 class="text-2xl font-bold text-white flex items-center">
+                                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20"
                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd"
-                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                            clip-rule="evenodd"></path>
+                                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 016 6H2a6 6 0 016-6z"></path>
                                     </svg>
-                                    Create User
+                                    Create New User
+                                </h3>
+                                <button type="button"
+                                    class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
+                                    dark:hover:bg-gray-600 transition-all duration-200"
+                                    data-modal-hide="createUserModal">
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span class="sr-only">Close modal</span>
                                 </button>
                             </div>
-                        </form>
+
+                            <!-- Modal body -> Form -->
+                            <form action="{{ route('users.store') }}" method="POST"
+                                class="p-6 bg-gray-50 dark:bg-gray-800">
+                                @csrf
+                                <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information below to
+                                    create a new user account.</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Left Column -->
+                                    <div class="space-y-5">
+                                        <!-- Personal Information Section -->
+                                        <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                            <h4
+                                                class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                                Personal Information
+                                            </h4>
+
+                                            <!-- Name -->
+                                            <div class="mb-4">
+                                                <label for="name"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Full Name <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="text" name="name" id="name"
+                                                        placeholder="John Doe"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required />
+                                                </div>
+                                            </div>
+
+                                            <!-- Email -->
+                                            <div class="mb-4">
+                                                <label for="email"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Email Address <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z">
+                                                            </path>
+                                                            <path
+                                                                d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="email" name="email" id="email"
+                                                        placeholder="john@example.com"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Password Section -->
+                                        <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                            <h4
+                                                class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                                Security
+                                            </h4>
+
+                                            <!-- Password -->
+                                            <div class="mb-4">
+                                                <label for="password"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Password <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="password" name="password" id="password"
+                                                        value="12345678"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required />
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Password must be
+                                                    at least 8 characters</p>
+                                            </div>
+
+                                            <!-- Confirm Password -->
+                                            <div class="mb-4">
+                                                <label for="password_confirmation"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Confirm Password <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="password" name="password_confirmation"
+                                                        id="password_confirmation" value="12345678"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column -->
+                                    <div class="space-y-5">
+                                        <!-- Role & Organization Section -->
+                                        <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                            <h4
+                                                class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+                                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                                Role & Organization
+                                            </h4>
+
+                                            <!-- Role -->
+                                            <div class="mb-4">
+                                                <label for="role"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Role <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                    <select name="role" id="role"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required>
+                                                        <option value="" disabled
+                                                            {{ old('role') ? '' : 'selected' }}>Select role</option>
+                                                        <option value="admin"
+                                                            {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                        <option value="cao"
+                                                            {{ old('role') === 'cao' ? 'selected' : '' }}>CAO</option>
+                                                        <option value="staff"
+                                                            {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Department -->
+                                            <div class="mb-4">
+                                                <label for="department_id"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Division <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v2h1v1H4v-1h1v-2H4v-1h16v1h-1z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <select name="department_id" id="department_id"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required>
+                                                        <option value="" disabled selected>Select division</option>
+                                                        @foreach ($departments as $dept)
+                                                            <option value="{{ $dept->id }}">{{ $dept->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                @error('department_id')
+                                                    <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Designation -->
+                                            <div class="mb-4">
+                                                <label for="designation_id"
+                                                    class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Designation <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative">
+                                                    <div
+                                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                                                                clip-rule="evenodd"></path>
+                                                            <path
+                                                                d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                    <select name="designation_id" id="designation_id"
+                                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                            focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
+                                                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                        required>
+                                                        <option value="" disabled selected>Select designation
+                                                        </option>
+                                                        @foreach ($designations as $desig)
+                                                            <option value="{{ $desig->id }}">{{ $desig->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                @error('designation_id')
+                                                    <p class="text-red-500 mt-1 text-sm">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <!-- Notes & Tips -->
+                                        <div
+                                            class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-blue-900">
+                                            <h4
+                                                class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                                Important Information
+                                            </h4>
+                                            <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-6 list-disc">
+                                                <li>Default password will be set to "12345678"</li>
+                                                <li>New users will be prompted to update their password on first login</li>
+                                                <li>All fields marked with <span class="text-red-500">*</span> are required
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Footer -->
+                                <div
+                                    class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                    <button type="button" data-modal-hide="createUserModal"
+                                        class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
+                                            bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
+                                            focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
+                                            dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
+                                            dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" data-modal-hide="createUserModal"
+                                        class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
+                                            focus:ring-4 focus:outline-none focus:ring-blue-300
+                                            font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
+                                            dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd"
+                                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        Create User
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             <!-- Existing Charts Section -->
             <div class="grid grid-cols-12 gap-6 mt-8">
@@ -1896,5 +1889,199 @@
     // Function for the search clear button
     function clearSearch() {
         window.location.href = window.location.pathname;
+    }
+</script>
+
+// Add this script to your dashboard page alongside your existing scripts
+
+<script>
+    // Modal Accessibility Fix - Add this to resolve aria-hidden focus issues
+    document.addEventListener('DOMContentLoaded', function() {
+        let lastFocusedElement = null;
+
+        // Fix for Flowbite modal accessibility
+        function initializeModalAccessibility() {
+            // Find all modal elements
+            const modals = document.querySelectorAll('[id*="Modal"]');
+
+            modals.forEach(modal => {
+                // Ensure proper initial state
+                if (modal.classList.contains('hidden')) {
+                    modal.setAttribute('aria-hidden', 'true');
+                } else {
+                    modal.removeAttribute('aria-hidden');
+                    modal.setAttribute('aria-modal', 'true');
+                }
+
+                // Add proper ARIA attributes if missing
+                if (!modal.hasAttribute('role')) {
+                    modal.setAttribute('role', 'dialog');
+                }
+            });
+        }
+
+        // Handle modal opening
+        document.addEventListener('click', function(e) {
+            const modalTrigger = e.target.closest('[data-modal-toggle], [data-modal-target]');
+            if (modalTrigger) {
+                lastFocusedElement = modalTrigger;
+                const modalId = modalTrigger.getAttribute('data-modal-toggle') ||
+                            modalTrigger.getAttribute('data-modal-target');
+
+                if (modalId) {
+                    // Small delay to let Flowbite handle the modal opening
+                    setTimeout(() => {
+                        const modal = document.getElementById(modalId);
+                        if (modal && !modal.classList.contains('hidden')) {
+                            // Ensure proper accessibility attributes
+                            modal.removeAttribute('aria-hidden');
+                            modal.setAttribute('aria-modal', 'true');
+
+                            // Focus management
+                            const firstFocusable = modal.querySelector(
+                                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                            );
+                            if (firstFocusable) {
+                                firstFocusable.focus();
+                            }
+                        }
+                    }, 50);
+                }
+            }
+        });
+
+        // Handle modal closing
+        document.addEventListener('click', function(e) {
+            const modalClose = e.target.closest('[data-modal-hide]');
+            if (modalClose) {
+                const modalId = modalClose.getAttribute('data-modal-hide');
+                const modal = document.getElementById(modalId);
+
+                if (modal) {
+                    // Set proper attributes when closing
+                    modal.setAttribute('aria-hidden', 'true');
+                    modal.removeAttribute('aria-modal');
+
+                    // Return focus to the element that opened the modal
+                    setTimeout(() => {
+                        if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                            lastFocusedElement.focus();
+                            lastFocusedElement = null;
+                        }
+                    }, 50);
+                }
+            }
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('[id*="Modal"]:not(.hidden)');
+                if (openModal) {
+                    openModal.setAttribute('aria-hidden', 'true');
+                    openModal.removeAttribute('aria-modal');
+
+                    // Trigger Flowbite's hide method
+                    const closeButton = openModal.querySelector('[data-modal-hide]');
+                    if (closeButton) {
+                        closeButton.click();
+                    }
+
+                    // Return focus
+                    if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                        lastFocusedElement.focus();
+                        lastFocusedElement = null;
+                    }
+                }
+            }
+        });
+
+        // Trap focus within open modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                const openModal = document.querySelector('[id*="Modal"]:not(.hidden)');
+                if (openModal) {
+                    const focusableElements = openModal.querySelectorAll(
+                        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                    );
+
+                    if (focusableElements.length > 0) {
+                        const firstFocusable = focusableElements[0];
+                        const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                        if (e.shiftKey) {
+                            // Shift + Tab
+                            if (document.activeElement === firstFocusable) {
+                                lastFocusable.focus();
+                                e.preventDefault();
+                            }
+                        } else {
+                            // Tab
+                            if (document.activeElement === lastFocusable) {
+                                firstFocusable.focus();
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize on page load
+        initializeModalAccessibility();
+
+        // Re-initialize when new modals are added (for dynamic content)
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    const addedNodes = Array.from(mutation.addedNodes);
+                    const hasModalElements = addedNodes.some(node =>
+                        node.nodeType === 1 &&
+                        (node.id && node.id.includes('Modal') || node.querySelector && node.querySelector('[id*="Modal"]'))
+                    );
+
+                    if (hasModalElements) {
+                        setTimeout(initializeModalAccessibility, 100);
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+
+    // Enhanced reset password modal functions
+    function confirmResetPassword(userId, userName) {
+        document.getElementById('resetUserName').textContent = userName;
+        document.getElementById('resetPasswordForm').action = '{{ url("/users") }}/' + userId + '/reset-password';
+
+        const modal = document.getElementById('resetPasswordModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        // Proper accessibility handling
+        modal.removeAttribute('aria-hidden');
+        modal.setAttribute('aria-modal', 'true');
+
+        // Focus the first button in the modal
+        setTimeout(() => {
+            const firstButton = modal.querySelector('button');
+            if (firstButton) {
+                firstButton.focus();
+            }
+        }, 50);
+    }
+
+    function closeResetPasswordModal() {
+        const modal = document.getElementById('resetPasswordModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+
+        // Proper accessibility handling
+        modal.setAttribute('aria-hidden', 'true');
+        modal.removeAttribute('aria-modal');
     }
 </script>
