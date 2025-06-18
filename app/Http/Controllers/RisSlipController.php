@@ -1,13 +1,11 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\RisSlip;
 use App\Models\RisItem;
 use App\Models\Supply;
 use App\Models\Department;
 use App\Models\SupplyStock;
-use App\Models\SupplyTransaction; // Add this import
+use App\Models\SupplyTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +24,7 @@ class RisSlipController extends Controller
         $approvedCount = RisSlip::where('status', 'approved')->count();
         $pendingReceiptCount = RisSlip::where('status', 'posted')->whereNull('received_at')->count();
         $completedCount = RisSlip::where('status', 'posted')->whereNotNull('received_at')->count();
+        $declinedCount = RisSlip::where('status', 'declined')->count();
 
         // Start building the query
         $query = RisSlip::with(['department', 'requester'])
@@ -45,6 +44,9 @@ class RisSlipController extends Controller
                     break;
                 case 'completed':
                     $query->where('status', 'posted')->whereNotNull('received_at');
+                    break;
+                case 'declined':
+                    $query->where('status', 'declined');
                     break;
             }
         }
@@ -72,7 +74,8 @@ class RisSlipController extends Controller
             'pendingCount',
             'approvedCount',
             'pendingReceiptCount',
-            'completedCount'
+            'completedCount',
+            'declinedCount'
         ));
     }
 
@@ -280,7 +283,7 @@ class RisSlipController extends Controller
      */
     public function show(RisSlip $risSlip)
     {
-        $risSlip->load(['department', 'requester', 'items.supply']);
+        $risSlip->load(['department', 'requester', 'items.supply', 'decliner']);
 
         // Calculate availability for each item across all fund clusters
         foreach ($risSlip->items as $item) {
@@ -310,18 +313,47 @@ class RisSlipController extends Controller
         // Validate the fund cluster and signature type
         $validated = $request->validate([
             'fund_cluster' => 'nullable|string',
-            'signature_type' => 'required|in:esign,sgd', // Add this validation
+            'signature_type' => 'required|in:esign,sgd',
         ]);
 
         $risSlip->update([
             'status' => 'approved',
             'approved_by' => Auth::id(),
             'approved_at' => now(),
-            'approver_signature_type' => $validated['signature_type'], // Add this field
+            'approver_signature_type' => $validated['signature_type'],
             'fund_cluster' => $validated['fund_cluster'] ?? $risSlip->fund_cluster,
         ]);
 
         return back()->with('success', 'RIS approved successfully.');
+    }
+
+    /**
+     * Decline the RIS.
+     */
+    public function decline(Request $request, RisSlip $risSlip)
+    {
+        if ($risSlip->status !== 'draft') {
+            return back()->with('error', 'This RIS cannot be declined.');
+        }
+
+        // Validate the decline reason
+        $validated = $request->validate([
+            'decline_reason' => 'required|string|min:10|max:500',
+        ]);
+
+        $risSlip->update([
+            'status' => 'declined',
+            'declined_by' => Auth::id(),
+            'declined_at' => now(),
+            'decline_reason' => $validated['decline_reason'],
+        ]);
+
+        // Note: No need to update stock availability because declined items
+        // were never deducted from stock in the first place. The stock
+        // calculation already excludes declined requests by checking for
+        // status in ['draft', 'approved'] only.
+
+        return back()->with('success', 'RIS declined successfully. The requested items remain available for other requests.');
     }
 
     public function issue(Request $request, RisSlip $risSlip)
@@ -337,7 +369,7 @@ class RisSlipController extends Controller
             'items.*.quantity_issued' => 'required|integer|min:0',
             'items.*.remarks' => 'nullable|string',
             'received_by' => 'nullable|exists:users,id',
-            'signature_type' => 'required|in:esign,sgd', // Add this validation
+            'signature_type' => 'required|in:esign,sgd',
         ]);
 
         return DB::transaction(function() use ($validated, $risSlip, $request) {
@@ -381,7 +413,6 @@ class RisSlipController extends Controller
                         if ($stock->quantity_on_hand <= 0) {
                             $stock->status = 'depleted';
                         }
-
                         $stock->save();
 
                         // Calculate the new balance after this deduction
@@ -399,7 +430,7 @@ class RisSlipController extends Controller
                             'department_id' => $risSlip->division,
                             'remarks' => "Issued via RIS #{$risSlip->ris_no}",
                             'balance_quantity' => $newBalance,
-                            'user_id' => Auth::id(), // Ensure this field is set
+                            'user_id' => Auth::id(),
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -436,7 +467,7 @@ class RisSlipController extends Controller
                 'status' => 'posted',
                 'issued_by' => Auth::id(),
                 'issued_at' => now(),
-                'issuer_signature_type' => $validated['signature_type'], // Add this field
+                'issuer_signature_type' => $validated['signature_type'],
                 'received_by' => $request->received_by ?? null,
             ]);
 
@@ -449,7 +480,7 @@ class RisSlipController extends Controller
     {
         // Validate the signature type
         $validated = $request->validate([
-            'signature_type' => 'required|in:esign,sgd', // Add this validation
+            'signature_type' => 'required|in:esign,sgd',
         ]);
 
         // Check if the current user is the one assigned to receive
@@ -470,19 +501,18 @@ class RisSlipController extends Controller
         // Update the received timestamp with signature type
         $risSlip->update([
             'received_at' => now(),
-            'receiver_signature_type' => $validated['signature_type'], // Add this field
+            'receiver_signature_type' => $validated['signature_type'],
         ]);
 
         return back()->with('success', 'Supplies received successfully.');
     }
-
 
     /**
      * Print the RIS form.
      */
     public function print(RisSlip $risSlip)
     {
-        $risSlip->load(['department', 'requester', 'approver', 'issuer', 'receiver', 'items.supply']);
+        $risSlip->load(['department', 'requester', 'approver', 'issuer', 'receiver', 'decliner', 'items.supply']);
         return view('ris.print', compact('risSlip'));
     }
 }

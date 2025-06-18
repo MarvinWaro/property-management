@@ -11,21 +11,12 @@
         </div>
     </x-slot>
 
-    {{-- <div style="background: #f9f9f9; padding: 10px; margin-top: 20px; font-size: 12px;">
-        <p>Debug Info (remove in production):</p>
-        <ul>
-            <li>Requester Signature Type: {{ $risSlip->requester_signature_type ?? 'null' }}</li>
-            <li>Requester Has Signature: {{ $risSlip->requester && $risSlip->requester->signature_path ? 'Yes' : 'No' }}</li>
-            <li>Signature Path: {{ $risSlip->requester && $risSlip->requester->signature_path ? $risSlip->requester->signature_path : 'No path' }}</li>
-        </ul>
-    </div> --}}
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <!-- Status / Action Bar -->
                 <div class="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                    <!-- Replace the existing status div with this: -->
+                    <!-- Status display -->
                     <div class="flex items-center">
                         <span class="mr-2 text-gray-700 dark:text-gray-300">Status:</span>
                         @if($risSlip->status === 'draft')
@@ -36,27 +27,98 @@
                             <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">Issued - Pending Receipt</span>
                         @elseif($risSlip->status === 'posted' && $risSlip->received_at)
                             <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">Completed</span>
+                        @elseif($risSlip->status === 'declined')
+                            <span class="px-2 py-1 text-xs rounded-full bg-red-200 text-red-800">Declined</span>
                         @endif
                     </div>
 
-                    <a href="{{ route('ris.print', $risSlip) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150 ml-2">
-                        Print RIS
-                    </a>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('ris.print', $risSlip) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                            Print RIS
+                        </a>
 
-                    {{-- Both Admin and CAO can approve --}}
-                    @if(auth()->user()->hasAdminPrivileges() && $risSlip->status === 'draft')
-                        <button id="openApproveModal" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Approve Request
-                        </button>
-                    @endif
+                        {{-- Both Admin and CAO can approve/decline --}}
+                        @if(auth()->user()->hasAdminPrivileges() && $risSlip->status === 'draft')
+                            <button id="openApproveModal" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Approve Request
+                            </button>
+                            <button id="openDeclineModal" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Decline Request
+                            </button>
+                        @endif
 
-                    {{-- Only Admin can issue --}}
-                    @if(auth()->user()->hasRole('admin') && $risSlip->status === 'approved')
-                        <button id="openIssueModal" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Process Issuance
-                        </button>
-                    @endif
+                        {{-- Only Admin can issue --}}
+                        @if(auth()->user()->hasRole('admin') && $risSlip->status === 'approved')
+                            <button id="openIssueModal" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Process Issuance
+                            </button>
+                        @endif
+                    </div>
                 </div>
+
+                <!-- Decline Modal -->
+                @if(auth()->user()->hasAdminPrivileges())
+                    <div id="declineModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+                            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Decline RIS #{{ $risSlip->ris_no }}
+                                </h3>
+                                <button id="closeDeclineModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <form action="{{ route('ris.decline', $risSlip) }}" method="POST" id="declineForm">
+                                @csrf
+                                <div class="p-6">
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason for Declining</label>
+                                        <textarea name="decline_reason" rows="4" required minlength="10" maxlength="500"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500"
+                                            placeholder="Please provide a reason for declining this request (minimum 10 characters)"></textarea>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 10 characters required</p>
+                                    </div>
+
+                                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                            <strong>Note:</strong> Declining this request will make the requested items available for other requisitions.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                                    <button type="button" id="cancelDecline" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" id="submitDeclineBtn" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Decline Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Decline modal controls
+                            const declineModal = document.getElementById('declineModal');
+                            const openDeclineBtn = document.getElementById('openDeclineModal');
+                            const closeDeclineBtn = document.getElementById('closeDeclineModal');
+                            const cancelDeclineBtn = document.getElementById('cancelDecline');
+
+                            if (openDeclineBtn) {
+                                openDeclineBtn.addEventListener('click', function() {
+                                    declineModal.classList.remove('hidden');
+                                });
+                            }
+
+                            const hideDeclineModal = () => declineModal.classList.add('hidden');
+                            closeDeclineBtn?.addEventListener('click', hideDeclineModal);
+                            cancelDeclineBtn?.addEventListener('click', hideDeclineModal);
+                        });
+                    </script>
+                @endif
 
                 <!-- Approve Modal -->
                 @if(auth()->user()->hasAdminPrivileges())
@@ -209,6 +271,17 @@
                         </div>
                     @endif
 
+                    <!-- Show decline reason if declined -->
+                    @if($risSlip->status === 'declined' && $risSlip->decline_reason)
+                        <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-red-800 mb-1">Decline Reason:</h3>
+                            <p class="text-sm text-red-700">{{ $risSlip->decline_reason }}</p>
+                            <p class="text-xs text-red-500 mt-2">
+                                Declined by: {{ optional($risSlip->decliner)->name }} on {{ $risSlip->declined_at->format('M d, Y h:i A') }}
+                            </p>
+                        </div>
+                    @endif
+
                     <!-- Header Information -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div>
@@ -320,9 +393,19 @@
                         </div>
 
                         <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved By:</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                @if($risSlip->status === 'declined')
+                                    Declined By:
+                                @else
+                                    Approved By:
+                                @endif
+                            </p>
                             <div class="mt-8" style="min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                                @if($risSlip->approved_by && $risSlip->approver_signature_type == 'esign' && $risSlip->approver && $risSlip->approver->signature_path)
+                                @if($risSlip->status === 'declined' && $risSlip->declined_by)
+                                    <div style="margin-bottom: 5px; text-align: center;">
+                                        <p class="italic font-bold text-red-600">DECLINED</p>
+                                    </div>
+                                @elseif($risSlip->approved_by && $risSlip->approver_signature_type == 'esign' && $risSlip->approver && $risSlip->approver->signature_path)
                                     <div style="margin-bottom: 5px; text-align: center;">
                                         <img src="{{ Storage::url($risSlip->approver->signature_path) }}"
                                             alt="Approver signature"
@@ -336,7 +419,11 @@
                                 @endif
                             </div>
                             <div style="border-top: 1px solid #000; width: 100%;"></div>
-                            @if($risSlip->approved_by)
+                            @if($risSlip->status === 'declined' && $risSlip->declined_by)
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->decliner)->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->decliner)->designation->name ?? 'N/A' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->declined_at->format('M d, Y h:i A') }}</p>
+                            @elseif($risSlip->approved_by)
                                 <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold text-center">{{ optional($risSlip->approver)->name }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ optional($risSlip->approver)->designation->name ?? 'N/A' }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ $risSlip->approved_at->format('M d, Y h:i A') }}</p>

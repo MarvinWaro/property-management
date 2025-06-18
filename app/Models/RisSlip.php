@@ -24,18 +24,21 @@ class RisSlip extends Model
         'fund_cluster',
         'responsibility_center_code',
         'requested_by',
-        'requester_signature_type', // Make sure these fields are included
+        'requester_signature_type',
         'purpose',
         'status',
         'approved_by',
         'approved_at',
-        'approver_signature_type', // Make sure these fields are included
+        'approver_signature_type',
         'issued_by',
         'issued_at',
-        'issuer_signature_type', // Make sure these fields are included
+        'issuer_signature_type',
         'received_by',
         'received_at',
-        'receiver_signature_type', // Make sure these fields are included
+        'receiver_signature_type',
+        'declined_by',
+        'declined_at',
+        'decline_reason',
     ];
 
     protected $casts = [
@@ -43,6 +46,7 @@ class RisSlip extends Model
         'approved_at'   => 'datetime',
         'issued_at'     => 'datetime',
         'received_at'   => 'datetime',
+        'declined_at'   => 'datetime',
     ];
 
     /**
@@ -85,5 +89,10 @@ class RisSlip extends Model
     public function receiver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by');
+    }
+
+    public function decliner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'declined_by');
     }
 }

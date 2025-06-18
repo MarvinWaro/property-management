@@ -53,6 +53,13 @@
                                 <span>Completed: </span>
                                 <span class="font-semibold ml-1">{{ $completedCount ?? 0 }}</span>
                             </a>
+
+                            <a href="{{ route('ris.index', ['status' => 'declined']) }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request('status') === 'declined' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                <span class="w-3 h-3 mr-2 rounded-full bg-red-500"></span>
+                                <span>Declined: </span>
+                                <span class="font-semibold ml-1">{{ $declinedCount ?? 0 }}</span>
+                            </a>
                         </div>
 
                         <!-- Search Form -->
@@ -190,6 +197,13 @@
                                                                 <path d="M8 13a1 1 0 0 1-.707-.293l-2-2a1 1 0 1 1 1.414-1.414L8 10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-5 5A1 1 0 0 1 8 13Z" />
                                                             </svg>
                                                             Completed
+                                                        </span>
+                                                    @elseif($ris->status === 'declined')
+                                                        <span class="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-red-900/20 dark:text-red-300">
+                                                            <svg class="w-3 h-3 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 1 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+                                                            </svg>
+                                                            Declined
                                                         </span>
                                                     @endif
                                                 </td>
