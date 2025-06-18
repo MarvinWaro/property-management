@@ -22,6 +22,9 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.16.0/dist/sweetalert2.all.min.js"></script>
 
+    <!-- Pusher JS -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
     <!-- Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -35,6 +38,7 @@
             window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document
                 .querySelector('meta[name="csrf-token"]')
                 .getAttribute('content');
+            window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             window.axios.defaults.withCredentials = true;
         });
     </script>
@@ -105,77 +109,29 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.0.0/flowbite.min.js"></script>
 
-    @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'cao']))
+    <!-- Pusher Configuration and Notification Scripts -->
+    @auth
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const requisitionNavLink = document.getElementById('requisition-nav-link');
-            if (!requisitionNavLink) return;
+            // Initialize Pusher
+            const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                encrypted: true,
+                authEndpoint: '/broadcasting/auth',
+                auth: {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            });
 
             // Initialize notification sound
-            const notificationSound = new Audio('/sounds/ding.mp3'); // Update with your file extension
-            notificationSound.volume = 1.0; // Adjust volume (0.0 to 1.0)
-
-            // Store previous counts to detect new requests
-            let previousDraftCount = 0;
-            let previousApprovedCount = 0;
-            let isFirstCheck = true;
-
-            // Check for pending requisitions and update badges
-            const checkPendingRequisitions = async () => {
-                try {
-                    const response = await fetch('/pending-requisitions', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        },
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-
-                        // Check if there are new requests
-                        const hasNewDrafts = data.draft_count > previousDraftCount;
-                        const hasNewApproved = data.approved_count > previousApprovedCount;
-
-                        // Play sound if there are new requests (but not on first load)
-                        if (!isFirstCheck && (hasNewDrafts || hasNewApproved)) {
-                            playNotificationSound();
-
-                            // Optional: Show browser notification
-                            if (hasNewDrafts) {
-                                showBrowserNotification(
-                                    'New Requisition Request',
-                                    `You have ${data.draft_count - previousDraftCount} new requisition(s) pending approval`
-                                );
-                            }
-                            if (hasNewApproved) {
-                                showBrowserNotification(
-                                    'Requisition Approved',
-                                    `${data.approved_count - previousApprovedCount} requisition(s) approved and awaiting issue`
-                                );
-                            }
-                        }
-
-                        // Update the badges
-                        updateBadges(data);
-
-                        // Store current counts for next comparison
-                        previousDraftCount = data.draft_count;
-                        previousApprovedCount = data.approved_count;
-                        isFirstCheck = false;
-                    } else {
-                        console.error('Error response:', response.status, response.statusText);
-                    }
-                } catch (error) {
-                    console.error('Error checking for pending requisitions:', error);
-                }
-            };
+            const notificationSound = new Audio('/sounds/ding.mp3');
+            notificationSound.volume = 0.7;
 
             // Play notification sound
             const playNotificationSound = () => {
-                // Clone the audio to allow multiple plays
                 const sound = notificationSound.cloneNode();
                 sound.volume = notificationSound.volume;
                 sound.play().catch(e => {
@@ -183,24 +139,20 @@
                 });
             };
 
-            // Show browser notification (optional)
+            // Show browser notification
             const showBrowserNotification = (title, body) => {
-                // Check if browser supports notifications
                 if (!("Notification" in window)) {
                     return;
                 }
 
-                // Check if permission is granted
                 if (Notification.permission === "granted") {
                     new Notification(title, {
                         body: body,
-                        icon: '/favicon.ico', // Update with your app icon
-                        tag: 'ris-notification', // Prevents duplicate notifications
+                        icon: '/favicon.ico',
+                        tag: 'ris-notification',
                         renotify: true
                     });
-                }
-                // Request permission if not denied
-                else if (Notification.permission !== "denied") {
+                } else if (Notification.permission !== "denied") {
                     Notification.requestPermission().then(permission => {
                         if (permission === "granted") {
                             new Notification(title, {
@@ -211,71 +163,6 @@
                             });
                         }
                     });
-                }
-            };
-
-            // Update badges visibility based on counts
-            const updateBadges = (data) => {
-                // Get or create badge container
-                let badgeContainer = document.getElementById('ris-badges-container');
-                if (!badgeContainer) {
-                    badgeContainer = document.createElement('div');
-                    badgeContainer.id = 'ris-badges-container';
-                    badgeContainer.className = 'absolute -top-1 -right-1 flex space-x-1';
-                    requisitionNavLink.appendChild(badgeContainer);
-                }
-
-                // Update draft badge (orange)
-                updateBadge('ris-draft-badge', data.draft_count, '#f59e0b', badgeContainer);
-
-                // Update approved badge (blue/indigo)
-                updateBadge('ris-approved-badge', data.approved_count, '#6366f1', badgeContainer);
-            };
-
-            // Helper function to update individual badge
-            const updateBadge = (badgeId, count, bgColor, container) => {
-                let badge = document.getElementById(badgeId);
-
-                if (count > 0) {
-                    if (!badge) {
-                        // Create badge if it doesn't exist
-                        badge = document.createElement('span');
-                        badge.id = badgeId;
-                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white border-2 border-white rounded-full`;
-                        badge.style.backgroundColor = bgColor;
-                        container.appendChild(badge);
-                    }
-                    badge.textContent = count > 99 ? '99+' : count;
-                    badge.style.display = 'inline-flex';
-
-                    // Add subtle animation for new items
-                    if (badgeId === 'ris-draft-badge' && count > previousDraftCount) {
-                        badge.classList.add('animate-pulse');
-                        setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
-                    }
-                } else if (badge) {
-                    badge.remove();
-                }
-            };
-
-            // Optional: Mark requisitions as viewed
-            const markRequisitionsAsViewed = async () => {
-                try {
-                    await fetch('/mark-requisitions-viewed', {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document
-                                .querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content')
-                        },
-                        credentials: 'include'
-                    });
-                    // After marking as viewed, still check the actual counts
-                    checkPendingRequisitions();
-                } catch (error) {
-                    console.error('Error marking requisitions as viewed:', error);
                 }
             };
 
@@ -296,23 +183,133 @@
             // Initialize preferences
             loadNotificationPreferences();
 
-            // Initial check
-            checkPendingRequisitions();
+            @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'cao']))
+            // Admin/CAO notification handling
+            const adminChannel = pusher.subscribe('private-admin-notifications');
 
-            // Poll every 5 seconds
-            setInterval(checkPendingRequisitions, 20000);
+            adminChannel.bind('App\\Events\\RequisitionStatusUpdated', function(data) {
+                console.log('Admin notification received:', data);
 
-            // Update when page becomes visible again
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    checkPendingRequisitions();
+                // Update badges
+                updateAdminBadges(data.counts);
+
+                // Play sound and show notification for new requisitions
+                if (data.action === 'created') {
+                    playNotificationSound();
+                    showBrowserNotification(
+                        'New Requisition Request',
+                        `New requisition ${data.ris_no} from ${data.requester_name}`
+                    );
                 }
             });
 
-            // Optional: Add a manual "Mark as Read" functionality
-            window.markAllRequisitionsAsRead = function() {
-                markRequisitionsAsViewed();
+            // Update badges function for admin
+            const updateAdminBadges = (counts) => {
+                const requisitionNavLink = document.getElementById('requisition-nav-link');
+                if (!requisitionNavLink) return;
+
+                let badgeContainer = document.getElementById('ris-badges-container');
+                if (!badgeContainer) {
+                    badgeContainer = document.createElement('div');
+                    badgeContainer.id = 'ris-badges-container';
+                    badgeContainer.className = 'absolute -top-1 -right-1 flex space-x-1';
+                    requisitionNavLink.appendChild(badgeContainer);
+                }
+
+                // Update draft badge (orange)
+                updateBadge('ris-draft-badge', counts.draft_count, '#f59e0b', badgeContainer);
+
+                // Update approved badge (blue/indigo)
+                updateBadge('ris-approved-badge', counts.approved_count, '#6366f1', badgeContainer);
             };
+
+            const updateBadge = (badgeId, count, bgColor, container) => {
+                let badge = document.getElementById(badgeId);
+
+                if (count > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.id = badgeId;
+                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white border-2 border-white rounded-full`;
+                        badge.style.backgroundColor = bgColor;
+                        container.appendChild(badge);
+                    }
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'inline-flex';
+                    badge.classList.add('animate-pulse');
+                    setTimeout(() => badge.classList.remove('animate-pulse'), 3000);
+                } else if (badge) {
+                    badge.remove();
+                }
+            };
+
+            @elseif(auth()->check() && !in_array(auth()->user()->role, ['admin', 'cao']))
+            // Regular user notification handling
+            const userChannel = pusher.subscribe('private-user.{{ auth()->id() }}');
+
+            userChannel.bind('App\\Events\\UserNotificationUpdated', function(data) {
+                console.log('User notification received:', data);
+
+                // Update badges
+                updateUserBadges(data.counts);
+
+                // Play sound and show notification based on type
+                playNotificationSound();
+
+                switch(data.notification.type) {
+                    case 'requisition_approved':
+                        showBrowserNotification(
+                            'Request Approved!',
+                            `Your requisition ${data.notification.data.ris_no} has been approved and is ready for issuance.`
+                        );
+                        break;
+                    case 'supplies_ready':
+                        showBrowserNotification(
+                            'Supplies Ready for Pickup!',
+                            `Supplies for ${data.notification.data.ris_no} are ready to be received.`
+                        );
+                        break;
+                    case 'requisition_declined':
+                        showBrowserNotification(
+                            'Request Declined',
+                            `Your requisition was declined: ${data.notification.data.reason}`
+                        );
+                        break;
+                }
+            });
+
+            // Update user badges
+            const updateUserBadges = (counts) => {
+                updateUserBadge('user-approved-badge', counts.approved_requests_count, '#6366f1');
+                updateUserBadge('user-pending-badge', counts.pending_receipt_count, '#f59e0b', true);
+            };
+
+            const updateUserBadge = (badgeId, count, bgColor, shouldPulse = false) => {
+                let badge = document.getElementById(badgeId);
+                const parentLink = badge ? badge.closest('a') : document.querySelector(`a[data-target="${badgeId.includes('approved') ? 'requests' : 'received-supplies'}"]`);
+
+                if (count > 0) {
+                    if (!badge && parentLink) {
+                        badge = document.createElement('span');
+                        badge.id = badgeId;
+                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full${shouldPulse ? ' animate-pulse' : ''}`;
+                        badge.style.backgroundColor = bgColor;
+                        parentLink.appendChild(badge);
+                    }
+
+                    if (badge) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.style.display = 'inline-flex';
+
+                        if (shouldPulse) {
+                            badge.classList.add('animate-pulse');
+                        }
+                    }
+                } else if (badge) {
+                    badge.style.display = 'none';
+                }
+            };
+            @endif
 
             // Expose sound control functions
             window.setNotificationVolume = function(volume) {
@@ -335,176 +332,7 @@
             };
         });
     </script>
-    @endif
-
-    <!-- Add this JavaScript to your user dashboard or main layout for non-admin users -->
-    @if(auth()->check() && !in_array(auth()->user()->role, ['admin', 'cao']))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize notification sound
-            const notificationSound = new Audio('/sounds/ding.mp3');
-            notificationSound.volume = 0.5;
-
-            // Store previous counts to detect changes
-            let previousApprovedCount = 0;
-            let previousPendingReceiptCount = 0;
-            let isFirstCheck = true;
-
-            // Check for user notifications
-            const checkUserNotifications = async () => {
-                try {
-                    const response = await fetch('/user-notifications', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        },
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-
-                        // Check for new notifications
-                        const hasNewApproved = data.approved_requests_count > previousApprovedCount;
-                        const hasNewPending = data.pending_receipt_count > previousPendingReceiptCount;
-
-                        // Play sound if there are new notifications (but not on first load)
-                        if (!isFirstCheck && (hasNewApproved || hasNewPending)) {
-                            playNotificationSound();
-
-                            // Show browser notification
-                            if (hasNewApproved) {
-                                showBrowserNotification(
-                                    'Request Approved!',
-                                    `Your requisition has been approved and is ready for issuance.`
-                                );
-                            }
-                            if (hasNewPending) {
-                                showBrowserNotification(
-                                    'Supplies Ready for Pickup!',
-                                    `You have supplies waiting to be received.`
-                                );
-                            }
-                        }
-
-                        // Update badges
-                        updateUserBadges(data);
-
-                        // Store current counts
-                        previousApprovedCount = data.approved_requests_count;
-                        previousPendingReceiptCount = data.pending_receipt_count;
-                        isFirstCheck = false;
-                    }
-                } catch (error) {
-                    console.error('Error checking user notifications:', error);
-                }
-            };
-
-            // Update user badges
-            const updateUserBadges = (data) => {
-                // Update approved requests badge
-                updateBadge('user-approved-badge', data.approved_requests_count, '#6366f1');
-
-                // Update pending receipt badge (with pulse animation)
-                updateBadge('user-pending-badge', data.pending_receipt_count, '#f59e0b', true);
-            };
-
-            // Helper function to update individual badge
-            const updateBadge = (badgeId, count, bgColor, shouldPulse = false) => {
-                let badge = document.getElementById(badgeId);
-                const parentLink = badge ? badge.closest('a') : document.querySelector(`a[data-target="${badgeId.includes('approved') ? 'requests' : 'received-supplies'}"]`);
-
-                if (count > 0) {
-                    if (!badge && parentLink) {
-                        // Create badge if it doesn't exist
-                        badge = document.createElement('span');
-                        badge.id = badgeId;
-                        badge.className = `inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full${shouldPulse ? ' animate-pulse' : ''}`;
-                        badge.style.backgroundColor = bgColor;
-                        parentLink.appendChild(badge);
-                    }
-
-                    if (badge) {
-                        badge.textContent = count > 99 ? '99+' : count;
-                        badge.style.display = 'inline-flex';
-
-                        // Add pulse animation for urgent items
-                        if (shouldPulse && count > previousPendingReceiptCount) {
-                            badge.classList.add('animate-pulse');
-                        }
-                    }
-                } else if (badge) {
-                    badge.style.display = 'none';
-                }
-            };
-
-            // Play notification sound
-            const playNotificationSound = () => {
-                const sound = notificationSound.cloneNode();
-                sound.volume = notificationSound.volume;
-                sound.play().catch(e => {
-                    console.log('Could not play notification sound:', e);
-                });
-            };
-
-            // Show browser notification
-            const showBrowserNotification = (title, body) => {
-                if (!("Notification" in window)) {
-                    return;
-                }
-
-                if (Notification.permission === "granted") {
-                    new Notification(title, {
-                        body: body,
-                        icon: '/favicon.ico',
-                        tag: 'user-notification',
-                        renotify: true
-                    });
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            new Notification(title, {
-                                body: body,
-                                icon: '/favicon.ico',
-                                tag: 'user-notification',
-                                renotify: true
-                            });
-                        }
-                    });
-                }
-            };
-
-            // Load saved notification preferences
-            const loadNotificationPreferences = () => {
-                const savedVolume = localStorage.getItem('notificationVolume');
-                const soundEnabled = localStorage.getItem('notificationSoundEnabled');
-
-                if (savedVolume !== null) {
-                    notificationSound.volume = parseFloat(savedVolume);
-                }
-
-                if (soundEnabled === 'false') {
-                    notificationSound.volume = 0;
-                }
-            };
-
-            // Initialize
-            loadNotificationPreferences();
-            checkUserNotifications();
-
-            // Check every 30 seconds
-            setInterval(checkUserNotifications, 20000);
-
-            // Update when page becomes visible
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    checkUserNotifications();
-                }
-            });
-        });
-    </script>
-    @endif
+    @endauth
 
 </body>
 

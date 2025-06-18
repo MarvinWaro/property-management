@@ -20,6 +20,11 @@ use App\Http\Controllers\RisSlipController;
 use App\Http\Controllers\StockCardController;
 use App\Http\Controllers\Api\NotificationController;
 
+use Illuminate\Support\Facades\Broadcast;
+
+// Add this line BEFORE your middleware groups
+Broadcast::routes(['middleware' => ['web', 'auth:sanctum']]);
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +38,8 @@ Route::get('/run-storage-link', function () {
 // Combine admin + staff + cao under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
+    Route::get('/api/initial-counts', [NotificationController::class, 'getInitialCounts'])->middleware(['admin-cao']);
+    Route::get('/api/user-initial-counts', [NotificationController::class, 'getUserInitialCounts']);
 
     // Shared routes (accessible by admin, cao, and staff)
     Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
@@ -61,7 +68,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
     Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
-    Route::get('/user-notifications', [NotificationController::class, 'getUserNotifications'])->middleware(['auth:sanctum', 'verified']);
+    //Route::get('/user-notifications', [NotificationController::class, 'getUserNotifications'])->middleware(['auth:sanctum', 'verified']);
 
 
     /**
@@ -71,9 +78,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      */
     Route::middleware(['admin-cao'])->group(function () {
 
-         // these now share your normal web session cookie
-        Route::get('/pending-requisitions', [NotificationController::class, 'getPendingCount']);
-        Route::post('/mark-requisitions-viewed', [NotificationController::class, 'markAsViewed']);
+        // these now share your normal web session cookie
 
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');

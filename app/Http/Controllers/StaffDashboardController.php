@@ -127,6 +127,16 @@ class StaffDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(6, ['*'], 'properties');
 
+        // 8. Get notification counts for initial load
+        $approvedRequestsCount = RisSlip::where('requested_by', $userId)
+            ->where('status', 'approved')
+            ->count();
+
+        $pendingReceiptNotificationCount = RisSlip::where('received_by', $userId)
+            ->where('status', 'posted')
+            ->whereNull('received_at')
+            ->count();
+
         return view('staff-dashboard', compact(
             'forceChangePassword',
             'departments',
@@ -139,7 +149,9 @@ class StaffDashboardController extends Controller
             'approvedCount',
             'pendingReceiptCount',
             'completedCount',
-            'declinedCount'
+            'declinedCount',
+            'approvedRequestsCount',
+            'pendingReceiptNotificationCount'
         ));
     }
 

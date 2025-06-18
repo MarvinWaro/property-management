@@ -342,47 +342,5 @@
         });
     </script>
 
-    <!-- New Items Indicator Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for new items and add visual indicator
-            fetch('/pending-requisitions', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.new_count > 0) {
-                    // Add a "new" indicator to the page
-                    const headerElement = document.querySelector('h2');
-                    if (headerElement && !document.getElementById('new-indicator')) {
-                        const newIndicator = document.createElement('span');
-                        newIndicator.id = 'new-indicator';
-                        newIndicator.className = 'ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                        newIndicator.textContent = `${data.new_count} new`;
-                        headerElement.appendChild(newIndicator);
-                    }
-                }
-            });
 
-            // Optional: Add a button to mark all as read
-            const statsDiv = document.querySelector('.flex.flex-wrap.gap-3');
-            if (statsDiv) {
-                const markReadBtn = document.createElement('button');
-                markReadBtn.className = 'inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors';
-                markReadBtn.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Mark All as Read';
-                markReadBtn.onclick = function() {
-                    if (window.markAllRequisitionsAsRead) {
-                        window.markAllRequisitionsAsRead();
-                        // Remove the new indicator
-                        const indicator = document.getElementById('new-indicator');
-                        if (indicator) indicator.remove();
-                    }
-                };
-                statsDiv.appendChild(markReadBtn);
-            }
-        });
-    </script>
 </x-app-layout>
