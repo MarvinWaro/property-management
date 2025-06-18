@@ -300,7 +300,7 @@
             checkPendingRequisitions();
 
             // Poll every 5 seconds
-            setInterval(checkPendingRequisitions, 5000);
+            setInterval(checkPendingRequisitions, 20000);
 
             // Update when page becomes visible again
             document.addEventListener('visibilitychange', function() {
@@ -494,7 +494,7 @@
             checkUserNotifications();
 
             // Check every 30 seconds
-            setInterval(checkUserNotifications, 30000);
+            setInterval(checkUserNotifications, 20000);
 
             // Update when page becomes visible
             document.addEventListener('visibilitychange', function() {
