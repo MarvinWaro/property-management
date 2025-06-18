@@ -343,7 +343,19 @@
                                                 {{ $item->supply->stock_no ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                                {{ $item->supply->item_name ?? 'N/A' }}
+                                                @php
+                                                    // build an array of the bits you want to show
+                                                    $parts = [
+                                                    $item->supply->item_name,
+                                                    $item->supply->description       // make sure your Supply model actually has this column
+                                                    ];
+                                                    // filter out empty/null and join with commas
+                                                    $display = collect($parts)
+                                                                ->filter()
+                                                                ->join(', ');
+                                                @endphp
+
+                                                {{ $display ?: 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                                 {{ $item->quantity_requested }}
