@@ -2284,7 +2284,7 @@
             checkUserNotifications();
 
             // Check every 5 seconds for faster updates (instead of 30 seconds)
-            setInterval(checkUserNotifications, 5000);
+            setInterval(checkUserNotifications, 20000);
 
             // Update when page becomes visible
             document.addEventListener('visibilitychange', function() {
