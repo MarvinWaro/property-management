@@ -211,6 +211,13 @@
                                                 <span>Completed:</span>
                                                 <span class="ml-1 font-semibold">{{ $completedCount ?? 0 }}</span>
                                             </a>
+
+                                            <a href="{{ route('staff.dashboard', ['status' => 'declined']) }}"
+                                            class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg transition-all duration-200 {{ request('status') === 'declined' ? 'bg-[#ce201f] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                                <span class="w-2 h-2 mr-2 rounded-full bg-red-500"></span>
+                                                <span>Declined:</span>
+                                                <span class="ml-1 font-semibold">{{ $declinedCount ?? 0 }}</span>
+                                            </a>
                                         </div>
 
                                         <!-- Search Form -->
@@ -304,6 +311,16 @@
                                                                     </svg>
                                                                     Completed
                                                                 </span>
+                                                            @elseif($request->status === 'declined')
+                                                                <span class="bg-red-100 text-red-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded dark:bg-red-900/20 dark:text-red-300">
+                                                                    <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                    Declined
+                                                                </span>
+                                                                @if($request->decline_reason)
+                                                                    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ Str::limit($request->decline_reason, 50) }}</p>
+                                                                @endif
                                                             @endif
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">

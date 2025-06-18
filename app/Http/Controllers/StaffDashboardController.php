@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-
 use App\Models\Department;
 use App\Models\SupplyStock;
 use App\Models\RisSlip;
@@ -74,6 +71,9 @@ class StaffDashboardController extends Controller
                                   ->where('status', 'posted')
                                   ->whereNotNull('received_at')
                                   ->count();
+        $declinedCount       = RisSlip::where('requested_by', $userId)
+                                  ->where('status', 'declined')
+                                  ->count();
 
         // 5. Build query for "My Requests" with filters and search
         // Note: Search only happens when form is submitted (search button clicked)
@@ -90,6 +90,7 @@ class StaffDashboardController extends Controller
                                            ->whereNull('received_at'),
                 'completed'       => $query->where('status','posted')
                                            ->whereNotNull('received_at'),
+                'declined'        => $query->where('status', 'declined'),
                 default           => null,
             };
         }
@@ -137,7 +138,8 @@ class StaffDashboardController extends Controller
             'pendingCount',
             'approvedCount',
             'pendingReceiptCount',
-            'completedCount'
+            'completedCount',
+            'declinedCount'
         ));
     }
 

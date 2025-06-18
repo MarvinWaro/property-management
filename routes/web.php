@@ -102,6 +102,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
         // RIS
         Route::post('/ris/{risSlip}/approve', [RisSlipController::class, 'approve'])->name('ris.approve');
+        Route::post('/ris/{risSlip}/decline', [RisSlipController::class, 'decline'])->name('ris.decline');
         Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
 
         // Add these routes to your existing web.php file within the middleware group
