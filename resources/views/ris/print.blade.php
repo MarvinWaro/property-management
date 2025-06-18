@@ -192,7 +192,19 @@
             <tr>
                 <td>{{ $item->supply->stock_no ?? 'N/A' }}</td>
                 <td>{{ $item->supply->unit_of_measurement ?? 'N/A' }}</td>
-                <td>{{ $item->supply->item_name }}</td>
+                <td>
+                    @php
+                        $parts = [
+                        $item->supply->item_name,
+                        $item->supply->description,
+                        ];
+                        $display = collect($parts)
+                                    ->filter()
+                                    ->join(', ');
+                    @endphp
+
+                    {{ $display ?: 'N/A' }}
+                </td>
                 <td>{{ $item->quantity_requested }}</td>
                 <td style="text-align: center">{{ $item->stock_available ? '✓' : '' }}</td>
                 <td style="text-align: center">{{ !$item->stock_available ? '✓' : '' }}</td>
