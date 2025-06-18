@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ReferenceNumberService;
+use App\Events\RequisitionStatusUpdated;
+use App\Events\UserNotificationUpdated;
 
 class RisSlipController extends Controller
 {
@@ -198,6 +200,9 @@ class RisSlipController extends Controller
                         ]);
                     }
 
+                    // Broadcast the event for new requisition
+                    broadcast(new RequisitionStatusUpdated($risSlip, 'created'));
+
                     return response()->json([
                         'success' => true,
                         'message' => 'Requisition created successfully with RIS# ' . $newRisNumber,
@@ -324,6 +329,17 @@ class RisSlipController extends Controller
             'fund_cluster' => $validated['fund_cluster'] ?? $risSlip->fund_cluster,
         ]);
 
+        // Broadcast events
+        broadcast(new RequisitionStatusUpdated($risSlip, 'approved'));
+
+        if ($risSlip->requested_by) {
+            broadcast(new UserNotificationUpdated(
+                $risSlip->requested_by,
+                'requisition_approved',
+                ['ris_no' => $risSlip->ris_no, 'ris_id' => $risSlip->ris_id]
+            ));
+        }
+
         return back()->with('success', 'RIS approved successfully.');
     }
 
@@ -348,10 +364,16 @@ class RisSlipController extends Controller
             'decline_reason' => $validated['decline_reason'],
         ]);
 
-        // Note: No need to update stock availability because declined items
-        // were never deducted from stock in the first place. The stock
-        // calculation already excludes declined requests by checking for
-        // status in ['draft', 'approved'] only.
+        // Broadcast events
+        broadcast(new RequisitionStatusUpdated($risSlip, 'declined'));
+
+        if ($risSlip->requested_by) {
+            broadcast(new UserNotificationUpdated(
+                $risSlip->requested_by,
+                'requisition_declined',
+                ['ris_no' => $risSlip->ris_no, 'reason' => $validated['decline_reason']]
+            ));
+        }
 
         return back()->with('success', 'RIS declined successfully. The requested items remain available for other requests.');
     }
@@ -471,6 +493,17 @@ class RisSlipController extends Controller
                 'received_by' => $request->received_by ?? null,
             ]);
 
+            // Broadcast events
+            broadcast(new RequisitionStatusUpdated($risSlip, 'issued'));
+
+            if ($request->received_by) {
+                broadcast(new UserNotificationUpdated(
+                    $request->received_by,
+                    'supplies_ready',
+                    ['ris_no' => $risSlip->ris_no, 'ris_id' => $risSlip->ris_id]
+                ));
+            }
+
             return redirect()->route('ris.show', $risSlip)
                             ->with('success', 'Supplies issued successfully.');
         });
@@ -503,6 +536,17 @@ class RisSlipController extends Controller
             'received_at' => now(),
             'receiver_signature_type' => $validated['signature_type'],
         ]);
+
+        // Broadcast completion event
+        broadcast(new RequisitionStatusUpdated($risSlip, 'completed'));
+
+        if ($risSlip->received_by) {
+            broadcast(new UserNotificationUpdated(
+                $risSlip->received_by,
+                'supplies_received',
+                ['ris_no' => $risSlip->ris_no]
+            ));
+        }
 
         return back()->with('success', 'Supplies received successfully.');
     }

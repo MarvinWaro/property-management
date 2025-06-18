@@ -17,37 +17,57 @@ return new class extends Migration
             $table->date('ris_date')->default(now());
 
             $table->string('entity_name');
-            // division now FK to departments.id
             $table->foreignId('division')
-                ->constrained('departments')    // references departments.id
-                ->cascadeOnDelete();
-            // office stays a simple string, but nullable
+                  ->constrained('departments')
+                  ->cascadeOnDelete();
             $table->string('office')->nullable();
 
             $table->string('fund_cluster')->nullable();
             $table->string('responsibility_center_code')->nullable();
 
-            // who requested it
             $table->foreignId('requested_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
 
             $table->text('purpose')->nullable();
-            $table->enum('status', ['draft','approved','posted'])->default('draft');
+            $table->enum('status', ['draft','approved','posted'])
+                  ->default('draft');
 
-            // sign‑offs
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            // sign-offs
+            $table->foreignId('approved_by')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
-            $table->foreignId('issued_by')->nullable()->constrained('users')->nullOnDelete();
+
+            $table->foreignId('issued_by')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
             $table->timestamp('issued_at')->nullable();
-            $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
+
+            $table->foreignId('received_by')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
             $table->timestamp('received_at')->nullable();
+
+            //
+            // ↓↓↓ DECLINE FIELDS ↓↓↓
+            //
+            $table->foreignId('declined_by')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
+            $table->timestamp('declined_at')->nullable();
+            $table->enum('decline_signature_type', ['esign','sgd'])
+                  ->nullable();
+            $table->text('decline_reason')->nullable();
 
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.
