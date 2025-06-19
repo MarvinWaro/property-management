@@ -156,18 +156,42 @@
     @auth
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Pusher
+            // Initialize Pusher with debug mode and fallback transports
             const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
                 encrypted: true,
                 authEndpoint: '/broadcasting/auth',
-                enabledTransports: ['ws', 'wss'],
+                enabledTransports: ['ws', 'wss', 'xhr_polling', 'xhr_streaming'],
                 auth: {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     }
-                }
+                },
+                // Enable debug mode to see detailed connection info
+                enableLogging: true,
+                // Add connection timeout and retry settings
+                activityTimeout: 30000,
+                pongTimeout: 6000,
+                unavailableTimeout: 10000
+            });
+
+            // Add connection event listeners for debugging
+            pusher.connection.bind('connected', function() {
+                const transportName = pusher.connection.transport?.name || 'unknown';
+                console.log('✅ Pusher connected successfully via:', transportName);
+            });
+
+            pusher.connection.bind('disconnected', function() {
+                console.log('❌ Pusher disconnected');
+            });
+
+            pusher.connection.bind('error', function(err) {
+                console.error('🔥 Pusher connection error:', err);
+            });
+
+            pusher.connection.bind('failed', function() {
+                console.error('💀 Pusher connection failed completely');
             });
 
             // Initialize notification sound
@@ -266,6 +290,7 @@
             const showToastNotification = (title, text, icon = 'info', userName = 'System', userImage = null) => {
                 const toastContainer = document.getElementById('toast-container');
                 const toastId = 'toast-' + Date.now();
+                const timestamp = new Date();
 
                 // Define icon and colors based on type
                 let iconHtml = '';
@@ -310,7 +335,7 @@
                 }
 
                 const toastHtml = `
-                    <div id="${toastId}" class="w-full max-w-xs p-4 mb-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert">
+                    <div id="${toastId}" class="w-full max-w-xs p-4 mb-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${timestamp.getTime()}">
                         <div class="flex items-center mb-3">
                             <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">${title}</span>
                             <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="closeToast('${toastId}')" aria-label="Close">
@@ -339,7 +364,7 @@
                             <div class="ms-3 text-sm font-normal">
                                 <div class="text-sm font-semibold text-gray-900 dark:text-white">${userName}</div>
                                 <div class="text-sm font-normal">${text}</div>
-                                <span class="text-xs font-medium text-blue-600 dark:text-blue-500">just now</span>
+                                <span class="text-xs font-medium text-blue-600 dark:text-blue-500 toast-timestamp" data-time="${timestamp.getTime()}">just now</span>
                             </div>
                         </div>
                     </div>
@@ -347,11 +372,52 @@
 
                 toastContainer.insertAdjacentHTML('beforeend', toastHtml);
 
-                // Auto close after 5 seconds
-                setTimeout(() => {
-                    closeToast(toastId);
-                }, 5000);
+                // Notifications stay visible until manually closed
+                // No auto-close timer - user must click X to dismiss
             };
+
+            // Function to calculate time difference like Laravel's diffForHumans()
+            const getTimeAgo = (timestamp) => {
+                const now = new Date().getTime();
+                const diff = now - timestamp;
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                const weeks = Math.floor(days / 7);
+                const months = Math.floor(days / 30);
+                const years = Math.floor(days / 365);
+
+                if (seconds < 30) return 'just now';
+                if (seconds < 60) return `${seconds} seconds ago`;
+                if (minutes === 1) return '1 minute ago';
+                if (minutes < 60) return `${minutes} minutes ago`;
+                if (hours === 1) return '1 hour ago';
+                if (hours < 24) return `${hours} hours ago`;
+                if (days === 1) return '1 day ago';
+                if (days < 7) return `${days} days ago`;
+                if (weeks === 1) return '1 week ago';
+                if (weeks < 4) return `${weeks} weeks ago`;
+                if (months === 1) return '1 month ago';
+                if (months < 12) return `${months} months ago`;
+                if (years === 1) return '1 year ago';
+                return `${years} years ago`;
+            };
+
+            // Update all toast timestamps in real-time
+            const updateToastTimestamps = () => {
+                const timestamps = document.querySelectorAll('.toast-timestamp');
+                timestamps.forEach(element => {
+                    const timestamp = parseInt(element.getAttribute('data-time'));
+                    element.textContent = getTimeAgo(timestamp);
+                });
+            };
+
+            // Update timestamps every 10 seconds (more frequent updates)
+            setInterval(updateToastTimestamps, 10000);
+
+            // Also update timestamps immediately when page loads
+            setTimeout(updateToastTimestamps, 1000);
 
             // Close toast function
             window.closeToast = function(toastId) {
@@ -363,6 +429,14 @@
                         toast.remove();
                     }, 300);
                 }
+            };
+
+            // Add function to close all toasts (useful for testing/cleanup)
+            window.closeAllToasts = function() {
+                const toasts = document.querySelectorAll('[id^="toast-"]');
+                toasts.forEach(toast => {
+                    closeToast(toast.id);
+                });
             };
 
             // Load saved notification preferences
@@ -647,7 +721,7 @@
             window.testToastNotification = function() {
                 showToastNotification(
                     'Test Notification',
-                    'This is a test notification to see how it looks!',
+                    'This notification timestamp will update in real-time!',
                     'success',
                     '{{ auth()->user()->name ?? "Test User" }}',
                     '{{ auth()->user()->profile_photo_url ?? null }}'
@@ -663,6 +737,57 @@
                     '{{ auth()->user()->name ?? "Test User" }}',
                     '{{ auth()->user()->profile_photo_url ?? null }}'
                 );
+            };
+
+            // Test timestamp updates - create old notification to see time change
+            window.testTimestampUpdate = function() {
+                // Create a notification that appears to be 2 minutes old
+                const oldTime = new Date(Date.now() - 2 * 60 * 1000); // 2 minutes ago
+                const toastContainer = document.getElementById('toast-container');
+                const toastId = 'toast-old-' + Date.now();
+
+                const toastHtml = `
+                    <div id="${toastId}" class="w-full max-w-xs p-4 mb-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${oldTime.getTime()}">
+                        <div class="flex items-center mb-3">
+                            <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Old Notification</span>
+                            <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="closeToast('${toastId}')" aria-label="Close">
+                                <span class="sr-only">Close</span>
+                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="relative inline-block shrink-0">
+                                <img class="w-12 h-12 rounded-full object-cover" src="/favicon.ico" alt="System image">
+                                <span class="absolute bottom-0 right-0 inline-flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full">
+                                    <svg class="w-3 h-3 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18" fill="currentColor">
+                                        <path d="M18 4H16V9C16 10.0609 15.5786 11.0783 14.8284 11.8284C14.0783 12.5786 13.0609 13 12 13H9L6.846 14.615C7.17993 14.8628 7.58418 14.9977 8 15H11.667L15.4 17.8C15.5731 17.9298 15.7836 18 16 18C16.2652 18 16.5196 17.8946 16.7071 17.7071C16.8946 17.5196 17 17.2652 17 17V15H18C18.5304 15 19.0391 14.7893 19.4142 14.4142C19.7893 14.0391 20 13.5304 20 13V6C20 5.46957 19.7893 4.96086 19.4142 4.58579C19.0391 4.21071 18.5304 4 18 4Z"/>
+                                        <path d="M12 0H2C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V9C0 9.53043 0.210714 10.0391 0.585786 10.4142C0.960859 10.7893 1.46957 11 2 11H3V13C3 13.1857 3.05171 13.3678 3.14935 13.5257C3.24698 13.6837 3.38668 13.8114 3.55279 13.8944C3.71889 13.9775 3.90484 14.0126 4.08981 13.996C4.27477 13.9793 4.45143 13.9114 4.6 13.8L8.333 11H12C12.5304 11 13.0391 10.7893 13.4142 10.4142C13.7893 10.0391 14 9.53043 14 9V2C14 1.46957 13.7893 0.960859 13.4142 0.585786C13.0391 0.210714 12.5304 0 12 0Z"/>
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ms-3 text-sm font-normal">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-white">System</div>
+                                <div class="text-sm font-normal">Watch this timestamp update every 30 seconds!</div>
+                                <span class="text-xs font-medium text-blue-600 dark:text-blue-500 toast-timestamp" data-time="${oldTime.getTime()}">2 minutes ago</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+                // Immediately update to show correct time
+                updateToastTimestamps();
+
+                console.log('🕐 Created old notification - watch timestamp update every 30 seconds!');
+            };
+
+            // Force update all timestamps now (for testing)
+            window.updateTimestamps = function() {
+                updateToastTimestamps();
+                console.log('🔄 Updated all toast timestamps');
             };
         });
     </script>
