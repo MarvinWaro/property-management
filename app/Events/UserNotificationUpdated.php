@@ -6,13 +6,13 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow; // <-- Change here!
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\RisSlip;
 use App\Models\User;
 
-class UserNotificationUpdated implements ShouldBroadcast
+class UserNotificationUpdated implements ShouldBroadcastNow // <-- And here!
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
