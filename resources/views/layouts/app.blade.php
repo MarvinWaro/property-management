@@ -166,6 +166,27 @@
                 }
             };
 
+            // Show toast notification with SweetAlert2
+            const showToastNotification = (title, text, icon = 'info') => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: icon,
+                    title: title,
+                    text: text
+                });
+            };
+
             // Load saved notification preferences
             const loadNotificationPreferences = () => {
                 const savedVolume = localStorage.getItem('notificationVolume');
@@ -183,28 +204,8 @@
             // Initialize preferences
             loadNotificationPreferences();
 
-            @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'cao']))
-            // Admin/CAO notification handling
-            const adminChannel = pusher.subscribe('private-admin-notifications');
-
-            adminChannel.bind('App\\Events\\RequisitionStatusUpdated', function(data) {
-                console.log('Admin notification received:', data);
-
-                // Update badges
-                updateAdminBadges(data.counts);
-
-                // Play sound and show notification for new requisitions
-                if (data.action === 'created') {
-                    playNotificationSound();
-                    showBrowserNotification(
-                        'New Requisition Request',
-                        `New requisition ${data.ris_no} from ${data.requester_name}`
-                    );
-                }
-            });
-
-            // Update badges function for admin
-            const updateAdminBadges = (counts) => {
+            // Update badges function
+            const updateBadges = (counts, role) => {
                 const requisitionNavLink = document.getElementById('requisition-nav-link');
                 if (!requisitionNavLink) return;
 
@@ -216,11 +217,19 @@
                     requisitionNavLink.appendChild(badgeContainer);
                 }
 
-                // Update draft badge (orange)
-                updateBadge('ris-draft-badge', counts.draft_count, '#f59e0b', badgeContainer);
-
-                // Update approved badge (blue/indigo)
-                updateBadge('ris-approved-badge', counts.approved_count, '#6366f1', badgeContainer);
+                if (role === 'cao') {
+                    // CAO sees only draft (pending approval)
+                    updateBadge('ris-draft-badge', counts.draft_count, '#f59e0b', badgeContainer);
+                    // Remove approved badge for CAO
+                    const approvedBadge = document.getElementById('ris-approved-badge');
+                    if (approvedBadge) approvedBadge.remove();
+                } else if (role === 'admin') {
+                    // Admin sees only approved (pending issuance)
+                    updateBadge('ris-approved-badge', counts.approved_count, '#6366f1', badgeContainer);
+                    // Remove draft badge for Admin
+                    const draftBadge = document.getElementById('ris-draft-badge');
+                    if (draftBadge) draftBadge.remove();
+                }
             };
 
             const updateBadge = (badgeId, count, bgColor, container) => {
@@ -243,36 +252,143 @@
                 }
             };
 
-            @elseif(auth()->check() && !in_array(auth()->user()->role, ['admin', 'cao']))
+            @if(auth()->check() && auth()->user()->role === 'cao')
+            // CAO notification handling
+            const caoChannel = pusher.subscribe('private-cao-notifications');
+
+            caoChannel.bind('App\\Events\\RequisitionStatusUpdated', function(data) {
+                console.log('CAO notification received:', data);
+
+                // Update badges
+                updateBadges(data.counts, 'cao');
+
+                // Always play sound for CAO notifications
+                playNotificationSound();
+
+                // Show notifications for new requisitions
+                if (data.action === 'created') {
+                    showToastNotification(
+                        'New Requisition Request',
+                        `${data.requester_name} submitted requisition ${data.ris_no}`,
+                        'info'
+                    );
+                    showBrowserNotification(
+                        'New Requisition Request',
+                        data.message
+                    );
+                }
+            });
+
+            @elseif(auth()->check() && auth()->user()->role === 'admin')
+            // Admin notification handling
+            const adminChannel = pusher.subscribe('private-admin-notifications');
+
+            adminChannel.bind('App\\Events\\RequisitionStatusUpdated', function(data) {
+                console.log('Admin notification received:', data);
+
+                // Update badges
+                updateBadges(data.counts, 'admin');
+
+                // Always play sound for admin notifications
+                playNotificationSound();
+
+                // Show notifications for approved requisitions needing issuance
+                if (data.action === 'approved') {
+                    showToastNotification(
+                        'Requisition Approved',
+                        `Requisition ${data.ris_no} is ready for issuance`,
+                        'success'
+                    );
+                    showBrowserNotification(
+                        'Requisition Ready for Issuance',
+                        data.message
+                    );
+                } else if (data.action === 'completed') {
+                    showToastNotification(
+                        'Supplies Received',
+                        `Supplies for ${data.ris_no} have been received`,
+                        'success'
+                    );
+                }
+            });
+
+            @elseif(auth()->check())
             // Regular user notification handling
             const userChannel = pusher.subscribe('private-user.{{ auth()->id() }}');
 
-            userChannel.bind('App\\Events\\UserNotificationUpdated', function(data) {
+            userChannel.bind('App\\Events\\RequisitionStatusUpdated', function(data) {
                 console.log('User notification received:', data);
 
-                // Update badges
-                updateUserBadges(data.counts);
-
-                // Play sound and show notification based on type
+                // Always play sound for user notifications
                 playNotificationSound();
 
-                switch(data.notification.type) {
-                    case 'requisition_approved':
+                switch(data.action) {
+                    case 'approved':
+                        showToastNotification(
+                            'Request Approved!',
+                            `Your requisition ${data.ris_no} has been approved`,
+                            'success'
+                        );
                         showBrowserNotification(
                             'Request Approved!',
-                            `Your requisition ${data.notification.data.ris_no} has been approved and is ready for issuance.`
+                            data.message
+                        );
+                        break;
+                    case 'declined':
+                        showToastNotification(
+                            'Request Declined',
+                            `Your requisition ${data.ris_no} was declined`,
+                            'error'
+                        );
+                        showBrowserNotification(
+                            'Request Declined',
+                            data.message
+                        );
+                        break;
+                    case 'issued':
+                        showToastNotification(
+                            'Supplies Ready!',
+                            `Your supplies for ${data.ris_no} are ready for pickup`,
+                            'success'
+                        );
+                        showBrowserNotification(
+                            'Supplies Ready for Pickup!',
+                            data.message
+                        );
+                        break;
+                }
+            });
+
+            userChannel.bind('App\\Events\\UserNotificationUpdated', function(data) {
+                console.log('User notification update received:', data);
+
+                // Update user badges
+                updateUserBadges(data.counts);
+
+                // Play sound
+                playNotificationSound();
+
+                // Show appropriate notification
+                switch(data.notification.type) {
+                    case 'requisition_approved':
+                        showToastNotification(
+                            'Request Approved!',
+                            `Your requisition ${data.notification.data.ris_no} has been approved`,
+                            'success'
                         );
                         break;
                     case 'supplies_ready':
-                        showBrowserNotification(
-                            'Supplies Ready for Pickup!',
-                            `Supplies for ${data.notification.data.ris_no} are ready to be received.`
+                        showToastNotification(
+                            'Supplies Ready!',
+                            `Supplies for ${data.notification.data.ris_no} are ready for pickup`,
+                            'info'
                         );
                         break;
                     case 'requisition_declined':
-                        showBrowserNotification(
+                        showToastNotification(
                             'Request Declined',
-                            `Your requisition was declined: ${data.notification.data.reason}`
+                            `Your requisition was declined: ${data.notification.data.reason}`,
+                            'error'
                         );
                         break;
                 }
