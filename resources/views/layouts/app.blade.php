@@ -174,14 +174,66 @@
             const notificationSound = new Audio('/sounds/ding.mp3');
             notificationSound.volume = 0.7;
 
+            // Track if user has interacted with the page
+            let userHasInteracted = false;
+            let soundEnabled = localStorage.getItem('notificationSoundEnabled') !== 'false';
+
+            // Listen for first user interaction
+            const enableAudioOnInteraction = () => {
+                userHasInteracted = true;
+                // Try to preload the sound after first interaction
+                if (soundEnabled) {
+                    notificationSound.load();
+                }
+                // Remove listeners after first interaction
+                document.removeEventListener('click', enableAudioOnInteraction);
+                document.removeEventListener('keydown', enableAudioOnInteraction);
+                document.removeEventListener('touchstart', enableAudioOnInteraction);
+            };
+
+            // Add interaction listeners
+            document.addEventListener('click', enableAudioOnInteraction);
+            document.addEventListener('keydown', enableAudioOnInteraction);
+            document.addEventListener('touchstart', enableAudioOnInteraction);
+
             // Play notification sound
             const playNotificationSound = () => {
+                if (!soundEnabled) return;
+
+                if (!userHasInteracted) {
+                    console.log('🔊 Notification sound blocked - user interaction required first');
+                    return;
+                }
+
                 const sound = notificationSound.cloneNode();
                 sound.volume = notificationSound.volume;
                 sound.play().catch(e => {
-                    console.log('Could not play notification sound:', e);
+                    if (e.name === 'NotAllowedError') {
+                        console.log('🔊 Audio blocked by browser - user needs to interact with page first');
+                        // Show a one-time toast about enabling sounds
+                        showAudioPermissionToast();
+                    } else {
+                        console.log('Could not play notification sound:', e.message);
+                    }
                 });
             };
+
+            // Show toast asking user to enable sounds
+            const showAudioPermissionToast = (() => {
+                let hasShownToast = false;
+                return () => {
+                    if (hasShownToast) return;
+                    hasShownToast = true;
+
+                    showToastNotification(
+                        'Enable Sound Notifications',
+                        'Click anywhere on the page to enable notification sounds',
+                        'info',
+                        'System',
+                        null
+                    );
+                };
+            })();
 
             // Show browser notification
             const showBrowserNotification = (title, body) => {
@@ -316,14 +368,14 @@
             // Load saved notification preferences
             const loadNotificationPreferences = () => {
                 const savedVolume = localStorage.getItem('notificationVolume');
-                const soundEnabled = localStorage.getItem('notificationSoundEnabled');
+                const soundEnabledSetting = localStorage.getItem('notificationSoundEnabled');
 
                 if (savedVolume !== null) {
                     notificationSound.volume = parseFloat(savedVolume);
                 }
 
-                if (soundEnabled === 'false') {
-                    notificationSound.volume = 0;
+                if (soundEnabledSetting !== null) {
+                    soundEnabled = soundEnabledSetting !== 'false';
                 }
             };
 
@@ -568,17 +620,27 @@
             };
 
             window.toggleNotificationSound = function(enabled) {
+                soundEnabled = enabled;
                 localStorage.setItem('notificationSoundEnabled', enabled);
-                if (!enabled) {
-                    notificationSound.volume = 0;
-                } else {
-                    loadNotificationPreferences();
-                }
+                console.log(`🔊 Notification sounds ${enabled ? 'enabled' : 'disabled'}`);
             };
 
             // Test notification sound
             window.testNotificationSound = function() {
+                if (!userHasInteracted) {
+                    console.log('🔊 Please click somewhere on the page first, then try again');
+                    return;
+                }
                 playNotificationSound();
+            };
+
+            // Check sound status
+            window.getSoundStatus = function() {
+                return {
+                    soundEnabled: soundEnabled,
+                    userHasInteracted: userHasInteracted,
+                    volume: notificationSound.volume
+                };
             };
 
             // Test toast notification function (for development)
