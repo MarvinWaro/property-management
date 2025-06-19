@@ -6,13 +6,13 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow; // <-- Change here!
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\RisSlip;
 use App\Models\User;
 
-class UserNotificationUpdated implements ShouldBroadcastNow // <-- And here!
+class UserNotificationUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -40,9 +40,21 @@ class UserNotificationUpdated implements ShouldBroadcastNow // <-- And here!
             'total_notifications' => $approvedRequestsCount + $pendingReceiptCount
         ];
 
+        // Get user profile photos for notifications
+        $caoUser = User::where('role', 'cao')->first();
+        $adminUser = User::where('role', 'admin')->first();
+        $currentUser = User::find($userId);
+
+        // Enhance notification data with profile photos
+        $enhancedData = is_array($data) ? $data : [];
+        $enhancedData['cao_photo'] = $caoUser?->profile_photo_url;
+        $enhancedData['admin_photo'] = $adminUser?->profile_photo_url;
+        $enhancedData['receiver_name'] = $currentUser?->name;
+        $enhancedData['receiver_photo'] = $currentUser?->profile_photo_url;
+
         $this->notification = [
             'type' => $type,
-            'data' => $data
+            'data' => $enhancedData
         ];
     }
 

@@ -6,12 +6,13 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow; // <-- Change here!
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\RisSlip;
+use App\Models\User;
 
-class RequisitionStatusUpdated implements ShouldBroadcastNow // <-- And here!
+class RequisitionStatusUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -99,6 +100,10 @@ class RequisitionStatusUpdated implements ShouldBroadcastNow // <-- And here!
                 break;
         }
 
+        // Get user profile photos
+        $caoUser = User::where('role', 'cao')->first();
+        $adminUser = User::where('role', 'admin')->first();
+
         return [
             'ris_id' => $this->risSlip->ris_id,
             'ris_no' => $this->risSlip->ris_no,
@@ -106,6 +111,11 @@ class RequisitionStatusUpdated implements ShouldBroadcastNow // <-- And here!
             'status' => $this->risSlip->status,
             'counts' => $this->counts,
             'requester_name' => $this->risSlip->requester->name ?? null,
+            'requester_photo' => $this->risSlip->requester->profile_photo_url ?? null,
+            'receiver_name' => $this->risSlip->receiver->name ?? null,
+            'receiver_photo' => $this->risSlip->receiver->profile_photo_url ?? null,
+            'cao_photo' => $caoUser?->profile_photo_url,
+            'admin_photo' => $adminUser?->profile_photo_url,
             'department_name' => $this->risSlip->department->name ?? null,
             'message' => $message,
             'timestamp' => now()->toIso8601String()
