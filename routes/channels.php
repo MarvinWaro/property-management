@@ -8,9 +8,14 @@ use Illuminate\Support\Facades\Broadcast;
 |--------------------------------------------------------------------------
 */
 
-// Admin notifications channel (for admin and cao users)
+// CAO notifications channel (only for cao users)
+Broadcast::channel('cao-notifications', function ($user) {
+    return $user->role === 'cao';
+});
+
+// Admin notifications channel (only for admin users)
 Broadcast::channel('admin-notifications', function ($user) {
-    return in_array($user->role, ['admin', 'cao']);
+    return $user->role === 'admin';
 });
 
 // User-specific channel
