@@ -32,7 +32,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('{{ asset("img/bg-login.jpg") }}') center/cover;
+            background: url('{{ asset("img/bg-ched.jpg") }}') center/cover;
             opacity: 0.1;
             z-index: 1;
         }
