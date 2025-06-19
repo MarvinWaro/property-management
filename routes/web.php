@@ -35,32 +35,32 @@ Route::get('/run-storage-link', function () {
     return 'Symlink created!';
 });
 
-// Test broadcast route
-Route::get('/test-broadcast', function () {
-    $risSlip = \App\Models\RisSlip::first();
+// // Test broadcast route
+// Route::get('/test-broadcast', function () {
+//     $risSlip = \App\Models\RisSlip::first();
 
-    if (!$risSlip) {
-        return 'No RIS slips found. Create one first.';
-    }
+//     if (!$risSlip) {
+//         return 'No RIS slips found. Create one first.';
+//     }
 
-    try {
-        // Test if broadcasting is working
-        $event = new \App\Events\RequisitionStatusUpdated($risSlip, 'test');
-        broadcast($event);
+//     try {
+//         // Test if broadcasting is working
+//         $event = new \App\Events\RequisitionStatusUpdated($risSlip, 'test');
+//         broadcast($event);
 
-        return response()->json([
-            'message' => 'Event broadcast! Check Pusher debug console.',
-            'event_data' => $event->broadcastWith(),
-            'channels' => ['admin-notifications'],
-            'broadcast_driver' => config('broadcasting.default')
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-})->middleware('auth');
+//         return response()->json([
+//             'message' => 'Event broadcast! Check Pusher debug console.',
+//             'event_data' => $event->broadcastWith(),
+//             'channels' => ['admin-notifications'],
+//             'broadcast_driver' => config('broadcasting.default')
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'error' => $e->getMessage(),
+//             'trace' => $e->getTraceAsString()
+//         ], 500);
+//     }
+// })->middleware('auth');
 
 // Combine admin + staff + cao under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
