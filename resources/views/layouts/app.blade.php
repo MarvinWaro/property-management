@@ -116,16 +116,17 @@
             // Initialize Pusher
             const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
-                encrypted: true,
                 authEndpoint: '/broadcasting/auth',
                 auth: {
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     }
-                }
+                },
+                forceTLS: true,                     // always use wss://
+                disableStats: true,                 // disable pusher's stats requests
+                enabledTransports: ['ws', 'wss']    // <--- ONLY pure WebSocket, disables SockJS/fallbacks
             });
-
             // Initialize notification sound
             const notificationSound = new Audio('/sounds/ding.mp3');
             notificationSound.volume = 0.7;
