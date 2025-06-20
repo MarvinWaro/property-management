@@ -129,7 +129,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            background: #ffffff;
+            background: #ffffff !important; /* Force white background */
             overflow-y: auto;
         }
 
@@ -146,12 +146,12 @@
         .welcome-title {
             font-size: 1.875rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #1f2937 !important; /* Force dark text */
             margin-bottom: 0.5rem;
         }
 
         .welcome-subtitle {
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
             font-size: 1rem;
         }
 
@@ -164,7 +164,7 @@
             display: block;
             font-size: 0.875rem;
             font-weight: 500;
-            color: #374151;
+            color: #374151 !important; /* Force dark text */
             margin-bottom: 0.5rem;
         }
 
@@ -174,7 +174,8 @@
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 1rem;
-            background-color: #f9fafb;
+            background-color: #f9fafb !important; /* Force light background */
+            color: #1f2937 !important; /* Force dark text */
             transition: all 0.2s ease;
         }
 
@@ -182,7 +183,7 @@
             outline: none;
             border-color: #b91c1c;
             box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
-            background-color: #ffffff;
+            background-color: #ffffff !important; /* Force white background on focus */
         }
 
         .form-select {
@@ -191,7 +192,8 @@
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 1rem;
-            background-color: #f9fafb;
+            background-color: #f9fafb !important; /* Force light background */
+            color: #1f2937 !important; /* Force dark text */
             transition: all 0.2s ease;
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
@@ -205,7 +207,7 @@
             outline: none;
             border-color: #b91c1c;
             box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
-            background-color: #ffffff;
+            background-color: #ffffff !important; /* Force white background on focus */
         }
 
         .form-grid {
@@ -236,7 +238,7 @@
 
         .remember-me label {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
         }
 
         .register-button {
@@ -266,7 +268,7 @@
         .signin-prompt {
             text-align: center;
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
         }
 
         .signin-link {
@@ -353,7 +355,8 @@
             }
         }
 
-        /* Dark mode support */
+        /* Dark mode override - commented out to force white background */
+        /*
         @media (prefers-color-scheme: dark) {
             .register-panel {
                 background: #111827;
@@ -390,6 +393,7 @@
                 color: #9ca3af;
             }
         }
+        */
     </style>
 
     <div class="register-container">

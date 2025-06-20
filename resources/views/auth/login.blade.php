@@ -129,7 +129,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            background: #ffffff;
+            background: #ffffff !important; /* Force white background */
         }
 
         .login-form-container {
@@ -145,12 +145,12 @@
         .welcome-title {
             font-size: 1.875rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #1f2937 !important; /* Force dark text */
             margin-bottom: 0.5rem;
         }
 
         .welcome-subtitle {
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
             font-size: 1rem;
         }
 
@@ -163,7 +163,7 @@
             display: block;
             font-size: 0.875rem;
             font-weight: 500;
-            color: #374151;
+            color: #374151 !important; /* Force dark text */
             margin-bottom: 0.5rem;
         }
 
@@ -173,7 +173,8 @@
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 1rem;
-            background-color: #f9fafb;
+            background-color: #f9fafb !important; /* Force light background */
+            color: #1f2937 !important; /* Force dark text */
             transition: all 0.2s ease;
         }
 
@@ -181,7 +182,7 @@
             outline: none;
             border-color: #b91c1c;
             box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
-            background-color: #ffffff;
+            background-color: #ffffff !important; /* Force white background on focus */
         }
 
         .form-row {
@@ -203,7 +204,7 @@
 
         .remember-me label {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
         }
 
         .forgot-password {
@@ -244,7 +245,7 @@
         .signup-prompt {
             text-align: center;
             font-size: 0.875rem;
-            color: #6b7280;
+            color: #6b7280 !important; /* Force gray text */
         }
 
         .signup-link {
@@ -312,7 +313,8 @@
             }
         }
 
-        /* Dark mode support */
+        /* Dark mode override - commented out to force white background */
+        /*
         @media (prefers-color-scheme: dark) {
             .login-panel {
                 background: #111827;
@@ -349,6 +351,7 @@
                 color: #9ca3af;
             }
         }
+        */
     </style>
 
     <div class="login-container">
@@ -445,7 +448,7 @@
                     <div class="form-row">
                         <label class="remember-me">
                             <input type="checkbox" id="remember_me" name="remember" />
-                            <span class="text-white">{{ __('Remember me') }}</span>
+                            <span>{{ __('Remember me') }}</span>
                         </label>
 
                         @if (Route::has('password.request'))
