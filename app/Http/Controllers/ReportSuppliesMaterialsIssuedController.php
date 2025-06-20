@@ -830,6 +830,9 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('A6')->getFont()->setBold(true);
         $sheet->getStyle('B6')->getFont()->setBold(true);
         $sheet->getStyle('B6:E6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Add this line for left alignment:
+        $sheet->getStyle('B6:E6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
 
         $sheet->setCellValue('F6', 'Date:');
         $sheet->setCellValue('G6', $startDate->format('F Y'));
