@@ -745,7 +745,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         return $pdf->download($filename);
     }
 
-
     public function exportExcel(Request $request)
     {
         $month = $request->get('month', Carbon::now()->format('Y-m'));
@@ -831,6 +830,9 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('A6')->getFont()->setBold(true);
         $sheet->getStyle('B6')->getFont()->setBold(true);
         $sheet->getStyle('B6:E6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Add this line for left alignment:
+        $sheet->getStyle('B6:E6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
 
         $sheet->setCellValue('F6', 'Date:');
         $sheet->setCellValue('G6', $startDate->format('F Y'));
@@ -948,7 +950,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ]);
 
         // Recapitulation - Fixed to match template exactly with correct column positioning
-        $currentRow += 3;
+        $currentRow ++;
 
         // First row - "Recapitulation:" spanning columns B-C and "Recapitulation:" spanning columns F-H
         // Column A remains empty
@@ -1047,7 +1049,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $recapStartRow = $currentRow;
         $recapItemCount = 0;
 
-        foreach (array_slice($recapData, 0, 15, true) as $stockNo => $data) {
+        foreach ($recapData as $stockNo => $data) {
             // Column A - empty
             $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
@@ -1078,21 +1080,21 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             $sheet->getStyle("F{$currentRow}:G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            $recapItemCount++;
             $currentRow++;
         }
 
-        // Add empty rows to make it 15 rows total (if less than 15 items)
-        while ($recapItemCount < 15) {
-            // Apply borders to empty rows
-            $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $sheet->getStyle("D{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $sheet->getStyle("F{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-            $recapItemCount++;
-            $currentRow++;
-        }
+        // // Add empty rows to make it 15 rows total (if less than 15 items)
+        // while ($recapItemCount < 15) {
+        //     // Apply borders to empty rows
+        //     $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        //     $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        //     $sheet->getStyle("D{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        //     $sheet->getStyle("F{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        //     $recapItemCount++;
+        //     $currentRow++;
+        // }
 
         // Total row
         // Columns A-E empty
@@ -1115,10 +1117,15 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Apply special alignment for Total label
         $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-        // Signatures
-        $currentRow += 5;
+        // Signatures - Immediately after recapitulation (no gap)
+        $currentRow++; // Just move one row down from the total row
+
+        // Left signature box (A-D)
         $sheet->mergeCells("A{$currentRow}:D" . ($currentRow + 6));
-        $sheet->setCellValue("A{$currentRow}", "I hereby certify to the correctness of the above information.\n\n\n\nALEA MARIE P. DELOSO\nSupply and/or Property Custodian");
+
+        // Add the certification text with underline for signature
+        $certText = "I hereby certify to the correctness of the above information.\n\n\n_____________________________________________\nSignature over Printed Name of Supply and/or\nProperty Custodian";
+        $sheet->setCellValue("A{$currentRow}", $certText);
         $sheet->getStyle("A{$currentRow}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_TOP)
@@ -1126,14 +1133,37 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle("A{$currentRow}:D" . ($currentRow + 6))->getBorders()
             ->getOutline()->setBorderStyle(Border::BORDER_THIN);
 
-        $sheet->mergeCells("E{$currentRow}:H" . ($currentRow + 6));
-        $sheet->setCellValue("E{$currentRow}", "Posted by:\n\n\n_________________________________\nSignature over Printed Name of\nDesignated Accounting Staff\n\n_____________\nDate");
-        $sheet->getStyle("E{$currentRow}")->getAlignment()
+        // Column E - empty with border
+        $sheet->getStyle("E{$currentRow}:E" . ($currentRow + 6))->getBorders()
+            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+
+        // Right side - "Posted by:" label
+        $sheet->setCellValue("F{$currentRow}", "Posted by:");
+        $sheet->getStyle("F{$currentRow}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_TOP);
+
+        // Apply borders to F-H for the entire signature area
+        $sheet->getStyle("F{$currentRow}:H" . ($currentRow + 6))->getBorders()
+            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+
+        // Add underlines and text in the right section
+        $rightSigRow = $currentRow + 3;
+
+        // Merge F-G for the signature line and text
+        $sheet->mergeCells("F{$rightSigRow}:G" . ($rightSigRow + 1));
+        $sheet->setCellValue("F{$rightSigRow}", "___________________________\nDesignated Accounting Staff");
+        $sheet->getStyle("F{$rightSigRow}:G" . ($rightSigRow + 1))->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_TOP)
             ->setWrapText(true);
-        $sheet->getStyle("E{$currentRow}:H" . ($currentRow + 6))->getBorders()
-            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+
+        // Date line and text in column H
+        $sheet->setCellValue("H{$rightSigRow}", "______________\nDate");
+        $sheet->getStyle("H{$rightSigRow}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_TOP)
+            ->setWrapText(true);
 
         // Adjust column widths
         $sheet->getColumnDimension('A')->setWidth(15);

@@ -243,21 +243,21 @@
             };
 
             // Show toast asking user to enable sounds
-            const showAudioPermissionToast = (() => {
-                let hasShownToast = false;
-                return () => {
-                    if (hasShownToast) return;
-                    hasShownToast = true;
+            // const showAudioPermissionToast = (() => {
+            //     let hasShownToast = false;
+            //     return () => {
+            //         if (hasShownToast) return;
+            //         hasShownToast = true;
 
-                    showToastNotification(
-                        'Enable Sound Notifications',
-                        'Click anywhere on the page to enable notification sounds',
-                        'info',
-                        'System',
-                        null
-                    );
-                };
-            })();
+            //         showToastNotification(
+            //             'Enable Sound Notifications',
+            //             'Click anywhere on the page to enable notification sounds',
+            //             'info',
+            //             'System',
+            //             null
+            //         );
+            //     };
+            // })();
 
             // Show browser notification
             const showBrowserNotification = (title, body) => {
