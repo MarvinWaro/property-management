@@ -11,6 +11,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
+// Add this to your imports at the top of your controller
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+
 class ReportSuppliesMaterialsIssuedController extends Controller
 {
     /**
@@ -735,5 +744,397 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $filename = "RSMI-".strtoupper($startDate->format('F-Y'))."-FC{$fundCluster}.pdf";
         return $pdf->download($filename);
     }
+
+
+public function exportExcel(Request $request)
+{
+    $month = $request->get('month', Carbon::now()->format('Y-m'));
+    $departmentId = $request->get('department_id');
+    $fundCluster = $request->get('fund_cluster', '101');
+
+    // Parse month
+    $startDate = Carbon::parse($month . '-01')->startOfMonth();
+    $endDate = Carbon::parse($month . '-01')->endOfMonth();
+
+    // Get transactions (using your existing logic)
+    $transactionsQuery = SupplyTransaction::with(['supply', 'department'])
+        ->where('transaction_type', 'issue')
+        ->whereBetween('transaction_date', [$startDate, $endDate])
+        ->whereHas('supply.stocks', fn($q) => $q->where('fund_cluster', $fundCluster));
+
+    if ($departmentId) {
+        $transactionsQuery->where('department_id', $departmentId);
+    }
+
+    $transactions = $transactionsQuery->get();
+
+    // Group by RIS number (using your existing grouping logic)
+    $reportData = $transactions
+        ->groupBy('reference_no')
+        ->map(fn($items, $risNo) => [
+            'ris_no' => $risNo,
+            'department' => 'CHEDRO XII',
+            'issued_date' => $items->first()->transaction_date,
+            'items' => $items->map(fn($tx) => [
+                'stock_no' => $tx->supply->stock_no,
+                'item_name' => trim(
+                    $tx->supply->item_name .
+                    ($tx->supply->description ? ', ' . $tx->supply->description : '')
+                ),
+                'unit' => $tx->supply->unit_of_measurement,
+                'quantity_issued' => $tx->quantity,
+                'unit_cost' => $tx->unit_cost,
+                'total_cost' => $tx->total_cost,
+            ]),
+        ])
+        ->sortKeys();
+
+    $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
+
+    // Create Excel file
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Set page setup
+    $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+    $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
+    $sheet->getPageMargins()->setTop(0.5)->setRight(0.5)->setLeft(0.5)->setBottom(0.5);
+
+    // Appendix 64 (top right)
+    $sheet->setCellValue('H1', 'Appendix 64');
+    $sheet->getStyle('H1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->getStyle('H1')->getFont()->setItalic(true);
+
+    // Title
+    $sheet->mergeCells('A3:H3');
+    $sheet->setCellValue('A3', 'REPORT OF SUPPLIES AND MATERIALS ISSUED');
+    $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(16);
+    $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    // Entity info
+    $sheet->setCellValue('A5', 'Entity Name:');
+    $sheet->setCellValue('B5', strtoupper($entityName));
+    $sheet->mergeCells('B5:E5');
+    $sheet->getStyle('A5')->getFont()->setBold(true);
+    $sheet->getStyle('B5')->getFont()->setBold(true);
+    $sheet->getStyle('B5:E5')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+    $sheet->setCellValue('F5', 'Serial No.:');
+    $sheet->setCellValue('G5', '');
+    $sheet->mergeCells('G5:H5');
+    $sheet->getStyle('F5')->getFont()->setBold(true);
+    $sheet->getStyle('G5:H5')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+    $sheet->setCellValue('A6', 'Fund Cluster:');
+    $sheet->setCellValue('B6', $fundCluster);
+    $sheet->mergeCells('B6:E6');
+    $sheet->getStyle('A6')->getFont()->setBold(true);
+    $sheet->getStyle('B6')->getFont()->setBold(true);
+    $sheet->getStyle('B6:E6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+    $sheet->setCellValue('F6', 'Date:');
+    $sheet->setCellValue('G6', $startDate->format('F Y'));
+    $sheet->mergeCells('G6:H6');
+    $sheet->getStyle('F6')->getFont()->setBold(true);
+    $sheet->getStyle('G6')->getFont()->setBold(true);
+    $sheet->getStyle('G6:H6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+
+    // Instructions
+    $sheet->setCellValue('A8', 'To be filled up by the Supply and/or Property Division/Unit');
+    $sheet->setCellValue('F8', 'To be filled up by the Accounting Division/Unit');
+    $sheet->getStyle('A8:H8')->getFont()->setItalic(true)->setSize(10);
+
+    // Main table headers
+    $currentRow = 10;
+    $headers = [
+        'A' => "RIS No.",
+        'B' => "Responsibility\nCenter Code",
+        'C' => "Stock No.",
+        'D' => "Item",
+        'E' => "Unit",
+        'F' => "Quantity\nIssued",
+        'G' => "Unit Cost",
+        'H' => "Amount"
+    ];
+
+    foreach ($headers as $col => $header) {
+        $sheet->setCellValue("{$col}{$currentRow}", $header);
+    }
+
+    // Style headers
+    $headerRange = "A{$currentRow}:H{$currentRow}";
+    $sheet->getStyle($headerRange)->applyFromArray([
+        'font' => ['bold' => true, 'size' => 10],
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+            'vertical' => Alignment::VERTICAL_CENTER,
+            'wrapText' => true
+        ],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ]
+    ]);
+    $sheet->getRowDimension($currentRow)->setRowHeight(30);
+
+    // Data rows
+    $currentRow++;
+    $totalAmount = 0;
+    $recapData = [];
+
+    foreach ($reportData as $risData) {
+        foreach ($risData['items'] as $item) {
+            $sheet->setCellValue("A{$currentRow}", $risData['ris_no']);
+            $sheet->setCellValue("B{$currentRow}", ''); // Responsibility Center Code
+            $sheet->setCellValue("C{$currentRow}", $item['stock_no']);
+            $sheet->setCellValue("D{$currentRow}", $item['item_name']);
+            $sheet->setCellValue("E{$currentRow}", $item['unit']);
+            $sheet->setCellValue("F{$currentRow}", $item['quantity_issued']);
+            $sheet->setCellValue("G{$currentRow}", $item['unit_cost']);
+            $sheet->setCellValue("H{$currentRow}", $item['total_cost']);
+
+            // Format numbers
+            $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+
+            // Apply borders
+            $sheet->getStyle("A{$currentRow}:H{$currentRow}")->getBorders()
+                ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            // Alignment
+            $sheet->getStyle("A{$currentRow}:C{$currentRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("E{$currentRow}:F{$currentRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("G{$currentRow}:H{$currentRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+            $totalAmount += $item['total_cost'];
+
+            // Build recap data
+            $stockNo = $item['stock_no'];
+            if (!isset($recapData[$stockNo])) {
+                $recapData[$stockNo] = [
+                    'quantity' => 0,
+                    'unit_cost' => $item['unit_cost'],
+                    'total_cost' => 0,
+                ];
+            }
+            $recapData[$stockNo]['quantity'] += $item['quantity_issued'];
+            $recapData[$stockNo]['total_cost'] += $item['total_cost'];
+
+            $currentRow++;
+        }
+    }
+
+    // Total row
+    $sheet->mergeCells("A{$currentRow}:G{$currentRow}");
+    $sheet->setCellValue("H{$currentRow}", $totalAmount);
+    $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle("A{$currentRow}:H{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
+    ]);
+
+    // Recapitulation - Fixed to match template exactly
+    $currentRow += 3;
+
+    // First row - "Recapitulation:" spanning columns A-C and "Recapitulation:" spanning columns E-H
+    $sheet->mergeCells("A{$currentRow}:C{$currentRow}");
+    $sheet->setCellValue("A{$currentRow}", 'Recapitulation:');
+    $sheet->getStyle("A{$currentRow}:C{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 11],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+    ]);
+
+    $sheet->mergeCells("E{$currentRow}:H{$currentRow}");
+    $sheet->setCellValue("E{$currentRow}", 'Recapitulation:');
+    $sheet->getStyle("E{$currentRow}:H{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 11],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+    ]);
+
+    // Headers row
+    $currentRow++;
+
+    // Left side headers
+    $sheet->setCellValue("A{$currentRow}", 'Stock No.');
+    $sheet->mergeCells("B{$currentRow}:C{$currentRow}");
+    $sheet->setCellValue("B{$currentRow}", 'Quantity');
+
+    // Apply style to left headers
+    $sheet->getStyle("A{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 10],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+    ]);
+
+    $sheet->getStyle("B{$currentRow}:C{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 10],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+    ]);
+
+    // Right side headers
+    $sheet->setCellValue("E{$currentRow}", 'Unit Cost');
+    $sheet->setCellValue("F{$currentRow}", 'Total Cost');
+    $sheet->setCellValue("G{$currentRow}", 'UACS Object Code');
+
+    // Apply style to right headers
+    $sheet->getStyle("E{$currentRow}:G{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true, 'size' => 10],
+        'fill' => [
+            'fillType' => Fill::FILL_SOLID,
+            'color' => ['rgb' => 'F0F0F0']
+        ],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+    ]);
+
+    // Leave H column empty but with border
+    $sheet->getStyle("H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+    // Data rows - only show up to 15 items as in template
+    $currentRow++;
+    $recapStartRow = $currentRow;
+    $recapItemCount = 0;
+
+    foreach (array_slice($recapData, 0, 15, true) as $stockNo => $data) {
+        // Left side - Stock No. and Quantity
+        $sheet->setCellValue("A{$currentRow}", $stockNo);
+        $sheet->mergeCells("B{$currentRow}:C{$currentRow}");
+        $sheet->setCellValue("B{$currentRow}", $data['quantity']);
+
+        // Right side - Unit Cost and Total Cost
+        $sheet->setCellValue("E{$currentRow}", $data['unit_cost']);
+        $sheet->setCellValue("F{$currentRow}", $data['total_cost']);
+        $sheet->setCellValue("G{$currentRow}", ''); // UACS Object Code - leave empty
+
+        // Format numbers
+        $sheet->getStyle("B{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+
+        // Apply borders to all cells in the row
+        $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // Alignment
+        $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("E{$currentRow}:F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $recapItemCount++;
+        $currentRow++;
+    }
+
+    // Add empty rows to make it 15 rows total (if less than 15 items)
+    while ($recapItemCount < 15) {
+        // Apply borders to empty rows
+        $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        $recapItemCount++;
+        $currentRow++;
+    }
+
+    // Total row
+    $sheet->setCellValue("E{$currentRow}", 'Total:');
+    $sheet->setCellValue("F{$currentRow}", $totalAmount);
+    $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+
+    // Apply style to total row
+    $sheet->getStyle("A{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle("E{$currentRow}:H{$currentRow}")->applyFromArray([
+        'font' => ['bold' => true],
+        'borders' => [
+            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+        ],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
+    ]);
+
+    // Signatures
+    $currentRow += 5;
+    $sheet->mergeCells("A{$currentRow}:D" . ($currentRow + 6));
+    $sheet->setCellValue("A{$currentRow}", "I hereby certify to the correctness of the above information.\n\n\n\nALEA MARIE P. DELOSO\nSupply and/or Property Custodian");
+    $sheet->getStyle("A{$currentRow}")->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        ->setVertical(Alignment::VERTICAL_TOP)
+        ->setWrapText(true);
+    $sheet->getStyle("A{$currentRow}:D" . ($currentRow + 6))->getBorders()
+        ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+
+    $sheet->mergeCells("E{$currentRow}:H" . ($currentRow + 6));
+    $sheet->setCellValue("E{$currentRow}", "Posted by:\n\n\n_________________________________\nSignature over Printed Name of\nDesignated Accounting Staff\n\n_____________\nDate");
+    $sheet->getStyle("E{$currentRow}")->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+        ->setVertical(Alignment::VERTICAL_TOP)
+        ->setWrapText(true);
+    $sheet->getStyle("E{$currentRow}:H" . ($currentRow + 6))->getBorders()
+        ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+
+    // Adjust column widths
+    $sheet->getColumnDimension('A')->setWidth(15);
+    $sheet->getColumnDimension('B')->setWidth(10);
+    $sheet->getColumnDimension('C')->setWidth(10);
+    $sheet->getColumnDimension('D')->setWidth(35);
+    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('F')->setWidth(12);
+    $sheet->getColumnDimension('G')->setWidth(15);
+    $sheet->getColumnDimension('H')->setWidth(12);
+
+    // Write file
+    $writer = new Xlsx($spreadsheet);
+    $filename = 'RSMI_Report_' . $startDate->format('Y_m') . '.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment;filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
+    exit;
+}
 
 }
