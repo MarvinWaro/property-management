@@ -20,6 +20,9 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
+use PhpOffice\PhpSpreadsheet\RichText\Run;
+
 class ReportSuppliesMaterialsIssuedController extends Controller
 {
     /**
@@ -833,7 +836,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Add this line for left alignment:
         $sheet->getStyle('B6:E6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-
         $sheet->setCellValue('F6', 'Date:');
         $sheet->setCellValue('G6', $startDate->format('F Y'));
         $sheet->mergeCells('G6:H6');
@@ -1083,19 +1085,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             $currentRow++;
         }
 
-
-        // // Add empty rows to make it 15 rows total (if less than 15 items)
-        // while ($recapItemCount < 15) {
-        //     // Apply borders to empty rows
-        //     $sheet->getStyle("A{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle("D{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle("F{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        //     $recapItemCount++;
-        //     $currentRow++;
-        // }
-
         // Total row
         // Columns A-E empty
         $sheet->getStyle("A{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
@@ -1123,9 +1112,18 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Left signature box (A-D)
         $sheet->mergeCells("A{$currentRow}:D" . ($currentRow + 6));
 
-        // Add the certification text with underline for signature
-        $certText = "I hereby certify to the correctness of the above information.\n\n\n_____________________________________________\nSignature over Printed Name of Supply and/or\nProperty Custodian";
-        $sheet->setCellValue("A{$currentRow}", $certText);
+        // Add the certification text with actual name
+        $certRichText = new RichText();
+        $certRichText->createText("I hereby certify to the correctness of the above information.\n\n\n");
+
+        // Underlined name part
+        $underlined = $certRichText->createTextRun("ALEA MARIE P. DELOSO");
+        $underlined->getFont()->setUnderline(true)->setBold(true);
+
+        // Add the title below the name
+        $certRichText->createText("\nSupply and/or Property Custodian");
+
+        $sheet->setCellValue("A{$currentRow}", $certRichText); // <-- use $certRichText
         $sheet->getStyle("A{$currentRow}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_TOP)
@@ -1152,7 +1150,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         // Merge F-G for the signature line and text
         $sheet->mergeCells("F{$rightSigRow}:G" . ($rightSigRow + 1));
-        $sheet->setCellValue("F{$rightSigRow}", "___________________________\nDesignated Accounting Staff");
+        $sheet->setCellValue("F{$rightSigRow}", "___________________________\nSignature over Printed Name of\nDesignated Accounting Staff");
         $sheet->getStyle("F{$rightSigRow}:G" . ($rightSigRow + 1))->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_TOP)
