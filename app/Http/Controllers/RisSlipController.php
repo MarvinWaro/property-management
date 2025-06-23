@@ -20,6 +20,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+
 class RisSlipController extends Controller
 {
     /**
@@ -568,7 +570,7 @@ class RisSlipController extends Controller
     }
 
     /**
-     * Export RIS to Excel
+     * Export RIS to Excel with E-Signature Images
      */
     public function exportExcel(RisSlip $risSlip)
     {
@@ -594,23 +596,24 @@ class RisSlipController extends Controller
 
         $currentRow = 5;
 
-        // Entity Information Table
+        // Entity Information Section (NO BORDERS - just underlines like the template)
         // First row - Entity Name and Fund Cluster
         $sheet->setCellValue("A{$currentRow}", "Entity Name:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("B{$currentRow}:D{$currentRow}");
+        $sheet->mergeCells("B{$currentRow}:F{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", $risSlip->entity_name);
-        $sheet->getStyle("A{$currentRow}:D{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        // Add underline only (no full borders)
+        $sheet->getStyle("B{$currentRow}:F{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
 
-        $sheet->setCellValue("E{$currentRow}", "Fund Cluster:");
-        $sheet->getStyle("E{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("F{$currentRow}:H{$currentRow}");
-        $sheet->setCellValue("F{$currentRow}", $risSlip->fund_cluster);
-        $sheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->setCellValue("G{$currentRow}", "Fund Cluster:");
+        $sheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
+        $sheet->setCellValue("H{$currentRow}", $risSlip->fund_cluster);
+        // Add underline only (no full borders)
+        $sheet->getStyle("H{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
 
         $currentRow++;
 
-        // Second row - Division and Responsibility Center Code
+        // Second row - Division and Responsibility Center Code (with borders)
         $sheet->setCellValue("A{$currentRow}", "Division:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
         $sheet->mergeCells("B{$currentRow}:D{$currentRow}");
@@ -625,7 +628,7 @@ class RisSlipController extends Controller
 
         $currentRow++;
 
-        // Third row - Office and RIS No.
+        // Third row - Office and RIS No. (with borders)
         $sheet->setCellValue("A{$currentRow}", "Office:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
         $sheet->mergeCells("B{$currentRow}:D{$currentRow}");
@@ -638,7 +641,7 @@ class RisSlipController extends Controller
         $sheet->setCellValue("F{$currentRow}", $risSlip->ris_no);
         $sheet->getStyle("E{$currentRow}:H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $currentRow += 2; // Add space
+        $currentRow ++; // Add space
 
         // Main items table headers
         // First header row with merged sections
@@ -749,15 +752,15 @@ class RisSlipController extends Controller
             $currentRow++;
         }
 
-        // Add empty rows to match template format (minimum 10 rows total)
-        $emptyRowsToAdd = max(10 - count($risSlip->items), 0);
-        for ($i = 0; $i < $emptyRowsToAdd; $i++) {
-            $sheet->getStyle("A{$currentRow}:H{$currentRow}")->getBorders()
-                ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $currentRow++;
-        }
+        // // Add empty rows to match template format (minimum 10 rows total)
+        // $emptyRowsToAdd = max(10 - count($risSlip->items), 0);
+        // for ($i = 0; $i < $emptyRowsToAdd; $i++) {
+        //     $sheet->getStyle("A{$currentRow}:H{$currentRow}")->getBorders()
+        //         ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        //     $currentRow++;
+        // }
 
-        $currentRow += 1; // Add small space before purpose
+        // $currentRow += 1; // Add small space before purpose
 
         // Purpose section
         $sheet->setCellValue("A{$currentRow}", "Purpose:");
@@ -833,57 +836,128 @@ class RisSlipController extends Controller
         $sheet->getStyle("A{$currentRow}:B{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        // Requested by (Column C)
-        $requestedSignature = '';
-        if ($risSlip->requester && $risSlip->requester_signature_type == 'esign') {
-            $requestedSignature = '[E-Signature]';
-        } elseif ($risSlip->requester) {
-            $requestedSignature = 'SGD';
-        }
-        $sheet->setCellValue("C{$currentRow}", $requestedSignature);
+        // Set higher row height for signature images
+        $sheet->getRowDimension($currentRow)->setRowHeight(50);
+
+        // Apply borders to all signature cells first
         $sheet->getStyle("C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle("C{$currentRow}")->getFont()->setItalic(true)->setBold(true);
-
-        // Approved by (Columns D-E)
-        $approvedSignature = '';
-        if ($risSlip->approved_by && $risSlip->approver_signature_type == 'esign') {
-            $approvedSignature = '[E-Signature]';
-        } elseif ($risSlip->approved_by) {
-            $approvedSignature = 'SGD';
-        }
-        $sheet->mergeCells("D{$currentRow}:E{$currentRow}");
-        $sheet->setCellValue("D{$currentRow}", $approvedSignature);
         $sheet->getStyle("D{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle("D{$currentRow}")->getFont()->setItalic(true)->setBold(true);
-
-        // Issued by (Columns F-G)
-        $issuedSignature = '';
-        if ($risSlip->issued_by && $risSlip->issuer_signature_type == 'esign') {
-            $issuedSignature = '[E-Signature]';
-        } elseif ($risSlip->issued_by) {
-            $issuedSignature = 'SGD';
-        }
-        $sheet->mergeCells("F{$currentRow}:G{$currentRow}");
-        $sheet->setCellValue("F{$currentRow}", $issuedSignature);
         $sheet->getStyle("F{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle("F{$currentRow}")->getFont()->setItalic(true)->setBold(true);
-
-        // Received by (Column H)
-        $receivedSignature = '';
-        if ($risSlip->received_at && $risSlip->receiver_signature_type == 'esign') {
-            $receivedSignature = '[E-Signature]';
-        } elseif ($risSlip->received_at) {
-            $receivedSignature = 'SGD';
-        }
-        $sheet->setCellValue("H{$currentRow}", $receivedSignature);
         $sheet->getStyle("H{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle("H{$currentRow}")->getFont()->setItalic(true)->setBold(true);
 
-        $sheet->getRowDimension($currentRow)->setRowHeight(40); // Space for signatures
+        // Requested by (Column C) - IMAGE OR SGD
+        if ($risSlip->requester && $risSlip->requester_signature_type == 'esign' && $risSlip->requester->signature_path) {
+            try {
+                $signaturePath = storage_path('app/public/' . $risSlip->requester->signature_path);
+                if (file_exists($signaturePath)) {
+                    $drawing = new Drawing();
+                    $drawing->setName('Requester Signature');
+                    $drawing->setDescription('Requester Signature');
+                    $drawing->setPath($signaturePath);
+                    $drawing->setHeight(35);
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setCoordinates("C{$currentRow}");
+                    $drawing->setWorksheet($sheet);
+                } else {
+                    $sheet->setCellValue("C{$currentRow}", "SGD");
+                    $sheet->getStyle("C{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+                }
+            } catch (Exception $e) {
+                $sheet->setCellValue("C{$currentRow}", "SGD");
+                $sheet->getStyle("C{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+            }
+        } elseif ($risSlip->requester) {
+            $sheet->setCellValue("C{$currentRow}", "SGD");
+            $sheet->getStyle("C{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+        }
+        $sheet->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Approved by (Columns D-E) - IMAGE OR SGD
+        $sheet->mergeCells("D{$currentRow}:E{$currentRow}");
+        if ($risSlip->approved_by && $risSlip->approver_signature_type == 'esign' && $risSlip->approver && $risSlip->approver->signature_path) {
+            try {
+                $signaturePath = storage_path('app/public/' . $risSlip->approver->signature_path);
+                if (file_exists($signaturePath)) {
+                    $drawing = new Drawing();
+                    $drawing->setName('Approver Signature');
+                    $drawing->setDescription('Approver Signature');
+                    $drawing->setPath($signaturePath);
+                    $drawing->setHeight(35);
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setCoordinates("D{$currentRow}");
+                    $drawing->setWorksheet($sheet);
+                } else {
+                    $sheet->setCellValue("D{$currentRow}", "SGD");
+                    $sheet->getStyle("D{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+                }
+            } catch (Exception $e) {
+                $sheet->setCellValue("D{$currentRow}", "SGD");
+                $sheet->getStyle("D{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+            }
+        } elseif ($risSlip->approved_by) {
+            $sheet->setCellValue("D{$currentRow}", "SGD");
+            $sheet->getStyle("D{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+        }
+        $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Issued by (Columns F-G) - IMAGE OR SGD
+        $sheet->mergeCells("F{$currentRow}:G{$currentRow}");
+        if ($risSlip->issued_by && $risSlip->issuer_signature_type == 'esign' && $risSlip->issuer && $risSlip->issuer->signature_path) {
+            try {
+                $signaturePath = storage_path('app/public/' . $risSlip->issuer->signature_path);
+                if (file_exists($signaturePath)) {
+                    $drawing = new Drawing();
+                    $drawing->setName('Issuer Signature');
+                    $drawing->setDescription('Issuer Signature');
+                    $drawing->setPath($signaturePath);
+                    $drawing->setHeight(35);
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setCoordinates("F{$currentRow}");
+                    $drawing->setWorksheet($sheet);
+                } else {
+                    $sheet->setCellValue("F{$currentRow}", "SGD");
+                    $sheet->getStyle("F{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+                }
+            } catch (Exception $e) {
+                $sheet->setCellValue("F{$currentRow}", "SGD");
+                $sheet->getStyle("F{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+            }
+        } elseif ($risSlip->issued_by) {
+            $sheet->setCellValue("F{$currentRow}", "SGD");
+            $sheet->getStyle("F{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+        }
+        $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Received by (Column H) - IMAGE OR SGD
+        if ($risSlip->received_at && $risSlip->receiver_signature_type == 'esign' && $risSlip->receiver && $risSlip->receiver->signature_path) {
+            try {
+                $signaturePath = storage_path('app/public/' . $risSlip->receiver->signature_path);
+                if (file_exists($signaturePath)) {
+                    $drawing = new Drawing();
+                    $drawing->setName('Receiver Signature');
+                    $drawing->setDescription('Receiver Signature');
+                    $drawing->setPath($signaturePath);
+                    $drawing->setHeight(35);
+                    $drawing->setOffsetX(10);
+                    $drawing->setOffsetY(5);
+                    $drawing->setCoordinates("H{$currentRow}");
+                    $drawing->setWorksheet($sheet);
+                } else {
+                    $sheet->setCellValue("H{$currentRow}", "SGD");
+                    $sheet->getStyle("H{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+                }
+            } catch (Exception $e) {
+                $sheet->setCellValue("H{$currentRow}", "SGD");
+                $sheet->getStyle("H{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+            }
+        } elseif ($risSlip->received_at) {
+            $sheet->setCellValue("H{$currentRow}", "SGD");
+            $sheet->getStyle("H{$currentRow}")->getFont()->setItalic(true)->setBold(true);
+        }
+        $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
         $currentRow++;
 
@@ -1004,14 +1078,14 @@ class RisSlipController extends Controller
         $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Adjust column widths
-        $sheet->getColumnDimension('A')->setWidth(12);  // Stock No
+        $sheet->getColumnDimension('A')->setWidth(12);  // Stock No / Labels
         $sheet->getColumnDimension('B')->setWidth(10);  // Unit
-        $sheet->getColumnDimension('C')->setWidth(30);  // Description
-        $sheet->getColumnDimension('D')->setWidth(10);  // Quantity
-        $sheet->getColumnDimension('E')->setWidth(8);   // Yes
-        $sheet->getColumnDimension('F')->setWidth(8);   // No
-        $sheet->getColumnDimension('G')->setWidth(10);  // Issue Quantity
-        $sheet->getColumnDimension('H')->setWidth(15);  // Remarks
+        $sheet->getColumnDimension('C')->setWidth(30);  // Description / Requested by
+        $sheet->getColumnDimension('D')->setWidth(10);  // Quantity / Approved by (part 1)
+        $sheet->getColumnDimension('E')->setWidth(10);  // Yes / Approved by (part 2)
+        $sheet->getColumnDimension('F')->setWidth(10);  // No / Issued by (part 1)
+        $sheet->getColumnDimension('G')->setWidth(10);  // Issue Quantity / Issued by (part 2)
+        $sheet->getColumnDimension('H')->setWidth(18);  // Remarks / Received by (wider to prevent overflow)
 
         // Write file
         $writer = new Xlsx($spreadsheet);
@@ -1025,6 +1099,6 @@ class RisSlipController extends Controller
         exit;
     }
 
-    
+
 }
 
