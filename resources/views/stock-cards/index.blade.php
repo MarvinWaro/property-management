@@ -77,7 +77,12 @@
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <a href="{{ route('stock-cards.show', $supply->supply_id) }}"
-                                                class="px-3 py-2 text-xs font-medium text-white bg-[#10b981] rounded-lg hover:bg-[#059669] focus:ring-2 focus:outline-none focus:ring-[#10b981]/30 transition-all duration-200 shadow-sm">
+                                            class="inline-block w-auto whitespace-nowrap
+                                                    px-3 py-2 text-xs font-medium text-white
+                                                    bg-[#10b981] rounded-lg
+                                                    hover:bg-[#059669]
+                                                    focus:ring-2 focus:outline-none focus:ring-[#10b981]/30
+                                                    transition-all duration-200 shadow-sm">
                                                 View Stock Card
                                             </a>
                                         </td>
