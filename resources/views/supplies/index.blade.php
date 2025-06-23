@@ -148,7 +148,7 @@
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Stock No</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Item Details</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Division</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Unit</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Reorder Point</th>
                                             @if(auth()->user()->hasRole('admin'))

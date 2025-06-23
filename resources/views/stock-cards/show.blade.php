@@ -1,21 +1,39 @@
 <!-- stock-cards/show.blade.php -->
 <x-app-layout>
     <x-slot name="header">
+        <!-- Replace your current single button with this section -->
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Stock Card: {{ $supply->item_name }}
             </h2>
-            <a href="{{ route('stock-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                <span class="flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span>Export as PDF</span>
-                </span>
-            </a>
+
+            <div class="flex space-x-2">
+                <!-- PDF Export Button -->
+                <a href="{{ route('stock-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span>Export as PDF</span>
+                    </span>
+                </a>
+
+                <!-- Excel Export Button -->
+                <a href="{{ route('stock-cards.export-excel', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <span class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Export as Excel</span>
+                    </span>
+                </a>
+            </div>
         </div>
     </x-slot>
 

@@ -18,9 +18,9 @@
                     </span>
                 </a>
 
-                <!-- Excel Export Button -->
-                <button onclick="exportSupplyLedgerExcel()" type="button"
-                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <!-- Replace your Excel Export Button with this direct link approach -->
+                <a href="{{ route('supply-ledger-cards.export-excel', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                     <span class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -29,13 +29,13 @@
                         </svg>
                         <span>Export as Excel</span>
                     </span>
-                </button>
+                </a>
 
-                <!-- Test Button (remove this after testing) -->
+                {{-- <!-- Test Button (remove this after testing) -->
                 <button onclick="testExcelExport()" type="button"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                     <span>Test Excel</span>
-                </button>
+                </button> --}}
             </div>
         </div>
     </x-slot>
