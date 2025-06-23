@@ -80,6 +80,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');
     Route::get('/stock-cards/{supplyId}', [StockCardController::class, 'show'])->name('stock-cards.show');
     Route::get('/stock-cards/{supplyId}/export-pdf', [StockCardController::class, 'exportPdf'])->name('stock-cards.export-pdf');
+    Route::get('/stock-cards/{supplyId}/export-excel', [StockCardController::class, 'exportExcel'])->name('stock-cards.export-excel');
 
     // Supply Ledger Card routes
     Route::get('/supply-ledger-cards', [App\Http\Controllers\SupplyLedgerCardController::class, 'index'])->name('supply-ledger-cards.index');

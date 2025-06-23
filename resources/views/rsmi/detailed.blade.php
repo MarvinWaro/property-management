@@ -123,7 +123,7 @@
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
                                             <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">RIS No.</th>
-                                            <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Department</th>
+                                            <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Division</th>
                                             <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Date</th>
                                             <th scope="col" class="px-4 py-2 text-right font-bold text-gray-800 dark:text-gray-200">Quantity</th>
                                             <th scope="col" class="px-4 py-2 text-right font-bold text-gray-800 dark:text-gray-200">Unit Cost</th>
