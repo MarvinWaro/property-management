@@ -8,6 +8,8 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/ched-logo-180x180.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -76,7 +78,7 @@
             z-index: 10;
         }
 
-        /* Toast container styles */
+        /* Updated Toast container styles */
         #toast-container {
             position: fixed;
             top: 1rem;
@@ -84,6 +86,63 @@
             z-index: 50;
             max-width: 384px;
             width: 100%;
+        }
+
+        .toast-wrapper {
+            position: relative;
+        }
+
+        .toast-stack-indicator {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .toast-stack-indicator:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateX(-5px);
+        }
+
+        .toast-stack-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-bottom: 0;
+            transition: all 0.3s ease-out;
+        }
+
+        .toast-stack-expanded {
+            max-height: 2000px;
+            opacity: 1;
+            transition: all 0.3s ease-in;
+        }
+
+        .toast-notification {
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .toast-notification.stacked {
+            transform: scale(0.95);
+            margin-bottom: -60px;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .toast-notification.stacked:nth-child(2) {
+            transform: scale(0.97) translateY(5px);
+        }
+
+        .toast-notification.stacked:nth-child(3) {
+            transform: scale(0.94) translateY(10px);
         }
 
         .toast-slide-in {
@@ -114,6 +173,15 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+        }
+
+        /* Expand/collapse animation for stack indicator */
+        .expand-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
         }
     </style>
 
@@ -202,6 +270,131 @@
             let userHasInteracted = false;
             let soundEnabled = localStorage.getItem('notificationSoundEnabled') !== 'false';
 
+            // Notification management variables
+            let notifications = [];
+            let isStackExpanded = false;
+            const MAX_VISIBLE_NOTIFICATIONS = 3;
+
+            // Tab notification system
+            let originalTitle = document.title;
+            let tabNotificationCount = 0;
+            let isTabActive = true;
+            let tabNotificationInterval = null;
+            let lastNotificationPreview = '';
+
+            // Track tab visibility
+            document.addEventListener('visibilitychange', function() {
+                isTabActive = !document.hidden;
+                if (isTabActive) {
+                    resetTabNotification();
+                }
+            });
+
+            window.addEventListener('focus', function() {
+                isTabActive = true;
+                resetTabNotification();
+            });
+
+            window.addEventListener('blur', function() {
+                isTabActive = false;
+            });
+
+            // Update tab title with notification count
+            const updateTabTitle = () => {
+                if (tabNotificationCount > 0 && !isTabActive) {
+                    // Clear existing interval
+                    if (tabNotificationInterval) {
+                        clearInterval(tabNotificationInterval);
+                    }
+
+                    let showCount = true;
+                    // Immediately show count
+                    document.title = `(${tabNotificationCount}) {{ config('app.name', 'Laravel') }}`;
+
+                    // Start alternating between count and preview
+                    tabNotificationInterval = setInterval(() => {
+                        if (showCount) {
+                            document.title = `(${tabNotificationCount}) {{ config('app.name', 'Laravel') }}`;
+                        } else {
+                            document.title = lastNotificationPreview || `(${tabNotificationCount}) New notification${tabNotificationCount > 1 ? 's' : ''}`;
+                        }
+                        showCount = !showCount;
+                    }, 2000);
+
+                    // Update favicon with notification badge
+                    updateFaviconBadge();
+                }
+            };
+
+            // Reset tab notification
+            const resetTabNotification = () => {
+                tabNotificationCount = 0;
+                document.title = originalTitle;
+                if (tabNotificationInterval) {
+                    clearInterval(tabNotificationInterval);
+                    tabNotificationInterval = null;
+                }
+                lastNotificationPreview = '';
+                resetFavicon();
+            };
+
+            // Add notification badge to favicon
+            const updateFaviconBadge = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 32;
+                canvas.height = 32;
+                const ctx = canvas.getContext('2d');
+
+                const faviconPath = '{{ asset("favicon.ico") }}';
+
+                const favicon = document.querySelector("link[rel='icon']") || document.querySelector("link[rel='shortcut icon']");
+                const newFavicon = document.createElement('link');
+                const img = new Image();
+
+                img.onload = function() {
+                    // Draw original favicon
+                    ctx.drawImage(img, 0, 0, 32, 32);
+
+                    // Draw red notification circle
+                    ctx.fillStyle = '#dc2626'; // red-600
+                    ctx.beginPath();
+                    ctx.arc(24, 8, 8, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // Draw white border
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    // Draw count text
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const displayCount = tabNotificationCount > 9 ? '9+' : tabNotificationCount.toString();
+                    ctx.fillText(displayCount, 24, 8);
+
+                    // Update favicon
+                    newFavicon.rel = 'icon';
+                    newFavicon.href = canvas.toDataURL('image/png');
+
+                    if (favicon) {
+                        favicon.parentNode.removeChild(favicon);
+                    }
+                    document.head.appendChild(newFavicon);
+                };
+
+                img.src = faviconPath;
+            };
+
+            // Reset favicon to original
+            const resetFavicon = () => {
+                const favicon = document.querySelector("link[rel='icon']");
+                if (favicon) {
+                    favicon.href = faviconPath;
+                }
+            };
+
             // Listen for first user interaction
             const enableAudioOnInteraction = () => {
                 userHasInteracted = true;
@@ -242,23 +435,6 @@
                 });
             };
 
-            // Show toast asking user to enable sounds
-            // const showAudioPermissionToast = (() => {
-            //     let hasShownToast = false;
-            //     return () => {
-            //         if (hasShownToast) return;
-            //         hasShownToast = true;
-
-            //         showToastNotification(
-            //             'Enable Sound Notifications',
-            //             'Click anywhere on the page to enable notification sounds',
-            //             'info',
-            //             'System',
-            //             null
-            //         );
-            //     };
-            // })();
-
             // Show browser notification
             const showBrowserNotification = (title, body) => {
                 if (!("Notification" in window)) {
@@ -286,9 +462,75 @@
                 }
             };
 
+            // New function to manage notification stack
+            const updateNotificationDisplay = () => {
+                const toastContainer = document.getElementById('toast-container');
+                const existingWrapper = document.querySelector('.toast-wrapper');
+
+                if (existingWrapper) {
+                    existingWrapper.remove();
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'toast-wrapper';
+
+                // If we have more than MAX_VISIBLE_NOTIFICATIONS, show stack indicator
+                if (notifications.length > MAX_VISIBLE_NOTIFICATIONS) {
+                    const hiddenCount = notifications.length - MAX_VISIBLE_NOTIFICATIONS;
+                    const stackIndicator = document.createElement('div');
+                    stackIndicator.className = 'toast-stack-indicator';
+                    stackIndicator.innerHTML = `
+                        <span>${hiddenCount} more notification${hiddenCount > 1 ? 's' : ''}</span>
+                        <svg class="expand-icon w-4 h-4 ${isStackExpanded ? 'rotated' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    `;
+                    stackIndicator.onclick = toggleStack;
+                    wrapper.appendChild(stackIndicator);
+
+                    // Container for hidden notifications
+                    const hiddenContainer = document.createElement('div');
+                    hiddenContainer.className = `toast-stack-${isStackExpanded ? 'expanded' : 'collapsed'}`;
+                    hiddenContainer.id = 'hidden-notifications';
+
+                    // Add hidden notifications
+                    for (let i = MAX_VISIBLE_NOTIFICATIONS; i < notifications.length; i++) {
+                        const notifElement = createNotificationElement(notifications[i]);
+                        hiddenContainer.appendChild(notifElement);
+                    }
+                    wrapper.appendChild(hiddenContainer);
+                }
+
+                // Add visible notifications
+                for (let i = 0; i < Math.min(notifications.length, MAX_VISIBLE_NOTIFICATIONS); i++) {
+                    const notifElement = createNotificationElement(notifications[i]);
+                    if (i > 0 && !isStackExpanded && notifications.length > MAX_VISIBLE_NOTIFICATIONS) {
+                        notifElement.classList.add('stacked');
+                    }
+                    wrapper.appendChild(notifElement);
+                }
+
+                toastContainer.appendChild(wrapper);
+                updateToastTimestamps();
+            };
+
+            // Create notification element
+            const createNotificationElement = (notification) => {
+                const div = document.createElement('div');
+                div.innerHTML = notification.html;
+                const notifElement = div.firstElementChild;
+                notifElement.classList.add('toast-notification');
+                return notifElement;
+            };
+
+            // Toggle stack expansion
+            const toggleStack = () => {
+                isStackExpanded = !isStackExpanded;
+                updateNotificationDisplay();
+            };
+
             // Show Flowbite toast notification
             const showToastNotification = (title, text, icon = 'info', userName = 'System', userImage = null) => {
-                const toastContainer = document.getElementById('toast-container');
                 const toastId = 'toast-' + Date.now();
                 const timestamp = new Date();
 
@@ -335,7 +577,7 @@
                 }
 
                 const toastHtml = `
-                    <div id="${toastId}" class="w-full max-w-xs p-4 mb-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${timestamp.getTime()}">
+                    <div id="${toastId}" class="w-full max-w-xs p-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${timestamp.getTime()}">
                         <div class="flex items-center mb-3">
                             <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">${title}</span>
                             <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="closeToast('${toastId}')" aria-label="Close">
@@ -370,10 +612,22 @@
                     </div>
                 `;
 
-                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                // Add to notifications array at the beginning
+                notifications.unshift({
+                    id: toastId,
+                    html: toastHtml,
+                    timestamp: timestamp
+                });
 
-                // Notifications stay visible until manually closed
-                // No auto-close timer - user must click X to dismiss
+                // Update the display
+                updateNotificationDisplay();
+
+                // Update tab notification if tab is not active
+                if (!isTabActive) {
+                    tabNotificationCount++;
+                    lastNotificationPreview = `💬 ${title}`;
+                    updateTabTitle();
+                }
             };
 
             // Function to calculate time difference like Laravel's diffForHumans()
@@ -421,23 +675,40 @@
 
             // Close toast function
             window.closeToast = function(toastId) {
-                const toast = document.getElementById(toastId);
-                if (toast) {
-                    toast.classList.remove('toast-slide-in');
-                    toast.classList.add('toast-slide-out');
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 300);
+                // Remove from notifications array
+                notifications = notifications.filter(n => n.id !== toastId);
+
+                // Update display
+                updateNotificationDisplay();
+
+                // Recalculate tab notification count
+                if (!isTabActive && notifications.length < tabNotificationCount) {
+                    tabNotificationCount = notifications.length;
+                    if (tabNotificationCount === 0) {
+                        resetTabNotification();
+                    } else {
+                        updateTabTitle();
+                    }
                 }
             };
 
             // Add function to close all toasts (useful for testing/cleanup)
             window.closeAllToasts = function() {
-                const toasts = document.querySelectorAll('[id^="toast-"]');
-                toasts.forEach(toast => {
-                    closeToast(toast.id);
-                });
+                notifications = [];
+                updateNotificationDisplay();
+                resetTabNotification();
             };
+
+            // Clear old notifications (optional - keeps last 20)
+            const clearOldNotifications = () => {
+                if (notifications.length > 20) {
+                    notifications = notifications.slice(0, 20);
+                    updateNotificationDisplay();
+                }
+            };
+
+            // Call clearOldNotifications periodically
+            setInterval(clearOldNotifications, 60000); // Every minute
 
             // Load saved notification preferences
             const loadNotificationPreferences = () => {
@@ -743,43 +1014,43 @@
             window.testTimestampUpdate = function() {
                 // Create a notification that appears to be 2 minutes old
                 const oldTime = new Date(Date.now() - 2 * 60 * 1000); // 2 minutes ago
-                const toastContainer = document.getElementById('toast-container');
-                const toastId = 'toast-old-' + Date.now();
 
-                const toastHtml = `
-                    <div id="${toastId}" class="w-full max-w-xs p-4 mb-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${oldTime.getTime()}">
-                        <div class="flex items-center mb-3">
-                            <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Old Notification</span>
-                            <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="closeToast('${toastId}')" aria-label="Close">
-                                <span class="sr-only">Close</span>
-                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="relative inline-block shrink-0">
-                                <img class="w-12 h-12 rounded-full object-cover" src="/favicon.ico" alt="System image">
-                                <span class="absolute bottom-0 right-0 inline-flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full">
-                                    <svg class="w-3 h-3 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18" fill="currentColor">
-                                        <path d="M18 4H16V9C16 10.0609 15.5786 11.0783 14.8284 11.8284C14.0783 12.5786 13.0609 13 12 13H9L6.846 14.615C7.17993 14.8628 7.58418 14.9977 8 15H11.667L15.4 17.8C15.5731 17.9298 15.7836 18 16 18C16.2652 18 16.5196 17.8946 16.7071 17.7071C16.8946 17.5196 17 17.2652 17 17V15H18C18.5304 15 19.0391 14.7893 19.4142 14.4142C19.7893 14.0391 20 13.5304 20 13V6C20 5.46957 19.7893 4.96086 19.4142 4.58579C19.0391 4.21071 18.5304 4 18 4Z"/>
-                                        <path d="M12 0H2C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V9C0 9.53043 0.210714 10.0391 0.585786 10.4142C0.960859 10.7893 1.46957 11 2 11H3V13C3 13.1857 3.05171 13.3678 3.14935 13.5257C3.24698 13.6837 3.38668 13.8114 3.55279 13.8944C3.71889 13.9775 3.90484 14.0126 4.08981 13.996C4.27477 13.9793 4.45143 13.9114 4.6 13.8L8.333 11H12C12.5304 11 13.0391 10.7893 13.4142 10.4142C13.7893 10.0391 14 9.53043 14 9V2C14 1.46957 13.7893 0.960859 13.4142 0.585786C13.0391 0.210714 12.5304 0 12 0Z"/>
+                const notification = {
+                    id: 'toast-old-' + Date.now(),
+                    html: `
+                        <div id="toast-old-${Date.now()}" class="w-full max-w-xs p-4 text-gray-900 bg-white rounded-lg shadow-lg dark:bg-gray-800 dark:text-gray-300 toast-slide-in" role="alert" data-timestamp="${oldTime.getTime()}">
+                            <div class="flex items-center mb-3">
+                                <span class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Old Notification</span>
+                                <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white justify-center items-center shrink-0 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="closeToast('toast-old-${Date.now()}')" aria-label="Close">
+                                    <span class="sr-only">Close</span>
+                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                     </svg>
-                                </span>
+                                </button>
                             </div>
-                            <div class="ms-3 text-sm font-normal">
-                                <div class="text-sm font-semibold text-gray-900 dark:text-white">System</div>
-                                <div class="text-sm font-normal">Watch this timestamp update every 30 seconds!</div>
-                                <span class="text-xs font-medium text-blue-600 dark:text-blue-500 toast-timestamp" data-time="${oldTime.getTime()}">2 minutes ago</span>
+                            <div class="flex items-center">
+                                <div class="relative inline-block shrink-0">
+                                    <img class="w-12 h-12 rounded-full object-cover" src="/favicon.ico" alt="System image">
+                                    <span class="absolute bottom-0 right-0 inline-flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full">
+                                        <svg class="w-3 h-3 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18" fill="currentColor">
+                                            <path d="M18 4H16V9C16 10.0609 15.5786 11.0783 14.8284 11.8284C14.0783 12.5786 13.0609 13 12 13H9L6.846 14.615C7.17993 14.8628 7.58418 14.9977 8 15H11.667L15.4 17.8C15.5731 17.9298 15.7836 18 16 18C16.2652 18 16.5196 17.8946 16.7071 17.7071C16.8946 17.5196 17 17.2652 17 17V15H18C18.5304 15 19.0391 14.7893 19.4142 14.4142C19.7893 14.0391 20 13.5304 20 13V6C20 5.46957 19.7893 4.96086 19.4142 4.58579C19.0391 4.21071 18.5304 4 18 4Z"/>
+                                            <path d="M12 0H2C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V9C0 9.53043 0.210714 10.0391 0.585786 10.4142C0.960859 10.7893 1.46957 11 2 11H3V13C3 13.1857 3.05171 13.3678 3.14935 13.5257C3.24698 13.6837 3.38668 13.8114 3.55279 13.8944C3.71889 13.9775 3.90484 14.0126 4.08981 13.996C4.27477 13.9793 4.45143 13.9114 4.6 13.8L8.333 11H12C12.5304 11 13.0391 10.7893 13.4142 10.4142C13.7893 10.0391 14 9.53043 14 9V2C14 1.46957 13.7893 0.960859 13.4142 0.585786C13.0391 0.210714 12.5304 0 12 0Z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="ms-3 text-sm font-normal">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">System</div>
+                                    <div class="text-sm font-normal">Watch this timestamp update every 30 seconds!</div>
+                                    <span class="text-xs font-medium text-blue-600 dark:text-blue-500 toast-timestamp" data-time="${oldTime.getTime()}">2 minutes ago</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `,
+                    timestamp: oldTime
+                };
 
-                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-
-                // Immediately update to show correct time
-                updateToastTimestamps();
+                notifications.unshift(notification);
+                updateNotificationDisplay();
 
                 console.log('🕐 Created old notification - watch timestamp update every 30 seconds!');
             };
@@ -788,6 +1059,59 @@
             window.updateTimestamps = function() {
                 updateToastTimestamps();
                 console.log('🔄 Updated all toast timestamps');
+            };
+
+            // Test function for tab notifications
+            window.testTabNotification = function() {
+                // Save current state
+                const wasActive = isTabActive;
+
+                // Simulate inactive tab
+                isTabActive = false;
+
+                // Add test notifications
+                showToastNotification(
+                    'Test Tab Notification',
+                    'Switch to another tab to see the notification in the title!',
+                    'info',
+                    'System'
+                );
+
+                // Restore state after a moment
+                setTimeout(() => {
+                    isTabActive = wasActive;
+                    if (isTabActive) {
+                        resetTabNotification();
+                    }
+                }, 100);
+
+                console.log('Tab notification test triggered. Switch tabs to see the effect!');
+            };
+
+            // Add multiple test notifications
+            window.testMultipleTabNotifications = function(count = 5) {
+                const wasActive = isTabActive;
+                isTabActive = false;
+
+                for (let i = 1; i <= count; i++) {
+                    setTimeout(() => {
+                        showToastNotification(
+                            `Notification ${i}`,
+                            `This is test notification number ${i}`,
+                            i % 2 === 0 ? 'success' : 'info',
+                            `User ${i}`
+                        );
+                    }, i * 500);
+                }
+
+                setTimeout(() => {
+                    isTabActive = wasActive;
+                    if (isTabActive) {
+                        resetTabNotification();
+                    }
+                }, (count + 1) * 500);
+
+                console.log(`Creating ${count} test notifications. Switch tabs to see the counter!`);
             };
         });
     </script>
