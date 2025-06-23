@@ -85,6 +85,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/supply-ledger-cards', [App\Http\Controllers\SupplyLedgerCardController::class, 'index'])->name('supply-ledger-cards.index');
     Route::get('/supply-ledger-cards/{supplyId}', [App\Http\Controllers\SupplyLedgerCardController::class, 'show'])->name('supply-ledger-cards.show');
     Route::get('/supply-ledger-cards/{supplyId}/export-pdf', [App\Http\Controllers\SupplyLedgerCardController::class, 'exportPdf'])->name('supply-ledger-cards.export-pdf');
+    // ADD THIS NEW LINE:
+    Route::get('/supply-ledger-cards/{supplyId}/export-excel', [App\Http\Controllers\SupplyLedgerCardController::class, 'exportExcel'])->name('supply-ledger-cards.export-excel');
+
 
     // Beginning Balance creation route
     Route::post('/stocks/create-beginning-balances', [App\Http\Controllers\SupplyStockController::class, 'createBeginningBalances'])
