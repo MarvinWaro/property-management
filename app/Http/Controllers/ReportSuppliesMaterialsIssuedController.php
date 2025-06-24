@@ -833,7 +833,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('A6')->getFont()->setBold(true);
         $sheet->getStyle('B6')->getFont()->setBold(true);
         $sheet->getStyle('B6:E6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
-        // Add this line for left alignment:
         $sheet->getStyle('B6:E6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         $sheet->setCellValue('F6', 'Date:');
@@ -843,13 +842,39 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('G6')->getFont()->setBold(true);
         $sheet->getStyle('G6:H6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
 
-        // Instructions
-        $sheet->setCellValue('A8', 'To be filled up by the Supply and/or Property Division/Unit');
-        $sheet->setCellValue('F8', 'To be filled up by the Accounting Division/Unit');
-        $sheet->getStyle('A8:H8')->getFont()->setItalic(true)->setSize(10);
+        // FIXED: Instructions with proper merged cells and borders (no gap - row 8)
+        $instructionRow = 8;
 
-        // Main table headers
-        $currentRow = 10;
+        // Left instruction: "To be filled up by the Supply and/or Property Division/Unit" (A-F merged)
+        $sheet->mergeCells("A{$instructionRow}:F{$instructionRow}");
+        $sheet->setCellValue("A{$instructionRow}", 'To be filled up by the Supply and/or Property Division/Unit');
+        $sheet->getStyle("A{$instructionRow}:F{$instructionRow}")->applyFromArray([
+            'font' => ['italic' => true, 'size' => 10],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ],
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+            ]
+        ]);
+
+        // Right instruction: "To be filled up by the Accounting Division/Unit" (G-H merged)
+        $sheet->mergeCells("G{$instructionRow}:H{$instructionRow}");
+        $sheet->setCellValue("G{$instructionRow}", 'To be filled up by the Accounting Division/Unit');
+        $sheet->getStyle("G{$instructionRow}:H{$instructionRow}")->applyFromArray([
+            'font' => ['italic' => true, 'size' => 10],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ],
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+            ]
+        ]);
+
+        // Main table headers (immediately after instructions - row 9)
+        $currentRow = 9;
         $headers = [
             'A' => "RIS No.",
             'B' => "Responsibility\nCenter Code",
@@ -952,7 +977,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ]);
 
         // Recapitulation - Fixed to match template exactly with correct column positioning
-        $currentRow ++;
+        $currentRow++;
 
         // First row - "Recapitulation:" spanning columns B-C and "Recapitulation:" spanning columns F-H
         // Column A remains empty
@@ -1123,7 +1148,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Add the title below the name
         $certRichText->createText("\nSupply and/or Property Custodian");
 
-        $sheet->setCellValue("A{$currentRow}", $certRichText); // <-- use $certRichText
+        $sheet->setCellValue("A{$currentRow}", $certRichText);
         $sheet->getStyle("A{$currentRow}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_TOP)
