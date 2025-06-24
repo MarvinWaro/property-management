@@ -263,93 +263,88 @@ class StockCardController extends Controller
         $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LETTER);
         $sheet->getPageMargins()->setTop(0.5)->setRight(0.5)->setLeft(0.5)->setBottom(0.5);
 
-        // Appendix 58 (top right)
-        $sheet->setCellValue('I1', 'Appendix 58');
-        $sheet->getStyle('I1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle('I1')->getFont()->setItalic(true)->setSize(15);
+        // Appendix 58 (top right) - Fixed to column G
+        $sheet->setCellValue('G1', 'Appendix 58');
+        $sheet->getStyle('G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('G1')->getFont()->setItalic(true)->setSize(15);
 
-        // Title
-        $sheet->mergeCells('A3:I3');
+        // Title - Fixed to span A-G
+        $sheet->mergeCells('A3:G3');
         $sheet->setCellValue('A3', 'STOCK CARD');
         $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Entity info section (without borders, with underlines)
+        // Entity info section (following template layout)
         $currentRow = 5;
 
-        // Entity Name and Fund Cluster row (no borders, with underlines)
+        // FIXED: Entity Name (A-E) and Fund Cluster (F-G) - no borders, just underlines
         $sheet->setCellValue("A{$currentRow}", "Entity Name:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
 
-        $sheet->mergeCells("B{$currentRow}:F{$currentRow}");
+        $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", strtoupper($entityName));
-        $sheet->getStyle("B{$currentRow}:F{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("B{$currentRow}:E{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        $sheet->setCellValue("G{$currentRow}", "Fund Cluster:");
-        $sheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
+        $sheet->setCellValue("F{$currentRow}", "Fund Cluster:");
+        $sheet->getStyle("F{$currentRow}")->getFont()->setBold(true);
 
-        $sheet->mergeCells("H{$currentRow}:I{$currentRow}");
-        $sheet->setCellValue("H{$currentRow}", $fundCluster);
-        $sheet->getStyle("H{$currentRow}:I{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->setCellValue("G{$currentRow}", $fundCluster);
+        $sheet->getStyle("G{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        $currentRow += 2; // Add space between entity info and item table
+        $currentRow++; // Move to next row for item info table
 
-        // Item information table (with borders)
-        // First row - Item and Item Code
+        // FIXED: Item information table with borders (following template layout)
+        // First row - Item (A-E) and Stock No. (F-G)
         $sheet->setCellValue("A{$currentRow}", "Item:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("B{$currentRow}:F{$currentRow}");
+        $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", $supply->item_name);
-        $sheet->getStyle("A{$currentRow}:F{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $sheet->setCellValue("G{$currentRow}", "Item Code:");
-        $sheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("H{$currentRow}:I{$currentRow}");
-        $sheet->setCellValue("H{$currentRow}", $supply->stock_no);
-        $sheet->getStyle("G{$currentRow}:I{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->setCellValue("F{$currentRow}", "Stock No.:");
+        $sheet->getStyle("F{$currentRow}")->getFont()->setBold(true);
+        $sheet->setCellValue("G{$currentRow}", $supply->stock_no);
+        $sheet->getStyle("F{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         $currentRow++;
 
-        // Second row - Description and Re-order Point
+        // Second row - Description (A-E) and Re-order Point (F-G)
         $sheet->setCellValue("A{$currentRow}", "Description:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("B{$currentRow}:F{$currentRow}");
+        $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", $supply->description);
-        $sheet->getStyle("A{$currentRow}:F{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$currentRow}:E{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $sheet->setCellValue("G{$currentRow}", "Re-order Point:");
-        $sheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("H{$currentRow}:I{$currentRow}");
-        $sheet->setCellValue("H{$currentRow}", $supply->reorder_point);
-        $sheet->getStyle("G{$currentRow}:I{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->setCellValue("F{$currentRow}", "Re-order Point:");
+        $sheet->getStyle("F{$currentRow}")->getFont()->setBold(true);
+        $sheet->setCellValue("G{$currentRow}", $supply->reorder_point);
+        $sheet->getStyle("F{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         $currentRow++;
 
-        // Third row - Unit of Measurement (spans full width)
+        // Third row - Unit of Measurement (spans A-G)
         $sheet->setCellValue("A{$currentRow}", "Unit of Measurement:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-        $sheet->mergeCells("B{$currentRow}:I{$currentRow}");
+        $sheet->mergeCells("B{$currentRow}:G{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", $supply->unit_of_measurement);
-        $sheet->getStyle("A{$currentRow}:I{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $currentRow += 2; // Add some space
+        $currentRow++; // NO GAP - directly to table headers
 
-        // Main stock card table headers
+        // FIXED: Main stock card table headers (A-G only, following template)
         // First header row with merged cells
         $sheet->setCellValue("A{$currentRow}", "Date");
         $sheet->setCellValue("B{$currentRow}", "Reference");
-        $sheet->mergeCells("C{$currentRow}:D{$currentRow}");
         $sheet->setCellValue("C{$currentRow}", "Receipt");
-        $sheet->mergeCells("E{$currentRow}:F{$currentRow}");
-        $sheet->setCellValue("E{$currentRow}", "Issue");
-        $sheet->setCellValue("G{$currentRow}", "Balance");
-        $sheet->setCellValue("H{$currentRow}", "No. of Days\nto Consume");
-        $sheet->setCellValue("I{$currentRow}", "Remarks");
+        $sheet->mergeCells("D{$currentRow}:E{$currentRow}");
+        $sheet->setCellValue("D{$currentRow}", "Issue");
+        $sheet->setCellValue("F{$currentRow}", "Balance");
+        $sheet->setCellValue("G{$currentRow}", "No. of Days\nto Consume");
 
         // Style first header row
-        $headerRange = "A{$currentRow}:I{$currentRow}";
+        $headerRange = "A{$currentRow}:G{$currentRow}";
         $sheet->getStyle($headerRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 10],
             'alignment' => [
@@ -370,15 +365,13 @@ class StockCardController extends Controller
 
         // Second header row with sub-headers
         $subHeaders = [
-            'A' => "",  // Date spans both rows
-            'B' => "",  // Reference spans both rows
-            'C' => "Qty.",
-            'D' => "Office",
-            'E' => "Qty.",
-            'F' => "Office",
-            'G' => "",  // Balance spans both rows
-            'H' => "",  // Days to consume spans both rows
-            'I' => ""   // Remarks spans both rows
+            'A' => "",      // Date spans both rows
+            'B' => "",      // Reference spans both rows
+            'C' => "Qty.",  // Receipt quantity only
+            'D' => "Qty.",  // Issue quantity
+            'E' => "Office", // Issue office
+            'F' => "Qty.",  // Balance quantity
+            'G' => ""       // Days to consume spans both rows
         ];
 
         foreach ($subHeaders as $col => $header) {
@@ -390,12 +383,11 @@ class StockCardController extends Controller
         // Merge cells that span both header rows
         $sheet->mergeCells("A" . ($currentRow - 1) . ":A{$currentRow}");
         $sheet->mergeCells("B" . ($currentRow - 1) . ":B{$currentRow}");
+        $sheet->mergeCells("F" . ($currentRow - 1) . ":F{$currentRow}");
         $sheet->mergeCells("G" . ($currentRow - 1) . ":G{$currentRow}");
-        $sheet->mergeCells("H" . ($currentRow - 1) . ":H{$currentRow}");
-        $sheet->mergeCells("I" . ($currentRow - 1) . ":I{$currentRow}");
 
         // Style second header row
-        $subHeaderRange = "A{$currentRow}:I{$currentRow}";
+        $subHeaderRange = "A{$currentRow}:G{$currentRow}";
         $sheet->getStyle($subHeaderRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 10],
             'alignment' => [
@@ -422,42 +414,36 @@ class StockCardController extends Controller
             $sheet->setCellValue("A{$currentRow}", Carbon::parse($entry['date'])->format('m/d/Y'));
             $sheet->setCellValue("B{$currentRow}", $entry['reference']);
 
-            // Receipt columns
+            // Receipt column (C only)
             $sheet->setCellValue("C{$currentRow}", $entry['receipt_qty'] ? $entry['receipt_qty'] : '');
-            $sheet->setCellValue("D{$currentRow}", $entry['receipt_qty'] ? 'Supplier' : ''); // Default for receipts
 
-            // Issue columns
-            $sheet->setCellValue("E{$currentRow}", $entry['issue_qty'] ? $entry['issue_qty'] : '');
-            $sheet->setCellValue("F{$currentRow}", $entry['issue_office'] ? $entry['issue_office'] : '');
+            // Issue columns (D-E)
+            $sheet->setCellValue("D{$currentRow}", $entry['issue_qty'] ? $entry['issue_qty'] : '');
+            $sheet->setCellValue("E{$currentRow}", $entry['issue_office'] ? $entry['issue_office'] : '');
 
-            // Balance
-            $sheet->setCellValue("G{$currentRow}", $entry['balance_qty']);
+            // Balance (F)
+            $sheet->setCellValue("F{$currentRow}", $entry['balance_qty']);
 
-            // Days to consume
-            $sheet->setCellValue("H{$currentRow}", $entry['days_to_consume'] ?: '');
-
-            // Remarks (empty)
-            $sheet->setCellValue("I{$currentRow}", '');
+            // Days to consume (G)
+            $sheet->setCellValue("G{$currentRow}", $entry['days_to_consume'] ?: '');
 
             // Format numbers
             $sheet->getStyle("C{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle("D{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
 
             // Apply borders
-            $sheet->getStyle("A{$currentRow}:I{$currentRow}")->getBorders()
+            $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
             // Alignment
             $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $sheet->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $sheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("H{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("I{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
             $currentRow++;
         }
@@ -465,21 +451,19 @@ class StockCardController extends Controller
         // Add empty rows to match template format (minimum 15 rows)
         $emptyRowsToAdd = max(15 - count($stockCardEntries), 0);
         for ($i = 0; $i < $emptyRowsToAdd; $i++) {
-            $sheet->getStyle("A{$currentRow}:I{$currentRow}")->getBorders()
+            $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
             $currentRow++;
         }
 
-        // Adjust column widths
+        // Adjust column widths for A-G layout
         $sheet->getColumnDimension('A')->setWidth(12);  // Date
-        $sheet->getColumnDimension('B')->setWidth(15);  // Reference
+        $sheet->getColumnDimension('B')->setWidth(18);  // Reference
         $sheet->getColumnDimension('C')->setWidth(10);  // Receipt Qty
-        $sheet->getColumnDimension('D')->setWidth(15);  // Receipt Office
-        $sheet->getColumnDimension('E')->setWidth(10);  // Issue Qty
-        $sheet->getColumnDimension('F')->setWidth(15);  // Issue Office
-        $sheet->getColumnDimension('G')->setWidth(10);  // Balance
-        $sheet->getColumnDimension('H')->setWidth(12);  // Days to Consume
-        $sheet->getColumnDimension('I')->setWidth(15);  // Remarks
+        $sheet->getColumnDimension('D')->setWidth(10);  // Issue Qty
+        $sheet->getColumnDimension('E')->setWidth(25);  // Issue Office (wider)
+        $sheet->getColumnDimension('F')->setWidth(12);  // Balance
+        $sheet->getColumnDimension('G')->setWidth(15);  // Days to Consume
 
         // Write file
         $writer = new Xlsx($spreadsheet);
