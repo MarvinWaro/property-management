@@ -746,8 +746,31 @@
                 <form action="{{ route('ris.issue', $risSlip) }}" method="POST" id="issueForm">
                     @csrf
                     <div class="p-6">
+                        <!-- Important Notice -->
+                        <div class="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                        Issuance Guidelines
+                                    </h3>
+                                    <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            <li><strong>Minimum quantity:</strong> 1 (you must issue at least 1 if approved and stock is available)</li>
+                                            <li><strong>Maximum quantity:</strong> Requested amount or available stock (whichever is lower)</li>
+                                            <li><strong>Zero quantity:</strong> Only allowed when no stock is available</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
-                            Specify the quantities to be issued for each requested item.
+                            Specify the quantities to be issued for each requested item. Items with available stock must receive at least 1 unit.
                         </p>
 
                         <div class="overflow-x-auto">
@@ -757,58 +780,108 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Item</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requested</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Available</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Issue Quantity</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Issue Quantity *</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                                     @foreach($risSlip->items as $item)
-                                        <tr>
+                                        @php
+                                            // Get total availability across all fund clusters
+                                            $totalAvailable = App\Models\SupplyStock::where('supply_id', $item->supply_id)
+                                                ->where('status', 'available')
+                                                ->sum('quantity_on_hand');
+
+                                            // Get available in the specified fund cluster
+                                            $matchingFundAvailable = App\Models\SupplyStock::where('supply_id', $item->supply_id)
+                                                ->where('status', 'available')
+                                                ->where('fund_cluster', $risSlip->fund_cluster)
+                                                ->sum('quantity_on_hand');
+
+                                            // Calculate max issue quantity (minimum of requested and available)
+                                            $maxIssueQty = min($totalAvailable, $item->quantity_requested);
+
+                                            // Set minimum based on stock availability
+                                            $minIssueQty = $totalAvailable > 0 ? 1 : 0;
+
+                                            // Default value: full request if possible, otherwise available amount, minimum 1 if stock exists
+                                            $defaultValue = $totalAvailable > 0 ? max(1, $maxIssueQty) : 0;
+                                        @endphp
+                                        <tr class="{{ $totalAvailable <= 0 ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                                                {{ $item->supply->item_name ?? 'N/A' }}
+                                                <div class="font-medium">{{ $item->supply->item_name ?? 'N/A' }}</div>
+                                                <div class="text-xs text-gray-400">Stock #{{ $item->supply->stock_no ?? 'N/A' }}</div>
                                                 <input type="hidden" name="items[{{ $loop->index }}][item_id]" value="{{ $item->item_id }}">
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                                                {{ $item->quantity_requested }}
+                                                <span class="font-medium">{{ $item->quantity_requested }}</span>
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                                @php
-                                                    // Get total availability across all fund clusters
-                                                    $totalAvailable = App\Models\SupplyStock::where('supply_id', $item->supply_id)
-                                                        ->where('status', 'available')
-                                                        ->sum('quantity_on_hand');
-
-                                                    // Get available in the specified fund cluster
-                                                    $matchingFundAvailable = App\Models\SupplyStock::where('supply_id', $item->supply_id)
-                                                        ->where('status', 'available')
-                                                        ->where('fund_cluster', $risSlip->fund_cluster)
-                                                        ->sum('quantity_on_hand');
-                                                @endphp
-
                                                 @if($totalAvailable >= $item->quantity_requested)
-                                                    <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">{{ $totalAvailable }}</span>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">
+                                                        {{ $totalAvailable }} available
+                                                    </span>
                                                 @elseif($totalAvailable > 0)
-                                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">{{ $totalAvailable }}</span>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">
+                                                        Only {{ $totalAvailable }} available
+                                                    </span>
                                                 @else
-                                                    <span class="px-2 py-1 text-xs rounded-full bg-red-200 text-red-800">0</span>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-red-200 text-red-800">
+                                                        Out of Stock
+                                                    </span>
                                                 @endif
 
-                                                @if($matchingFundAvailable < $totalAvailable)
+                                                @if($matchingFundAvailable < $totalAvailable && $matchingFundAvailable > 0)
                                                     <p class="mt-1 text-xs text-gray-500">
                                                         ({{ $matchingFundAvailable }} from fund {{ $risSlip->fund_cluster }})
                                                     </p>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4">
-                                                <input type="number" name="items[{{ $loop->index }}][quantity_issued]"
-                                                    class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                                                    min="0" max="{{ min($totalAvailable, $item->quantity_requested) }}"
-                                                    value="{{ min($totalAvailable, $item->quantity_requested) }}">
+                                                @if($totalAvailable > 0)
+                                                    <div class="relative">
+                                                        <input type="number"
+                                                            name="items[{{ $loop->index }}][quantity_issued]"
+                                                            class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                                                            min="{{ $minIssueQty }}"
+                                                            max="{{ $maxIssueQty }}"
+                                                            value="{{ $defaultValue }}"
+                                                            required
+                                                            data-max="{{ $maxIssueQty }}"
+                                                            data-min="{{ $minIssueQty }}"
+                                                            data-available="{{ $totalAvailable }}"
+                                                            data-requested="{{ $item->quantity_requested }}"
+                                                            data-item-name="{{ $item->supply->item_name }}"
+                                                            onchange="validateIssueQuantity(this)"
+                                                            oninput="validateIssueQuantity(this)">
+                                                        <div class="text-xs text-gray-500 mt-1">
+                                                            Min: {{ $minIssueQty }}, Max: {{ $maxIssueQty }}
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="text-center">
+                                                        <span class="text-red-600 font-medium text-sm">Cannot Issue</span>
+                                                        <input type="hidden" name="items[{{ $loop->index }}][quantity_issued]" value="0">
+                                                        <div class="text-xs text-red-500 mt-1">No stock available</div>
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4">
-                                                <input type="text" name="items[{{ $loop->index }}][remarks]"
-                                                    class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                                                    placeholder="Remarks">
+                                                @if($totalAvailable > 0)
+                                                    <input type="text"
+                                                        name="items[{{ $loop->index }}][remarks]"
+                                                        class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                                                        placeholder="Optional remarks"
+                                                        @if($totalAvailable < $item->quantity_requested)
+                                                            value="Partial fulfillment - insufficient stock"
+                                                        @endif>
+                                                @else
+                                                    <input type="text"
+                                                        name="items[{{ $loop->index }}][remarks]"
+                                                        class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white bg-gray-100"
+                                                        value="Cannot issue - out of stock"
+                                                        readonly>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -817,8 +890,8 @@
                         </div>
 
                         <div class="mt-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Received By (Select User)</label>
-                            <select name="received_by" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Received By (Select User) *</label>
+                            <select name="received_by" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white" required>
                                 <option value="" disabled>Select recipient...</option>
 
                                 @php
@@ -884,6 +957,17 @@
                                 color: #6b7280 !important;
                                 background-color: #374151 !important;
                             }
+
+                            /* Validation error styling */
+                            .quantity-error {
+                                border-color: #ef4444 !important;
+                                background-color: #fef2f2 !important;
+                            }
+
+                            .dark .quantity-error {
+                                border-color: #ef4444 !important;
+                                background-color: #450a0a !important;
+                            }
                         </style>
 
                         <!-- Add signature type selection -->
@@ -939,8 +1023,47 @@
         </div>
 
         <script>
+            // Enhanced validation function for issue quantities
+            function validateIssueQuantity(input) {
+                const value = parseInt(input.value);
+                const max = parseInt(input.getAttribute('data-max'));
+                const min = parseInt(input.getAttribute('data-min'));
+                const available = parseInt(input.getAttribute('data-available'));
+                const requested = parseInt(input.getAttribute('data-requested'));
+                const itemName = input.getAttribute('data-item-name');
+
+                // Remove previous error styling
+                input.classList.remove('quantity-error');
+
+                // Validate minimum (if stock is available, minimum is 1)
+                if (available > 0 && value < min) {
+                    alert(`❌ ${itemName}: Minimum issue quantity is ${min}.\n\n💡 Why? This item was approved and has stock available. You cannot issue 0 for approved items.`);
+                    input.value = min;
+                    input.classList.add('quantity-error');
+                    return false;
+                }
+
+                // Validate maximum
+                if (value > max) {
+                    alert(`❌ ${itemName}: Maximum issue quantity is ${max}.\n\n📊 Available stock: ${available}\n📋 Requested: ${requested}\n🎯 Max allowed: ${Math.min(available, requested)}`);
+                    input.value = max;
+                    input.classList.add('quantity-error');
+                    return false;
+                }
+
+                // Validate zero when stock is available
+                if (available > 0 && value === 0) {
+                    alert(`❌ ${itemName}: Cannot issue 0 when stock is available!\n\n✅ Available: ${available} units\n📋 Requested: ${requested} units\n💡 Minimum required: 1 unit`);
+                    input.value = 1;
+                    input.classList.add('quantity-error');
+                    return false;
+                }
+
+                return true;
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
-                // Issue modal controls
+                // Issue modal controls (existing functionality)
                 const issueModal = document.getElementById('issueModal');
                 const openIssueBtn = document.getElementById('openIssueModal');
                 const closeIssueBtn = document.getElementById('closeIssueModal');
@@ -956,7 +1079,7 @@
                 closeIssueBtn?.addEventListener('click', hideIssueModal);
                 cancelIssueBtn?.addEventListener('click', hideIssueModal);
 
-                // Issue form validation
+                // Issue form validation (existing signature functionality)
                 const issueForm = document.getElementById('issueForm');
                 const issueEsignRadio = document.getElementById('issue-esign');
                 const issueSgdRadio = document.getElementById('issue-sgd');
@@ -965,9 +1088,9 @@
                 const issueSignaturePreview = document.getElementById('issue-signature-preview');
                 const submitIssueBtn = document.getElementById('submitIssueBtn');
 
-                // Function to toggle submit button state
+                // Function to toggle submit button state (existing)
                 function updateIssueSubmitButton() {
-                    if (issueEsignRadio.checked && !issueTermsCheckbox.checked) {
+                    if (issueEsignRadio && issueEsignRadio.checked && issueTermsCheckbox && !issueTermsCheckbox.checked) {
                         submitIssueBtn.disabled = true;
                         submitIssueBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     } else {
@@ -976,11 +1099,11 @@
                     }
                 }
 
-                // Add event listeners
+                // Add event listeners (existing signature handling)
                 if (issueEsignRadio) {
                     issueEsignRadio.addEventListener('change', function() {
                         if (this.checked) {
-                            issueTermsDiv.classList.remove('hidden');
+                            if (issueTermsDiv) issueTermsDiv.classList.remove('hidden');
                             if (issueSignaturePreview) issueSignaturePreview.classList.remove('hidden');
                             updateIssueSubmitButton();
                         }
@@ -990,7 +1113,7 @@
                 if (issueSgdRadio) {
                     issueSgdRadio.addEventListener('change', function() {
                         if (this.checked) {
-                            issueTermsDiv.classList.add('hidden');
+                            if (issueTermsDiv) issueTermsDiv.classList.add('hidden');
                             if (issueSignaturePreview) issueSignaturePreview.classList.add('hidden');
                             updateIssueSubmitButton();
                         }
@@ -1001,13 +1124,59 @@
                     issueTermsCheckbox.addEventListener('change', updateIssueSubmitButton);
                 }
 
-                // Handle form submission
+                // Enhanced form submission with validation
                 if (issueForm) {
                     issueForm.addEventListener('submit', function(e) {
-                        if (issueEsignRadio.checked && !issueTermsCheckbox.checked) {
+                        // Check signature terms
+                        if (issueEsignRadio && issueEsignRadio.checked && issueTermsCheckbox && !issueTermsCheckbox.checked) {
                             e.preventDefault();
                             alert('You must agree to the terms to use e-signature');
+                            return;
                         }
+
+                        // Validate all quantity inputs
+                        const quantityInputs = issueForm.querySelectorAll('input[name*="quantity_issued"]');
+                        let isValid = true;
+                        let hasIssuedItems = false;
+
+                        quantityInputs.forEach(input => {
+                            if (input.type === 'number') {
+                                if (!validateIssueQuantity(input)) {
+                                    isValid = false;
+                                }
+
+                                // Check if at least one item is being issued
+                                const value = parseInt(input.value);
+                                if (value > 0) {
+                                    hasIssuedItems = true;
+                                }
+                            }
+                        });
+
+                        if (!isValid) {
+                            e.preventDefault();
+                            return;
+                        }
+
+                        // Check if at least one item is being issued
+                        if (!hasIssuedItems) {
+                            e.preventDefault();
+                            alert('❌ You must issue at least one item!\n\n💡 You cannot process an issuance with all quantities set to zero.');
+                            return;
+                        }
+
+                        // Check if recipient is selected
+                        const recipientSelect = issueForm.querySelector('select[name="received_by"]');
+                        if (!recipientSelect.value) {
+                            e.preventDefault();
+                            alert('Please select a recipient for the supplies.');
+                            recipientSelect.focus();
+                            return;
+                        }
+
+                        // Show loading state
+                        submitIssueBtn.disabled = true;
+                        submitIssueBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
                     });
                 }
 
@@ -1016,27 +1185,6 @@
             });
         </script>
     @endif
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const issueModal      = document.getElementById('issueModal');
-            const openIssueBtn    = document.getElementById('openIssueModal');
-            const closeIssueBtn   = document.getElementById('closeIssueModal');
-            const cancelIssueBtn  = document.getElementById('cancelIssue');
-
-            if (openIssueBtn) {
-                openIssueBtn.addEventListener('click', function() {
-                    issueModal.classList.remove('hidden');
-                });
-            }
-
-            const hideIssueModal = () => issueModal.classList.add('hidden');
-
-            closeIssueBtn?.addEventListener('click', hideIssueModal);
-            cancelIssueBtn?.addEventListener('click', hideIssueModal);
-        });
-    </script>
 
     <!-- Approve Modal Controls (fixed) -->
     <script>
