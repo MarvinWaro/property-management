@@ -419,7 +419,7 @@ class SupplyLedgerCardController extends Controller
         $sheet->setCellValue("B{$currentRow}", $supply->unit_of_measurement);
         $sheet->getStyle("A{$currentRow}:L{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $currentRow += 2; // Add some space
+        $currentRow++; // FIXED: Remove gap - directly to table headers (was $currentRow += 2)
 
         // Main ledger table headers
         $headers = [
