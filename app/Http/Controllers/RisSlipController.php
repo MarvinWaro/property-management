@@ -460,32 +460,93 @@ class RisSlipController extends Controller
             return back()->with('error', 'This RIS cannot be issued.');
         }
 
-        // Validate the quantities, remarks, and signature type
+        // Enhanced validation with proper business logic
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:ris_items,item_id',
             'items.*.quantity_issued' => 'required|integer|min:0',
-            'items.*.remarks' => 'nullable|string',
-            'received_by' => 'nullable|exists:users,id',
+            'items.*.remarks' => 'nullable|string|max:500',
+            'received_by' => 'required|exists:users,id',  // Made required
             'signature_type' => 'required|in:esign,sgd',
         ]);
 
         return DB::transaction(function() use ($validated, $risSlip, $request) {
-            // Process each item
-            foreach ($validated['items'] as $item) {
-                $risItem = RisItem::findOrFail($item['item_id']);
+            $hasIssuedItems = false;
+            $validationErrors = [];
 
-                if ($item['quantity_issued'] > 0) {
-                    $risItem->update([
-                        'quantity_issued' => $item['quantity_issued'],
-                        'remarks' => $item['remarks'] ?? null,
-                    ]);
+            // PRE-VALIDATION: Check all items before processing
+            foreach ($validated['items'] as $itemData) {
+                $risItem = RisItem::findOrFail($itemData['item_id']);
 
-                    // Get all available stocks for this supply
+                // Get current stock availability
+                $totalAvailable = SupplyStock::where('supply_id', $risItem->supply_id)
+                    ->where('status', 'available')
+                    ->sum('quantity_on_hand');
+
+                $requestedQty = $risItem->quantity_requested;
+                $issueQty = $itemData['quantity_issued'];
+
+                // BUSINESS RULE VALIDATION:
+                // 1. If stock is available, minimum issue quantity is 1
+                // 2. Maximum issue quantity is min(requested, available)
+                // 3. Zero is only allowed when no stock is available
+
+                if ($totalAvailable > 0) {
+                    // Stock is available - minimum must be 1
+                    if ($issueQty < 1) {
+                        $validationErrors[] = "Item '{$risItem->supply->item_name}' has {$totalAvailable} units available. Minimum issue quantity is 1. Cannot issue 0 for approved items with available stock.";
+                        continue;
+                    }
+
+                    $maxAllowedQty = min($totalAvailable, $requestedQty);
+                    if ($issueQty > $maxAllowedQty) {
+                        $validationErrors[] = "Item '{$risItem->supply->item_name}' - Maximum issue quantity is {$maxAllowedQty} (Available: {$totalAvailable}, Requested: {$requestedQty}).";
+                        continue;
+                    }
+                } else {
+                    // No stock available - only 0 is allowed
+                    if ($issueQty > 0) {
+                        $validationErrors[] = "Item '{$risItem->supply->item_name}' has no stock available. Cannot issue {$issueQty} units.";
+                        continue;
+                    }
+                }
+
+                if ($issueQty > 0) {
+                    $hasIssuedItems = true;
+                }
+            }
+
+            // Return validation errors if any
+            if (!empty($validationErrors)) {
+                return back()->withErrors(['issue_validation' => $validationErrors])
+                           ->with('error', 'Please correct the issue quantities before proceeding.')
+                           ->withInput();
+            }
+
+            // Business rule: At least one item must be issued
+            if (!$hasIssuedItems) {
+                return back()->with('error', 'You must issue at least one item. Cannot process issuance with all quantities set to zero.');
+            }
+
+            // Process each item (existing logic but with better logging)
+            foreach ($validated['items'] as $itemData) {
+                $risItem = RisItem::findOrFail($itemData['item_id']);
+                $issueQty = $itemData['quantity_issued'];
+
+                // Update RIS item
+                $risItem->update([
+                    'quantity_issued' => $issueQty,
+                    'remarks' => $itemData['remarks'] ?? null,
+                ]);
+
+                // Only process stock deduction if quantity > 0
+                if ($issueQty > 0) {
+                    // Get all available stocks for this supply (FIFO approach)
                     $matchingStocks = SupplyStock::where('supply_id', $risItem->supply_id)
                         ->where('status', 'available')
                         ->where('quantity_on_hand', '>', 0)
                         ->orderBy('expiry_date', 'asc') // Use FIFO approach - oldest stock first
+                        ->orderBy('created_at', 'asc')   // If same expiry, use oldest entry first
                         ->get();
 
                     // Calculate current balance before issuance
@@ -494,7 +555,7 @@ class RisSlipController extends Controller
                         ->sum('quantity_on_hand');
 
                     // Process the issuance from stocks
-                    $remainingQuantity = $item['quantity_issued'];
+                    $remainingQuantity = $issueQty;
                     $totalCost = 0;
 
                     foreach ($matchingStocks as $stock) {
@@ -516,7 +577,7 @@ class RisSlipController extends Controller
                         // Calculate the new balance after this deduction
                         $newBalance = $currentBalance - $qtyToDeduct;
 
-                        // Create the transaction using direct DB query to ensure all fields are included
+                        // Create the transaction using direct DB query
                         $transaction = DB::table('supply_transactions')->insertGetId([
                             'supply_id' => $risItem->supply_id,
                             'transaction_type' => 'issue',
@@ -526,14 +587,14 @@ class RisSlipController extends Controller
                             'unit_cost' => $stock->unit_cost,
                             'total_cost' => $stockItemCost,
                             'department_id' => $risSlip->division,
-                            'remarks' => "Issued via RIS #{$risSlip->ris_no}",
+                            'remarks' => "Issued via RIS #{$risSlip->ris_no}" . ($itemData['remarks'] ? " - {$itemData['remarks']}" : ""),
                             'balance_quantity' => $newBalance,
                             'user_id' => Auth::id(),
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
 
-                        // Set up the many-to-many relationships if needed
+                        // Set up the many-to-many relationships
                         if ($risSlip->requested_by) {
                             DB::table('user_transactions')->insert([
                                 'transaction_id' => $transaction,
@@ -555,8 +616,28 @@ class RisSlipController extends Controller
                         }
 
                         $remainingQuantity -= $qtyToDeduct;
-                        $currentBalance = $newBalance; // Update current balance for next iteration
+                        $currentBalance = $newBalance;
                     }
+
+                    // Log if there was insufficient stock to fulfill the complete request
+                    if ($remainingQuantity > 0) {
+                        \Log::warning("Insufficient stock for complete fulfillment", [
+                            'ris_no' => $risSlip->ris_no,
+                            'supply_id' => $risItem->supply_id,
+                            'item_name' => $risItem->supply->item_name,
+                            'requested' => $issueQty,
+                            'fulfilled' => $issueQty - $remainingQuantity,
+                            'shortfall' => $remainingQuantity
+                        ]);
+                    }
+                } else {
+                    // Log items that couldn't be issued (for audit trail)
+                    \Log::info("Item not issued due to insufficient stock", [
+                        'ris_no' => $risSlip->ris_no,
+                        'supply_id' => $risItem->supply_id,
+                        'item_name' => $risItem->supply->item_name,
+                        'reason' => 'No stock available'
+                    ]);
                 }
             }
 
@@ -566,7 +647,7 @@ class RisSlipController extends Controller
                 'issued_by' => Auth::id(),
                 'issued_at' => now(),
                 'issuer_signature_type' => $validated['signature_type'],
-                'received_by' => $request->received_by ?? null,
+                'received_by' => $request->received_by,
             ]);
 
             // Broadcast events
@@ -580,8 +661,23 @@ class RisSlipController extends Controller
                 ));
             }
 
+            // Enhanced success logging
+            $issuedItemsCount = collect($validated['items'])->where('quantity_issued', '>', 0)->count();
+            $totalItemsCount = count($validated['items']);
+
+            \Log::info('RIS issued successfully', [
+                'ris_id' => $risSlip->ris_id,
+                'ris_no' => $risSlip->ris_no,
+                'issued_by' => Auth::id(),
+                'issued_by_name' => Auth::user()->name,
+                'received_by' => $request->received_by,
+                'total_items' => $totalItemsCount,
+                'issued_items' => $issuedItemsCount,
+                'signature_type' => $validated['signature_type']
+            ]);
+
             return redirect()->route('ris.show', $risSlip)
-                            ->with('success', 'Supplies issued successfully.');
+                            ->with('success', "Supplies issued successfully! {$issuedItemsCount} out of {$totalItemsCount} items processed.");
         });
     }
 
