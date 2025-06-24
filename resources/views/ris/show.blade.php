@@ -16,19 +16,17 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                 <!-- Status / Action Bar -->
                 <div class="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                    <!-- Status display -->
+                    <!-- Status display (Enhanced version using model attributes) -->
                     <div class="flex items-center">
                         <span class="mr-2 text-gray-700 dark:text-gray-300">Status:</span>
-                        @if($risSlip->status === 'draft')
-                            <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-800">Draft</span>
-                        @elseif($risSlip->status === 'approved')
-                            <span class="px-2 py-1 text-xs rounded-full bg-blue-200 text-blue-800">Approved</span>
-                        @elseif($risSlip->status === 'posted' && !$risSlip->received_at)
+                        @if($risSlip->status === 'posted' && !$risSlip->received_at)
                             <span class="px-2 py-1 text-xs rounded-full bg-yellow-200 text-yellow-800">Issued - Pending Receipt</span>
                         @elseif($risSlip->status === 'posted' && $risSlip->received_at)
                             <span class="px-2 py-1 text-xs rounded-full bg-green-200 text-green-800">Completed</span>
-                        @elseif($risSlip->status === 'declined')
-                            <span class="px-2 py-1 text-xs rounded-full bg-red-200 text-red-800">Declined</span>
+                        @else
+                            <span class="px-2 py-1 text-xs rounded-full {{ $risSlip->status_badge_class }}">
+                                {{ $risSlip->status_label }}
+                            </span>
                         @endif
                     </div>
 
@@ -47,17 +45,20 @@
                         </a>
 
                         {{-- Both Admin and CAO can approve/decline --}}
-                        @if(auth()->user()->hasAdminPrivileges() && $risSlip->status === 'draft')
+                        @if(auth()->user()->hasAdminPrivileges() && $risSlip->canBeApproved())
                             <button id="openApproveModal" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Approve Request
                             </button>
+                        @endif
+
+                        @if(auth()->user()->hasAdminPrivileges() && $risSlip->canBeDeclined())
                             <button id="openDeclineModal" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Decline Request
                             </button>
                         @endif
 
                         {{-- Only Admin can issue --}}
-                        @if(auth()->user()->hasRole('admin') && $risSlip->status === 'approved')
+                        @if(auth()->user()->hasRole('admin') && $risSlip->canBeIssued())
                             <button id="openIssueModal" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Process Issuance
                             </button>
@@ -65,42 +66,84 @@
                     </div>
                 </div>
 
-                <!-- Decline Modal -->
-                @if(auth()->user()->hasAdminPrivileges())
+                {{-- Enhanced Decline Modal (replace existing decline modal) --}}
+                @if(auth()->user()->hasAdminPrivileges() && $risSlip->canBeDeclined())
                     <div id="declineModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
                             <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                     Decline RIS #{{ $risSlip->ris_no }}
                                 </h3>
-                                <button id="closeDeclineModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+                                <button id="closeDeclineModal" type="button" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 transition-colors">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
                             </div>
+
                             <form action="{{ route('ris.decline', $risSlip) }}" method="POST" id="declineForm">
                                 @csrf
-                                <div class="p-6">
-                                    <div class="mb-4">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason for Declining</label>
-                                        <textarea name="decline_reason" rows="4" required minlength="10" maxlength="500"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500"
-                                            placeholder="Please provide a reason for declining this request (minimum 10 characters)"></textarea>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 10 characters required</p>
+                                <div class="p-6 space-y-4">
+                                    {{-- Reason Input --}}
+                                    <div>
+                                        <label for="decline_reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Reason for Declining <span class="text-red-500">*</span>
+                                        </label>
+                                        <textarea
+                                            id="decline_reason"
+                                            name="decline_reason"
+                                            rows="4"
+                                            required
+                                            minlength="10"
+                                            maxlength="500"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-red-500 focus:border-red-500 transition-colors"
+                                            placeholder="Please provide a detailed reason for declining this request..."
+                                        ></textarea>
+                                        <div class="mt-1 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                                            <span>Minimum 10 characters required</span>
+                                            <span id="charCount">0/500</span>
+                                        </div>
                                     </div>
 
-                                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                                            <strong>Note:</strong> Declining this request will make the requested items available for other requisitions.
-                                        </p>
+                                    {{-- Warning Notice --}}
+                                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                                                    Important Notice
+                                                </h3>
+                                                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                                                    <ul class="list-disc pl-5 space-y-1">
+                                                        <li>This action will permanently decline the requisition</li>
+                                                        <li>The requester will be notified with your reason</li>
+                                                        <li>The RIS number sequence will be maintained</li>
+                                                        <li>This action cannot be undone</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
-                                    <button type="button" id="cancelDecline" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 mr-2">
+
+                                <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                                    <button
+                                        type="button"
+                                        id="cancelDecline"
+                                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                                         Cancel
                                     </button>
-                                    <button type="submit" id="submitDeclineBtn" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    <button
+                                        type="submit"
+                                        id="submitDeclineBtn"
+                                        class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
                                         Decline Request
                                     </button>
                                 </div>
@@ -110,21 +153,76 @@
 
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            // Decline modal controls
                             const declineModal = document.getElementById('declineModal');
                             const openDeclineBtn = document.getElementById('openDeclineModal');
                             const closeDeclineBtn = document.getElementById('closeDeclineModal');
                             const cancelDeclineBtn = document.getElementById('cancelDecline');
+                            const declineForm = document.getElementById('declineForm');
+                            const reasonTextarea = document.getElementById('decline_reason');
+                            const charCount = document.getElementById('charCount');
+                            const submitBtn = document.getElementById('submitDeclineBtn');
 
-                            if (openDeclineBtn) {
-                                openDeclineBtn.addEventListener('click', function() {
-                                    declineModal.classList.remove('hidden');
+                            // Character counter
+                            if (reasonTextarea && charCount) {
+                                reasonTextarea.addEventListener('input', function() {
+                                    const count = this.value.length;
+                                    charCount.textContent = `${count}/500`;
+
+                                    // Update submit button state
+                                    if (count < 10) {
+                                        submitBtn.disabled = true;
+                                        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                    } else {
+                                        submitBtn.disabled = false;
+                                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                    }
                                 });
                             }
 
-                            const hideDeclineModal = () => declineModal.classList.add('hidden');
+                            // Modal controls
+                            if (openDeclineBtn) {
+                                openDeclineBtn.addEventListener('click', function() {
+                                    declineModal.classList.remove('hidden');
+                                    reasonTextarea.focus();
+                                });
+                            }
+
+                            const hideDeclineModal = () => {
+                                declineModal.classList.add('hidden');
+                                declineForm.reset();
+                                charCount.textContent = '0/500';
+                                submitBtn.disabled = true;
+                                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            };
+
                             closeDeclineBtn?.addEventListener('click', hideDeclineModal);
                             cancelDeclineBtn?.addEventListener('click', hideDeclineModal);
+
+                            // Close modal when clicking outside
+                            declineModal?.addEventListener('click', function(e) {
+                                if (e.target === declineModal) {
+                                    hideDeclineModal();
+                                }
+                            });
+
+                            // Form validation
+                            declineForm?.addEventListener('submit', function(e) {
+                                const reason = reasonTextarea.value.trim();
+                                if (reason.length < 10) {
+                                    e.preventDefault();
+                                    alert('Please provide a reason with at least 10 characters.');
+                                    reasonTextarea.focus();
+                                    return false;
+                                }
+
+                                // Show loading state
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
+                            });
+
+                            // Initialize button state
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
                         });
                     </script>
                 @endif
