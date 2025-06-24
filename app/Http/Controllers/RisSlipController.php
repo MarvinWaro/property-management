@@ -13,6 +13,8 @@ use App\Services\ReferenceNumberService;
 use App\Events\RequisitionStatusUpdated;
 use App\Events\UserNotificationUpdated;
 
+use App\Constants\RisStatus; // Add this import at the top of your controller
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -24,40 +26,44 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RisSlipController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // Get total counts for stats (before applying filters)
+        // Get total counts for stats using model scopes
         $totalCount = RisSlip::count();
-        $pendingCount = RisSlip::where('status', 'draft')->count();
-        $approvedCount = RisSlip::where('status', 'approved')->count();
-        $pendingReceiptCount = RisSlip::where('status', 'posted')->whereNull('received_at')->count();
-        $completedCount = RisSlip::where('status', 'posted')->whereNotNull('received_at')->count();
-        $declinedCount = RisSlip::where('status', 'declined')->count();
+        $pendingCount = RisSlip::draft()->count();
+        $approvedCount = RisSlip::approved()->count();
+        $pendingReceiptCount = RisSlip::pendingReceipt()->count();
+        $completedCount = RisSlip::completed()->count();
+        $declinedCount = RisSlip::declined()->count();
 
-        // Start building the query
-        $query = RisSlip::with(['department', 'requester'])
+        // Start building the query with relationships
+        $query = RisSlip::with(['department', 'requester', 'approver', 'issuer', 'receiver', 'decliner'])
                     ->orderBy('created_at', 'desc');
 
-        // Apply status filter
+        // Apply status filter using constants
         if ($request->filled('status')) {
             switch ($request->status) {
-                case 'draft':
-                    $query->where('status', 'draft');
+                case RisStatus::DRAFT:
+                    $query->draft();
                     break;
-                case 'approved':
-                    $query->where('status', 'approved');
+                case RisStatus::APPROVED:
+                    $query->approved();
                     break;
                 case 'pending-receipt':
-                    $query->where('status', 'posted')->whereNull('received_at');
+                    $query->pendingReceipt();
                     break;
                 case 'completed':
-                    $query->where('status', 'posted')->whereNotNull('received_at');
+                    $query->completed();
                     break;
-                case 'declined':
-                    $query->where('status', 'declined');
+                case RisStatus::DECLINED:
+                    $query->declined();
+                    break;
+                case RisStatus::POSTED:
+                    $query->posted();
                     break;
             }
         }
@@ -67,6 +73,9 @@ class RisSlipController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('ris_no', 'like', "%{$search}%")
+                ->orWhere('purpose', 'like', "%{$search}%")
+                ->orWhere('entity_name', 'like', "%{$search}%")
+                ->orWhere('office', 'like', "%{$search}%")
                 ->orWhereHas('requester', function($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%");
                 })
@@ -76,8 +85,25 @@ class RisSlipController extends Controller
             });
         }
 
+        // Apply date range filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Apply department filter if provided
+        if ($request->filled('department')) {
+            $query->where('division', $request->department);
+        }
+
         // Paginate with query string preservation
-        $risSlips = $query->paginate(5)->appends($request->query());
+        $risSlips = $query->paginate(10)->appends($request->query());
+
+        // Get departments for filter dropdown
+        $departments = \App\Models\Department::orderBy('name')->get();
 
         return view('ris.index', compact(
             'risSlips',
@@ -86,7 +112,8 @@ class RisSlipController extends Controller
             'approvedCount',
             'pendingReceiptCount',
             'completedCount',
-            'declinedCount'
+            'declinedCount',
+            'departments'
         ));
     }
 
@@ -357,34 +384,74 @@ class RisSlipController extends Controller
      */
     public function decline(Request $request, RisSlip $risSlip)
     {
-        if ($risSlip->status !== 'draft') {
-            return back()->with('error', 'This RIS cannot be declined.');
+        // Validate that the RIS can be declined
+        if (!$risSlip->canBeDeclined()) {
+            return back()->with('error', 'This RIS cannot be declined. Only draft requisitions can be declined.');
         }
 
         // Validate the decline reason
         $validated = $request->validate([
             'decline_reason' => 'required|string|min:10|max:500',
+        ], [
+            'decline_reason.required' => 'A decline reason is required.',
+            'decline_reason.min' => 'The decline reason must be at least 10 characters.',
+            'decline_reason.max' => 'The decline reason cannot exceed 500 characters.',
         ]);
 
-        $risSlip->update([
-            'status' => 'declined',
-            'declined_by' => Auth::id(),
-            'declined_at' => now(),
-            'decline_reason' => $validated['decline_reason'],
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Broadcast events
-        broadcast(new RequisitionStatusUpdated($risSlip, 'declined'));
+            // Update the RIS status to declined
+            $risSlip->update([
+                'status' => RisStatus::DECLINED,
+                'declined_by' => Auth::id(),
+                'declined_at' => now(),
+                'decline_reason' => trim($validated['decline_reason']),
+            ]);
 
-        if ($risSlip->requested_by) {
-            broadcast(new UserNotificationUpdated(
-                $risSlip->requested_by,
-                'requisition_declined',
-                ['ris_no' => $risSlip->ris_no, 'reason' => $validated['decline_reason']]
-            ));
+            DB::commit();
+
+            // Broadcast events for real-time updates
+            broadcast(new RequisitionStatusUpdated($risSlip, 'declined'));
+
+            // Notify the requester about the decline
+            if ($risSlip->requested_by) {
+                broadcast(new UserNotificationUpdated(
+                    $risSlip->requested_by,
+                    'requisition_declined',
+                    [
+                        'ris_no' => $risSlip->ris_no,
+                        'reason' => $validated['decline_reason'],
+                        'ris_id' => $risSlip->ris_id,
+                        'declined_by' => Auth::user()->name,
+                        'declined_at' => now()->format('M d, Y h:i A')
+                    ]
+                ));
+            }
+
+            \Log::info('RIS declined successfully', [
+                'ris_id' => $risSlip->ris_id,
+                'ris_no' => $risSlip->ris_no,
+                'declined_by' => Auth::id(),
+                'declined_by_name' => Auth::user()->name,
+                'reason' => $validated['decline_reason']
+            ]);
+
+            return back()->with('success', "RIS #{$risSlip->ris_no} has been declined successfully. The requester has been notified with your reason.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Error declining RIS', [
+                'ris_id' => $risSlip->ris_id,
+                'ris_no' => $risSlip->ris_no,
+                'declined_by' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'An error occurred while declining the RIS. Please try again or contact support.');
         }
-
-        return back()->with('success', 'RIS declined successfully. The requested items remain available for other requests.');
     }
 
     public function issue(Request $request, RisSlip $risSlip)
