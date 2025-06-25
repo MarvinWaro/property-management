@@ -359,24 +359,26 @@
                     </div>
 
                     @if(auth()->user()->hasRole('admin'))
-                        <!-- Create Stock Modal -->
+                        <!-- Create Stock Modal (Multiple Items) - Modern Minimalist Design -->
                         <div id="createStockModal" tabindex="-1" aria-hidden="true"
-                            class="hidden fixed inset-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+                            class="hidden fixed inset-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900/60 backdrop-blur-sm">
 
-                            <div class="relative w-full max-w-3xl max-h-full">
+                            <div class="relative w-full max-w-7xl max-h-[90vh] animate-modal-slide-up">
                                 <!-- Modal content -->
-                                <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
-                                    <!-- Modal header -->
-                                    <div class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-800">
-                                        <h3 class="text-2xl font-bold text-white flex items-center">
-                                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Add New Stock
-                                        </h3>
+                                <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+                                    <!-- Modal header - Minimalist -->
+                                    <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+                                        <div>
+                                            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                                Inventory Acceptance Report
+                                            </h3>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                Create new stock entries with a single IAR reference
+                                            </p>
+                                        </div>
                                         <button type="button"
-                                            class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                            dark:hover:bg-gray-600 transition-all duration-200"
+                                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg p-2
+                                            hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                                             data-modal-hide="createStockModal">
                                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -387,367 +389,716 @@
                                         </button>
                                     </div>
 
-                                    <!-- Modal body -> Form -->
-                                    <form action="{{ route('stocks.store') }}" method="POST" class="p-6 bg-gray-50 dark:bg-gray-800">
+                                    <!-- Modal body -->
+                                    <form action="{{ route('stocks.store') }}" method="POST" class="p-6">
                                         @csrf
-
-                                        <!-- ADD THIS LINE HERE -->
                                         <input type="hidden" name="submission_token" value="{{ uniqid() . time() }}">
 
                                         <!-- Validation Errors Alert -->
                                         @if ($errors->any() && session('show_create_modal'))
-                                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-                                                <div class="font-medium">Oops! There were some problems with your input:</div>
-                                                <ul class="mt-1.5 ml-4 list-disc list-inside">
-                                                    @foreach ($errors->all() as $e)
-                                                        <li>{{ $e }}</li>
-                                                    @endforeach
-                                                </ul>
+                                            <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg p-4">
+                                                <div class="flex">
+                                                    <div class="flex-shrink-0">
+                                                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 0016 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V9a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <h3 class="text-sm font-medium text-red-800 dark:text-red-300">
+                                                            There were some problems with your submission
+                                                        </h3>
+                                                        <div class="mt-2 text-xs text-red-700 dark:text-red-400">
+                                                            <ul class="list-disc list-inside space-y-1">
+                                                                @foreach ($errors->all() as $error)
+                                                                    <li>{{ $error }}</li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         @endif
 
-                                        <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Fill in the information below to add new stock to the inventory.</p>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <!-- Left Column -->
-                                            <div class="space-y-5">
-                                                <!-- Supply Selection Section -->
-                                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                    <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Supply Information
-                                                    </h4>
-
-                                                    <!-- Supply Selection with Search -->
-                                                    <div class="mb-4">
-                                                        <label for="supply_search" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Supply Item <span class="text-red-500">*</span>
-                                                        </label>
-
-                                                        <!-- Searchable Dropdown -->
-                                                        <div class="relative">
-                                                            <!-- Search Input -->
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="text" id="supply_search"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                        focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                        dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                                    placeholder="Search Supplies."
-                                                                    autocomplete="off">
-
-                                                                <!-- Clear button -->
-                                                                <button type="button" id="clear_supply_search"
-                                                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-red-500 focus:outline-none hidden">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <line x1="18" x2="6" y1="6" y2="18"></line>
-                                                                        <line x1="6" x2="18" y1="6" y2="18"></line>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-
-                                                            <!-- Dropdown List -->
-                                                            <div id="supply_dropdown"
-                                                                class="absolute z-10 w-full mt-1 max-h-60 overflow-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg hidden">
-                                                                <ul id="supply_list" class="py-1 text-sm text-gray-700 dark:text-gray-200">
-                                                                    <!-- Dropdown items will be dynamically populated -->
-                                                                </ul>
-                                                            </div>
-
-                                                            <!-- Hidden select for form submission -->
-                                                            <select id="supply_id" name="supply_id" class="hidden">
-                                                                <option selected disabled value="">Select a supply</option>
-                                                                @foreach ($supplies as $s)
-                                                                    <option value="{{ $s->supply_id }}"
-                                                                            data-name="{{ $s->item_name }}"
-                                                                            data-description="{{ $s->description }}"
-                                                                            data-stock-no="{{ $s->stock_no }}"
-                                                                            {{ old('supply_id') == $s->supply_id ? 'selected' : '' }}>
-                                                                        {{ $s->item_name }} — {{ Str::limit($s->description, 60) }} ({{ $s->stock_no }})
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-
-                                                        <!-- Selected Supply Display -->
-                                                        <div id="selected_supply" class="mt-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-blue-50 dark:bg-gray-700 hidden">
-                                                            <div class="flex justify-between">
-                                                                <div>
-                                                                    <p id="selected_supply_name" class="font-medium text-gray-900 dark:text-white"></p>
-                                                                    <p id="selected_supply_desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
-                                                                    <p id="selected_supply_stock_no" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></p>
-                                                                </div>
-                                                                <button type="button" id="clear_selection" class="text-gray-400 hover:text-red-500 dark:hover:text-gray-300 focus:outline-none">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <line x1="18" x2="6" y1="6" y2="18"></line>
-                                                                        <line x1="6" x2="18" y1="6" y2="18"></line>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        @error('supply_id')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
-                                                    </div>
-
-                                                    <!-- Quantity & Unit Cost -->
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label for="quantity_on_hand" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Quantity <span class="text-red-500">*</span>
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="number" name="quantity_on_hand" id="quantity_on_hand" min="1" required
-                                                                    value="{{ old('quantity_on_hand', 0) }}"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                                            </div>
-                                                            @error('quantity_on_hand')
-                                                                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                            @enderror
+                                        <!-- IAR Information Card -->
+                                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                        IAR REFERENCE
+                                                    </label>
+                                                    <div class="flex items-center">
+                                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+                                                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
                                                         </div>
                                                         <div>
-                                                            <label for="unit_cost" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Unit Cost <span class="text-red-500">*</span>
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="text" name="unit_cost" id="unit_cost" required
-                                                                    value="{{ old('unit_cost', '0.00') }}"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                                            </div>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cost per unit in your local currency</p>
-                                                            @error('unit_cost')
-                                                                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                            @enderror
+                                                            <p class="text-sm font-medium text-gray-900 dark:text-white">Auto-generated</p>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400">IAR YYYY-MM-XXX</p>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <!-- Status & Expiry Date Section -->
-                                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                    <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Status Information
-                                                    </h4>
-
-                                                    <!-- Status -->
-                                                    <div class="mb-4">
-                                                        <label for="status" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Status <span class="text-red-500">*</span>
-                                                        </label>
-                                                        <div class="relative">
-                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <select name="status" id="status" required
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>Available</option>
-                                                                <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>Reserved</option>
-                                                                <option value="expired" {{ old('status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                                                                <option value="depleted" {{ old('status') == 'depleted' ? 'selected' : '' }}>Depleted</option>
-                                                            </select>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                        RECEIPT DATE
+                                                    </label>
+                                                    <div class="flex items-center">
+                                                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+                                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
                                                         </div>
-                                                        @error('status')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
+                                                        <div>
+                                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ now()->format('F d, Y') }}</p>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Today</p>
+                                                        </div>
                                                     </div>
+                                                </div>
 
-                                                    <!-- Expiry Date -->
-                                                    <div class="mb-4">
-                                                        <label for="expiry_date" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Expiry Date
-                                                        </label>
-                                                        <div class="relative">
-                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <input type="date" name="expiry_date" id="expiry_date"
-                                                                value="{{ old('expiry_date') }}"
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                                <div>
+                                                    <label for="general_remarks" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        GENERAL REMARKS
+                                                    </label>
+                                                    <input type="text" name="general_remarks" id="general_remarks"
+                                                        placeholder="e.g., PO #12345, DR #67890"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Supply Items Section -->
+                                        <div class="mb-6">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                        Supply Items
+                                                    </h4>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                        Add all items received in this delivery
+                                                    </p>
+                                                </div>
+                                                <button type="button" id="addItemBtn"
+                                                    class="inline-flex items-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100
+                                                    text-white dark:text-gray-900 text-sm font-medium rounded-lg transition-all duration-200
+                                                    shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+                                                    </svg>
+                                                    Add Item
+                                                </button>
+                                            </div>
+
+                                            <!-- Supply Items Table - Modern Design -->
+                                            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full">
+                                                        <thead>
+                                                            <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Supply Item
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                                    Quantity
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 150px;">
+                                                                    Unit Cost
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 150px;">
+                                                                    Total Cost
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                                    Fund
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                                    Status
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 130px;">
+                                                                    Expiry
+                                                                </th>
+                                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 60px;">
+
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="supplyItemsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                                                            <!-- Dynamic rows will be added here -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Empty State -->
+                                                <div id="emptyState" class="p-12 text-center bg-white dark:bg-gray-800">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                                                    </svg>
+                                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No items added yet</p>
+                                                    <p class="text-xs text-gray-400 dark:text-gray-500">Click "Add Item" to start</p>
+                                                </div>
+
+                                                <!-- Grand Total Footer -->
+                                                <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-4 border-t border-gray-200 dark:border-gray-700 hidden" id="grandTotalRow">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="flex items-center">
+                                                            <span class="text-sm font-medium text-gray-900 dark:text-white">Grand Total</span>
+                                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400" id="totalItemsCount">(0 items)</span>
                                                         </div>
-                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Date when this item will expire (if applicable)</p>
-                                                        @error('expiry_date')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
+                                                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                            ₱<span id="grandTotal">0.00</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <!-- Right Column -->
-                                            <div class="space-y-5">
-                                                <!-- Fund & Consumption Section -->
-                                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                    <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Funding & Consumption
-                                                    </h4>
-
-                                                    <!-- Fund Cluster -->
-                                                    <div class="mb-4">
-                                                        <label for="fund_cluster" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Fund Cluster <span class="text-red-500">*</span>
-                                                        </label>
-                                                        <div class="relative">
-                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <select name="fund_cluster" id="fund_cluster" required
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                                <option value="101" {{ old('fund_cluster') == '101' ? 'selected' : '' }}>101</option>
-                                                                <option value="151" {{ old('fund_cluster') == '151' ? 'selected' : '' }}>151</option>
-                                                            </select>
-                                                        </div>
-                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Budget source for this stock</p>
-                                                        @error('fund_cluster')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
-                                                    </div>
-
-                                                    <!-- Days to Consume -->
-                                                    <div class="mb-4">
-                                                        <label for="days_to_consume" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Days to Consume
-                                                        </label>
-                                                        <div class="relative">
-                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <input type="number" name="days_to_consume" id="days_to_consume" min="0"
-                                                                value="{{ old('days_to_consume') }}"
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                                        </div>
-                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estimated time until this stock is consumed</p>
-                                                        @error('days_to_consume')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
-                                                    </div>
+                                        <!-- Info Alert -->
+                                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4 mb-6">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                    </svg>
                                                 </div>
-
-                                                <!-- Remarks Section -->
-                                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                    <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Additional Information
-                                                    </h4>
-
-                                                    <!-- Remarks -->
-                                                    <div class="mb-4">
-                                                        <label for="remarks" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                            Remarks
-                                                        </label>
-                                                        <div class="relative">
-                                                            <div class="absolute top-3 left-0 flex items-center pl-3 pointer-events-none">
-                                                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <textarea name="remarks" id="remarks" rows="3"
-                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5
-                                                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                                placeholder="Enter any additional notes or comments">{{ old('remarks') }}</textarea>
-                                                        </div>
-                                                        @error('remarks')
-                                                            <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ $message }}</p>
-                                                        @enderror
+                                                <div class="ml-3">
+                                                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                                        Important Notes
+                                                    </h3>
+                                                    <div class="mt-2 text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                                                        <p>• All items will share the same IAR reference number</p>
+                                                        <p>• Enter costs in peso format (e.g., 100.00)</p>
+                                                        <p>• Set expiry dates for perishable items</p>
                                                     </div>
-                                                </div>
-
-                                                <!-- Notes & Tips -->
-                                                <div class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-blue-900">
-                                                    <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center">
-                                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Important Information
-                                                    </h4>
-                                                    <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-6 list-disc">
-                                                        <li>All fields marked with <span class="text-red-500">*</span> are required</li>
-                                                        <li>Select the correct supply item to maintain inventory accuracy</li>
-                                                        {{-- <li>The unit cost should match the acquisition cost of the item</li> --}}
-                                                        <li>Set appropriate expiry dates for perishable items</li>
-                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Modal Footer -->
-                                        <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center justify-end space-x-3">
                                             <button type="button" data-modal-hide="createStockModal"
-                                                class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                    bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700
-                                                    focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                    dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                    dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
+                                                class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300
+                                                bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
+                                                rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700
+                                                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600
+                                                transition-all duration-200">
                                                 Cancel
                                             </button>
-                                            <button type="submit"
-                                                class="text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
-                                                    focus:ring-4 focus:outline-none focus:ring-blue-300
-                                                    font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all duration-200">
-                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
-                                                </svg>
-                                                Save Stock
+                                            <button type="submit" id="submitStockBtn"
+                                                class="px-6 py-2.5 text-sm font-medium text-white
+                                                bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                                                rounded-lg shadow-sm hover:shadow-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                                transition-all duration-200 transform hover:-translate-y-0.5
+                                                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                                <span class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Save Stock Receipt
+                                                </span>
                                             </button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Add these styles -->
+                        <style>
+                            @keyframes modal-slide-up {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(20px);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                }
+                            }
+
+                            .animate-modal-slide-up {
+                                animation: modal-slide-up 0.3s ease-out;
+                            }
+
+                            @keyframes spin {
+                                from { transform: rotate(0deg); }
+                                to { transform: rotate(360deg); }
+                            }
+
+                            .animate-spin {
+                                animation: spin 1s linear infinite;
+                            }
+
+                            /* Custom scrollbar */
+                            .modal-scrollbar::-webkit-scrollbar {
+                                width: 6px;
+                            }
+
+                            .modal-scrollbar::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+
+                            .modal-scrollbar::-webkit-scrollbar-thumb {
+                                background: #888;
+                                border-radius: 3px;
+                            }
+
+                            .modal-scrollbar::-webkit-scrollbar-thumb:hover {
+                                background: #555;
+                            }
+                        </style>
+
+                        <script>
+                            // Enhanced Multiple Item Stock Form Handler
+                            document.addEventListener('DOMContentLoaded', function() {
+                                let itemIndex = 0;
+
+                                // Add item button
+                                const addItemBtn = document.getElementById('addItemBtn');
+                                const itemsTable = document.getElementById('supplyItemsTable');
+                                const template = document.getElementById('supplyItemRowTemplate');
+                                const emptyState = document.getElementById('emptyState');
+                                const grandTotalRow = document.getElementById('grandTotalRow');
+
+                                // Function to format number as currency
+                                function formatCurrency(amount) {
+                                    return parseFloat(amount).toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+
+                                // Function to parse currency input
+                                function parseCurrency(value) {
+                                    // Remove all non-numeric characters except decimal point
+                                    return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
+                                }
+
+                                // Function to add new item row
+                                function addItemRow() {
+                                    const templateContent = template.content.cloneNode(true);
+                                    const row = templateContent.querySelector('tr');
+
+                                    // Replace INDEX with actual index
+                                    row.innerHTML = row.innerHTML.replace(/INDEX/g, itemIndex);
+
+                                    // Add event listeners
+                                    const quantityInput = row.querySelector('.quantity-input');
+                                    const unitCostInput = row.querySelector('.unit-cost-input');
+                                    const removeBtn = row.querySelector('.remove-item-btn');
+                                    const supplySelect = row.querySelector('.supply-select');
+
+                                    // Initialize unit cost with 0.00
+                                    unitCostInput.value = '0.00';
+
+                                    // Format unit cost on focus/blur
+                                    unitCostInput.addEventListener('focus', function() {
+                                        if (this.value === '0.00') {
+                                            this.value = '';
+                                        }
+                                    });
+
+                                    unitCostInput.addEventListener('blur', function() {
+                                        const value = parseCurrency(this.value);
+                                        this.value = formatCurrency(value);
+                                        calculateRowTotal(row);
+                                    });
+
+                                    unitCostInput.addEventListener('input', function() {
+                                        // Allow typing but validate on blur
+                                        calculateRowTotal(row);
+                                    });
+
+                                    quantityInput.addEventListener('input', function() {
+                                        calculateRowTotal(row);
+                                    });
+
+                                    quantityInput.addEventListener('blur', function() {
+                                        if (!this.value || this.value < 1) {
+                                            this.value = '1';
+                                        }
+                                        calculateRowTotal(row);
+                                    });
+
+                                    removeBtn.addEventListener('click', function() {
+                                        removeItemRow(row);
+                                    });
+
+                                    // Prevent duplicate supply selection
+                                    supplySelect.addEventListener('change', function() {
+                                        validateDuplicateSupply(this);
+                                    });
+
+                                    // Hide empty state and show grand total row
+                                    emptyState.classList.add('hidden');
+                                    grandTotalRow.classList.remove('hidden');
+
+                                    itemsTable.appendChild(row);
+                                    itemIndex++;
+
+                                    // Update submit button state and item count
+                                    updateSubmitButton();
+                                    updateItemCount();
+
+                                    // Focus on supply select
+                                    setTimeout(() => {
+                                        row.querySelector('.supply-select').focus();
+                                    }, 100);
+                                }
+
+                                // Calculate row total
+                                function calculateRowTotal(row) {
+                                    const quantity = parseInt(row.querySelector('.quantity-input').value) || 0;
+                                    const unitCost = parseCurrency(row.querySelector('.unit-cost-input').value);
+                                    const total = quantity * unitCost;
+
+                                    row.querySelector('.total-cost').textContent = '₱' + formatCurrency(total);
+
+                                    calculateGrandTotal();
+                                }
+
+                                // Calculate grand total
+                                function calculateGrandTotal() {
+                                    let grandTotal = 0;
+                                    document.querySelectorAll('.total-cost').forEach(function(el) {
+                                        const value = parseCurrency(el.textContent);
+                                        grandTotal += value;
+                                    });
+
+                                    document.getElementById('grandTotal').textContent = formatCurrency(grandTotal);
+                                }
+
+                                // Update item count
+                                function updateItemCount() {
+                                    const count = document.querySelectorAll('.supply-item-row').length;
+                                    const itemsText = count === 1 ? '1 item' : `${count} items`;
+                                    document.getElementById('totalItemsCount').textContent = `(${itemsText})`;
+
+                                    // Show/hide empty state
+                                    if (count === 0) {
+                                        emptyState.classList.remove('hidden');
+                                        grandTotalRow.classList.add('hidden');
+                                    }
+                                }
+
+                                // Remove item row
+                                function removeItemRow(row) {
+                                    if (document.querySelectorAll('.supply-item-row').length > 1) {
+                                        // Add fade out animation
+                                        row.style.opacity = '0';
+                                        row.style.transform = 'translateX(-10px)';
+
+                                        setTimeout(() => {
+                                            row.remove();
+                                            calculateGrandTotal();
+                                            updateSubmitButton();
+                                            updateItemCount();
+                                        }, 200);
+                                    } else {
+                                        // Show a nicer alert
+                                        showAlert('At least one item is required.');
+                                    }
+                                }
+
+                                // Show custom alert
+                                function showAlert(message) {
+                                    // Create alert element
+                                    const alert = document.createElement('div');
+                                    alert.className = 'fixed top-4 right-4 z-[60] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-modal-slide-up';
+                                    alert.innerHTML = `
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>${message}</span>
+                                    `;
+
+                                    document.body.appendChild(alert);
+
+                                    // Remove after 3 seconds
+                                    setTimeout(() => {
+                                        alert.style.opacity = '0';
+                                        setTimeout(() => alert.remove(), 300);
+                                    }, 3000);
+                                }
+
+                                // Validate duplicate supply selection
+                                function validateDuplicateSupply(select) {
+                                    const selectedValue = select.value;
+                                    if (!selectedValue) return;
+
+                                    const allSelects = document.querySelectorAll('.supply-select');
+                                    let duplicateCount = 0;
+
+                                    allSelects.forEach(function(s) {
+                                        if (s.value === selectedValue) {
+                                            duplicateCount++;
+                                        }
+                                    });
+
+                                    if (duplicateCount > 1) {
+                                        showAlert('This supply item has already been selected.');
+                                        select.value = '';
+                                    }
+                                }
+
+                                // Update submit button state
+                                function updateSubmitButton() {
+                                    const submitBtn = document.getElementById('submitStockBtn');
+                                    const rowCount = document.querySelectorAll('.supply-item-row').length;
+
+                                    if (rowCount === 0) {
+                                        submitBtn.disabled = true;
+                                        submitBtn.classList.add('disabled:opacity-50', 'disabled:cursor-not-allowed', 'disabled:transform-none');
+                                    } else {
+                                        submitBtn.disabled = false;
+                                        submitBtn.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed', 'disabled:transform-none');
+                                    }
+                                }
+
+                                // Add item button click
+                                if (addItemBtn) {
+                                    addItemBtn.addEventListener('click', addItemRow);
+                                }
+
+                                // Handle form submission
+                                const stockForm = document.querySelector('#createStockModal form');
+                                if (stockForm) {
+                                    stockForm.addEventListener('submit', function(e) {
+                                        // Validate at least one item
+                                        const rowCount = document.querySelectorAll('.supply-item-row').length;
+                                        if (rowCount === 0) {
+                                            e.preventDefault();
+                                            showAlert('Please add at least one supply item.');
+                                            return false;
+                                        }
+
+                                        // Validate all rows have required data
+                                        let isValid = true;
+                                        let emptyFields = [];
+
+                                        document.querySelectorAll('.supply-item-row').forEach(function(row, index) {
+                                            const supplyId = row.querySelector('select[name*="supply_id"]').value;
+                                            const quantity = row.querySelector('input[name*="quantity"]').value;
+                                            const unitCost = parseCurrency(row.querySelector('input[name*="unit_cost"]').value);
+
+                                            if (!supplyId) {
+                                                isValid = false;
+                                                emptyFields.push(`Row ${index + 1}: Supply item not selected`);
+                                            }
+                                            if (!quantity || quantity < 1) {
+                                                isValid = false;
+                                                emptyFields.push(`Row ${index + 1}: Invalid quantity`);
+                                            }
+                                            if (unitCost <= 0) {
+                                                isValid = false;
+                                                emptyFields.push(`Row ${index + 1}: Unit cost must be greater than 0`);
+                                            }
+                                        });
+
+                                        if (!isValid) {
+                                            e.preventDefault();
+                                            showAlert(emptyFields[0]); // Show first error
+                                            return false;
+                                        }
+
+                                        // Show loading state
+                                        const submitBtn = document.getElementById('submitStockBtn');
+                                        const originalHTML = submitBtn.innerHTML;
+                                        submitBtn.disabled = true;
+                                        submitBtn.innerHTML = `
+                                            <span class="flex items-center">
+                                                <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Processing IAR...
+                                            </span>
+                                        `;
+                                    });
+                                }
+
+                                // Handle + Add Stock button for single items (keep existing functionality)
+                                document.querySelectorAll('.add-stock-btn').forEach(btn => {
+                                    btn.addEventListener('click', () => {
+                                        // Reset the form for multiple items
+                                        itemsTable.innerHTML = '';
+                                        itemIndex = 0;
+
+                                        // Add a single row with pre-filled data
+                                        addItemRow();
+
+                                        // Pre-fill the first row with the selected supply
+                                        setTimeout(() => {
+                                            const firstRow = itemsTable.querySelector('.supply-item-row');
+                                            if (firstRow) {
+                                                const supplySelect = firstRow.querySelector('.supply-select');
+                                                const unitCostInput = firstRow.querySelector('.unit-cost-input');
+                                                const fundClusterSelect = firstRow.querySelector('select[name*="fund_cluster"]');
+
+                                                supplySelect.value = btn.dataset.supplyId;
+                                                unitCostInput.value = formatCurrency(parseCurrency(btn.dataset.unitCost));
+                                                fundClusterSelect.value = btn.dataset.fundCluster;
+
+                                                // Calculate total
+                                                calculateRowTotal(firstRow);
+
+                                                // Focus on quantity
+                                                firstRow.querySelector('.quantity-input').focus();
+                                            }
+                                        }, 100);
+                                    });
+                                });
+
+                                // Keyboard shortcuts
+                                document.addEventListener('keydown', function(e) {
+                                    // Ctrl/Cmd + Enter to submit
+                                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                                        const submitBtn = document.getElementById('submitStockBtn');
+                                        if (submitBtn && !submitBtn.disabled) {
+                                            submitBtn.click();
+                                        }
+                                    }
+
+                                    // Ctrl/Cmd + Shift + A to add new item
+                                    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
+                                        e.preventDefault();
+                                        const addBtn = document.getElementById('addItemBtn');
+                                        if (addBtn) {
+                                            addBtn.click();
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
+
+                        <!-- Template for supply item row (hidden) -->
+                        <template id="supplyItemRowTemplate">
+                            <tr class="supply-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
+                                <td class="px-4 py-3">
+                                    <select name="items[INDEX][supply_id]" required
+                                        class="supply-select w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                        <option value="">Select Supply Item</option>
+                                        @foreach ($supplies as $s)
+                                            <option value="{{ $s->supply_id }}"
+                                                data-unit="{{ $s->unit_of_measurement }}"
+                                                data-name="{{ $s->item_name }}">
+                                                {{ $s->item_name }} ({{ $s->stock_no }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <input type="number" name="items[INDEX][quantity]" min="1" required
+                                        placeholder="0"
+                                        class="quantity-input w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                        rounded-lg text-sm text-center text-gray-900 dark:text-white
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">₱</span>
+                                        <input type="text" name="items[INDEX][unit_cost]" required
+                                            placeholder="0.00"
+                                            class="unit-cost-input w-full pl-8 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                            rounded-lg text-sm text-right text-gray-900 dark:text-white
+                                            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="total-cost font-medium text-gray-900 dark:text-white">₱0.00</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <select name="items[INDEX][fund_cluster]" required
+                                        class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                        <option value="101">101</option>
+                                        <option value="151">151</option>
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <select name="items[INDEX][status]" required
+                                        class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                        <option value="available">Available</option>
+                                        <option value="reserved">Reserved</option>
+                                        <option value="expired">Expired</option>
+                                        <option value="depleted">Depleted</option>
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <input type="date" name="items[INDEX][expiry_date]"
+                                        class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button type="button" class="remove-item-btn p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400
+                                        hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+
+                        <!-- Add this script for validation error handling -->
+                        @if ($errors->any() && session('show_create_modal') && old('items'))
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    // Wait for modal to be shown
+                                    setTimeout(function() {
+                                        const oldItems = @json(old('items', []));
+                                        const generalRemarks = @json(old('general_remarks', ''));
+
+                                        // Set general remarks
+                                        document.getElementById('general_remarks').value = generalRemarks;
+
+                                        // Clear any existing rows
+                                        document.getElementById('supplyItemsTable').innerHTML = '';
+
+                                        // Re-add rows with old data
+                                        oldItems.forEach(function(item, index) {
+                                            // Trigger add item button
+                                            document.getElementById('addItemBtn').click();
+
+                                            // Fill in the data
+                                            setTimeout(function() {
+                                                const rows = document.querySelectorAll('.supply-item-row');
+                                                const row = rows[index];
+
+                                                if (row) {
+                                                    row.querySelector('select[name*="supply_id"]').value = item.supply_id || '';
+                                                    row.querySelector('input[name*="quantity"]').value = item.quantity || '1';
+
+                                                    // Format unit cost
+                                                    const unitCostInput = row.querySelector('input[name*="unit_cost"]');
+                                                    const unitCost = item.unit_cost || '0.00';
+                                                    unitCostInput.value = parseFloat(unitCost.replace(/,/g, '')).toLocaleString('en-US', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    });
+
+                                                    row.querySelector('select[name*="fund_cluster"]').value = item.fund_cluster || '101';
+                                                    row.querySelector('select[name*="status"]').value = item.status || 'available';
+                                                    row.querySelector('input[name*="expiry_date"]').value = item.expiry_date || '';
+
+                                                    // Trigger calculation
+                                                    const event = new Event('input', { bubbles: true });
+                                                    row.querySelector('.quantity-input').dispatchEvent(event);
+                                                }
+                                            }, 100 * (index + 1));
+                                        });
+                                    }, 500);
+                                });
+                            </script>
+                        @endif
                     @endif
 
                     @if(auth()->user()->hasRole('admin'))

@@ -83,6 +83,7 @@ class SupplyStockController extends Controller
     /**
      * Store a newly created receipt in storage,
      * update weighted‑average summary, and log transaction.
+     * Now supports both single item and multiple items
      */
     public function store(Request $request)
     {
@@ -101,6 +102,12 @@ class SupplyStockController extends Controller
         session([$sessionKey => $submissionToken]);
         // DOUBLE SUBMISSION PREVENTION - END
 
+        // Check if this is a multiple items submission
+        if ($request->has('items') && is_array($request->input('items'))) {
+            return $this->storeMultipleItems($request);
+        }
+
+        // Single item submission (existing logic)
         // Format the unit cost properly (remove commas)
         $request->merge([
             'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
@@ -123,80 +130,8 @@ class SupplyStockController extends Controller
             $referenceNo = $this->referenceNumberService->generateIarNumber($validated['supply_id']);
 
             DB::transaction(function() use ($validated, $request, $referenceNo) {
-                // 1) Pull or init the summary row (group only by supply+cluster)
-                $stock = SupplyStock::firstOrNew([
-                    'supply_id'    => $validated['supply_id'],
-                    'fund_cluster' => $validated['fund_cluster'],
-                ]);
-
-                // 2) Get current values (before adding new stock)
-                $oldQty = $stock->exists ? $stock->quantity_on_hand : 0;
-                $oldTotalCost = $stock->exists ? $stock->total_cost : 0;
-
-                // 3) Calculate new lot values
-                $newLotQty = $validated['quantity_on_hand'];
-                $newLotUnitCost = $validated['unit_cost'];
-                $newLotTotalCost = $newLotQty * $newLotUnitCost;
-
-                // 4) Calculate new totals after adding the lot
-                $newTotalQty = $oldQty + $newLotQty;
-                $newTotalCost = $oldTotalCost + $newLotTotalCost;
-
-                // 5) Calculate weighted average unit cost
-                $newWeightedAvgCost = $newTotalQty > 0 ? $newTotalCost / $newTotalQty : 0;
-
-                // 6) Update summary row with weighted average
-                $stock->quantity_on_hand = $newTotalQty;
-                $stock->total_cost = $newTotalCost;
-                $stock->unit_cost = round($newWeightedAvgCost, 2); // Round to 2 decimal places
-                $stock->expiry_date = $validated['expiry_date'];
-                $stock->status = $validated['status'];
-                $stock->days_to_consume = $validated['days_to_consume'];
-                $stock->remarks = $validated['remarks'];
-                $stock->save();
-
-                // 7) Log this receipt transaction with the ORIGINAL unit cost (not weighted average)
-                // Get the authenticated user's department_id or default to a system department
-                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
-
-                // Debug log to check user and department info
-                Log::info('User and Department Info', [
-                    'user_id' => auth()->id(),
-                    'department_id' => $departmentId,
-                    'auth_check' => auth()->check()
-                ]);
-
-                SupplyTransaction::create([
-                    'supply_id'        => $validated['supply_id'],
-                    'transaction_type' => 'receipt',
-                    'transaction_date' => now()->toDateString(),
-                    'reference_no'     => $referenceNo,
-                    'quantity'         => $newLotQty,
-                    'unit_cost'        => $newLotUnitCost, // Original cost, not weighted average
-                    'total_cost'       => $newLotTotalCost,
-                    'balance_quantity' => $newTotalQty,
-                    'balance_unit_cost' => round($newWeightedAvgCost, 2), // Add this field
-                    'balance_total_cost' => $newTotalCost, // Add this field
-                    'department_id'    => $departmentId, // Use the checked department ID
-                    'user_id'          => auth()->id(),
-                    'remarks'          => $validated['remarks'] ?? 'Stock receipt', // Provide default remarks
-                    'fund_cluster'     => $validated['fund_cluster'],
-                    'days_to_consume'  => $validated['days_to_consume'],
-                ]);
-
-                // Debug logging to track the calculation
-                Log::info('Stock Receipt Added', [
-                    'supply_id' => $validated['supply_id'],
-                    'old_qty' => $oldQty,
-                    'old_total_cost' => $oldTotalCost,
-                    'new_lot_qty' => $newLotQty,
-                    'new_lot_unit_cost' => $newLotUnitCost,
-                    'new_lot_total_cost' => $newLotTotalCost,
-                    'new_total_qty' => $newTotalQty,
-                    'new_total_cost' => $newTotalCost,
-                    'new_weighted_avg_cost' => $newWeightedAvgCost,
-                    'final_unit_cost' => $stock->unit_cost
-                ]);
+                // Process single item (existing logic remains the same)
+                $this->processStockReceipt($validated, $referenceNo);
             });
 
             // Clear the submission token after successful creation
@@ -220,6 +155,155 @@ class SupplyStockController extends Controller
             // Show the actual error message for debugging (can be removed in production)
             return back()->with('error', 'Failed to add stock: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Handle multiple items submission with single IAR
+     */
+    private function storeMultipleItems(Request $request)
+    {
+        // Validate general information and items array
+        $request->validate([
+            'general_remarks' => 'nullable|string|max:255',
+            'submission_token' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.supply_id' => 'required|exists:supplies,supply_id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_cost' => 'required|string', // String because of formatting
+            'items.*.fund_cluster' => 'required|in:101,151',
+            'items.*.status' => 'required|in:available,reserved,expired,depleted',
+            'items.*.expiry_date' => 'nullable|date',
+        ]);
+
+        try {
+            // Generate single IAR reference number for all items
+            // Pass the first supply_id to maintain compatibility
+            $firstSupplyId = $request->input('items')[0]['supply_id'];
+            $referenceNo = $this->referenceNumberService->generateIarNumber($firstSupplyId);
+
+            DB::transaction(function() use ($request, $referenceNo) {
+                $items = $request->input('items');
+                $generalRemarks = $request->input('general_remarks', '');
+
+                foreach ($items as $item) {
+                    // Clean up unit cost (remove commas)
+                    $item['unit_cost'] = str_replace(',', '', $item['unit_cost']);
+
+                    // Prepare data in the format expected by processStockReceipt
+                    $itemData = [
+                        'supply_id' => $item['supply_id'],
+                        'quantity_on_hand' => $item['quantity'],
+                        'unit_cost' => $item['unit_cost'],
+                        'expiry_date' => $item['expiry_date'] ?? null,
+                        'status' => $item['status'],
+                        'fund_cluster' => $item['fund_cluster'],
+                        'days_to_consume' => null,
+                        'remarks' => $generalRemarks,
+                    ];
+
+                    // Process each item using the same logic
+                    $this->processStockReceipt($itemData, $referenceNo);
+                }
+            });
+
+            // Clear the submission token after successful creation
+            session()->forget('last_stock_submission_' . auth()->id());
+
+            // Count items for success message
+            $itemCount = count($request->input('items'));
+            $itemText = $itemCount > 1 ? $itemCount . ' items' : '1 item';
+
+            return redirect()
+                ->route('stocks.index')
+                ->with('success', "IAR {$referenceNo} created successfully with {$itemText}.");
+
+        } catch (\Exception $e) {
+            // Clear the submission token on error so user can retry
+            session()->forget('last_stock_submission_' . auth()->id());
+
+            Log::error('Failed to create stock IAR', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id()
+            ]);
+
+            return back()->with('error', 'Failed to add stock: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process a single stock receipt item
+     * Extracted to avoid code duplication
+     */
+    private function processStockReceipt($itemData, $referenceNo)
+    {
+        // 1) Pull or init the summary row (group only by supply+cluster)
+        $stock = SupplyStock::firstOrNew([
+            'supply_id'    => $itemData['supply_id'],
+            'fund_cluster' => $itemData['fund_cluster'],
+        ]);
+
+        // 2) Get current values (before adding new stock)
+        $oldQty = $stock->exists ? $stock->quantity_on_hand : 0;
+        $oldTotalCost = $stock->exists ? $stock->total_cost : 0;
+
+        // 3) Calculate new lot values
+        $newLotQty = $itemData['quantity_on_hand'];
+        $newLotUnitCost = $itemData['unit_cost'];
+        $newLotTotalCost = $newLotQty * $newLotUnitCost;
+
+        // 4) Calculate new totals after adding the lot
+        $newTotalQty = $oldQty + $newLotQty;
+        $newTotalCost = $oldTotalCost + $newLotTotalCost;
+
+        // 5) Calculate weighted average unit cost
+        $newWeightedAvgCost = $newTotalQty > 0 ? $newTotalCost / $newTotalQty : 0;
+
+        // 6) Update summary row with weighted average
+        $stock->quantity_on_hand = $newTotalQty;
+        $stock->total_cost = $newTotalCost;
+        $stock->unit_cost = round($newWeightedAvgCost, 2); // Round to 2 decimal places
+        $stock->expiry_date = $itemData['expiry_date'];
+        $stock->status = $itemData['status'];
+        $stock->days_to_consume = $itemData['days_to_consume'] ?? null;
+        $stock->remarks = $itemData['remarks'];
+        $stock->save();
+
+        // 7) Log this receipt transaction with the ORIGINAL unit cost (not weighted average)
+        $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+
+        SupplyTransaction::create([
+            'supply_id'        => $itemData['supply_id'],
+            'transaction_type' => 'receipt',
+            'transaction_date' => now()->toDateString(),
+            'reference_no'     => $referenceNo,
+            'quantity'         => $newLotQty,
+            'unit_cost'        => $newLotUnitCost, // Original cost, not weighted average
+            'total_cost'       => $newLotTotalCost,
+            'balance_quantity' => $newTotalQty,
+            'balance_unit_cost' => round($newWeightedAvgCost, 2),
+            'balance_total_cost' => $newTotalCost,
+            'department_id'    => $departmentId,
+            'user_id'          => auth()->id(),
+            'remarks'          => $itemData['remarks'] ?? 'Stock receipt via IAR ' . $referenceNo,
+            'fund_cluster'     => $itemData['fund_cluster'],
+            'days_to_consume'  => $itemData['days_to_consume'] ?? null,
+        ]);
+
+        // Debug logging to track the calculation
+        Log::info('Stock Receipt Added', [
+            'iar_reference' => $referenceNo,
+            'supply_id' => $itemData['supply_id'],
+            'old_qty' => $oldQty,
+            'old_total_cost' => $oldTotalCost,
+            'new_lot_qty' => $newLotQty,
+            'new_lot_unit_cost' => $newLotUnitCost,
+            'new_lot_total_cost' => $newLotTotalCost,
+            'new_total_qty' => $newTotalQty,
+            'new_total_cost' => $newTotalCost,
+            'new_weighted_avg_cost' => $newWeightedAvgCost,
+            'final_unit_cost' => $stock->unit_cost
+        ]);
     }
 
     /**
@@ -284,7 +368,7 @@ class SupplyStockController extends Controller
                     'balance_quantity' => $newQty,
                     'balance_unit_cost' => $newWeightedAvgCost,
                     'balance_total_cost' => $newTotalCost,
-                    'department_id'    => $departmentId, // Use the checked department ID
+                    'department_id'    => $departmentId,
                     'user_id'          => auth()->id(),
                     'remarks'          => $validated['remarks'] ?? 'Stock issued',
                     'fund_cluster'     => $validated['fund_cluster'],
