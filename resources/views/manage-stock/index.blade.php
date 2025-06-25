@@ -973,6 +973,7 @@
                             });
                         </script>
 
+
                         <!-- Template for supply item row (hidden) -->
                         <template id="supplyItemRowTemplate">
                             <tr class="supply-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
@@ -1611,175 +1612,6 @@
             });
         </script>
 
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Cache DOM elements
-                const supplySearch = document.getElementById('supply_search');
-                const clearSearchBtn = document.getElementById('clear_supply_search');
-                const supplyDropdown = document.getElementById('supply_dropdown');
-                const supplyList = document.getElementById('supply_list');
-                const supplySelect = document.getElementById('supply_id');
-                const selectedSupplyDiv = document.getElementById('selected_supply');
-                const selectedSupplyName = document.getElementById('selected_supply_name');
-                const selectedSupplyDesc = document.getElementById('selected_supply_desc');
-                const selectedSupplyStockNo = document.getElementById('selected_supply_stock_no');
-                const clearSelectionBtn = document.getElementById('clear_selection');
-
-                // Parse all supplies into a usable array
-                const supplies = Array.from(supplySelect.options).slice(1).map(option => {
-                    return {
-                        id: option.value,
-                        name: option.getAttribute('data-name'),
-                        description: option.getAttribute('data-description'),
-                        stockNo: option.getAttribute('data-stock-no'),
-                        searchText: `${option.getAttribute('data-name')} ${option.getAttribute('data-description')} ${option.getAttribute('data-stock-no')}`.toLowerCase()
-                    };
-                });
-
-                // Toggle clear search button visibility
-                function toggleClearSearch() {
-                    clearSearchBtn.classList.toggle('hidden', !supplySearch.value.trim());
-                }
-
-                // Filter supplies based on search query
-                function filterSupplies() {
-                    const query = supplySearch.value.toLowerCase().trim();
-
-                    // Show dropdown if search input has focus
-                    if (document.activeElement === supplySearch) {
-                        supplyDropdown.classList.remove('hidden');
-                    }
-
-                    // Clear the list
-                    supplyList.innerHTML = '';
-
-                    // Filter supplies
-                    let filteredSupplies = query ?
-                        supplies.filter(supply => supply.searchText.includes(query)) :
-                        supplies.slice(0, 100); // Limit to first 100 if no search
-
-                    // Display no results message
-                    if (filteredSupplies.length === 0) {
-                        const noResults = document.createElement('li');
-                        noResults.className = 'px-4 py-3 text-center text-gray-500 dark:text-gray-400';
-                        noResults.textContent = 'No matching supplies found';
-                        supplyList.appendChild(noResults);
-                        return;
-                    }
-
-                    // Create list items for filtered supplies
-                    filteredSupplies.forEach(supply => {
-                        const item = document.createElement('li');
-                        item.className = 'border-b last:border-b-0 border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
-                        item.dataset.id = supply.id;
-
-                        item.innerHTML = `
-                            <div class="px-4 py-2">
-                                <div class="font-medium text-gray-900 dark:text-white">${supply.name}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">${supply.description}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">(${supply.stockNo})</div>
-                            </div>
-                        `;
-
-                        item.addEventListener('click', () => selectSupply(supply));
-                        supplyList.appendChild(item);
-                    });
-                }
-
-                // Select a supply
-                function selectSupply(supply) {
-                    // Update hidden select for form submission
-                    supplySelect.value = supply.id;
-
-                    // Display selected supply details
-                    selectedSupplyName.textContent = supply.name;
-                    selectedSupplyDesc.textContent = supply.description;
-                    selectedSupplyStockNo.textContent = `Stock No: ${supply.stockNo}`;
-                    selectedSupplyDiv.classList.remove('hidden');
-
-                    // Clear search and hide dropdown
-                    supplySearch.value = '';
-                    supplyDropdown.classList.add('hidden');
-                    toggleClearSearch();
-
-                    // Dispatch change event for validation
-                    supplySelect.dispatchEvent(new Event('change'));
-                }
-
-                // Clear selection
-                function clearSelection() {
-                    supplySelect.value = '';
-                    selectedSupplyDiv.classList.add('hidden');
-                    supplySearch.value = '';
-                    toggleClearSearch();
-
-                    // Dispatch change event for validation
-                    supplySelect.dispatchEvent(new Event('change'));
-
-                    // Focus on search input
-                    supplySearch.focus();
-                }
-
-                // Initialize with existing selection if any
-                function initializeSelection() {
-                    if (supplySelect.value) {
-                        const selectedOption = supplySelect.options[supplySelect.selectedIndex];
-                        const supply = {
-                            id: selectedOption.value,
-                            name: selectedOption.getAttribute('data-name'),
-                            description: selectedOption.getAttribute('data-description'),
-                            stockNo: selectedOption.getAttribute('data-stock-no')
-                        };
-
-                        // Display selected supply details
-                        selectedSupplyName.textContent = supply.name;
-                        selectedSupplyDesc.textContent = supply.description;
-                        selectedSupplyStockNo.textContent = `Stock No: ${supply.stockNo}`;
-                        selectedSupplyDiv.classList.remove('hidden');
-                    }
-                }
-
-                // Event Listeners
-                supplySearch.addEventListener('input', () => {
-                    filterSupplies();
-                    toggleClearSearch();
-                });
-
-                supplySearch.addEventListener('focus', filterSupplies);
-
-                clearSearchBtn.addEventListener('click', () => {
-                    supplySearch.value = '';
-                    toggleClearSearch();
-                    filterSupplies();
-                    supplySearch.focus();
-                });
-
-                clearSelectionBtn.addEventListener('click', clearSelection);
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!supplySearch.contains(e.target) && !supplyDropdown.contains(e.target)) {
-                        supplyDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Handle keyboard navigation
-                supplySearch.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        supplyDropdown.classList.add('hidden');
-                    } else if (e.key === 'ArrowDown' && !supplyDropdown.classList.contains('hidden')) {
-                        e.preventDefault();
-                        const firstItem = supplyList.querySelector('li');
-                        if (firstItem) firstItem.focus();
-                    }
-                });
-
-                // Initialize
-                toggleClearSearch();
-                initializeSelection();
-            });
-        </script>
     @endif
 
     <!-- Add this script tag AFTER your existing scripts -->
@@ -1891,5 +1723,6 @@
             document.head.appendChild(style);
         }
     </script>
+
 
 </x-app-layout>
