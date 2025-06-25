@@ -31,7 +31,9 @@ return new class extends Migration
                   ->nullOnDelete();
 
             $table->text('purpose')->nullable();
-            $table->enum('status', ['draft','approved','posted'])
+
+            // ← here we use string instead of enum
+            $table->string('status', 20)
                   ->default('draft');
 
             // sign-offs
@@ -53,9 +55,7 @@ return new class extends Migration
                   ->nullOnDelete();
             $table->timestamp('received_at')->nullable();
 
-            //
             // ↓↓↓ DECLINE FIELDS ↓↓↓
-            //
             $table->foreignId('declined_by')
                   ->nullable()
                   ->constrained('users')
