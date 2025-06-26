@@ -1507,30 +1507,30 @@
                 );
 
                 // + Add‑Stock button
-                document.querySelectorAll('.add-stock-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const {
-                            supplyId,
-                            unitCost,
-                            fundCluster
-                        } = btn.dataset;
-                        document.getElementById('supply_id').value = supplyId;
-                        document.getElementById('fund_cluster').value = fundCluster;
-                        document.getElementById('unit_cost').value =
-                            parseFloat(unitCost).toLocaleString('en-US', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            });
-                        // reset other fields
-                        document.getElementById('quantity_on_hand').value = 0;
-                        document.getElementById('status').value = 'available';
-                        document.getElementById('expiry_date').value = '';
-                        document.getElementById('days_to_consume').value = '';
-                        document.getElementById('remarks').value = '';
-                        show('createStockModal');
-                        document.getElementById('quantity_on_hand').focus();
-                    });
-                });
+                // document.querySelectorAll('.add-stock-btn').forEach(btn => {
+                //     btn.addEventListener('click', () => {
+                //         const {
+                //             supplyId,
+                //             unitCost,
+                //             fundCluster
+                //         } = btn.dataset;
+                //         document.getElementById('supply_id').value = supplyId;
+                //         document.getElementById('fund_cluster').value = fundCluster;
+                //         document.getElementById('unit_cost').value =
+                //             parseFloat(unitCost).toLocaleString('en-US', {
+                //                 minimumFractionDigits: 2,
+                //                 maximumFractionDigits: 2
+                //             });
+                //         // reset other fields
+                //         document.getElementById('quantity_on_hand').value = 0;
+                //         document.getElementById('status').value = 'available';
+                //         document.getElementById('expiry_date').value = '';
+                //         document.getElementById('days_to_consume').value = '';
+                //         document.getElementById('remarks').value = '';
+                //         show('createStockModal');
+                //         document.getElementById('quantity_on_hand').focus();
+                //     });
+                // });
 
                 // === Edit‑Stock button (updated) ===
                 document.querySelectorAll('.edit-stock-btn').forEach(btn => {

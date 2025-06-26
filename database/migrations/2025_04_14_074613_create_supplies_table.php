@@ -17,9 +17,7 @@ return new class extends Migration
             $table->string('item_name');
             $table->text('description')->nullable();
             $table->string('unit_of_measurement');
-            $table->unsignedBigInteger('category_id')->nullable(); // Made nullable
-            $table->unsignedBigInteger('supplier_id');
-            $table->unsignedBigInteger('department_id')->nullable(); // Made nullable
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->integer('reorder_point')->default(0);
             $table->decimal('acquisition_cost', 10, 2)->default(0.00);
             $table->boolean('is_active')->default(true);
@@ -27,8 +25,6 @@ return new class extends Migration
 
             // Foreign key constraints
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
-            $table->foreign('supplier_id')->references('id')->on('suppliers');
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
         });
     }
 

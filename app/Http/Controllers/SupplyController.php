@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Supply;
 use App\Models\Category;
-use App\Models\Supplier;
-use App\Models\Department;
 use Illuminate\Http\Request;
 
 class SupplyController extends Controller
@@ -15,16 +13,11 @@ class SupplyController extends Controller
      */
     public function index(Request $request)
     {
-        // Only fetch suppliers for the dropdown
-        $suppliers = Supplier::orderBy('name')->get();
-
-        // You can still fetch categories and departments if needed for display purposes
-        // but not for the form dropdowns
+        // Only fetch categories for the dropdown
         $categories = Category::all();
-        $departments = Department::orderBy('name')->get();
 
-        // Start building the query for supplies with related category, supplier, and department
-        $suppliesQuery = Supply::with(['category', 'supplier', 'department']);
+        // Start building the query for supplies with related category only
+        $suppliesQuery = Supply::with(['category']);
 
         // Check if a search term was provided
         if ($search = $request->input('search')) {
@@ -38,8 +31,8 @@ class SupplyController extends Controller
         // Execute the query to get supplies with pagination
         $supplies = $suppliesQuery->paginate(5);
 
-        // Pass all variables to your view
-        return view('supplies.index', compact('categories', 'supplies', 'suppliers', 'departments'));
+        // Pass only categories and supplies to your view
+        return view('supplies.index', compact('categories', 'supplies'));
     }
 
     public function create()
@@ -59,9 +52,7 @@ class SupplyController extends Controller
                 'item_name'           => 'required|string|max:255',
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
-                'category_id'         => 'nullable|exists:categories,id', // Made optional
-                'supplier_id'         => 'required|exists:suppliers,id',
-                'department_id'       => 'nullable|exists:departments,id', // Made optional
+                'category_id'         => 'nullable|exists:categories,id',
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
@@ -89,9 +80,7 @@ class SupplyController extends Controller
                 'item_name'           => 'required|string|max:255',
                 'description'         => 'nullable|string',
                 'unit_of_measurement' => 'required|string|max:50',
-                'category_id'         => 'nullable|exists:categories,id', // Made optional
-                'supplier_id'         => 'required|exists:suppliers,id',
-                'department_id'       => 'nullable|exists:departments,id', // Made optional
+                'category_id'         => 'nullable|exists:categories,id',
                 'reorder_point'       => 'required|integer|min:0',
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
