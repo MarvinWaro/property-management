@@ -15,8 +15,6 @@ class Supply extends Model
         'description',
         'unit_of_measurement',
         'category_id',
-        'supplier_id',      // Add this
-        'department_id',    // Add this
         'reorder_point',
         'acquisition_cost',
         'is_active'
@@ -41,17 +39,6 @@ class Supply extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    // Add these relationships
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
-
     /**
      * Get the stock records for this supply
      */
@@ -59,5 +46,4 @@ class Supply extends Model
     {
         return $this->hasMany(SupplyStock::class, 'supply_id', 'supply_id');
     }
-
 }
