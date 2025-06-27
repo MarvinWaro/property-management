@@ -16,6 +16,17 @@ return new class extends Migration
                 ->constrained('supplies', 'supply_id')
                 ->cascadeOnDelete();
 
+            /* NEW: FK to suppliers and departments */
+            $table->foreignId('supplier_id')
+                ->nullable()
+                ->constrained('suppliers')
+                ->nullOnDelete();
+
+            $table->foreignId('department_id')
+                ->nullable()
+                ->constrained('departments')
+                ->nullOnDelete();
+
             /* summary values (ONE row per supply + fund‑cluster) */
             $table->integer('quantity_on_hand')->default(0);
             $table->decimal('unit_cost', 10, 2)->default(0.00);

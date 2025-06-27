@@ -68,7 +68,7 @@
                                 <span>Ledger Cards</span>
                             </a>
 
-                            {{-- only admins should see “Add Stock” --}}
+                            {{-- only admins should see "Add Stock" --}}
                             @if(auth()->user()->hasRole('admin'))
                                 <!-- Add Stock button - primary red action -->
                                 <button data-modal-target="createStockModal" data-modal-toggle="createStockModal" type="button"
@@ -144,6 +144,8 @@
                                         <tr>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supply Item</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
+                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
@@ -165,6 +167,23 @@
                                                     <div class="font-medium">{{ $stock->supply->item_name }}</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $stock->supply->stock_no }}</div>
+                                                </td>
+                                                <!-- Supplier -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    @if($stock->supplier)
+                                                        <div class="text-sm">{{ $stock->supplier->name }}</div>
+                                                    @else
+                                                        <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Department -->
+                                                <td class="px-6 py-4 dark:text-white">
+                                                    @if($stock->department)
+                                                        <div class="text-sm">{{ $stock->department->name }}</div>
+                                                    @else
+                                                        <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                                                    @endif
                                                 </td>
                                                 <!-- Quantity -->
                                                 <td class="px-6 py-4 dark:text-white">
@@ -247,6 +266,8 @@
                                                                 data-fund-cluster="{{ $stock->fund_cluster }}"
                                                                 data-days-to-consume="{{ $stock->days_to_consume }}"
                                                                 data-remarks="{{ $stock->remarks }}"
+                                                                data-supplier-id="{{ $stock->supplier_id }}"
+                                                                data-department-id="{{ $stock->department_id }}"
                                                                 data-modal-target="editStockModal"
                                                                 data-modal-toggle="editStockModal" title="Re‑value stock">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -316,7 +337,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="px-6 py-8 text-center">
+                                                <td colspan="9" class="px-6 py-8 text-center">
                                                     <div class="flex flex-col items-center justify-center">
                                                         <!-- empty‑state SVG + copy -->
                                                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,7 +442,7 @@
 
                                         <!-- IAR Information Card -->
                                         <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6">
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                                 <div>
                                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         IAR REFERENCE
@@ -457,15 +478,45 @@
                                                 </div>
 
                                                 <div>
-                                                    <label for="general_remarks" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                                                        GENERAL REMARKS
+                                                    <label for="general_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        SUPPLIER (OPTIONAL)
                                                     </label>
-                                                    <input type="text" name="general_remarks" id="general_remarks"
-                                                        placeholder="e.g., PO #12345, DR #67890"
+                                                    <select name="general_supplier_id" id="general_supplier_id"
                                                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                                                        rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
                                                         focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="">No Supplier</option>
+                                                        @foreach($suppliers as $supplier)
+                                                            <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
+
+                                                <div>
+                                                    <label for="general_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        DEPARTMENT (OPTIONAL)
+                                                    </label>
+                                                    <select name="general_department_id" id="general_department_id"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="">No Department</option>
+                                                        @foreach($departments as $department)
+                                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <label for="general_remarks" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                    GENERAL REMARKS
+                                                </label>
+                                                <input type="text" name="general_remarks" id="general_remarks"
+                                                    placeholder="e.g., PO #12345, DR #67890"
+                                                    class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                    rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400
+                                                    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
                                             </div>
                                         </div>
 
@@ -648,6 +699,57 @@
                             .modal-scrollbar::-webkit-scrollbar-thumb:hover {
                                 background: #555;
                             }
+
+
+                            /* Custom dropdown styles */
+                            .supply-dropdown-menu {
+                                max-width: 400px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar {
+                                width: 6px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-thumb {
+                                background: #888;
+                                border-radius: 3px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-thumb:hover {
+                                background: #555;
+                            }
+
+                            .supply-option {
+                                transition: all 0.2s ease;
+                            }
+
+                            .supply-option:hover {
+                                transform: translateX(2px);
+                            }
+
+                            /* Add this to your styles section */
+                            .overflow-x-auto {
+                                overflow: visible !important;
+                            }
+
+                            .supply-dropdown-menu {
+                                position: fixed !important;
+                                z-index: 9999 !important;
+                            }
+
+                            /* Keep the table scrollable but allow dropdowns to escape */
+                            #supplyItemsTable {
+                                overflow: visible !important;
+                            }
+
+                            .overflow-hidden {
+                                overflow: visible !important;
+                            }
                         </style>
 
                         <script>
@@ -676,6 +778,96 @@
                                     return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
                                 }
 
+                                // Custom dropdown functions
+                                window.toggleSupplyDropdown = function(trigger) {
+                                    const dropdown = trigger.nextElementSibling;
+                                    const allDropdowns = document.querySelectorAll('.supply-dropdown-menu');
+
+                                    // Close all other dropdowns
+                                    allDropdowns.forEach(d => {
+                                        if (d !== dropdown) {
+                                            d.classList.add('hidden');
+                                        }
+                                    });
+
+                                    // Toggle current dropdown
+                                    dropdown.classList.toggle('hidden');
+
+                                    // Focus on search input if opening
+                                    if (!dropdown.classList.contains('hidden')) {
+                                        const searchInput = dropdown.querySelector('.supply-search-input');
+                                        setTimeout(() => searchInput.focus(), 100);
+                                    }
+                                }
+
+                                window.filterSupplyOptions = function(searchInput) {
+                                    const searchTerm = searchInput.value.toLowerCase();
+                                    const options = searchInput.closest('.supply-dropdown-menu').querySelectorAll('.supply-option');
+                                    let visibleCount = 0;
+
+                                    options.forEach(option => {
+                                        const name = option.dataset.supplyName.toLowerCase();
+                                        const stockNo = option.dataset.supplyStockno.toLowerCase();
+                                        const description = (option.dataset.supplyDescription || '').toLowerCase();
+
+                                        if (name.includes(searchTerm) || stockNo.includes(searchTerm) || description.includes(searchTerm)) {
+                                            option.style.display = 'block';
+                                            visibleCount++;
+                                        } else {
+                                            option.style.display = 'none';
+                                        }
+                                    });
+                                }
+
+                                window.selectSupplyOption = function(option) {
+                                    const wrapper = option.closest('.supply-select-wrapper');
+                                    const hiddenInput = wrapper.querySelector('.supply-id-input');
+                                    const trigger = wrapper.querySelector('.supply-dropdown-trigger');
+                                    const selectedText = trigger.querySelector('.selected-supply-text');
+                                    const dropdown = wrapper.querySelector('.supply-dropdown-menu');
+
+                                    // Set values
+                                    hiddenInput.value = option.dataset.supplyId;
+                                    selectedText.textContent = `${option.dataset.supplyName} (${option.dataset.supplyStockno})`;
+                                    selectedText.classList.remove('text-gray-500');
+
+                                    // Close dropdown
+                                    dropdown.classList.add('hidden');
+
+                                    // Clear search
+                                    const searchInput = dropdown.querySelector('.supply-search-input');
+                                    searchInput.value = '';
+                                    filterSupplyOptions(searchInput);
+
+                                    // Trigger validation for duplicate check
+                                    validateDuplicateSupplyCustom(hiddenInput);
+                                }
+
+                                // Update the validateDuplicateSupply function
+                                function validateDuplicateSupplyCustom(input) {
+                                    const selectedValue = input.value;
+                                    if (!selectedValue) return;
+
+                                    const allInputs = document.querySelectorAll('.supply-id-input');
+                                    let duplicateCount = 0;
+
+                                    allInputs.forEach(function(i) {
+                                        if (i.value === selectedValue) {
+                                            duplicateCount++;
+                                        }
+                                    });
+
+                                    if (duplicateCount > 1) {
+                                        showAlert('This supply item has already been selected.');
+                                        // Clear the selection
+                                        input.value = '';
+                                        const wrapper = input.closest('.supply-select-wrapper');
+                                        const selectedText = wrapper.querySelector('.selected-supply-text');
+                                        selectedText.textContent = 'Select Supply Item';
+                                        selectedText.classList.add('text-gray-500');
+                                    }
+                                }
+
                                 // Function to add new item row
                                 function addItemRow() {
                                     const templateContent = template.content.cloneNode(true);
@@ -688,7 +880,6 @@
                                     const quantityInput = row.querySelector('.quantity-input');
                                     const unitCostInput = row.querySelector('.unit-cost-input');
                                     const removeBtn = row.querySelector('.remove-item-btn');
-                                    const supplySelect = row.querySelector('.supply-select');
 
                                     // Initialize unit cost with 0.00
                                     unitCostInput.value = '0.00';
@@ -726,11 +917,6 @@
                                         removeItemRow(row);
                                     });
 
-                                    // Prevent duplicate supply selection
-                                    supplySelect.addEventListener('change', function() {
-                                        validateDuplicateSupply(this);
-                                    });
-
                                     // Hide empty state and show grand total row
                                     emptyState.classList.add('hidden');
                                     grandTotalRow.classList.remove('hidden');
@@ -742,9 +928,12 @@
                                     updateSubmitButton();
                                     updateItemCount();
 
-                                    // Focus on supply select
+                                    // Focus on dropdown trigger
                                     setTimeout(() => {
-                                        row.querySelector('.supply-select').focus();
+                                        const dropdownTrigger = row.querySelector('.supply-dropdown-trigger');
+                                        if (dropdownTrigger) {
+                                            dropdownTrigger.click();
+                                        }
                                     }, 100);
                                 }
 
@@ -823,26 +1012,6 @@
                                     }, 3000);
                                 }
 
-                                // Validate duplicate supply selection
-                                function validateDuplicateSupply(select) {
-                                    const selectedValue = select.value;
-                                    if (!selectedValue) return;
-
-                                    const allSelects = document.querySelectorAll('.supply-select');
-                                    let duplicateCount = 0;
-
-                                    allSelects.forEach(function(s) {
-                                        if (s.value === selectedValue) {
-                                            duplicateCount++;
-                                        }
-                                    });
-
-                                    if (duplicateCount > 1) {
-                                        showAlert('This supply item has already been selected.');
-                                        select.value = '';
-                                    }
-                                }
-
                                 // Update submit button state
                                 function updateSubmitButton() {
                                     const submitBtn = document.getElementById('submitStockBtn');
@@ -879,7 +1048,7 @@
                                         let emptyFields = [];
 
                                         document.querySelectorAll('.supply-item-row').forEach(function(row, index) {
-                                            const supplyId = row.querySelector('select[name*="supply_id"]').value;
+                                            const supplyId = row.querySelector('input[name*="supply_id"]').value;
                                             const quantity = row.querySelector('input[name*="quantity"]').value;
                                             const unitCost = parseCurrency(row.querySelector('input[name*="unit_cost"]').value);
 
@@ -933,11 +1102,21 @@
                                         setTimeout(() => {
                                             const firstRow = itemsTable.querySelector('.supply-item-row');
                                             if (firstRow) {
-                                                const supplySelect = firstRow.querySelector('.supply-select');
+                                                const hiddenInput = firstRow.querySelector('.supply-id-input');
+                                                const selectedText = firstRow.querySelector('.selected-supply-text');
                                                 const unitCostInput = firstRow.querySelector('.unit-cost-input');
                                                 const fundClusterSelect = firstRow.querySelector('select[name*="fund_cluster"]');
 
-                                                supplySelect.value = btn.dataset.supplyId;
+                                                // Set the supply ID
+                                                hiddenInput.value = btn.dataset.supplyId;
+
+                                                // Find and set the supply name
+                                                const supplyOption = firstRow.querySelector(`.supply-option[data-supply-id="${btn.dataset.supplyId}"]`);
+                                                if (supplyOption) {
+                                                    selectedText.textContent = `${supplyOption.dataset.supplyName} (${supplyOption.dataset.supplyStockno})`;
+                                                    selectedText.classList.remove('text-gray-500');
+                                                }
+
                                                 unitCostInput.value = formatCurrency(parseCurrency(btn.dataset.unitCost));
                                                 fundClusterSelect.value = btn.dataset.fundCluster;
 
@@ -949,6 +1128,15 @@
                                             }
                                         }, 100);
                                     });
+                                });
+
+                                // Close dropdowns when clicking outside
+                                document.addEventListener('click', function(event) {
+                                    if (!event.target.closest('.supply-select-wrapper')) {
+                                        document.querySelectorAll('.supply-dropdown-menu').forEach(dropdown => {
+                                            dropdown.classList.add('hidden');
+                                        });
+                                    }
                                 });
 
                                 // Keyboard shortcuts
@@ -978,19 +1166,43 @@
                         <template id="supplyItemRowTemplate">
                             <tr class="supply-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
                                 <td class="px-4 py-3">
-                                    <select name="items[INDEX][supply_id]" required
-                                        class="supply-select w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                                        rounded-lg text-sm text-gray-900 dark:text-white
-                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
-                                        <option value="">Select Supply Item</option>
-                                        @foreach ($supplies as $s)
-                                            <option value="{{ $s->supply_id }}"
-                                                data-unit="{{ $s->unit_of_measurement }}"
-                                                data-name="{{ $s->item_name }}">
-                                                {{ $s->item_name }} ({{ $s->stock_no }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <!-- Custom searchable dropdown -->
+                                    <div class="supply-select-wrapper relative">
+                                        <input type="hidden" name="items[INDEX][supply_id]" class="supply-id-input" required>
+                                        <div class="supply-dropdown-trigger w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                            rounded-lg text-sm text-gray-900 dark:text-white cursor-pointer
+                                            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                            onclick="toggleSupplyDropdown(this)">
+                                            <span class="selected-supply-text text-gray-500">Select Supply Item</span>
+                                            <svg class="w-4 h-4 absolute right-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+
+                                        <!-- Custom dropdown menu -->
+                                        <div class="supply-dropdown-menu hidden absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                            <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                                <input type="text" class="supply-search-input w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                    placeholder="Search supplies..." onkeyup="filterSupplyOptions(this)">
+                                            </div>
+                                            <div class="supply-options-container max-h-[200px] overflow-y-auto">
+                                                @foreach ($supplies as $s)
+                                                    <div class="supply-option px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                                        data-supply-id="{{ $s->supply_id }}"
+                                                        data-supply-name="{{ $s->item_name }}"
+                                                        data-supply-stockno="{{ $s->stock_no }}"
+                                                        data-supply-description="{{ $s->description }}"
+                                                        data-unit="{{ $s->unit_of_measurement }}"
+                                                        onclick="selectSupplyOption(this)">
+                                                        <div class="font-medium text-sm text-gray-900 dark:text-white">{{ $s->item_name }} ({{ $s->stock_no }})</div>
+                                                        @if($s->description)
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ Str::limit($s->description, 60) }}</div>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <input type="number" name="items[INDEX][quantity]" min="1" required
@@ -1057,9 +1269,13 @@
                                     setTimeout(function() {
                                         const oldItems = @json(old('items', []));
                                         const generalRemarks = @json(old('general_remarks', ''));
+                                        const generalSupplierId = @json(old('general_supplier_id', ''));
+                                        const generalDepartmentId = @json(old('general_department_id', ''));
 
-                                        // Set general remarks
+                                        // Set general fields
                                         document.getElementById('general_remarks').value = generalRemarks;
+                                        document.getElementById('general_supplier_id').value = generalSupplierId;
+                                        document.getElementById('general_department_id').value = generalDepartmentId;
 
                                         // Clear any existing rows
                                         document.getElementById('supplyItemsTable').innerHTML = '';
@@ -1141,7 +1357,6 @@
 
                                         <input type="hidden" name="stock_id" id="edit_stock_id">
                                         <input type="hidden" name="supply_id" id="edit_supply_id">
-                                        <input type="hidden" name="department_id" value="{{ auth()->user()->department_id }}">
 
                                         <div class="p-6 bg-gray-50 dark:bg-gray-800">
                                             <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Update stock information including cost, status, and other details.</p>
@@ -1307,6 +1522,54 @@
                                                                     dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" />
                                                             </div>
                                                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estimated time until this stock is consumed</p>
+                                                        </div>
+
+                                                        <!-- Supplier Section -->
+                                                        <div class="mb-4">
+                                                            <label for="edit_supplier_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                Supplier
+                                                            </label>
+                                                            <div class="relative">
+                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <select name="supplier_id" id="edit_supplier_id"
+                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
+                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
+                                                                    <option value="">No Supplier</option>
+                                                                    @foreach($suppliers as $supplier)
+                                                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Department Section -->
+                                                        <div class="mb-4">
+                                                            <label for="edit_department_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                Department
+                                                            </label>
+                                                            <div class="relative">
+                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z" clip-rule="evenodd"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <select name="department_id" id="edit_department_id"
+                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
+                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
+                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
+                                                                    <option value="">No Department</option>
+                                                                    @foreach($departments as $department)
+                                                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1506,32 +1769,6 @@
                     btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
                 );
 
-                // + Add‑Stock button
-                // document.querySelectorAll('.add-stock-btn').forEach(btn => {
-                //     btn.addEventListener('click', () => {
-                //         const {
-                //             supplyId,
-                //             unitCost,
-                //             fundCluster
-                //         } = btn.dataset;
-                //         document.getElementById('supply_id').value = supplyId;
-                //         document.getElementById('fund_cluster').value = fundCluster;
-                //         document.getElementById('unit_cost').value =
-                //             parseFloat(unitCost).toLocaleString('en-US', {
-                //                 minimumFractionDigits: 2,
-                //                 maximumFractionDigits: 2
-                //             });
-                //         // reset other fields
-                //         document.getElementById('quantity_on_hand').value = 0;
-                //         document.getElementById('status').value = 'available';
-                //         document.getElementById('expiry_date').value = '';
-                //         document.getElementById('days_to_consume').value = '';
-                //         document.getElementById('remarks').value = '';
-                //         show('createStockModal');
-                //         document.getElementById('quantity_on_hand').focus();
-                //     });
-                // });
-
                 // === Edit‑Stock button (updated) ===
                 document.querySelectorAll('.edit-stock-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -1546,6 +1783,8 @@
                         document.getElementById('edit_fund_cluster').value = d.fundCluster;
                         document.getElementById('edit_days_to_consume').value = d.daysToConsume;
                         document.getElementById('edit_remarks').value = d.remarks;
+                        document.getElementById('edit_supplier_id').value = d.supplierId || '';
+                        document.getElementById('edit_department_id').value = d.departmentId || '';
 
                         // Update form action to point to the correct route
                         document.getElementById('editStockForm').action = `/stocks/${d.stockId}`;
@@ -1560,7 +1799,7 @@
                     btn.addEventListener('click', () => {
                         if (!confirm('Are you sure you want to delete this stock?')) return;
                         const id = btn.dataset.stockId;
-                        fetch(`/supply-stocks/${id}`, {
+                        fetch(`/stocks/${id}`, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector(
