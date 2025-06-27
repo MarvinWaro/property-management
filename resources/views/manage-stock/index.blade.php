@@ -699,6 +699,57 @@
                             .modal-scrollbar::-webkit-scrollbar-thumb:hover {
                                 background: #555;
                             }
+
+
+                            /* Custom dropdown styles */
+                            .supply-dropdown-menu {
+                                max-width: 400px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar {
+                                width: 6px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-thumb {
+                                background: #888;
+                                border-radius: 3px;
+                            }
+
+                            .supply-options-container::-webkit-scrollbar-thumb:hover {
+                                background: #555;
+                            }
+
+                            .supply-option {
+                                transition: all 0.2s ease;
+                            }
+
+                            .supply-option:hover {
+                                transform: translateX(2px);
+                            }
+
+                            /* Add this to your styles section */
+                            .overflow-x-auto {
+                                overflow: visible !important;
+                            }
+
+                            .supply-dropdown-menu {
+                                position: fixed !important;
+                                z-index: 9999 !important;
+                            }
+
+                            /* Keep the table scrollable but allow dropdowns to escape */
+                            #supplyItemsTable {
+                                overflow: visible !important;
+                            }
+
+                            .overflow-hidden {
+                                overflow: visible !important;
+                            }
                         </style>
 
                         <script>
@@ -727,6 +778,96 @@
                                     return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
                                 }
 
+                                // Custom dropdown functions
+                                window.toggleSupplyDropdown = function(trigger) {
+                                    const dropdown = trigger.nextElementSibling;
+                                    const allDropdowns = document.querySelectorAll('.supply-dropdown-menu');
+
+                                    // Close all other dropdowns
+                                    allDropdowns.forEach(d => {
+                                        if (d !== dropdown) {
+                                            d.classList.add('hidden');
+                                        }
+                                    });
+
+                                    // Toggle current dropdown
+                                    dropdown.classList.toggle('hidden');
+
+                                    // Focus on search input if opening
+                                    if (!dropdown.classList.contains('hidden')) {
+                                        const searchInput = dropdown.querySelector('.supply-search-input');
+                                        setTimeout(() => searchInput.focus(), 100);
+                                    }
+                                }
+
+                                window.filterSupplyOptions = function(searchInput) {
+                                    const searchTerm = searchInput.value.toLowerCase();
+                                    const options = searchInput.closest('.supply-dropdown-menu').querySelectorAll('.supply-option');
+                                    let visibleCount = 0;
+
+                                    options.forEach(option => {
+                                        const name = option.dataset.supplyName.toLowerCase();
+                                        const stockNo = option.dataset.supplyStockno.toLowerCase();
+                                        const description = (option.dataset.supplyDescription || '').toLowerCase();
+
+                                        if (name.includes(searchTerm) || stockNo.includes(searchTerm) || description.includes(searchTerm)) {
+                                            option.style.display = 'block';
+                                            visibleCount++;
+                                        } else {
+                                            option.style.display = 'none';
+                                        }
+                                    });
+                                }
+
+                                window.selectSupplyOption = function(option) {
+                                    const wrapper = option.closest('.supply-select-wrapper');
+                                    const hiddenInput = wrapper.querySelector('.supply-id-input');
+                                    const trigger = wrapper.querySelector('.supply-dropdown-trigger');
+                                    const selectedText = trigger.querySelector('.selected-supply-text');
+                                    const dropdown = wrapper.querySelector('.supply-dropdown-menu');
+
+                                    // Set values
+                                    hiddenInput.value = option.dataset.supplyId;
+                                    selectedText.textContent = `${option.dataset.supplyName} (${option.dataset.supplyStockno})`;
+                                    selectedText.classList.remove('text-gray-500');
+
+                                    // Close dropdown
+                                    dropdown.classList.add('hidden');
+
+                                    // Clear search
+                                    const searchInput = dropdown.querySelector('.supply-search-input');
+                                    searchInput.value = '';
+                                    filterSupplyOptions(searchInput);
+
+                                    // Trigger validation for duplicate check
+                                    validateDuplicateSupplyCustom(hiddenInput);
+                                }
+
+                                // Update the validateDuplicateSupply function
+                                function validateDuplicateSupplyCustom(input) {
+                                    const selectedValue = input.value;
+                                    if (!selectedValue) return;
+
+                                    const allInputs = document.querySelectorAll('.supply-id-input');
+                                    let duplicateCount = 0;
+
+                                    allInputs.forEach(function(i) {
+                                        if (i.value === selectedValue) {
+                                            duplicateCount++;
+                                        }
+                                    });
+
+                                    if (duplicateCount > 1) {
+                                        showAlert('This supply item has already been selected.');
+                                        // Clear the selection
+                                        input.value = '';
+                                        const wrapper = input.closest('.supply-select-wrapper');
+                                        const selectedText = wrapper.querySelector('.selected-supply-text');
+                                        selectedText.textContent = 'Select Supply Item';
+                                        selectedText.classList.add('text-gray-500');
+                                    }
+                                }
+
                                 // Function to add new item row
                                 function addItemRow() {
                                     const templateContent = template.content.cloneNode(true);
@@ -739,7 +880,6 @@
                                     const quantityInput = row.querySelector('.quantity-input');
                                     const unitCostInput = row.querySelector('.unit-cost-input');
                                     const removeBtn = row.querySelector('.remove-item-btn');
-                                    const supplySelect = row.querySelector('.supply-select');
 
                                     // Initialize unit cost with 0.00
                                     unitCostInput.value = '0.00';
@@ -777,11 +917,6 @@
                                         removeItemRow(row);
                                     });
 
-                                    // Prevent duplicate supply selection
-                                    supplySelect.addEventListener('change', function() {
-                                        validateDuplicateSupply(this);
-                                    });
-
                                     // Hide empty state and show grand total row
                                     emptyState.classList.add('hidden');
                                     grandTotalRow.classList.remove('hidden');
@@ -793,9 +928,12 @@
                                     updateSubmitButton();
                                     updateItemCount();
 
-                                    // Focus on supply select
+                                    // Focus on dropdown trigger
                                     setTimeout(() => {
-                                        row.querySelector('.supply-select').focus();
+                                        const dropdownTrigger = row.querySelector('.supply-dropdown-trigger');
+                                        if (dropdownTrigger) {
+                                            dropdownTrigger.click();
+                                        }
                                     }, 100);
                                 }
 
@@ -874,26 +1012,6 @@
                                     }, 3000);
                                 }
 
-                                // Validate duplicate supply selection
-                                function validateDuplicateSupply(select) {
-                                    const selectedValue = select.value;
-                                    if (!selectedValue) return;
-
-                                    const allSelects = document.querySelectorAll('.supply-select');
-                                    let duplicateCount = 0;
-
-                                    allSelects.forEach(function(s) {
-                                        if (s.value === selectedValue) {
-                                            duplicateCount++;
-                                        }
-                                    });
-
-                                    if (duplicateCount > 1) {
-                                        showAlert('This supply item has already been selected.');
-                                        select.value = '';
-                                    }
-                                }
-
                                 // Update submit button state
                                 function updateSubmitButton() {
                                     const submitBtn = document.getElementById('submitStockBtn');
@@ -930,7 +1048,7 @@
                                         let emptyFields = [];
 
                                         document.querySelectorAll('.supply-item-row').forEach(function(row, index) {
-                                            const supplyId = row.querySelector('select[name*="supply_id"]').value;
+                                            const supplyId = row.querySelector('input[name*="supply_id"]').value;
                                             const quantity = row.querySelector('input[name*="quantity"]').value;
                                             const unitCost = parseCurrency(row.querySelector('input[name*="unit_cost"]').value);
 
@@ -984,11 +1102,21 @@
                                         setTimeout(() => {
                                             const firstRow = itemsTable.querySelector('.supply-item-row');
                                             if (firstRow) {
-                                                const supplySelect = firstRow.querySelector('.supply-select');
+                                                const hiddenInput = firstRow.querySelector('.supply-id-input');
+                                                const selectedText = firstRow.querySelector('.selected-supply-text');
                                                 const unitCostInput = firstRow.querySelector('.unit-cost-input');
                                                 const fundClusterSelect = firstRow.querySelector('select[name*="fund_cluster"]');
 
-                                                supplySelect.value = btn.dataset.supplyId;
+                                                // Set the supply ID
+                                                hiddenInput.value = btn.dataset.supplyId;
+
+                                                // Find and set the supply name
+                                                const supplyOption = firstRow.querySelector(`.supply-option[data-supply-id="${btn.dataset.supplyId}"]`);
+                                                if (supplyOption) {
+                                                    selectedText.textContent = `${supplyOption.dataset.supplyName} (${supplyOption.dataset.supplyStockno})`;
+                                                    selectedText.classList.remove('text-gray-500');
+                                                }
+
                                                 unitCostInput.value = formatCurrency(parseCurrency(btn.dataset.unitCost));
                                                 fundClusterSelect.value = btn.dataset.fundCluster;
 
@@ -1000,6 +1128,15 @@
                                             }
                                         }, 100);
                                     });
+                                });
+
+                                // Close dropdowns when clicking outside
+                                document.addEventListener('click', function(event) {
+                                    if (!event.target.closest('.supply-select-wrapper')) {
+                                        document.querySelectorAll('.supply-dropdown-menu').forEach(dropdown => {
+                                            dropdown.classList.add('hidden');
+                                        });
+                                    }
                                 });
 
                                 // Keyboard shortcuts
@@ -1029,19 +1166,43 @@
                         <template id="supplyItemRowTemplate">
                             <tr class="supply-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
                                 <td class="px-4 py-3">
-                                    <select name="items[INDEX][supply_id]" required
-                                        class="supply-select w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                                        rounded-lg text-sm text-gray-900 dark:text-white
-                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
-                                        <option value="">Select Supply Item</option>
-                                        @foreach ($supplies as $s)
-                                            <option value="{{ $s->supply_id }}"
-                                                data-unit="{{ $s->unit_of_measurement }}"
-                                                data-name="{{ $s->item_name }}">
-                                                {{ $s->item_name }} ({{ $s->stock_no }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <!-- Custom searchable dropdown -->
+                                    <div class="supply-select-wrapper relative">
+                                        <input type="hidden" name="items[INDEX][supply_id]" class="supply-id-input" required>
+                                        <div class="supply-dropdown-trigger w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                            rounded-lg text-sm text-gray-900 dark:text-white cursor-pointer
+                                            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                            onclick="toggleSupplyDropdown(this)">
+                                            <span class="selected-supply-text text-gray-500">Select Supply Item</span>
+                                            <svg class="w-4 h-4 absolute right-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+
+                                        <!-- Custom dropdown menu -->
+                                        <div class="supply-dropdown-menu hidden absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                                            <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                                <input type="text" class="supply-search-input w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                    placeholder="Search supplies..." onkeyup="filterSupplyOptions(this)">
+                                            </div>
+                                            <div class="supply-options-container max-h-[200px] overflow-y-auto">
+                                                @foreach ($supplies as $s)
+                                                    <div class="supply-option px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                                        data-supply-id="{{ $s->supply_id }}"
+                                                        data-supply-name="{{ $s->item_name }}"
+                                                        data-supply-stockno="{{ $s->stock_no }}"
+                                                        data-supply-description="{{ $s->description }}"
+                                                        data-unit="{{ $s->unit_of_measurement }}"
+                                                        onclick="selectSupplyOption(this)">
+                                                        <div class="font-medium text-sm text-gray-900 dark:text-white">{{ $s->item_name }} ({{ $s->stock_no }})</div>
+                                                        @if($s->description)
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ Str::limit($s->description, 60) }}</div>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <input type="number" name="items[INDEX][quantity]" min="1" required
