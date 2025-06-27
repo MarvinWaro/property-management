@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\SupplyStock;
 use App\Models\SupplyTransaction;
 use App\Models\Supply;
+use App\Models\Supplier;
+use App\Models\Department;
 use App\Services\ReferenceNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+
 
 class SupplyStockController extends Controller
 {
@@ -33,6 +37,8 @@ class SupplyStockController extends Controller
         // Updated to include the supply relationship and latest transaction for current unit cost
         $stocksQuery = SupplyStock::with([
             'supply',
+            'supplier',
+            'department',
             'latestTransaction' => function($query) {
                 $query->orderBy('transaction_date', 'desc')->orderBy('created_at', 'desc');
             }
@@ -75,9 +81,11 @@ class SupplyStockController extends Controller
         }
 
         $supplies = Supply::all();
+        $suppliers = Supplier::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
         $stocks   = $stocksQuery->paginate(5);
 
-        return view('manage-stock.index', compact('stocks', 'supplies'));
+        return view('manage-stock.index', compact('stocks', 'supplies', 'suppliers', 'departments'));
     }
 
     /**
@@ -115,6 +123,8 @@ class SupplyStockController extends Controller
 
         $validated = $request->validate([
             'supply_id'        => 'required|exists:supplies,supply_id',
+            'supplier_id'      => 'nullable|exists:suppliers,id',
+            'department_id'    => 'nullable|exists:departments,id',
             'quantity_on_hand' => 'required|integer|min:1',
             'unit_cost'        => 'required|numeric|min:0',
             'expiry_date'      => 'nullable|date',
@@ -165,6 +175,8 @@ class SupplyStockController extends Controller
         // Validate general information and items array
         $request->validate([
             'general_remarks' => 'nullable|string|max:255',
+            'general_supplier_id' => 'nullable|exists:suppliers,id',
+            'general_department_id' => 'nullable|exists:departments,id',
             'submission_token' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
@@ -184,6 +196,8 @@ class SupplyStockController extends Controller
             DB::transaction(function() use ($request, $referenceNo) {
                 $items = $request->input('items');
                 $generalRemarks = $request->input('general_remarks', '');
+                $generalSupplierId = $request->input('general_supplier_id');
+                $generalDepartmentId = $request->input('general_department_id');
 
                 foreach ($items as $item) {
                     // Clean up unit cost (remove commas)
@@ -192,6 +206,8 @@ class SupplyStockController extends Controller
                     // Prepare data in the format expected by processStockReceipt
                     $itemData = [
                         'supply_id' => $item['supply_id'],
+                        'supplier_id' => $generalSupplierId,
+                        'department_id' => $generalDepartmentId,
                         'quantity_on_hand' => $item['quantity'],
                         'unit_cost' => $item['unit_cost'],
                         'expiry_date' => $item['expiry_date'] ?? null,
@@ -267,6 +283,8 @@ class SupplyStockController extends Controller
         $stock->status = $itemData['status'];
         $stock->days_to_consume = $itemData['days_to_consume'] ?? null;
         $stock->remarks = $itemData['remarks'];
+        $stock->supplier_id = $itemData['supplier_id'] ?? null;
+        $stock->department_id = $itemData['department_id'] ?? null;
         $stock->save();
 
         // 7) Log this receipt transaction with the ORIGINAL unit cost (not weighted average)
@@ -294,6 +312,8 @@ class SupplyStockController extends Controller
         Log::info('Stock Receipt Added', [
             'iar_reference' => $referenceNo,
             'supply_id' => $itemData['supply_id'],
+            'supplier_id' => $itemData['supplier_id'] ?? null,
+            'department_id' => $itemData['department_id'] ?? null,
             'old_qty' => $oldQty,
             'old_total_cost' => $oldTotalCost,
             'new_lot_qty' => $newLotQty,
@@ -418,6 +438,8 @@ class SupplyStockController extends Controller
 
         $validated = $request->validate([
             'unit_cost'        => 'required|numeric|min:0',
+            'supplier_id'      => 'nullable|exists:suppliers,id',
+            'department_id'    => 'nullable|exists:departments,id',
             'expiry_date'      => 'nullable|date',
             'status'           => 'required|in:available,reserved,expired,depleted',
             'fund_cluster'     => 'required|in:101,151',

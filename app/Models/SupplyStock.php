@@ -19,6 +19,8 @@ class SupplyStock extends Model
 
     protected $fillable = [
         'supply_id',
+        'supplier_id',
+        'department_id',
         'quantity_on_hand',
         'unit_cost',
         'total_cost',
@@ -46,12 +48,25 @@ class SupplyStock extends Model
         return $this->belongsTo(Supply::class, 'supply_id', 'supply_id');
     }
 
+        public function department(): BelongsTo
+    {
+        // FK on this model: department_id
+        // PK on departments table: id
+        return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
+
     public function latestTransaction()
     {
         return $this->hasOne(SupplyTransaction::class, 'supply_id', 'supply_id')
                     ->where('fund_cluster', $this->fund_cluster)
                     ->latest('transaction_date')
                     ->latest('created_at');
+    }
+
+    public function supplier(): BelongsTo
+    {
+        // if your suppliers PK is 'id' (default), and FK is supplier_id:
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
 
     // ---------------------------------------------------------------------
