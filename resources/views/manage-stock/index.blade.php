@@ -461,20 +461,30 @@
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                    <label for="receipt_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         RECEIPT DATE
                                                     </label>
-                                                    <div class="flex items-center">
-                                                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
-                                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                                        <!-- calendar icon (unchanged) -->
+                                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path /* … */ />
+                                                        </svg>
                                                         </div>
-                                                        <div>
-                                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ now()->format('F d, Y') }}</p>
-                                                            <p class="text-xs text-gray-500 dark:text-gray-400">Today</p>
-                                                        </div>
+                                                        <input
+                                                        type="date"
+                                                        name="receipt_date"
+                                                        id="receipt_date"
+                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white
+                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                                        value="{{ old('receipt_date', now()->format('Y-m-d')) }}"
+                                                        max="{{ now()->format('Y-m-d') }}"
+                                                        min="2025-01-01"
+                                                        >
                                                     </div>
+                                                    @error('receipt_date')
+                                                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
 
                                                 <div>
