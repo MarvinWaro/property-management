@@ -34,16 +34,18 @@ class SupplyStockController extends Controller
         $search = $request->get('search');
         $status = $request->get('status');
 
-        // Updated to include the supply relationship and latest transaction for current unit cost
+        // Include supply relations + latest transaction for unit cost
         $stocksQuery = SupplyStock::with([
             'supply',
             'supplier',
             'department',
             'latestTransaction' => function($query) {
-                $query->orderBy('transaction_date', 'desc')->orderBy('created_at', 'desc');
+                $query->orderBy('transaction_date', 'desc')
+                    ->orderBy('created_at', 'desc');
             }
         ]);
 
+        // Text‐search filter
         if ($search) {
             $stocksQuery->whereHas('supply', function($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
@@ -51,42 +53,55 @@ class SupplyStockController extends Controller
             });
         }
 
-        // Updated status filtering to handle dynamic status
+        // Status filter (handles all your dynamic‐status cases)
         if ($status && $status !== 'all') {
             if ($status === 'low_stock') {
-                // Filter for items that are at or below reorder point
                 $stocksQuery->whereHas('supply', function($q) {
                     $q->whereRaw('supply_stocks.quantity_on_hand <= supplies.reorder_point');
                 })->where('quantity_on_hand', '>', 0)
                 ->whereNotIn('status', ['depleted', 'expired']);
-            } elseif ($status === 'depleted') {
-                // Items with 0 quantity or manually marked as depleted
+            }
+            elseif ($status === 'depleted') {
                 $stocksQuery->where(function($q) {
                     $q->where('quantity_on_hand', '<=', 0)
                     ->orWhere('status', 'depleted');
                 });
-            } else {
-                // For other statuses (available, reserved, expired)
+            }
+            else {
                 if ($status === 'available') {
-                    // Available means > reorder point and not expired/depleted
                     $stocksQuery->where('quantity_on_hand', '>', 0)
-                            ->whereNotIn('status', ['depleted', 'expired'])
-                            ->whereHas('supply', function($q) {
-                                $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
-                            });
+                                ->whereNotIn('status', ['depleted', 'expired'])
+                                ->whereHas('supply', function($q) {
+                                    $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
+                                });
                 } else {
                     $stocksQuery->where('status', $status);
                 }
             }
         }
 
-        $supplies = Supply::all();
-        $suppliers = Supplier::orderBy('name')->get();
+        // Fetch selects + pagination
+        $supplies    = Supply::all();
+        $suppliers   = Supplier::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
-        $stocks   = $stocksQuery->paginate(5);
+        $stocks      = $stocksQuery->paginate(5);
 
-        return view('manage-stock.index', compact('stocks', 'supplies', 'suppliers', 'departments'));
+        // ─── NEW: generate a default IAR for the modal’s reference_no input
+        //    pick any existing supply_id (we just need an int for the generator)
+        $seedSupplyId = optional($supplies->first())->supply_id ?? 1;
+        $defaultIar   = $this->referenceNumberService
+                            ->generateIarNumber($seedSupplyId);
+
+        // Pass everything (including defaultIar) into the view
+        return view('manage-stock.index', compact(
+            'stocks',
+            'supplies',
+            'suppliers',
+            'departments',
+            'defaultIar'
+        ));
     }
+
 
     /**
      * Store a newly created receipt in storage,
@@ -95,63 +110,72 @@ class SupplyStockController extends Controller
      */
     public function store(Request $request)
     {
-        // DOUBLE SUBMISSION PREVENTION
+        // ── DOUBLE-SUBMISSION GUARD ─────────────────────────────────────────────
         if (! $request->has('submission_token')) {
             $request->merge(['submission_token' => uniqid().time()]);
         }
-        $token = $request->input('submission_token');
-        $key   = 'last_stock_submission_'.auth()->id();
-        if (session()->has($key) && session($key) === $token) {
+        $token      = $request->input('submission_token');
+        $sessionKey = 'last_stock_submission_'.auth()->id();
+        if (session()->has($sessionKey) && session($sessionKey) === $token) {
             return back()->with('error','Duplicate submission detected.');
         }
-        session([$key => $token]);
+        session([$sessionKey => $token]);
 
-        // If multiple items, hand off
+        // ── MULTI-ITEMS HANDOFF ─────────────────────────────────────────────────
         if ($request->has('items') && is_array($request->input('items'))) {
             return $this->storeMultipleItems($request);
         }
 
-        // strip commas from unit_cost
+        // ── CLEAN UP UNIT COST ──────────────────────────────────────────────────
         $request->merge([
-            'unit_cost'    => $request->unit_cost
-                               ? str_replace(',','',$request->unit_cost)
-                               : 0,
+            'unit_cost' => $request->unit_cost
+                ? str_replace(',','',$request->unit_cost)
+                : 0,
         ]);
 
-        // validate including receipt_date
+        // ── VALIDATION ──────────────────────────────────────────────────────────
         $validated = $request->validate([
-            'receipt_date'      => 'required|date|before_or_equal:today',
-            'supply_id'         => 'required|exists:supplies,supply_id',
-            'supplier_id'       => 'nullable|exists:suppliers,id',
-            'department_id'     => 'nullable|exists:departments,id',
-            'quantity_on_hand'  => 'required|integer|min:1',
-            'unit_cost'         => 'required|numeric|min:0',
-            'expiry_date'       => 'nullable|date',
-            'status'            => 'required|in:available,reserved,expired,depleted',
-            'fund_cluster'      => 'required|in:101,151',
-            'days_to_consume'   => 'nullable|integer|min:0',
-            'remarks'           => 'nullable|string',
-            'submission_token'  => 'required|string',
+            'reference_no'     => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
+            'receipt_date'     => 'required|date|before_or_equal:today',
+            'supply_id'        => 'required|exists:supplies,supply_id',
+            'supplier_id'      => 'nullable|exists:suppliers,id',
+            'department_id'    => 'nullable|exists:departments,id',
+            'quantity_on_hand' => 'required|integer|min:1',
+            'unit_cost'        => 'required|numeric|min:0',
+            'expiry_date'      => 'nullable|date',
+            'status'           => 'required|in:available,reserved,expired,depleted',
+            'fund_cluster'     => 'required|in:101,151',
+            'days_to_consume'  => 'nullable|integer|min:0',
+            'remarks'          => 'nullable|string',
+            'submission_token' => 'required|string',
         ]);
 
         try {
-            // generate IAR ref
-            $referenceNo = $this->referenceNumberService
-                                ->generateIarNumber($validated['supply_id']);
+            // ── DETERMINE IAR REFERENCE ─────────────────────────────────────────
+            if (! empty($validated['reference_no'])) {
+                $referenceNo = $validated['reference_no'];
+            } else {
+                $referenceNo = $this->referenceNumberService
+                                    ->generateIarNumber($validated['supply_id']);
+            }
 
+            // ── ATOMIC WRITE ───────────────────────────────────────────────────
             DB::transaction(function() use ($validated, $referenceNo) {
-                // includes receipt_date in $validated
-                $this->processStockReceipt($validated, $referenceNo);
+                // pass both receipt_date & reference_no into your processing
+                $this->processStockReceipt(
+                    array_merge($validated, ['reference_no' => $referenceNo]),
+                    $referenceNo
+                );
             });
 
-            session()->forget($key);
+            session()->forget($sessionKey);
 
             return redirect()
                 ->route('stocks.index')
                 ->with('success','Stock received and transaction logged.');
 
         } catch (\Exception $e) {
-            session()->forget($key);
+            session()->forget($sessionKey);
             Log::error('Failed to create stock', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -165,7 +189,9 @@ class SupplyStockController extends Controller
      */
     private function storeMultipleItems(Request $request)
     {
-        $request->validate([
+        // ── VALIDATION ──────────────────────────────────────────────────────────
+        $validated = $request->validate([
+            'reference_no'         => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
             'receipt_date'         => 'required|date|before_or_equal:today',
             'general_remarks'      => 'nullable|string|max:255',
             'general_supplier_id'  => 'nullable|exists:suppliers,id',
@@ -181,38 +207,41 @@ class SupplyStockController extends Controller
         ]);
 
         try {
-            $firstSupplyId = $request->input('items')[0]['supply_id'];
-            $referenceNo   = $this->referenceNumberService
-                                  ->generateIarNumber($firstSupplyId);
+            // pick the override or auto-gen
+            $referenceNo = ! empty($validated['reference_no'])
+                ? $validated['reference_no']
+                : $this->referenceNumberService
+                    ->generateIarNumber($validated['items'][0]['supply_id']);
 
-            $receiptDate   = $request->input('receipt_date');
-            $generalRemarks    = $request->input('general_remarks','');
-            $generalSupplierId = $request->input('general_supplier_id');
-            $generalDepartmentId = $request->input('general_department_id');
+            $receiptDate  = $validated['receipt_date'];
+            $remarks      = $validated['general_remarks'] ?? '';
+            $supplierId   = $validated['general_supplier_id'] ?? null;
+            $departmentId = $validated['general_department_id'] ?? null;
 
             DB::transaction(function() use (
-                $request,
+                $validated,
                 $referenceNo,
                 $receiptDate,
-                $generalRemarks,
-                $generalSupplierId,
-                $generalDepartmentId
+                $remarks,
+                $supplierId,
+                $departmentId
             ) {
-                foreach ($request->input('items') as $item) {
+                foreach ($validated['items'] as $item) {
                     $unitCost = str_replace(',','',$item['unit_cost']);
 
                     $itemData = [
+                        'reference_no'      => $referenceNo,
                         'receipt_date'      => $receiptDate,
                         'supply_id'         => $item['supply_id'],
-                        'supplier_id'       => $generalSupplierId,
-                        'department_id'     => $generalDepartmentId,
+                        'supplier_id'       => $supplierId,
+                        'department_id'     => $departmentId,
                         'quantity_on_hand'  => $item['quantity'],
                         'unit_cost'         => $unitCost,
                         'expiry_date'       => $item['expiry_date'] ?? null,
                         'status'            => $item['status'],
                         'fund_cluster'      => $item['fund_cluster'],
                         'days_to_consume'   => null,
-                        'remarks'           => $generalRemarks,
+                        'remarks'           => $remarks,
                     ];
 
                     $this->processStockReceipt($itemData, $referenceNo);
@@ -221,8 +250,8 @@ class SupplyStockController extends Controller
 
             session()->forget('last_stock_submission_'.auth()->id());
 
-            $count = count($request->input('items'));
-            $text  = $count>1 ? "$count items" : "1 item";
+            $count = count($validated['items']);
+            $text  = $count > 1 ? "{$count} items" : "1 item";
 
             return redirect()
                 ->route('stocks.index')
