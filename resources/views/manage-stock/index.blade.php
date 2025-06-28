@@ -1350,6 +1350,39 @@
 
                     @endif
 
+                    {{-- For date and reference number auto-fill --}}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function(){
+                        const dateField = document.getElementById('receipt_date');
+                        const refField  = document.getElementById('reference_no');
+                        if (!dateField || !refField) return;
+
+                        dateField.addEventListener('change', function(){
+                            const d = this.value;
+                            if (!d) return;
+
+                            fetch(
+                            "{{ route('stocks.next-iar') }}?receipt_date="
+                            + encodeURIComponent(d),
+                            {
+                                credentials: 'same-origin',                   // ← send Laravel session cookie
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            }
+                            )
+                            .then(r => {
+                            if (!r.ok) throw new Error(r.statusText);
+                            return r.json();
+                            })
+                            .then(json => {
+                            refField.value = json.defaultIar;
+                            })
+                            .catch(err => console.error('IAR lookup failed:', err));
+                        });
+                        });
+                    </script>
+
+
+
                     @if(auth()->user()->hasRole('admin'))
                         <!-- Edit / Re‑value Stock Modal -->
                         <div id="editStockModal" tabindex="-1" aria-hidden="true"

@@ -11,6 +11,7 @@ use App\Services\ReferenceNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;  
 
 
 
@@ -19,7 +20,7 @@ class SupplyStockController extends Controller
     /**
      * @var ReferenceNumberService
      */
-    protected $referenceNumberService;
+    protected ReferenceNumberService $referenceNumberService;
 
     public function __construct(ReferenceNumberService $referenceNumberService)
     {
@@ -102,42 +103,51 @@ class SupplyStockController extends Controller
         ));
     }
 
-
     /**
-     * Store a newly created receipt in storage,
-     * update weighted‑average summary, and log transaction.
-     * Now supports both single item and multiple items
+     * AJAX → return the next IAR for a given receipt_date.
      */
-    // In SupplyStockController.php
+    public function nextIar(Request $request)
+    {
+        $data = $request->validate([
+            'receipt_date' => 'required|date',
+        ]);
+
+        $date      = Carbon::parse($data['receipt_date']);
+        $defaultIar = $this->referenceNumberService
+                        ->generateIarNumberForDate($date);
+
+        return response()->json(['defaultIar' => $defaultIar]);
+    }
+
 
     public function store(Request $request)
     {
-        // ── DOUBLE‐SUBMISSION GUARD ─────────────────────────────────────────
+        // DOUBLE-SUBMISSION GUARD (unchanged) …
         if (! $request->has('submission_token')) {
             $request->merge(['submission_token' => uniqid().time()]);
         }
-        $token      = $request->input('submission_token');
-        $sessionKey = 'last_stock_submission_'.auth()->id();
-        if (session()->has($sessionKey) && session($sessionKey) === $token) {
-            return back()->with('error','Duplicate submission detected.');
+        $token = $request->input('submission_token');
+        $key   = 'last_stock_submission_'.auth()->id();
+        if (session()->has($key) && session($key) === $token) {
+            return back()->with('error','Duplicate submission detected.')
+                         ->withInput()
+                         ->with('show_create_modal', true);
         }
-        session([$sessionKey => $token]);
+        session([$key => $token]);
 
-        // ── MULTI‐ITEM HANDOFF ───────────────────────────────────────────────
+        // handle multiple vs single…
         if ($request->has('items') && is_array($request->input('items'))) {
             return $this->storeMultipleItems($request);
         }
 
-        // ── CLEAN UP UNIT COST ───────────────────────────────────────────────
+        // strip commas, then validate including receipt_date…
         $request->merge([
             'unit_cost' => $request->unit_cost
                 ? str_replace(',','',$request->unit_cost)
                 : 0,
         ]);
 
-        // ── VALIDATION ───────────────────────────────────────────────────────
         $validated = $request->validate([
-            'reference_no'     => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
             'receipt_date'     => 'required|date|before_or_equal:today',
             'supply_id'        => 'required|exists:supplies,supply_id',
             'supplier_id'      => 'nullable|exists:suppliers,id',
@@ -152,56 +162,42 @@ class SupplyStockController extends Controller
             'submission_token' => 'required|string',
         ]);
 
-        // ── DUPLICATE‐IAR CHECK ─────────────────────────────────────────────
-        if (! empty($validated['reference_no'])) {
-            $exists = SupplyTransaction::where('transaction_type','receipt')
-                       ->where('reference_no', $validated['reference_no'])
-                       ->exists();
-            if ($exists) {
-                return back()
-                    ->withErrors(['reference_no' => 'That IAR has already been used.'])
-                    ->withInput()
-                    ->with('show_create_modal', true);
-            }
-        }
-
         try {
-            // ── PICK OR AUTO‐GEN IAR ───────────────────────────────────────────
-            $referenceNo = $validated['reference_no']
-                ?: $this->referenceNumberService
-                       ->generateIarNumber($validated['supply_id']);
+            // **use the user-picked date** for sequencing
+            $onDate      = Carbon::parse($validated['receipt_date']);
+            $referenceNo = $this->referenceNumberService
+                                 ->generateIarNumberForDate($onDate);
 
-            // ── ATOMIC WRITE ─────────────────────────────────────────────────
             DB::transaction(function() use ($validated, $referenceNo) {
-                $this->processStockReceipt(
-                    array_merge($validated, ['reference_no' => $referenceNo]),
-                    $referenceNo
-                );
+                $this->processStockReceipt($validated, $referenceNo);
             });
 
-            session()->forget($sessionKey);
+            session()->forget($key);
 
             return redirect()
                 ->route('stocks.index')
                 ->with('success','Stock received and transaction logged.');
 
         } catch (\Exception $e) {
-            session()->forget($sessionKey);
+            session()->forget($key);
             Log::error('Failed to create stock', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return back()
                 ->with('error','Failed to add stock: '.$e->getMessage())
+                ->withInput()
                 ->with('show_create_modal', true);
         }
     }
 
+    /**
+     * Handle multiple items (same idea; honor receipt_date).
+     */
     private function storeMultipleItems(Request $request)
     {
-        // ── VALIDATION ───────────────────────────────────────────────────────
-        $validated = $request->validate([
-            'reference_no'         => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
+        $request->validate([
             'receipt_date'         => 'required|date|before_or_equal:today',
             'general_remarks'      => 'nullable|string|max:255',
             'general_supplier_id'  => 'nullable|exists:suppliers,id',
@@ -216,75 +212,61 @@ class SupplyStockController extends Controller
             'items.*.expiry_date'  => 'nullable|date',
         ]);
 
-        // ── DUPLICATE‐IAR CHECK ─────────────────────────────────────────────
-        if (! empty($validated['reference_no'])) {
-            $exists = SupplyTransaction::where('transaction_type','receipt')
-                       ->where('reference_no', $validated['reference_no'])
-                       ->exists();
-            if ($exists) {
-                return back()
-                    ->withErrors(['reference_no' => 'That IAR has already been used.'])
-                    ->withInput()
-                    ->with('show_create_modal', true);
-            }
-        }
-
         try {
-            $referenceNo = $validated['reference_no']
-                ?: $this->referenceNumberService
-                       ->generateIarNumber($validated['items'][0]['supply_id']);
-
-            $receiptDate    = $validated['receipt_date'];
-            $remarks        = $validated['general_remarks'] ?? '';
-            $supplierId     = $validated['general_supplier_id'] ?? null;
-            $departmentId   = $validated['general_department_id'] ?? null;
+            $receiptDate        = Carbon::parse($request->input('receipt_date'));
+            $referenceNo        = $this->referenceNumberService
+                                      ->generateIarNumberForDate($receiptDate);
+            $generalRemarks     = $request->input('general_remarks','');
+            $generalSupplierId  = $request->input('general_supplier_id');
+            $generalDepartmentId= $request->input('general_department_id');
 
             DB::transaction(function() use (
-                $validated,
+                $request,
                 $referenceNo,
                 $receiptDate,
-                $remarks,
-                $supplierId,
-                $departmentId
+                $generalRemarks,
+                $generalSupplierId,
+                $generalDepartmentId
             ) {
-                foreach ($validated['items'] as $item) {
+                foreach ($request->input('items') as $item) {
                     $unitCost = str_replace(',','',$item['unit_cost']);
                     $itemData = [
-                        'reference_no'      => $referenceNo,
-                        'receipt_date'      => $receiptDate,
+                        'receipt_date'      => $receiptDate->toDateString(),
                         'supply_id'         => $item['supply_id'],
-                        'supplier_id'       => $supplierId,
-                        'department_id'     => $departmentId,
+                        'supplier_id'       => $generalSupplierId,
+                        'department_id'     => $generalDepartmentId,
                         'quantity_on_hand'  => $item['quantity'],
                         'unit_cost'         => $unitCost,
                         'expiry_date'       => $item['expiry_date'] ?? null,
                         'status'            => $item['status'],
                         'fund_cluster'      => $item['fund_cluster'],
                         'days_to_consume'   => null,
-                        'remarks'           => $remarks,
+                        'remarks'           => $generalRemarks,
                     ];
+
                     $this->processStockReceipt($itemData, $referenceNo);
                 }
             });
 
             session()->forget('last_stock_submission_'.auth()->id());
 
-            $count = count($validated['items']);
-            $text  = $count>1 ? "{$count} items" : "1 item";
+            $count = count($request->input('items'));
+            $text  = $count > 1 ? "{$count} items" : "1 item";
 
             return redirect()
                 ->route('stocks.index')
-                ->with('success',"IAR {$referenceNo} created successfully with {$text}.");
+                ->with('success',"IAR {$referenceNo} created with {$text}.");
 
         } catch (\Exception $e) {
             session()->forget('last_stock_submission_'.auth()->id());
             Log::error('Failed to create stock IAR', ['error'=>$e->getMessage()]);
+
             return back()
                 ->with('error','Failed to add stock: '.$e->getMessage())
+                ->withInput()
                 ->with('show_create_modal', true);
         }
     }
-
 
     /**
      * Process a single stock receipt item

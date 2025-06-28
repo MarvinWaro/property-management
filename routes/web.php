@@ -67,6 +67,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::post('/stocks/create-beginning-balances', [App\Http\Controllers\SupplyStockController::class, 'createBeginningBalances'])
         ->name('stocks.create-beginning-balances');
 
+    Route::get('/stocks/next-iar', [SupplyStockController::class, 'nextIar'])->name('stocks.next-iar')->middleware(['auth', 'admin-cao']);  // whatever middleware group you use
+
 
     // Signature Management Routes (add these new routes)
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
