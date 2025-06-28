@@ -34,16 +34,18 @@ class SupplyStockController extends Controller
         $search = $request->get('search');
         $status = $request->get('status');
 
-        // Updated to include the supply relationship and latest transaction for current unit cost
+        // Include supply relations + latest transaction for unit cost
         $stocksQuery = SupplyStock::with([
             'supply',
             'supplier',
             'department',
             'latestTransaction' => function($query) {
-                $query->orderBy('transaction_date', 'desc')->orderBy('created_at', 'desc');
+                $query->orderBy('transaction_date', 'desc')
+                    ->orderBy('created_at', 'desc');
             }
         ]);
 
+        // Text‐search filter
         if ($search) {
             $stocksQuery->whereHas('supply', function($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
@@ -51,77 +53,92 @@ class SupplyStockController extends Controller
             });
         }
 
-        // Updated status filtering to handle dynamic status
+        // Status filter (handles all your dynamic‐status cases)
         if ($status && $status !== 'all') {
             if ($status === 'low_stock') {
-                // Filter for items that are at or below reorder point
                 $stocksQuery->whereHas('supply', function($q) {
                     $q->whereRaw('supply_stocks.quantity_on_hand <= supplies.reorder_point');
                 })->where('quantity_on_hand', '>', 0)
                 ->whereNotIn('status', ['depleted', 'expired']);
-            } elseif ($status === 'depleted') {
-                // Items with 0 quantity or manually marked as depleted
+            }
+            elseif ($status === 'depleted') {
                 $stocksQuery->where(function($q) {
                     $q->where('quantity_on_hand', '<=', 0)
                     ->orWhere('status', 'depleted');
                 });
-            } else {
-                // For other statuses (available, reserved, expired)
+            }
+            else {
                 if ($status === 'available') {
-                    // Available means > reorder point and not expired/depleted
                     $stocksQuery->where('quantity_on_hand', '>', 0)
-                            ->whereNotIn('status', ['depleted', 'expired'])
-                            ->whereHas('supply', function($q) {
-                                $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
-                            });
+                                ->whereNotIn('status', ['depleted', 'expired'])
+                                ->whereHas('supply', function($q) {
+                                    $q->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point');
+                                });
                 } else {
                     $stocksQuery->where('status', $status);
                 }
             }
         }
 
-        $supplies = Supply::all();
-        $suppliers = Supplier::orderBy('name')->get();
+        // Fetch selects + pagination
+        $supplies    = Supply::all();
+        $suppliers   = Supplier::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
-        $stocks   = $stocksQuery->paginate(5);
+        $stocks      = $stocksQuery->paginate(5);
 
-        return view('manage-stock.index', compact('stocks', 'supplies', 'suppliers', 'departments'));
+        // ─── NEW: generate a default IAR for the modal’s reference_no input
+        //    pick any existing supply_id (we just need an int for the generator)
+        $seedSupplyId = optional($supplies->first())->supply_id ?? 1;
+        $defaultIar   = $this->referenceNumberService
+                            ->generateIarNumber($seedSupplyId);
+
+        // Pass everything (including defaultIar) into the view
+        return view('manage-stock.index', compact(
+            'stocks',
+            'supplies',
+            'suppliers',
+            'departments',
+            'defaultIar'
+        ));
     }
+
 
     /**
      * Store a newly created receipt in storage,
      * update weighted‑average summary, and log transaction.
      * Now supports both single item and multiple items
      */
+    // In SupplyStockController.php
+
     public function store(Request $request)
     {
-        // DOUBLE SUBMISSION PREVENTION - START
-        if (!$request->has('submission_token')) {
-            $request->merge(['submission_token' => uniqid() . time()]);
+        // ── DOUBLE‐SUBMISSION GUARD ─────────────────────────────────────────
+        if (! $request->has('submission_token')) {
+            $request->merge(['submission_token' => uniqid().time()]);
         }
-
-        $submissionToken = $request->input('submission_token');
-        $sessionKey = 'last_stock_submission_' . auth()->id();
-
-        if (session()->has($sessionKey) && session($sessionKey) === $submissionToken) {
-            return back()->with('error', 'Duplicate submission detected. Stock was already saved.');
+        $token      = $request->input('submission_token');
+        $sessionKey = 'last_stock_submission_'.auth()->id();
+        if (session()->has($sessionKey) && session($sessionKey) === $token) {
+            return back()->with('error','Duplicate submission detected.');
         }
+        session([$sessionKey => $token]);
 
-        session([$sessionKey => $submissionToken]);
-        // DOUBLE SUBMISSION PREVENTION - END
-
-        // Check if this is a multiple items submission
+        // ── MULTI‐ITEM HANDOFF ───────────────────────────────────────────────
         if ($request->has('items') && is_array($request->input('items'))) {
             return $this->storeMultipleItems($request);
         }
 
-        // Single item submission (existing logic)
-        // Format the unit cost properly (remove commas)
+        // ── CLEAN UP UNIT COST ───────────────────────────────────────────────
         $request->merge([
-            'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
+            'unit_cost' => $request->unit_cost
+                ? str_replace(',','',$request->unit_cost)
+                : 0,
         ]);
 
+        // ── VALIDATION ───────────────────────────────────────────────────────
         $validated = $request->validate([
+            'reference_no'     => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
+            'receipt_date'     => 'required|date|before_or_equal:today',
             'supply_id'        => 'required|exists:supplies,supply_id',
             'supplier_id'      => 'nullable|exists:suppliers,id',
             'department_id'    => 'nullable|exists:departments,id',
@@ -135,194 +152,208 @@ class SupplyStockController extends Controller
             'submission_token' => 'required|string',
         ]);
 
-        try {
-            // Generate IAR reference number
-            $referenceNo = $this->referenceNumberService->generateIarNumber($validated['supply_id']);
+        // ── DUPLICATE‐IAR CHECK ─────────────────────────────────────────────
+        if (! empty($validated['reference_no'])) {
+            $exists = SupplyTransaction::where('transaction_type','receipt')
+                       ->where('reference_no', $validated['reference_no'])
+                       ->exists();
+            if ($exists) {
+                return back()
+                    ->withErrors(['reference_no' => 'That IAR has already been used.'])
+                    ->withInput()
+                    ->with('show_create_modal', true);
+            }
+        }
 
-            DB::transaction(function() use ($validated, $request, $referenceNo) {
-                // Process single item (existing logic remains the same)
-                $this->processStockReceipt($validated, $referenceNo);
+        try {
+            // ── PICK OR AUTO‐GEN IAR ───────────────────────────────────────────
+            $referenceNo = $validated['reference_no']
+                ?: $this->referenceNumberService
+                       ->generateIarNumber($validated['supply_id']);
+
+            // ── ATOMIC WRITE ─────────────────────────────────────────────────
+            DB::transaction(function() use ($validated, $referenceNo) {
+                $this->processStockReceipt(
+                    array_merge($validated, ['reference_no' => $referenceNo]),
+                    $referenceNo
+                );
             });
 
-            // Clear the submission token after successful creation
             session()->forget($sessionKey);
 
             return redirect()
                 ->route('stocks.index')
-                ->with('success', 'Stock received and transaction logged.');
+                ->with('success','Stock received and transaction logged.');
 
         } catch (\Exception $e) {
-            // Clear the submission token on error so user can retry
             session()->forget($sessionKey);
-
             Log::error('Failed to create stock', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'supply_id' => $validated['supply_id'] ?? null,
-                'user_id' => auth()->id()
             ]);
-
-            // Show the actual error message for debugging (can be removed in production)
-            return back()->with('error', 'Failed to add stock: ' . $e->getMessage());
+            return back()
+                ->with('error','Failed to add stock: '.$e->getMessage())
+                ->with('show_create_modal', true);
         }
     }
 
-    /**
-     * Handle multiple items submission with single IAR
-     */
     private function storeMultipleItems(Request $request)
     {
-        // Validate general information and items array
-        $request->validate([
-            'general_remarks' => 'nullable|string|max:255',
-            'general_supplier_id' => 'nullable|exists:suppliers,id',
-            'general_department_id' => 'nullable|exists:departments,id',
-            'submission_token' => 'required|string',
-            'items' => 'required|array|min:1',
-            'items.*.supply_id' => 'required|exists:supplies,supply_id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_cost' => 'required|string', // String because of formatting
+        // ── VALIDATION ───────────────────────────────────────────────────────
+        $validated = $request->validate([
+            'reference_no'         => ['nullable','regex:/^IAR\s\d{4}-\d{2}-\d{3}$/'],
+            'receipt_date'         => 'required|date|before_or_equal:today',
+            'general_remarks'      => 'nullable|string|max:255',
+            'general_supplier_id'  => 'nullable|exists:suppliers,id',
+            'general_department_id'=> 'nullable|exists:departments,id',
+            'submission_token'     => 'required|string',
+            'items'                => 'required|array|min:1',
+            'items.*.supply_id'    => 'required|exists:supplies,supply_id',
+            'items.*.quantity'     => 'required|integer|min:1',
+            'items.*.unit_cost'    => 'required|string',
             'items.*.fund_cluster' => 'required|in:101,151',
-            'items.*.status' => 'required|in:available,reserved,expired,depleted',
-            'items.*.expiry_date' => 'nullable|date',
+            'items.*.status'       => 'required|in:available,reserved,expired,depleted',
+            'items.*.expiry_date'  => 'nullable|date',
         ]);
 
+        // ── DUPLICATE‐IAR CHECK ─────────────────────────────────────────────
+        if (! empty($validated['reference_no'])) {
+            $exists = SupplyTransaction::where('transaction_type','receipt')
+                       ->where('reference_no', $validated['reference_no'])
+                       ->exists();
+            if ($exists) {
+                return back()
+                    ->withErrors(['reference_no' => 'That IAR has already been used.'])
+                    ->withInput()
+                    ->with('show_create_modal', true);
+            }
+        }
+
         try {
-            // Generate single IAR reference number for all items
-            // Pass the first supply_id to maintain compatibility
-            $firstSupplyId = $request->input('items')[0]['supply_id'];
-            $referenceNo = $this->referenceNumberService->generateIarNumber($firstSupplyId);
+            $referenceNo = $validated['reference_no']
+                ?: $this->referenceNumberService
+                       ->generateIarNumber($validated['items'][0]['supply_id']);
 
-            DB::transaction(function() use ($request, $referenceNo) {
-                $items = $request->input('items');
-                $generalRemarks = $request->input('general_remarks', '');
-                $generalSupplierId = $request->input('general_supplier_id');
-                $generalDepartmentId = $request->input('general_department_id');
+            $receiptDate    = $validated['receipt_date'];
+            $remarks        = $validated['general_remarks'] ?? '';
+            $supplierId     = $validated['general_supplier_id'] ?? null;
+            $departmentId   = $validated['general_department_id'] ?? null;
 
-                foreach ($items as $item) {
-                    // Clean up unit cost (remove commas)
-                    $item['unit_cost'] = str_replace(',', '', $item['unit_cost']);
-
-                    // Prepare data in the format expected by processStockReceipt
+            DB::transaction(function() use (
+                $validated,
+                $referenceNo,
+                $receiptDate,
+                $remarks,
+                $supplierId,
+                $departmentId
+            ) {
+                foreach ($validated['items'] as $item) {
+                    $unitCost = str_replace(',','',$item['unit_cost']);
                     $itemData = [
-                        'supply_id' => $item['supply_id'],
-                        'supplier_id' => $generalSupplierId,
-                        'department_id' => $generalDepartmentId,
-                        'quantity_on_hand' => $item['quantity'],
-                        'unit_cost' => $item['unit_cost'],
-                        'expiry_date' => $item['expiry_date'] ?? null,
-                        'status' => $item['status'],
-                        'fund_cluster' => $item['fund_cluster'],
-                        'days_to_consume' => null,
-                        'remarks' => $generalRemarks,
+                        'reference_no'      => $referenceNo,
+                        'receipt_date'      => $receiptDate,
+                        'supply_id'         => $item['supply_id'],
+                        'supplier_id'       => $supplierId,
+                        'department_id'     => $departmentId,
+                        'quantity_on_hand'  => $item['quantity'],
+                        'unit_cost'         => $unitCost,
+                        'expiry_date'       => $item['expiry_date'] ?? null,
+                        'status'            => $item['status'],
+                        'fund_cluster'      => $item['fund_cluster'],
+                        'days_to_consume'   => null,
+                        'remarks'           => $remarks,
                     ];
-
-                    // Process each item using the same logic
                     $this->processStockReceipt($itemData, $referenceNo);
                 }
             });
 
-            // Clear the submission token after successful creation
-            session()->forget('last_stock_submission_' . auth()->id());
+            session()->forget('last_stock_submission_'.auth()->id());
 
-            // Count items for success message
-            $itemCount = count($request->input('items'));
-            $itemText = $itemCount > 1 ? $itemCount . ' items' : '1 item';
+            $count = count($validated['items']);
+            $text  = $count>1 ? "{$count} items" : "1 item";
 
             return redirect()
                 ->route('stocks.index')
-                ->with('success', "IAR {$referenceNo} created successfully with {$itemText}.");
+                ->with('success',"IAR {$referenceNo} created successfully with {$text}.");
 
         } catch (\Exception $e) {
-            // Clear the submission token on error so user can retry
-            session()->forget('last_stock_submission_' . auth()->id());
-
-            Log::error('Failed to create stock IAR', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id()
-            ]);
-
-            return back()->with('error', 'Failed to add stock: ' . $e->getMessage());
+            session()->forget('last_stock_submission_'.auth()->id());
+            Log::error('Failed to create stock IAR', ['error'=>$e->getMessage()]);
+            return back()
+                ->with('error','Failed to add stock: '.$e->getMessage())
+                ->with('show_create_modal', true);
         }
     }
+
 
     /**
      * Process a single stock receipt item
      * Extracted to avoid code duplication
      */
-    private function processStockReceipt($itemData, $referenceNo)
+    private function processStockReceipt(array $itemData, string $referenceNo)
     {
-        // 1) Pull or init the summary row (group only by supply+cluster)
+        // 1) Pull or init summary
         $stock = SupplyStock::firstOrNew([
             'supply_id'    => $itemData['supply_id'],
             'fund_cluster' => $itemData['fund_cluster'],
         ]);
 
-        // 2) Get current values (before adding new stock)
-        $oldQty = $stock->exists ? $stock->quantity_on_hand : 0;
-        $oldTotalCost = $stock->exists ? $stock->total_cost : 0;
+        // 2) existing totals
+        $oldQty       = $stock->exists ? $stock->quantity_on_hand : 0;
+        $oldTotalCost = $stock->exists ? $stock->total_cost        : 0;
 
-        // 3) Calculate new lot values
-        $newLotQty = $itemData['quantity_on_hand'];
-        $newLotUnitCost = $itemData['unit_cost'];
-        $newLotTotalCost = $newLotQty * $newLotUnitCost;
+        // 3) this lot
+        $newLotQty   = $itemData['quantity_on_hand'];
+        $newLotCost  = $newLotQty * $itemData['unit_cost'];
 
-        // 4) Calculate new totals after adding the lot
-        $newTotalQty = $oldQty + $newLotQty;
-        $newTotalCost = $oldTotalCost + $newLotTotalCost;
+        // 4) updated totals
+        $newTotalQty  = $oldQty + $newLotQty;
+        $newTotalCost = $oldTotalCost + $newLotCost;
 
-        // 5) Calculate weighted average unit cost
-        $newWeightedAvgCost = $newTotalQty > 0 ? $newTotalCost / $newTotalQty : 0;
+        // 5) new weighted‐avg cost
+        $newAvgCost = $newTotalQty>0 ? $newTotalCost/$newTotalQty : 0;
 
-        // 6) Update summary row with weighted average
-        $stock->quantity_on_hand = $newTotalQty;
-        $stock->total_cost = $newTotalCost;
-        $stock->unit_cost = round($newWeightedAvgCost, 2); // Round to 2 decimal places
-        $stock->expiry_date = $itemData['expiry_date'];
-        $stock->status = $itemData['status'];
-        $stock->days_to_consume = $itemData['days_to_consume'] ?? null;
-        $stock->remarks = $itemData['remarks'];
-        $stock->supplier_id = $itemData['supplier_id'] ?? null;
-        $stock->department_id = $itemData['department_id'] ?? null;
-        $stock->save();
+        // 6) save summary
+        $stock->fill([
+            'quantity_on_hand' => $newTotalQty,
+            'unit_cost'        => round($newAvgCost,2),
+            'total_cost'       => $newTotalCost,
+            'expiry_date'      => $itemData['expiry_date'],
+            'status'           => $itemData['status'],
+            'days_to_consume'  => $itemData['days_to_consume'] ?? null,
+            'remarks'          => $itemData['remarks'],
+            'supplier_id'      => $itemData['supplier_id'] ?? null,
+            'department_id'    => $itemData['department_id'] ?? null,
+        ])->save();
 
-        // 7) Log this receipt transaction with the ORIGINAL unit cost (not weighted average)
-        $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+        // 7) log transaction with original unit_cost and user‐picked date
+        $deptId = auth()->user()->department_id ?? 1;
 
         SupplyTransaction::create([
-            'supply_id'        => $itemData['supply_id'],
-            'transaction_type' => 'receipt',
-            'transaction_date' => now()->toDateString(),
-            'reference_no'     => $referenceNo,
-            'quantity'         => $newLotQty,
-            'unit_cost'        => $newLotUnitCost, // Original cost, not weighted average
-            'total_cost'       => $newLotTotalCost,
-            'balance_quantity' => $newTotalQty,
-            'balance_unit_cost' => round($newWeightedAvgCost, 2),
-            'balance_total_cost' => $newTotalCost,
-            'department_id'    => $departmentId,
-            'user_id'          => auth()->id(),
-            'remarks'          => $itemData['remarks'] ?? 'Stock receipt via IAR ' . $referenceNo,
-            'fund_cluster'     => $itemData['fund_cluster'],
-            'days_to_consume'  => $itemData['days_to_consume'] ?? null,
+            'supply_id'         => $itemData['supply_id'],
+            'transaction_type'  => 'receipt',
+            'transaction_date'  => $itemData['receipt_date'],
+            'reference_no'      => $referenceNo,
+            'quantity'          => $newLotQty,
+            'unit_cost'         => $itemData['unit_cost'],
+            'total_cost'        => $newLotCost,
+            'balance_quantity'  => $newTotalQty,
+            'balance_unit_cost' => round($newAvgCost,2),
+            'balance_total_cost'=> $newTotalCost,
+            'department_id'     => $deptId,
+            'user_id'           => auth()->id(),
+            'remarks'           => $itemData['remarks']
+                                    ?? 'Stock receipt via IAR '.$referenceNo,
+            'fund_cluster'      => $itemData['fund_cluster'],
+            'days_to_consume'   => $itemData['days_to_consume'] ?? null,
         ]);
 
-        // Debug logging to track the calculation
+        // debug
         Log::info('Stock Receipt Added', [
             'iar_reference' => $referenceNo,
-            'supply_id' => $itemData['supply_id'],
-            'supplier_id' => $itemData['supplier_id'] ?? null,
-            'department_id' => $itemData['department_id'] ?? null,
-            'old_qty' => $oldQty,
-            'old_total_cost' => $oldTotalCost,
-            'new_lot_qty' => $newLotQty,
-            'new_lot_unit_cost' => $newLotUnitCost,
-            'new_lot_total_cost' => $newLotTotalCost,
+            'supply_id'     => $itemData['supply_id'],
+            'receipt_date'  => $itemData['receipt_date'],
             'new_total_qty' => $newTotalQty,
-            'new_total_cost' => $newTotalCost,
-            'new_weighted_avg_cost' => $newWeightedAvgCost,
-            'final_unit_cost' => $stock->unit_cost
         ]);
     }
 
