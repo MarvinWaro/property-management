@@ -416,57 +416,57 @@
                                         <input type="hidden" name="submission_token" value="{{ uniqid() . time() }}">
 
                                         <!-- Validation Errors Alert -->
-                                        @if ($errors->any() && session('show_create_modal'))
-                                            <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg p-4">
-                                                <div class="flex">
-                                                    <div class="flex-shrink-0">
-                                                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 0016 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V9a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                        </svg>
-                                                    </div>
-                                                    <div class="ml-3">
-                                                        <h3 class="text-sm font-medium text-red-800 dark:text-red-300">
-                                                            There were some problems with your submission
-                                                        </h3>
-                                                        <div class="mt-2 text-xs text-red-700 dark:text-red-400">
-                                                            <ul class="list-disc list-inside space-y-1">
-                                                                @foreach ($errors->all() as $error)
-                                                                    <li>{{ $error }}</li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    </div>
+                                        @if ($errors->any())
+                                        <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg p-4">
+                                            <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <!-- error icon -->
+                                            </div>
+                                            <div class="ml-3">
+                                                <h3 class="text-sm font-medium text-red-800 dark:text-red-300">
+                                                There were some problems with your submission
+                                                </h3>
+                                                <div class="mt-2 text-xs text-red-700 dark:text-red-400">
+                                                <ul class="list-disc list-inside space-y-1">
+                                                    @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                    @endforeach
+                                                </ul>
                                                 </div>
                                             </div>
+                                            </div>
+                                        </div>
                                         @endif
+
 
                                         <!-- IAR Information Card -->
                                         <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6">
                                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                                 <div>
                                                     <label for="reference_no" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                                    IAR REFERENCE
+                                                        IAR REFERENCE
                                                     </label>
                                                     <div class="flex items-center space-x-3">
-                                                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                                        <!-- your same icon SVG -->
-                                                    </div>
-                                                    <input
+                                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                                        <!-- icon -->
+                                                        </div>
+                                                        <input
                                                         type="text"
                                                         name="reference_no"
                                                         id="reference_no"
-                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                                                            rounded-lg text-sm text-gray-900 dark:text-white
-                                                            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                                                         value="{{ old('reference_no', $defaultIar) }}"
                                                         placeholder="IAR YYYY-MM-XXX"
-                                                    >
+                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border
+                                                                @error('reference_no') border-red-500 @else border-gray-200 @enderror
+                                                                rounded-lg text-sm text-gray-900 dark:text-white
+                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                                        >
                                                     </div>
                                                     @error('reference_no')
-                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                                                     @enderror
-
                                                 </div>
+
 
                                                 <div>
                                                     <label for="receipt_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -474,26 +474,26 @@
                                                     </label>
                                                     <div class="flex items-center space-x-3">
                                                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                                                        <!-- calendar icon (unchanged) -->
-                                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path /* … */ />
-                                                        </svg>
+                                                        <!-- calendar icon -->
                                                         </div>
                                                         <input
                                                         type="date"
                                                         name="receipt_date"
                                                         id="receipt_date"
-                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white
-                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                                                         value="{{ old('receipt_date', now()->format('Y-m-d')) }}"
                                                         max="{{ now()->format('Y-m-d') }}"
                                                         min="2025-01-01"
+                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border
+                                                                @error('receipt_date') border-red-500 @else border-gray-200 @enderror
+                                                                rounded-lg text-sm text-gray-900 dark:text-white
+                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                                                         >
                                                     </div>
                                                     @error('receipt_date')
                                                         <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                                                     @enderror
                                                 </div>
+
 
                                                 <div>
                                                     <label for="general_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
@@ -1334,6 +1334,17 @@
                                 });
                             </script>
                         @endif
+
+                        @if ($errors->any() || session('show_create_modal'))
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                document
+                                    .getElementById('createStockModal')
+                                    .classList.remove('hidden');
+                                });
+                            </script>
+                        @endif
+
                     @endif
 
                     @if(auth()->user()->hasRole('admin'))
