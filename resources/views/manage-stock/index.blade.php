@@ -475,14 +475,17 @@
                                                     <div class="flex items-center space-x-3">
                                                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                                                         <!-- calendar icon -->
+                                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path /* … */ />
+                                                        </svg>
                                                         </div>
+
                                                         <input
                                                         type="date"
                                                         name="receipt_date"
                                                         id="receipt_date"
                                                         value="{{ old('receipt_date', now()->format('Y-m-d')) }}"
                                                         max="{{ now()->format('Y-m-d') }}"
-                                                        min="2025-01-01"
                                                         class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border
                                                                 @error('receipt_date') border-red-500 @else border-gray-200 @enderror
                                                                 rounded-lg text-sm text-gray-900 dark:text-white
