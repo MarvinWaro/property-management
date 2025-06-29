@@ -9,34 +9,37 @@ use Carbon\Carbon;
 class ReferenceNumberService
 {
     /**
-     * Generate an IAR reference number for stock receipts
-     * Format: IAR YYYY-MM-NNN where NNN is a sequential number per month
+     * Generate an IAR reference number for a given date.
+     * Format: IAR YYYY-MM-NNN where NNN is a sequential number per that month.
      */
-    public function generateIarNumber(int $supply_id): string
+    public function generateIarNumberForDate(?Carbon $onDate = null): string
     {
-        $today = Carbon::now();
-        $year = $today->format('Y');
-        $month = $today->format('m');
+        $date  = $onDate ?: Carbon::now();
+        $year  = $date->format('Y');
+        $month = $date->format('m');
 
-        // Find the last IAR number for the current month/year
-        $lastIar = SupplyTransaction::where('transaction_type', 'receipt')
+        // find last IAR this year‐month
+        $last = SupplyTransaction::where('transaction_type', 'receipt')
             ->where('reference_no', 'like', "IAR {$year}-{$month}-%")
             ->orderBy('created_at', 'desc')
             ->first();
 
-        $nextNumber = 1;
-
-        if ($lastIar) {
-            // Extract the number part from the last IAR
-            $parts = explode('-', $lastIar->reference_no);
-            if (count($parts) >= 3) {
-                $lastNumber = intval($parts[2]);
-                $nextNumber = $lastNumber + 1;
-            }
+        $next = 1;
+        if ($last) {
+            $parts     = explode('-', $last->reference_no);
+            $lastNum   = intval($parts[2] ?? 0);
+            $next      = $lastNum + 1;
         }
 
-        // Format with leading zeros (001, 002, etc.)
-        return "IAR {$year}-{$month}-" . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return sprintf("IAR %s-%s-%03d", $year, $month, $next);
+    }
+
+    /**
+     * Original, always “today” version — left in place so nothing else breaks.
+     */
+    public function generateIarNumber(int $supply_id): string
+    {
+        return $this->generateIarNumberForDate();
     }
 
     /**

@@ -147,7 +147,7 @@
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th>
+                                            {{-- <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th> --}}
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Expiry Date</th>
                                             @if(auth()->user()->hasRole('admin'))
@@ -191,12 +191,12 @@
                                                 </td>
 
                                                 <!-- Combined Cost & Value -->
-                                                <td class="px-6 py-4 dark:text-white">
+                                                {{-- <td class="px-6 py-4 dark:text-white">
                                                     <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         Total: ₱{{ number_format($stock->total_cost, 2) }}
                                                     </div>
-                                                </td>
+                                                </td> --}}
 
                                                 <!-- Status -->
                                                 <td class="px-6 py-4">
@@ -1349,6 +1349,39 @@
                         @endif
 
                     @endif
+
+                    {{-- For date and reference number auto-fill --}}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function(){
+                        const dateField = document.getElementById('receipt_date');
+                        const refField  = document.getElementById('reference_no');
+                        if (!dateField || !refField) return;
+
+                        dateField.addEventListener('change', function(){
+                            const d = this.value;
+                            if (!d) return;
+
+                            fetch(
+                            "{{ route('stocks.next-iar') }}?receipt_date="
+                            + encodeURIComponent(d),
+                            {
+                                credentials: 'same-origin',                   // ← send Laravel session cookie
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            }
+                            )
+                            .then(r => {
+                            if (!r.ok) throw new Error(r.statusText);
+                            return r.json();
+                            })
+                            .then(json => {
+                            refField.value = json.defaultIar;
+                            })
+                            .catch(err => console.error('IAR lookup failed:', err));
+                        });
+                        });
+                    </script>
+
+
 
                     @if(auth()->user()->hasRole('admin'))
                         <!-- Edit / Re‑value Stock Modal -->
