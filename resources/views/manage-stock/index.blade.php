@@ -147,7 +147,7 @@
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th>
+                                            {{-- <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th> --}}
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Expiry Date</th>
                                             @if(auth()->user()->hasRole('admin'))
@@ -191,12 +191,12 @@
                                                 </td>
 
                                                 <!-- Combined Cost & Value -->
-                                                <td class="px-6 py-4 dark:text-white">
+                                                {{-- <td class="px-6 py-4 dark:text-white">
                                                     <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         Total: ₱{{ number_format($stock->total_cost, 2) }}
                                                     </div>
-                                                </td>
+                                                </td> --}}
 
                                                 <!-- Status -->
                                                 <td class="px-6 py-4">

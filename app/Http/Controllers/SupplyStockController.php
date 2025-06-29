@@ -15,7 +15,7 @@ use Carbon\Carbon;
 
 use Illuminate\Validation\Rule;
 
-
+use Illuminate\Support\Facades\Validator;
 
 
 class SupplyStockController extends Controller
@@ -124,72 +124,70 @@ class SupplyStockController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Duplicate‐submit guard (unchanged)…
+        // ── DOUBLE‐SUBMISSION GUARD ──
         if (! $request->has('submission_token')) {
             $request->merge(['submission_token' => uniqid().time()]);
         }
-        $key   = 'last_stock_submission_'.auth()->id();
         $token = $request->input('submission_token');
-        if (session()->has($key) && session($key) === $token) {
+        $sessionKey = 'last_stock_submission_'.auth()->id();
+        if (session()->has($sessionKey) && session($sessionKey) === $token) {
             return back()
                 ->with('error','Duplicate submission detected.')
                 ->withInput()
                 ->with('show_create_modal', true);
         }
-        session([$key => $token]);
+        session([$sessionKey => $token]);
 
-        // 2) Strip commas out of unit_cost
+        // ── MULTI VS SINGLE ──
+        if ($request->has('items') && is_array($request->input('items'))) {
+            return $this->storeMultipleItems($request);
+        }
+
+        // strip commas from unit_cost
         $request->merge([
             'unit_cost' => $request->unit_cost
                 ? str_replace(',','',$request->unit_cost)
                 : 0,
         ]);
 
-        // 3) If there *is* an items[0][…] array, treat it as multi‐item
-        $items = $request->input('items', []);
-        if (is_array($items) && count($items) > 0) {
-            return $this->storeMultipleItems($request);
-        }
-
-        // 4) Otherwise validate the single‐item fields exactly
+        // ── VALIDATE ──
         $validated = $request->validate([
-            'reference_no'     => [
-                'nullable','string','regex:/^IAR \d{4}-\d{2}-\d{3}$/',
+            'reference_no'        => [
+                'required',
+                'regex:/^IAR \d{4}-\d{2}-\d{3}$/',
                 Rule::unique('supply_transactions','reference_no')
-                    ->where('transaction_type','receipt'),
+                    ->where('supply_id', $request->input('supply_id')),
             ],
-            'receipt_date'     => 'required|date|before_or_equal:today',
-            'supply_id'        => 'required|exists:supplies,supply_id',
-            'supplier_id'      => 'nullable|exists:suppliers,id',
-            'department_id'    => 'nullable|exists:departments,id',
-            'quantity_on_hand' => 'required|integer|min:1',
-            'unit_cost'        => 'required|numeric|min:0',
-            'expiry_date'      => 'nullable|date',
-            'status'           => 'required|in:available,reserved,expired,depleted',
-            'fund_cluster'     => 'required|in:101,151',
-            'days_to_consume'  => 'nullable|integer|min:0',
-            'remarks'          => 'nullable|string',
-            'submission_token' => 'required|string',
+            'receipt_date'        => 'required|date|before_or_equal:today',
+            'supply_id'           => 'required|exists:supplies,supply_id',
+            'supplier_id'         => 'nullable|exists:suppliers,id',
+            'department_id'       => 'nullable|exists:departments,id',
+            'quantity_on_hand'    => 'required|integer|min:1',
+            'unit_cost'           => 'required|numeric|min:0',
+            'expiry_date'         => 'nullable|date',
+            'status'              => 'required|in:available,reserved,expired,depleted',
+            'fund_cluster'        => 'required|in:101,151',
+            'days_to_consume'     => 'nullable|integer|min:0',
+            'remarks'             => 'nullable|string',
+            'submission_token'    => 'required|string',
         ]);
 
-        // 5) Process your single‐item receipt exactly as before…
         try {
-            $onDate      = Carbon::parse($validated['receipt_date']);
-            $referenceNo = $validated['reference_no']
-                ?? $this->referenceNumberService->generateIarNumberForDate($onDate);
+            // use the user‐picked reference_no (no auto‐gen here)
+            $referenceNo = $validated['reference_no'];
 
             DB::transaction(function() use ($validated, $referenceNo) {
                 $this->processStockReceipt($validated, $referenceNo);
             });
 
-            session()->forget($key);
+            session()->forget($sessionKey);
 
             return redirect()
                 ->route('stocks.index')
                 ->with('success','Stock received and transaction logged.');
 
         } catch (\Exception $e) {
-            session()->forget($key);
+            session()->forget($sessionKey);
             Log::error('Failed to create stock', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -202,68 +200,73 @@ class SupplyStockController extends Controller
         }
     }
 
-    /**
-     * Handle multiple items (same idea; honor receipt_date).
-     */
+
     private function storeMultipleItems(Request $request)
     {
-        // 1) Validate general + items.*
-        $validated = $request->validate([
-            'reference_no'         => [
-                'nullable',
-                'string',
-                'regex:/^IAR \d{4}-\d{2}-\d{3}$/',
-                Rule::unique('supply_transactions','reference_no')
-                    ->where('transaction_type','receipt'),
-            ],
-            'receipt_date'         => 'required|date|before_or_equal:today',
-            'general_remarks'      => 'nullable|string|max:255',
-            'general_supplier_id'  => 'nullable|exists:suppliers,id',
-            'general_department_id'=> 'nullable|exists:departments,id',
-            'submission_token'     => 'required|string',
-            'items'                => 'required|array|min:1',
-            'items.*.supply_id'    => 'required|exists:supplies,supply_id',
-            'items.*.quantity'     => 'required|integer|min:1',
-            'items.*.unit_cost'    => 'required|string',
-            'items.*.fund_cluster' => 'required|in:101,151',
-            'items.*.status'       => 'required|in:available,reserved,expired,depleted',
-            'items.*.expiry_date'  => 'nullable|date',
+        // pull in all input so we can run a custom Validator
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            'reference_no'          => ['required','regex:/^IAR \d{4}-\d{2}-\d{3}$/'],
+            'receipt_date'          => 'required|date|before_or_equal:today',
+            'general_remarks'       => 'nullable|string|max:255',
+            'general_supplier_id'   => 'nullable|exists:suppliers,id',
+            'general_department_id' => 'nullable|exists:departments,id',
+            'submission_token'      => 'required|string',
+            'items'                 => 'required|array|min:1',
+            'items.*.supply_id'     => 'required|exists:supplies,supply_id',
+            'items.*.quantity'      => 'required|integer|min:1',
+            'items.*.unit_cost'     => 'required|string',
+            'items.*.fund_cluster'  => 'required|in:101,151',
+            'items.*.status'        => 'required|in:available,reserved,expired,depleted',
+            'items.*.expiry_date'   => 'nullable|date',
         ]);
 
+        // after‐hook to enforce per‐supply uniqueness of that IAR
+        $validator->after(function($validator) use ($data) {
+            $ref = $data['reference_no'];
+            foreach ($data['items'] as $i => $item) {
+                if (SupplyTransaction::where('reference_no', $ref)
+                                    ->where('supply_id', $item['supply_id'])
+                                    ->exists())
+                {
+                    $validator->errors()->add(
+                        "items.$i.supply_id",
+                        "IAR {$ref} has already been used for that item."
+                    );
+                }
+            }
+        });
+
+        // throw if invalid
+        $validator->validate();
+
         try {
-            // Parse the receipt_date once
-            $receiptDate = Carbon::parse($validated['receipt_date']);
-
-            // Use override or auto-generate
-            $referenceNo = $validated['reference_no']
-                ?? $this->referenceNumberService->generateIarNumberForDate($receiptDate);
-
-            // Pull general fields
-            $generalRemarks     = $validated['general_remarks'] ?? '';
-            $generalSupplierId  = $validated['general_supplier_id'] ?? null;
-            $generalDepartmentId= $validated['general_department_id'] ?? null;
+            $receiptDate       = Carbon::parse($data['receipt_date']);
+            $referenceNo       = $data['reference_no'];
+            $generalRemarks    = $data['general_remarks'] ?? '';
+            $generalSupplierId = $data['general_supplier_id'] ?? null;
+            $generalDeptId     = $data['general_department_id'] ?? null;
 
             DB::transaction(function() use (
-                $validated,
-                $receiptDate,
-                $referenceNo,
-                $generalRemarks,
-                $generalSupplierId,
-                $generalDepartmentId
+                $data, $referenceNo, $receiptDate,
+                $generalRemarks, $generalSupplierId, $generalDeptId
             ) {
-                foreach ($validated['items'] as $item) {
+                foreach ($data['items'] as $item) {
+                    // strip comma from unit_cost
+                    $unitCost = str_replace(',','',$item['unit_cost']);
                     $itemData = [
-                        'receipt_date'      => $receiptDate->toDateString(),
-                        'supply_id'         => $item['supply_id'],
-                        'supplier_id'       => $generalSupplierId,
-                        'department_id'     => $generalDepartmentId,
-                        'quantity_on_hand'  => $item['quantity'],
-                        'unit_cost'         => str_replace(',','',$item['unit_cost']),
-                        'expiry_date'       => $item['expiry_date'] ?? null,
-                        'status'            => $item['status'],
-                        'fund_cluster'      => $item['fund_cluster'],
-                        'days_to_consume'   => null,
-                        'remarks'           => $generalRemarks,
+                        'receipt_date'     => $receiptDate->toDateString(),
+                        'supply_id'        => $item['supply_id'],
+                        'supplier_id'      => $generalSupplierId,
+                        'department_id'    => $generalDeptId,
+                        'quantity_on_hand' => $item['quantity'],
+                        'unit_cost'        => $unitCost,
+                        'expiry_date'      => $item['expiry_date'] ?? null,
+                        'status'           => $item['status'],
+                        'fund_cluster'     => $item['fund_cluster'],
+                        'days_to_consume'  => null,
+                        'remarks'          => $generalRemarks,
                     ];
 
                     $this->processStockReceipt($itemData, $referenceNo);
@@ -272,7 +275,7 @@ class SupplyStockController extends Controller
 
             session()->forget('last_stock_submission_'.auth()->id());
 
-            $count = count($validated['items']);
+            $count = count($data['items']);
             $text  = $count > 1 ? "{$count} items" : "1 item";
 
             return redirect()
@@ -281,7 +284,7 @@ class SupplyStockController extends Controller
 
         } catch (\Exception $e) {
             session()->forget('last_stock_submission_'.auth()->id());
-            Log::error('Failed to create stock IAR', ['error'=>$e->getMessage()]);
+            Log::error('Failed to create multiple‐item IAR', ['error'=>$e->getMessage()]);
 
             return back()
                 ->with('error','Failed to add stock: '.$e->getMessage())
@@ -289,6 +292,7 @@ class SupplyStockController extends Controller
                 ->with('show_create_modal', true);
         }
     }
+
 
     /**
      * Process a single stock receipt item
