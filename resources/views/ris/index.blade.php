@@ -5,9 +5,25 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Requisition and Issue Slips') }}
             </h2>
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-                Manage supply requisitions
-            </span>
+            <div class="flex items-center space-x-3">
+                {{-- <span class="text-sm text-gray-600 dark:text-gray-400">
+                    Manage supply requisitionssss
+                </span> --}}
+
+                @if (auth()->user()->hasRole('admin'))
+                    <!-- Manual Entry Button -->
+                    <button type="button" id="openManualEntryModal"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700
+                        text-white text-sm font-medium rounded-lg shadow-sm transition-all duration-200
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Add Manual Entry
+                    </button>
+                @endif
+            </div>
         </div>
     </x-slot>
 
@@ -107,6 +123,924 @@
                         </form>
                     </div>
                 </div>
+
+
+                <!-- Manual RIS Entry Modal -->
+                <div id="manualEntryModal"
+                    class="fixed inset-0 z-50 overflow-y-auto -webkit-overflow-scrolling-touch bg-black bg-opacity-50
+                    flex items-start sm:items-center justify-center hidden p-1 sm:p-4">
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl
+                            w-full max-w-6xl mx-3 mt-8 sm:mt-0 sm:max-h-[90vh] flex flex-col pb-8 sm:pb-0">
+
+                        <!-- Fixed Header -->
+                        <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 shrink-0">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Manual RIS Entry
+                                </h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Create historical requisition record manually
+                                </p>
+                            </div>
+                            <button id="closeManualEntryModal"
+                                class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 p-1">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form action="{{ route('ris.store-manual') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
+                            @csrf
+                            <input type="hidden" name="is_manual_entry" value="1">
+
+                            <!-- Scrollable Content Area -->
+                            <div class="flex-1 overflow-y-auto">
+                                <div class="p-6">
+
+                                    <!-- Date Selection (Important for Historical Data) -->
+                                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+                                        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
+                                            📅 Historical Date Information
+                                        </h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    RIS Date <span class="text-red-500">*</span>
+                                                </label>
+                                                <input type="date" name="ris_date" required
+                                                    max="{{ now()->format('Y-m-d') }}"
+                                                    min="{{ now()->subYears(5)->format('Y-m-d') }}"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                    dark:bg-gray-700 dark:text-white rounded-md
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Reference/Source
+                                                </label>
+                                                <input type="text" name="reference_source"
+                                                    placeholder="e.g., Excel File, Physical Document"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                    dark:bg-gray-700 dark:text-white rounded-md
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Basic RIS Information -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                                        <div class="md:col-span-2 lg:col-span-1">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Entity Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" name="entity_name" value="CHEDRO 12" required
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Division <span class="text-red-500">*</span>
+                                            </label>
+                                            <select name="division" required
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Select Division</option>
+                                                @foreach ($departments as $department)
+                                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Fund Cluster
+                                            </label>
+                                            <select name="fund_cluster"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Select Fund Cluster</option>
+                                                <option value="101">101</option>
+                                                <option value="151">151</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Office
+                                            </label>
+                                            <input type="text" name="office"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Responsibility Center Code
+                                            </label>
+                                            <input type="text" name="responsibility_center_code"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Requested By <span class="text-red-500">*</span>
+                                            </label>
+                                            <select name="requested_by" required
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                dark:bg-gray-700 dark:text-white rounded-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Select User</option>
+                                                @foreach ($users as $user)
+                                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Purpose -->
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Purpose <span class="text-red-500">*</span>
+                                        </label>
+                                        <textarea name="purpose" rows="3" required
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                            dark:bg-gray-700 dark:text-white rounded-md
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                            placeholder="Enter the purpose of this requisition..."></textarea>
+                                    </div>
+
+                                    <!-- Supply Items Section -->
+                                    <div class="mb-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    Supply Items
+                                                </h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    Add items that were requested (only available supplies will be shown)
+                                                </p>
+                                            </div>
+                                            <button type="button" id="addManualItemBtn"
+                                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700
+                                                text-white text-sm font-medium rounded-lg transition-all duration-200">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+                                                </svg>
+                                                Add Item
+                                            </button>
+                                        </div>
+
+                                        <!-- Items Table -->
+                                        <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                                            <table class="w-full">
+                                                <thead>
+                                                    <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                            Supply Item
+                                                        </th>
+                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                            Available Qty
+                                                        </th>
+                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                            Requested Qty
+                                                        </th>
+                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 120px;">
+                                                            Issued Qty
+                                                        </th>
+                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 200px;">
+                                                            Remarks
+                                                        </th>
+                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="width: 60px;">
+
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="manualItemsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                                                    <!-- Dynamic rows will be added here -->
+                                                </tbody>
+                                            </table>
+
+                                            <!-- Empty State -->
+                                            <div id="manualEmptyState" class="p-12 text-center bg-white dark:bg-gray-800">
+                                                <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                        d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No items added yet</p>
+                                                <p class="text-xs text-gray-400 dark:text-gray-500">Click "Add Item" to start</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Selection for Historical Data -->
+                                    <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
+                                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-3">
+                                            📋 Historical Status Information
+                                        </h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Final Status <span class="text-red-500">*</span>
+                                                </label>
+                                                <select name="final_status" required id="finalStatusSelect"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                    dark:bg-gray-700 dark:text-white rounded-md
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                    <option value="">Select Status</option>
+                                                    <option value="completed">Completed (Fully Processed)</option>
+                                                    <option value="posted">Issued (Pending Receipt)</option>
+                                                    <option value="declined">Declined</option>
+                                                </select>
+                                            </div>
+                                            <div id="declineReasonDiv" class="hidden">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Decline Reason
+                                                </label>
+                                                <input type="text" name="decline_reason"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                    dark:bg-gray-700 dark:text-white rounded-md
+                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fixed Footer -->
+                            <div class="px-6 py-4 border-t dark:border-gray-700 flex justify-end space-x-3 shrink-0 bg-gray-50 dark:bg-gray-800">
+                                <button type="button" id="cancelManualEntry"
+                                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium
+                                    text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700
+                                    transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" id="submitManualEntry"
+                                    class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium
+                                    text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2
+                                    focus:ring-blue-500 transition-colors">
+                                    Create Manual RIS
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Template for manual item row -->
+                <template id="manualItemRowTemplate">
+                    <tr class="manual-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
+                        <td class="px-4 py-3">
+                            <select name="items[INDEX][supply_id]" required class="supply-select w-full px-3 py-2
+                                border border-gray-200 dark:border-gray-700 rounded-md text-sm
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Supply</option>
+                                @foreach ($availableSupplies as $stock)
+                                    <option value="{{ $stock->supply_id }}"
+                                        data-available="{{ $stock->quantity_on_hand }}"
+                                        data-stock-no="{{ $stock->supply->stock_no }}"
+                                        data-unit="{{ $stock->supply->unit_of_measurement }}">
+                                        {{ $stock->supply->item_name }} ({{ $stock->supply->stock_no }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="available-qty font-medium text-green-600 dark:text-green-400">0</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="number" name="items[INDEX][quantity_requested]" min="1" required
+                                class="requested-qty w-full px-3 py-2 border border-gray-200 dark:border-gray-700
+                                rounded-md text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="number" name="items[INDEX][quantity_issued]" min="0"
+                                class="issued-qty w-full px-3 py-2 border border-gray-200 dark:border-gray-700
+                                rounded-md text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </td>
+                        <td class="px-4 py-3">
+                            <input type="text" name="items[INDEX][remarks]"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700
+                                rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <button type="button" class="remove-manual-item-btn p-1.5 text-red-500 hover:text-red-700
+                                hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+
+                <style>
+                    @keyframes modal-slide-up {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    .animate-modal-slide-up {
+                        animation: modal-slide-up 0.3s ease-out;
+                    }
+
+                    /* Enhanced form styling */
+                    .supply-select:focus {
+                        border-color: #3b82f6;
+                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                    }
+
+                    .field-error {
+                        animation: shake 0.3s ease-in-out;
+                    }
+
+                    @keyframes shake {
+                        0%, 100% { transform: translateX(0); }
+                        25% { transform: translateX(-4px); }
+                        75% { transform: translateX(4px); }
+                    }
+
+                    /* Improved loading states */
+                    .loading-overlay {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(255, 255, 255, 0.8);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 10;
+                    }
+
+                    /* Enhanced table styling */
+                    .manual-item-row:hover {
+                        background-color: rgba(59, 130, 246, 0.05);
+                    }
+
+                    /* Status-specific styling */
+                    .status-completed { color: #10b981; }
+                    .status-posted { color: #f59e0b; }
+                    .status-declined { color: #ef4444; }
+                </style>
+
+                <!-- Complete Manual RIS Entry JavaScript - Fixed Version -->
+                <script>
+                    // Enhanced JavaScript for Manual RIS Entry with Real-time Validation
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modal = document.getElementById('manualEntryModal');
+                        const openBtn = document.getElementById('openManualEntryModal');
+                        const closeBtn = document.getElementById('closeManualEntryModal');
+                        const cancelBtn = document.getElementById('cancelManualEntry');
+                        const addItemBtn = document.getElementById('addManualItemBtn');
+                        const itemsTable = document.getElementById('manualItemsTable');
+                        const emptyState = document.getElementById('manualEmptyState');
+                        const template = document.getElementById('manualItemRowTemplate');
+                        const finalStatusSelect = document.getElementById('finalStatusSelect');
+                        const declineReasonDiv = document.getElementById('declineReasonDiv');
+                        const risDateInput = document.querySelector('input[name="ris_date"]');
+                        const submitBtn = document.getElementById('submitManualEntry');
+
+                        let itemIndex = 0;
+                        let availableSupplies = [];
+
+                        // Modal controls
+                        openBtn?.addEventListener('click', () => {
+                            modal.classList.remove('hidden');
+                            document.body.style.overflow = 'hidden';
+
+                            // Set default date to today
+                            if (risDateInput && !risDateInput.value) {
+                                risDateInput.value = new Date().toISOString().split('T')[0];
+                            }
+
+                            // Load available supplies from blade data
+                            loadAvailableSupplies();
+                        });
+
+                        function closeModal() {
+                            modal.classList.add('hidden');
+                            document.body.style.overflow = '';
+                            // Reset form
+                            document.querySelector('#manualEntryModal form').reset();
+                            itemsTable.innerHTML = '';
+                            itemIndex = 0;
+                            availableSupplies = [];
+                            updateEmptyState();
+                            clearValidationErrors();
+                        }
+
+                        closeBtn?.addEventListener('click', closeModal);
+                        cancelBtn?.addEventListener('click', closeModal);
+
+                        // Enhanced date validation
+                        risDateInput?.addEventListener('change', function() {
+                            const selectedDate = new Date(this.value);
+                            const today = new Date();
+                            const fiveYearsAgo = new Date();
+                            fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+
+                            // Clear existing warnings
+                            const existingWarning = document.getElementById('date-warning');
+                            if (existingWarning) {
+                                existingWarning.remove();
+                            }
+
+                            if (selectedDate > today) {
+                                showFieldError(this, 'Cannot select future dates');
+                                this.value = today.toISOString().split('T')[0];
+                                return;
+                            }
+
+                            if (selectedDate < fiveYearsAgo) {
+                                showFieldError(this, 'Cannot select dates more than 5 years old');
+                                this.value = fiveYearsAgo.toISOString().split('T')[0];
+                                return;
+                            }
+
+                            // Show warning for very old dates
+                            const oneYearAgo = new Date();
+                            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+                            if (selectedDate < oneYearAgo) {
+                                showDateWarning(this, selectedDate);
+                            }
+
+                            clearFieldError(this);
+                        });
+
+                        function showDateWarning(input, selectedDate) {
+                            const warning = document.createElement('div');
+                            warning.id = 'date-warning';
+                            warning.className = 'mt-2 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 rounded-lg';
+                            warning.innerHTML = `
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-orange-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-orange-800 dark:text-orange-300">Historical Date Selected</h4>
+                                        <p class="text-xs text-orange-700 dark:text-orange-400 mt-1">
+                                            Selected date: ${selectedDate.toLocaleDateString()}. This will create a historical record.
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+
+                            input.parentNode.appendChild(warning);
+                        }
+
+                        // Status change handler with enhanced logic
+                        finalStatusSelect?.addEventListener('change', function() {
+                            const declineReasonInput = declineReasonDiv.querySelector('input');
+
+                            if (this.value === 'declined') {
+                                declineReasonDiv.classList.remove('hidden');
+                                declineReasonInput.required = true;
+
+                                // Clear issued quantities for declined RIS
+                                document.querySelectorAll('.issued-qty').forEach(input => {
+                                    input.value = '0';
+                                    input.disabled = true;
+                                });
+                            } else {
+                                declineReasonDiv.classList.add('hidden');
+                                declineReasonInput.required = false;
+
+                                // Re-enable issued quantities
+                                document.querySelectorAll('.issued-qty').forEach(input => {
+                                    input.disabled = false;
+                                    // Auto-set to requested quantity for completed/posted status
+                                    const row = input.closest('tr');
+                                    const requestedQty = row.querySelector('.requested-qty').value;
+                                    if (requestedQty && (this.value === 'completed' || this.value === 'posted')) {
+                                        input.value = requestedQty;
+                                    }
+                                });
+                            }
+
+                            updateSubmitButtonText();
+                        });
+
+                        function updateSubmitButtonText() {
+                            if (!submitBtn || !finalStatusSelect) return;
+
+                            const status = finalStatusSelect.value;
+                            const statusTexts = {
+                                'completed': 'Create Completed RIS',
+                                'posted': 'Create Issued RIS',
+                                'declined': 'Create Declined RIS',
+                                '': 'Create Manual RIS'
+                            };
+
+                            submitBtn.textContent = statusTexts[status] || statusTexts[''];
+                        }
+
+                        // FIXED: Load available supplies from blade template data
+                        function loadAvailableSupplies() {
+                            try {
+                                showLoadingState();
+
+                                // Get supplies data passed from blade template (your enhanced index method)
+                                const suppliesData = @json($availableSupplies ?? []);
+
+                                // Convert the data to the format expected by JavaScript
+                                availableSupplies = suppliesData.map(stock => ({
+                                    supply_id: stock.supply_id,
+                                    stock_no: stock.supply?.stock_no || 'N/A',
+                                    item_name: stock.supply?.item_name || 'Unknown Item',
+                                    description: stock.supply?.description || '',
+                                    unit_of_measurement: stock.supply?.unit_of_measurement || 'pcs',
+                                    available_quantity: stock.actual_available || 0,
+                                    fund_cluster: stock.fund_cluster || ''
+                                }));
+
+                                hideLoadingState();
+
+                                if (availableSupplies.length === 0) {
+                                    showNoSuppliesMessage();
+                                }
+
+                                console.log('Loaded supplies:', availableSupplies.length, 'items');
+
+                            } catch (error) {
+                                console.error('Error loading supplies:', error);
+                                hideLoadingState();
+                                showAlert('Failed to load available supplies. Please refresh and try again.', 'error');
+                            }
+                        }
+
+                        function showLoadingState() {
+                            if (addItemBtn) {
+                                addItemBtn.disabled = true;
+                                addItemBtn.innerHTML = `
+                                    <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                `;
+                            }
+                        }
+
+                        function hideLoadingState() {
+                            if (addItemBtn) {
+                                addItemBtn.disabled = false;
+                                addItemBtn.innerHTML = `
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+                                    </svg>
+                                    Add Item
+                                `;
+                            }
+                        }
+
+                        function showNoSuppliesMessage() {
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg';
+                            alertDiv.innerHTML = `
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300">No Supplies Available</h4>
+                                        <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                                            No supplies with available stock found. Items must have existing IAR records to be requested.
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Insert before the items table
+                            const itemsSection = document.querySelector('.mb-6:has(#manualItemsTable)');
+                            if (itemsSection) {
+                                itemsSection.insertBefore(alertDiv, itemsSection.firstChild);
+                            }
+                        }
+
+                        // Enhanced add item functionality
+                        addItemBtn?.addEventListener('click', addManualItem);
+
+                        function addManualItem() {
+                            if (availableSupplies.length === 0) {
+                                showAlert('No supplies available. Please ensure there are supplies with stock in the system.', 'warning');
+                                return;
+                            }
+
+                            const templateContent = template.content.cloneNode(true);
+                            const row = templateContent.querySelector('tr');
+
+                            // Replace INDEX with actual index
+                            row.innerHTML = row.innerHTML.replace(/INDEX/g, itemIndex);
+
+                            // Populate supply options dynamically (not from template)
+                            const supplySelect = row.querySelector('.supply-select');
+                            supplySelect.innerHTML = '<option value="">Select Supply</option>';
+
+                            availableSupplies.forEach(supply => {
+                                const option = document.createElement('option');
+                                option.value = supply.supply_id;
+                                option.setAttribute('data-available', supply.available_quantity);
+                                option.setAttribute('data-stock-no', supply.stock_no);
+                                option.setAttribute('data-unit', supply.unit_of_measurement);
+                                option.textContent = `${supply.item_name} (${supply.stock_no})`;
+                                supplySelect.appendChild(option);
+                            });
+
+                            // Add event listeners
+                            const requestedQtyInput = row.querySelector('.requested-qty');
+                            const issuedQtyInput = row.querySelector('.issued-qty');
+                            const availableQtySpan = row.querySelector('.available-qty');
+                            const removeBtn = row.querySelector('.remove-manual-item-btn');
+
+                            // Supply selection handler
+                            supplySelect.addEventListener('change', function() {
+                                const selectedOption = this.options[this.selectedIndex];
+                                const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
+
+                                availableQtySpan.textContent = available;
+                                availableQtySpan.className = `available-qty font-medium ${available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
+
+                                // Set max for inputs
+                                requestedQtyInput.max = available;
+                                issuedQtyInput.max = available;
+
+                                // Clear quantities when changing supply
+                                requestedQtyInput.value = '';
+                                issuedQtyInput.value = '';
+
+                                // Enable/disable inputs based on availability
+                                requestedQtyInput.disabled = available === 0;
+                                issuedQtyInput.disabled = available === 0;
+
+                                if (available === 0) {
+                                    showFieldError(this, 'This supply has no available stock');
+                                } else {
+                                    clearFieldError(this);
+                                }
+                            });
+
+                            // Quantity validation
+                            requestedQtyInput.addEventListener('input', function() {
+                                const available = parseInt(availableQtySpan.textContent) || 0;
+                                const requested = parseInt(this.value) || 0;
+
+                                if (requested > available) {
+                                    this.value = available;
+                                    showFieldError(this, `Maximum available: ${available}`);
+                                } else {
+                                    clearFieldError(this);
+                                }
+
+                                // Auto-set issued quantity based on status
+                                const status = finalStatusSelect?.value;
+                                if (this.value && (status === 'completed' || status === 'posted')) {
+                                    issuedQtyInput.value = this.value;
+                                }
+
+                                validateForm();
+                            });
+
+                            issuedQtyInput.addEventListener('input', function() {
+                                const requested = parseInt(requestedQtyInput.value) || 0;
+                                const issued = parseInt(this.value) || 0;
+
+                                if (issued > requested) {
+                                    this.value = requested;
+                                    showFieldError(this, `Cannot exceed requested: ${requested}`);
+                                } else {
+                                    clearFieldError(this);
+                                }
+
+                                validateForm();
+                            });
+
+                            // Remove item handler
+                            removeBtn.addEventListener('click', function() {
+                                if (itemsTable.children.length === 1) {
+                                    showAlert('At least one item is required.', 'warning');
+                                    return;
+                                }
+
+                                row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                row.style.opacity = '0';
+                                row.style.transform = 'translateX(-10px)';
+
+                                setTimeout(() => {
+                                    row.remove();
+                                    updateEmptyState();
+                                    validateForm();
+                                }, 300);
+                            });
+
+                            itemsTable.appendChild(row);
+                            itemIndex++;
+                            updateEmptyState();
+
+                            // Focus on supply select
+                            setTimeout(() => supplySelect.focus(), 100);
+                        }
+
+                        function updateEmptyState() {
+                            const rowCount = itemsTable.children.length;
+                            if (rowCount === 0) {
+                                emptyState.classList.remove('hidden');
+                                submitBtn.disabled = true;
+                            } else {
+                                emptyState.classList.add('hidden');
+                                submitBtn.disabled = false;
+                            }
+                        }
+
+                        // Enhanced form validation
+                        function validateForm() {
+                            const rows = itemsTable.children.length;
+                            const hasValidItems = Array.from(itemsTable.children).every(row => {
+                                const supplySelect = row.querySelector('.supply-select');
+                                const requestedQty = row.querySelector('.requested-qty');
+
+                                return supplySelect.value && requestedQty.value && parseInt(requestedQty.value) > 0;
+                            });
+
+                            submitBtn.disabled = rows === 0 || !hasValidItems;
+                            updateSubmitButtonText();
+                        }
+
+                        // SIMPLIFIED form submission (removed AJAX validation for now)
+                        document.querySelector('#manualEntryModal form')?.addEventListener('submit', function(e) {
+                            e.preventDefault();
+
+                            if (!validateFormBeforeSubmit()) {
+                                return false;
+                            }
+
+                            // Show loading state
+                            submitBtn.disabled = true;
+                            const originalText = submitBtn.textContent;
+                            submitBtn.innerHTML = `
+                                <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                            `;
+
+                            // Submit the form directly (server-side validation will handle stock checking)
+                            this.submit();
+                        });
+
+                        function validateFormBeforeSubmit() {
+                            const requiredFields = [
+                                'ris_date',
+                                'entity_name',
+                                'division',
+                                'requested_by',
+                                'purpose',
+                                'final_status'
+                            ];
+
+                            let isValid = true;
+
+                            requiredFields.forEach(fieldName => {
+                                const field = document.querySelector(`[name="${fieldName}"]`);
+                                if (field && !field.value.trim()) {
+                                    showFieldError(field, 'This field is required');
+                                    isValid = false;
+                                }
+                            });
+
+                            // Validate items
+                            const itemCount = itemsTable.children.length;
+                            if (itemCount === 0) {
+                                showAlert('Please add at least one item.', 'error');
+                                isValid = false;
+                            }
+
+                            // Validate decline reason if needed
+                            const status = finalStatusSelect?.value;
+                            if (status === 'declined') {
+                                const declineReason = document.querySelector('[name="decline_reason"]');
+                                if (!declineReason.value.trim()) {
+                                    showFieldError(declineReason, 'Decline reason is required');
+                                    isValid = false;
+                                }
+                            }
+
+                            return isValid;
+                        }
+
+                        // Utility functions
+                        function showFieldError(field, message) {
+                            clearFieldError(field);
+
+                            field.classList.add('border-red-500');
+                            const error = document.createElement('p');
+                            error.className = 'field-error mt-1 text-xs text-red-600 dark:text-red-400';
+                            error.textContent = message;
+                            field.parentNode.appendChild(error);
+                        }
+
+                        function clearFieldError(field) {
+                            field.classList.remove('border-red-500');
+                            const existingError = field.parentNode.querySelector('.field-error');
+                            if (existingError) {
+                                existingError.remove();
+                            }
+                        }
+
+                        function clearValidationErrors() {
+                            document.querySelectorAll('.field-error').forEach(error => error.remove());
+                            document.querySelectorAll('.border-red-500').forEach(field => {
+                                field.classList.remove('border-red-500');
+                            });
+                        }
+
+                        function showAlert(message, type = 'info') {
+                            const alertColors = {
+                                'info': 'bg-blue-500',
+                                'success': 'bg-green-500',
+                                'warning': 'bg-orange-500',
+                                'error': 'bg-red-500'
+                            };
+
+                            const alert = document.createElement('div');
+                            alert.className = `fixed top-4 right-4 z-[70] ${alertColors[type]} text-white px-4 py-3 rounded-lg shadow-lg max-w-md animate-modal-slide-up`;
+                            alert.innerHTML = `
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 flex-shrink-0 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        ${type === 'error' ?
+                                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />' :
+                                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+                                        }
+                                    </svg>
+                                    <div class="flex-1">
+                                        <p class="text-sm whitespace-pre-line">${message}</p>
+                                    </div>
+                                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:bg-black/10 rounded p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            `;
+
+                            document.body.appendChild(alert);
+
+                            // Auto-remove after 5 seconds
+                            setTimeout(() => {
+                                if (alert.parentNode) {
+                                    alert.style.opacity = '0';
+                                    setTimeout(() => alert.remove(), 300);
+                                }
+                            }, 5000);
+                        }
+
+                        // Initialize
+                        updateEmptyState();
+
+                        // Close modal on outside click
+                        modal?.addEventListener('click', function(e) {
+                            if (e.target === modal) {
+                                closeModal();
+                            }
+                        });
+
+                        // Keyboard shortcuts
+                        document.addEventListener('keydown', function(e) {
+                            if (modal && !modal.classList.contains('hidden')) {
+                                // Escape to close
+                                if (e.key === 'Escape') {
+                                    closeModal();
+                                }
+
+                                // Ctrl/Cmd + Enter to submit
+                                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (!submitBtn.disabled) {
+                                        submitBtn.click();
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+
 
                 <div class="p-5">
                     <!-- Alert Messages -->

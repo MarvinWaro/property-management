@@ -116,11 +116,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/ris/{risSlip}/decline', [RisSlipController::class, 'decline'])->name('ris.decline');
         Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
 
-        // Add these routes to your existing web.php file within the middleware group
+        // NEW: Manual RIS Entry Route (Admin/CAO only)
+        Route::post('/ris/manual-entry', [RisSlipController::class, 'storeManual'])->name('ris.store-manual');
+
+        // NEW: AJAX route to get available supplies for manual entry
+        Route::get('/ris/available-supplies', [RisSlipController::class, 'getAvailableSupplies'])->name('ris.available-supplies');
+
+        // NEW: AJAX route to validate stock before manual entry
+        Route::post('/ris/validate-manual-stock', [RisSlipController::class, 'validateManualStock'])->name('ris.validate-manual-stock');
+
 
         // RSMI (Report of Supplies and Materials Issued) routes
         // Add these routes to your existing web.php file within the middleware group
-
         // RSMI (Report of Supplies and Materials Issued) routes
         Route::get('/rsmi', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'index'])->name('rsmi.index');
         Route::get('/rsmi/generate', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'generate'])->name('rsmi.generate');
