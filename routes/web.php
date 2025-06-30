@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
     Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel'); // ADD THIS LINE
 
+
     Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
 
     Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');
@@ -74,6 +75,29 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
     Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
+    Route::get('/debug-users', function() {
+    try {
+        // This should work
+            $users1 = \App\Models\User::where('status', true)->count();
+
+            // This will fail if you still have is_active somewhere
+            $users2 = \App\Models\User::where('status', true)->get(['id', 'name', 'email']);
+
+            return response()->json([
+                'success' => true,
+                'active_users_count' => $users1,
+                'sample_users' => $users2->take(3)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => basename($e->getFile()),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    });
+
     //Route::get('/user-notifications', [NotificationController::class, 'getUserNotifications'])->middleware(['auth:sanctum', 'verified']);
 
 
@@ -83,6 +107,65 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      * ------------------
      */
     Route::middleware(['admin-cao'])->group(function () {
+
+        // ADD THIS TEMPORARY TEST ROUTE TO YOUR web.php (inside admin-cao middleware group)
+
+        Route::get('/test-supplies-data', function() {
+            try {
+                $currentUser = auth()->user();
+
+                $result = [
+                    'user_can_access' => $currentUser->hasRole(['admin', 'cao']),
+                    'user_role' => $currentUser->role,
+                    'database_counts' => [
+                        'total_supplies' => \App\Models\Supply::count(),
+                        'active_supplies' => \App\Models\Supply::where('is_active', true)->count(),
+                        'total_supply_stocks' => \App\Models\SupplyStock::count(),
+                        'available_supply_stocks' => \App\Models\SupplyStock::where('status', 'available')->where('quantity_on_hand', '>', 0)->count(),
+                    ]
+                ];
+
+                // Test the exact same logic as your controller
+                if ($currentUser->hasRole(['admin', 'cao'])) {
+
+                    // Test the supplies query from your controller
+                    $availableSupplies = \App\Models\SupplyStock::with(['supply'])
+                        ->where('status', 'available')
+                        ->where('quantity_on_hand', '>', 0)
+                        ->get()
+                        ->map(function ($stock) {
+                            return (object) [
+                                'supply_id' => $stock->supply_id,
+                                'supply' => $stock->supply,
+                                'quantity_on_hand' => $stock->quantity_on_hand,
+                                'fund_cluster' => $stock->fund_cluster,
+                                'stock_no' => $stock->supply->stock_no,
+                                'item_name' => $stock->supply->item_name,
+                                'description' => $stock->supply->description,
+                                'unit_of_measurement' => $stock->supply->unit_of_measurement,
+                            ];
+                        });
+
+                    $result['supplies'] = [
+                        'count' => $availableSupplies->count(),
+                        'type' => gettype($availableSupplies),
+                        'is_collection' => $availableSupplies instanceof \Illuminate\Support\Collection,
+                        'first_3' => $availableSupplies->take(3)->toArray(),
+                        'all_data' => $availableSupplies->toArray() // This is what should be passed to blade
+                    ];
+                }
+
+                return response()->json($result, 200, [], JSON_PRETTY_PRINT);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => 'Test failed',
+                    'message' => $e->getMessage(),
+                    'line' => $e->getLine(),
+                    'file' => basename($e->getFile())
+                ], 500, [], JSON_PRETTY_PRINT);
+            }
+        })->name('test.supplies-data');
 
         // these now share your normal web session cookie
 
@@ -119,11 +202,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // NEW: Manual RIS Entry Route (Admin/CAO only)
         Route::post('/ris/manual-entry', [RisSlipController::class, 'storeManual'])->name('ris.store-manual');
 
-        // NEW: AJAX route to get available supplies for manual entry
-        Route::get('/ris/available-supplies', [RisSlipController::class, 'getAvailableSupplies'])->name('ris.available-supplies');
 
-        // NEW: AJAX route to validate stock before manual entry
-        Route::post('/ris/validate-manual-stock', [RisSlipController::class, 'validateManualStock'])->name('ris.validate-manual-stock');
 
 
         // RSMI (Report of Supplies and Materials Issued) routes

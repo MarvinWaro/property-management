@@ -1,19 +1,22 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\RisSlip;
 use App\Models\RisItem;
 use App\Models\Supply;
 use App\Models\Department;
 use App\Models\SupplyStock;
 use App\Models\SupplyTransaction;
+use App\Models\User; // <-- ADD THIS IMPORT
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- ADD THIS IMPORT
 use App\Services\ReferenceNumberService;
 use App\Events\RequisitionStatusUpdated;
 use App\Events\UserNotificationUpdated;
-
-use App\Constants\RisStatus; // Add this import at the top of your controller
+use App\Constants\RisStatus;
+use Carbon\Carbon; // <-- ADD THIS IMPORT
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -21,7 +24,6 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RisSlipController extends Controller
@@ -110,8 +112,9 @@ class RisSlipController extends Controller
         $availableSupplies = collect();
 
         if (auth()->user()->hasRole(['admin', 'cao'])) {
-            // Get all active users for manual entry dropdown
-            $users = User::where('is_active', true)
+            // FIXED: Get all active users for manual entry dropdown
+            $users = User::where('status', true)  // <-- CHANGED from 'is_active' to 'status'
+                ->with('department')  // <-- ADDED with('department') for proper loading
                 ->orderBy('name')
                 ->get(['id', 'name', 'email', 'department_id'])
                 ->map(function ($user) {
@@ -125,7 +128,7 @@ class RisSlipController extends Controller
 
             if ($showAllSupplies) {
                 // Show ALL active supplies for historical entry
-                $availableSupplies = Supply::where('is_active', true)
+                $availableSupplies = Supply::where('is_active', true)  // <-- This is correct (supplies table has is_active)
                     ->orderBy('item_name')
                     ->get()
                     ->map(function ($supply) {
@@ -1745,51 +1748,29 @@ class RisSlipController extends Controller
 
 
     /**
-     * AJAX: Get available supplies for manual entry
+     * AJAX: Get all active supplies (even if quantity_on_hand == 0)
      */
     public function getAvailableSupplies(Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'cao'])) {
+        if (! auth()->user()->hasRole(['admin','cao'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $fundCluster = $request->get('fund_cluster');
-
-        $query = SupplyStock::with('supply')
-            ->where('status', 'available')
-            ->where('quantity_on_hand', '>', 0);
-
-        if ($fundCluster) {
-            $query->where('fund_cluster', $fundCluster);
-        }
-
-        $supplies = $query->get()
-            ->map(function ($stock) {
-                // Calculate real available quantity
-                $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
-                    ->whereHas('risSlip', function($q) {
-                        $q->whereIn('status', ['draft', 'approved']);
-                    })
-                    ->sum('quantity_requested');
-
-                $actualAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
-
-                if ($actualAvailable > 0) {
-                    return [
-                        'supply_id' => $stock->supply_id,
-                        'stock_no' => $stock->supply->stock_no,
-                        'item_name' => $stock->supply->item_name,
-                        'description' => $stock->supply->description,
-                        'unit_of_measurement' => $stock->supply->unit_of_measurement,
-                        'available_quantity' => $actualAvailable,
-                        'fund_cluster' => $stock->fund_cluster,
-                    ];
-                }
-
-                return null;
-            })
-            ->filter()
-            ->values();
+        $supplies = Supply::where('is_active', true)
+            ->orderBy('item_name')
+            ->get()
+            ->map(function($supply) {
+                // total on‐hand, even if zero
+                $available = SupplyStock::getTotalAvailableQuantity($supply->supply_id);
+                return [
+                    'supply_id'          => $supply->supply_id,
+                    'stock_no'           => $supply->stock_no,
+                    'item_name'          => $supply->item_name,
+                    'description'        => $supply->description,
+                    'unit_of_measurement'=> $supply->unit_of_measurement,
+                    'available_quantity' => $available,
+                ];
+            });
 
         return response()->json(['supplies' => $supplies]);
     }
