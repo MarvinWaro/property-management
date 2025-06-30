@@ -840,6 +840,8 @@
                         // Add item functionality
                         addItemBtn?.addEventListener('click', addManualItem);
 
+
+
                         function addManualItem() {
                             console.log('Add item clicked, available supplies:', availableSupplies.length);
 
@@ -854,35 +856,136 @@
                             // Replace INDEX with actual index
                             row.innerHTML = row.innerHTML.replace(/INDEX/g, itemIndex);
 
-                            // Populate supply options
+                            // Get row elements
                             const supplySelect = row.querySelector('.supply-select');
+                            const availableQtySpan = row.querySelector('.available-qty');
+                            const requestedQtyInput = row.querySelector('.requested-qty');
+                            const issuedQtyInput = row.querySelector('.issued-qty');
+                            const removeBtn = row.querySelector('.remove-manual-item-btn');
+
                             if (supplySelect) {
                                 supplySelect.innerHTML = '<option value="">Select Supply</option>';
 
+                                // Populate supply options with data attributes
                                 availableSupplies.forEach(supply => {
                                     const option = document.createElement('option');
                                     option.value = supply.supply_id;
+                                    option.setAttribute('data-available', supply.available_quantity);
                                     option.setAttribute('data-stock-no', supply.stock_no);
                                     option.setAttribute('data-unit', supply.unit_of_measurement);
                                     option.textContent = `${supply.item_name} (${supply.stock_no})`;
                                     supplySelect.appendChild(option);
                                 });
 
+                                // CRITICAL: Add supply selection change handler
+                                supplySelect.addEventListener('change', function() {
+                                    const selectedOption = this.options[this.selectedIndex];
+
+                                    if (selectedOption.value) {
+                                        const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
+
+                                        console.log(`Selected supply: ${selectedOption.textContent}, Available: ${available}`);
+
+                                        // Update available quantity display
+                                        if (availableQtySpan) {
+                                            availableQtySpan.textContent = available;
+                                            availableQtySpan.className = `available-qty font-medium ${available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
+                                        }
+
+                                        // Set max limits on inputs
+                                        if (requestedQtyInput) {
+                                            requestedQtyInput.max = available;
+                                            requestedQtyInput.disabled = available === 0;
+                                        }
+
+                                        if (issuedQtyInput) {
+                                            issuedQtyInput.max = available;
+                                            issuedQtyInput.disabled = available === 0;
+                                        }
+
+                                        // Clear input values when changing supply
+                                        if (requestedQtyInput) requestedQtyInput.value = '';
+                                        if (issuedQtyInput) issuedQtyInput.value = '';
+
+                                    } else {
+                                        // No supply selected
+                                        if (availableQtySpan) {
+                                            availableQtySpan.textContent = '0';
+                                            availableQtySpan.className = 'available-qty font-medium text-gray-400';
+                                        }
+
+                                        if (requestedQtyInput) {
+                                            requestedQtyInput.max = '';
+                                            requestedQtyInput.disabled = false;
+                                            requestedQtyInput.value = '';
+                                        }
+
+                                        if (issuedQtyInput) {
+                                            issuedQtyInput.max = '';
+                                            issuedQtyInput.disabled = false;
+                                            issuedQtyInput.value = '';
+                                        }
+                                    }
+                                });
+
                                 console.log(`Added ${availableSupplies.length} options to select`);
                             }
 
-                            // Add event listeners for the new row
-                            const removeBtn = row.querySelector('.remove-manual-item-btn');
+                            // Add quantity input validation
+                            if (requestedQtyInput) {
+                                requestedQtyInput.addEventListener('input', function() {
+                                    const available = parseInt(availableQtySpan?.textContent) || 0;
+                                    const requested = parseInt(this.value) || 0;
+
+                                    if (requested > available) {
+                                        this.value = available;
+                                        showAlert(`Maximum available: ${available}`, 'warning');
+                                    }
+
+                                    // Auto-fill issued quantity for historical entries
+                                    if (issuedQtyInput && this.value) {
+                                        issuedQtyInput.value = this.value;
+                                    }
+                                });
+                            }
+
+                            if (issuedQtyInput) {
+                                issuedQtyInput.addEventListener('input', function() {
+                                    const requested = parseInt(requestedQtyInput?.value) || 0;
+                                    const issued = parseInt(this.value) || 0;
+
+                                    if (issued > requested) {
+                                        this.value = requested;
+                                        showAlert(`Cannot exceed requested: ${requested}`, 'warning');
+                                    }
+                                });
+                            }
+
+                            // Remove button handler
                             removeBtn?.addEventListener('click', function() {
-                                row.remove();
-                                updateEmptyState();
+                                if (itemsTable.children.length === 1) {
+                                    showAlert('At least one item is required.', 'warning');
+                                    return;
+                                }
+
+                                row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                row.style.opacity = '0';
+                                row.style.transform = 'translateX(-10px)';
+
+                                setTimeout(() => {
+                                    row.remove();
+                                    updateEmptyState();
+                                }, 300);
                             });
 
                             itemsTable.appendChild(row);
                             itemIndex++;
                             updateEmptyState();
 
-                            console.log('Item row added successfully');
+                            // Focus on the supply select
+                            setTimeout(() => supplySelect?.focus(), 100);
+
+                            console.log('Item row added successfully with change handlers');
                         }
 
                         function updateEmptyState() {
