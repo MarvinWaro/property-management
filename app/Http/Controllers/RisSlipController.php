@@ -1,19 +1,22 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Models\RisSlip;
 use App\Models\RisItem;
 use App\Models\Supply;
 use App\Models\Department;
 use App\Models\SupplyStock;
 use App\Models\SupplyTransaction;
+use App\Models\User; // <-- ADD THIS IMPORT
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- ADD THIS IMPORT
 use App\Services\ReferenceNumberService;
 use App\Events\RequisitionStatusUpdated;
 use App\Events\UserNotificationUpdated;
-
-use App\Constants\RisStatus; // Add this import at the top of your controller
+use App\Constants\RisStatus;
+use Carbon\Carbon; // <-- ADD THIS IMPORT
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -21,14 +24,13 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RisSlipController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource with manual entry support.
      */
     public function index(Request $request)
     {
@@ -103,7 +105,133 @@ class RisSlipController extends Controller
         $risSlips = $query->paginate(10)->appends($request->query());
 
         // Get departments for filter dropdown
-        $departments = \App\Models\Department::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+
+        // NEW: Get data for manual entry modal (only for admin/cao)
+        $users = collect();
+        $availableSupplies = collect();
+
+        if (auth()->user()->hasRole(['admin', 'cao'])) {
+            // FIXED: Get all active users for manual entry dropdown
+            $users = User::where('status', true)  // <-- CHANGED from 'is_active' to 'status'
+                ->with('department')  // <-- ADDED with('department') for proper loading
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'department_id'])
+                ->map(function ($user) {
+                    // Add department name for better display
+                    $user->department_name = $user->department ? $user->department->name : 'No Department';
+                    return $user;
+                });
+
+            // Check if we should show all supplies or only those with stock
+            $showAllSupplies = $request->get('show_all_supplies', false);
+
+            if ($showAllSupplies) {
+                // Show ALL active supplies for historical entry
+                $availableSupplies = Supply::where('is_active', true)  // <-- This is correct (supplies table has is_active)
+                    ->orderBy('item_name')
+                    ->get()
+                    ->map(function ($supply) {
+                        // Get stock info if available
+                        $stock = SupplyStock::where('supply_id', $supply->supply_id)
+                            ->where('status', 'available')
+                            ->where('quantity_on_hand', '>', 0)
+                            ->first();
+
+                        $quantity_on_hand = $stock ? $stock->quantity_on_hand : 0;
+
+                        // Calculate pending requests
+                        $pendingRequested = RisItem::where('supply_id', $supply->supply_id)
+                            ->whereHas('risSlip', function($q) {
+                                $q->whereIn('status', ['draft', 'approved']);
+                            })
+                            ->sum('quantity_requested');
+
+                        $actualAvailable = max(0, $quantity_on_hand - $pendingRequested);
+
+                        // Create a structured object for frontend
+                        return (object) [
+                            'supply_id' => $supply->supply_id,
+                            'supply' => $supply,
+                            'quantity_on_hand' => $quantity_on_hand,
+                            'actual_available' => $actualAvailable,
+                            'pending_requested' => $pendingRequested,
+                            'display_name' => $supply->item_name . ' (' . $supply->stock_no . ')',
+                            'full_description' => $supply->description,
+                            'unit' => $supply->unit_of_measurement,
+                            'has_stock' => $stock !== null,
+                            'fund_cluster' => $stock ? $stock->fund_cluster : null,
+                            'stock_no' => $supply->stock_no,
+                            'item_name' => $supply->item_name,
+                            'description' => $supply->description,
+                            'unit_of_measurement' => $supply->unit_of_measurement
+                        ];
+                    });
+
+                \Log::info('Showing all supplies for manual entry', [
+                    'total_supplies' => $availableSupplies->count(),
+                    'with_stock' => $availableSupplies->where('has_stock', true)->count(),
+                    'without_stock' => $availableSupplies->where('has_stock', false)->count()
+                ]);
+
+            } else {
+                // Original logic - only supplies with available stock
+                $availableSupplies = SupplyStock::with(['supply'])
+                    ->where('status', 'available')
+                    ->where('quantity_on_hand', '>', 0)
+                    ->get()
+                    ->map(function ($stock) {
+                        // Calculate real available quantity (minus pending requests)
+                        $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
+                            ->whereHas('risSlip', function($q) {
+                                $q->whereIn('status', ['draft', 'approved']);
+                            })
+                            ->sum('quantity_requested');
+
+                        $actualAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
+
+                        // Only include if there's actually available quantity
+                        if ($actualAvailable > 0) {
+                            // Add calculated availability to the stock object
+                            $stock->actual_available = $actualAvailable;
+                            $stock->pending_requested = $pendingRequested;
+
+                            // Add supply details for easier access in frontend
+                            $stock->display_name = $stock->supply->item_name . ' (' . $stock->supply->stock_no . ')';
+                            $stock->full_description = $stock->supply->description;
+                            $stock->unit = $stock->supply->unit_of_measurement;
+                            $stock->has_stock = true;
+
+                            // Add these for consistency with the show all supplies structure
+                            $stock->stock_no = $stock->supply->stock_no;
+                            $stock->item_name = $stock->supply->item_name;
+                            $stock->description = $stock->supply->description;
+                            $stock->unit_of_measurement = $stock->supply->unit_of_measurement;
+
+                            return $stock;
+                        }
+
+                        return null;
+                    })
+                    ->filter() // Remove null entries
+                    ->values() // Reset array keys
+                    ->sortBy('display_name'); // Sort by display name for better UX
+            }
+
+            // Debug log
+            \Log::info('Manual RIS Entry Supplies', [
+                'total_available_supplies' => $availableSupplies->count(),
+                'show_all_supplies' => $showAllSupplies,
+                'user' => auth()->user()->name,
+                'first_few' => $availableSupplies->take(3)->map(function($s) {
+                    return [
+                        'name' => $s->display_name ?? 'N/A',
+                        'available' => $s->actual_available ?? 0,
+                        'has_stock' => $s->has_stock ?? false
+                    ];
+                })
+            ]);
+        }
 
         return view('ris.index', compact(
             'risSlips',
@@ -113,7 +241,9 @@ class RisSlipController extends Controller
             'pendingReceiptCount',
             'completedCount',
             'declinedCount',
-            'departments'
+            'departments',
+            'users',
+            'availableSupplies'
         ));
     }
 
@@ -1260,6 +1390,459 @@ class RisSlipController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+
+    /**
+     * Store manually created RIS (for historical data) - ENHANCED VERSION
+     */
+    public function storeManual(Request $request, ReferenceNumberService $referenceNumberService)
+    {
+        // Only admin and CAO can create manual entries
+        if (!auth()->user()->hasRole(['admin', 'cao'])) {
+            return back()->with('error', 'Unauthorized to create manual RIS entries.');
+        }
+
+        // Enhanced validation for manual entries
+        $validated = $request->validate([
+            'is_manual_entry' => 'required|boolean',
+            'ris_date' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:' . now()->subYears(5)->format('Y-m-d')
+            ],
+            'reference_source' => 'nullable|string|max:255',
+            'entity_name' => 'required|string|max:255',
+            'division' => 'required|exists:departments,id',
+            'office' => 'nullable|string|max:255',
+            'fund_cluster' => 'nullable|in:101,151',
+            'responsibility_center_code' => 'nullable|string|max:50',
+            'requested_by' => 'required|exists:users,id',
+            'purpose' => 'required|string|max:1000',
+            'final_status' => 'required|in:completed,posted,declined',
+            'decline_reason' => 'nullable|string|max:500',
+            'items' => 'required|array|min:1',
+            'items.*.supply_id' => 'required|exists:supplies,supply_id',
+            'items.*.quantity_requested' => 'required|integer|min:1',
+            'items.*.quantity_issued' => 'nullable|integer|min:0',
+            'items.*.remarks' => 'nullable|string|max:500',
+        ]);
+
+        // Additional validation for decline reason
+        if ($validated['final_status'] === 'declined' && empty($validated['decline_reason'])) {
+            return back()->withErrors([
+                'decline_reason' => 'Decline reason is required when status is declined.'
+            ])->withInput();
+        }
+
+        try {
+            return DB::transaction(function() use ($validated, $referenceNumberService) {
+
+                // CRITICAL VALIDATION: Check if all supplies have valid IAR/Stock
+                $stockValidationErrors = [];
+
+                foreach ($validated['items'] as $index => $item) {
+                    $supplyId = $item['supply_id'];
+                    $requestedQty = $item['quantity_requested'];
+
+                    // Check if supply has any stock (IAR exists)
+                    $stock = SupplyStock::where('supply_id', $supplyId)
+                        ->where('status', 'available')
+                        ->where('quantity_on_hand', '>', 0)
+                        ->first();
+
+                    if (!$stock) {
+                        $supply = Supply::find($supplyId);
+                        $stockValidationErrors[] = [
+                            'supply_name' => $supply ? $supply->item_name : 'Unknown',
+                            'message' => 'No IAR found for this supply. Cannot request items without inventory record.'
+                        ];
+                        continue;
+                    }
+
+                    // For historical data, we still validate against available quantity
+                    $pendingRequested = RisItem::where('supply_id', $supplyId)
+                        ->whereHas('risSlip', function($q) {
+                            $q->whereIn('status', ['draft', 'approved']);
+                        })
+                        ->sum('quantity_requested');
+
+                    $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
+
+                    if ($requestedQty > $currentAvailable) {
+                        $supply = Supply::find($supplyId);
+                        $stockValidationErrors[] = [
+                            'supply_name' => $supply ? $supply->item_name : 'Unknown',
+                            'requested' => $requestedQty,
+                            'available' => $currentAvailable,
+                            'message' => "Insufficient stock. Available: {$currentAvailable}, Requested: {$requestedQty}"
+                        ];
+                    }
+                }
+
+                // Return validation errors if any
+                if (!empty($stockValidationErrors)) {
+                    return back()
+                        ->withErrors(['stock_validation' => $stockValidationErrors])
+                        ->with('error', 'Cannot create RIS: Stock validation failed.')
+                        ->withInput();
+                }
+
+                // Generate RIS number for the historical date
+                $risDate = Carbon::parse($validated['ris_date']);
+                $newRisNumber = $this->generateHistoricalRisNumber($risDate);
+
+                // Create the RIS Slip with historical date and manual entry fields
+                $risSlip = RisSlip::create([
+                    'ris_no' => $newRisNumber,
+                    'ris_date' => $risDate,
+                    'entity_name' => $validated['entity_name'],
+                    'division' => $validated['division'],
+                    'office' => $validated['office'],
+                    'fund_cluster' => $validated['fund_cluster'],
+                    'responsibility_center_code' => $validated['responsibility_center_code'],
+                    'requested_by' => $validated['requested_by'],
+                    'requester_signature_type' => 'sgd', // Manual entries use SGD
+                    'purpose' => $validated['purpose'],
+                    'status' => 'draft', // Start as draft, then update based on final_status
+
+                    // MANUAL ENTRY FIELDS
+                    'is_manual_entry' => true,
+                    'reference_source' => $validated['reference_source'],
+                    'manual_entry_by' => auth()->id(),
+                    'manual_entry_at' => now(),
+                    'manual_entry_notes' => "Historical entry for {$risDate->format('M d, Y')}",
+
+                    // Set historical timestamps
+                    'created_at' => $risDate,
+                    'updated_at' => $risDate,
+                ]);
+
+                // Create RIS Items
+                foreach ($validated['items'] as $item) {
+                    RisItem::create([
+                        'ris_id' => $risSlip->ris_id,
+                        'supply_id' => $item['supply_id'],
+                        'quantity_requested' => $item['quantity_requested'],
+                        'quantity_issued' => $item['quantity_issued'] ?? 0,
+                        'stock_available' => true, // We validated stock exists
+                        'remarks' => $item['remarks'],
+                    ]);
+                }
+
+                // Apply historical status transitions
+                $this->applyHistoricalStatus($risSlip, $validated, $risDate);
+
+                // Log manual entry for audit
+                Log::info('Manual RIS entry created', [
+                    'ris_no' => $newRisNumber,
+                    'ris_date' => $risDate->format('Y-m-d'),
+                    'created_by' => auth()->id(),
+                    'created_by_name' => auth()->user()->name,
+                    'requested_by' => $validated['requested_by'],
+                    'final_status' => $validated['final_status'],
+                    'reference_source' => $validated['reference_source'],
+                    'items_count' => count($validated['items']),
+                    'entity_name' => $validated['entity_name'],
+                    'purpose' => substr($validated['purpose'], 0, 100) . '...'
+                ]);
+
+                return redirect()
+                    ->route('ris.index')
+                    ->with('success', "Manual RIS {$newRisNumber} created successfully for date {$risDate->format('M d, Y')}.");
+            });
+
+        } catch (\Exception $e) {
+            Log::error('Failed to create manual RIS', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'ris_date' => $validated['ris_date'] ?? null,
+                'reference_source' => $validated['reference_source'] ?? null
+            ]);
+
+            return back()
+                ->with('error', 'Failed to create manual RIS: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Generate unique RIS number for historical dates - handles gaps properly
+     */
+    private function generateHistoricalRisNumber(Carbon $date): string
+    {
+        $year = $date->format('Y');
+        $month = $date->format('m');
+
+        // Get all existing RIS numbers for that month, sorted by number
+        $existingNumbers = RisSlip::where('ris_no', 'like', "RIS {$year}-{$month}-%")
+            ->pluck('ris_no')
+            ->map(function($risNo) {
+                $parts = explode('-', $risNo);
+                return intval($parts[2] ?? 0);
+            })
+            ->sort()
+            ->values();
+
+        // Find the next available number (handles gaps)
+        $next = 1;
+        foreach ($existingNumbers as $num) {
+            if ($num == $next) {
+                $next++;
+            } else {
+                break; // Found a gap
+            }
+        }
+
+        return sprintf("RIS %s-%s-%03d", $year, $month, $next);
+    }
+
+    /**
+     * Apply historical status to manually created RIS - ENHANCED VERSION
+     */
+    private function applyHistoricalStatus(RisSlip $risSlip, array $validated, Carbon $risDate)
+    {
+        $currentUserId = auth()->id();
+
+        switch ($validated['final_status']) {
+            case 'declined':
+                $risSlip->update([
+                    'status' => RisStatus::DECLINED,
+                    'declined_by' => $currentUserId,
+                    'declined_at' => $risDate,
+                    'decline_reason' => $validated['decline_reason'],
+                    'updated_at' => $risDate,
+                ]);
+
+                // Log decline
+                Log::info('Manual RIS declined', [
+                    'ris_no' => $risSlip->ris_no,
+                    'reason' => $validated['decline_reason'],
+                    'declined_by' => auth()->user()->name
+                ]);
+                break;
+
+            case 'posted':
+                // Approved -> Issued (Pending Receipt)
+                $risSlip->update([
+                    'status' => RisStatus::POSTED,
+                    'approved_by' => $currentUserId,
+                    'approved_at' => $risDate,
+                    'approver_signature_type' => 'sgd',
+                    'issued_by' => $currentUserId,
+                    'issued_at' => $risDate,
+                    'issuer_signature_type' => 'sgd',
+                    'updated_at' => $risDate,
+                ]);
+
+                // Process stock deductions for issued items
+                $this->processHistoricalStockDeductions($risSlip, $risDate);
+
+                Log::info('Manual RIS issued', [
+                    'ris_no' => $risSlip->ris_no,
+                    'issued_by' => auth()->user()->name
+                ]);
+                break;
+
+            case 'completed':
+                // Approved -> Issued -> Received (Completed)
+                $risSlip->update([
+                    'status' => RisStatus::POSTED,
+                    'approved_by' => $currentUserId,
+                    'approved_at' => $risDate,
+                    'approver_signature_type' => 'sgd',
+                    'issued_by' => $currentUserId,
+                    'issued_at' => $risDate,
+                    'issuer_signature_type' => 'sgd',
+                    'received_by' => $validated['requested_by'], // Set receiver as the requester
+                    'received_at' => $risDate,
+                    'receiver_signature_type' => 'sgd',
+                    'updated_at' => $risDate,
+                ]);
+
+                // Process stock deductions for completed items
+                $this->processHistoricalStockDeductions($risSlip, $risDate);
+
+                Log::info('Manual RIS completed', [
+                    'ris_no' => $risSlip->ris_no,
+                    'completed_by' => auth()->user()->name,
+                    'received_by' => User::find($validated['requested_by'])->name ?? 'Unknown'
+                ]);
+                break;
+        }
+    }
+
+    /**
+     * Process stock deductions for historical manual entries
+     */
+    private function processHistoricalStockDeductions(RisSlip $risSlip, Carbon $risDate)
+    {
+        foreach ($risSlip->items as $item) {
+            $issueQty = $item->quantity_issued;
+
+            if ($issueQty > 0) {
+                // Get available stocks (FIFO approach)
+                $matchingStocks = SupplyStock::where('supply_id', $item->supply_id)
+                    ->where('status', 'available')
+                    ->where('quantity_on_hand', '>', 0)
+                    ->orderBy('expiry_date', 'asc')
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+
+                $remainingQuantity = $issueQty;
+                $totalCost = 0;
+
+                foreach ($matchingStocks as $stock) {
+                    if ($remainingQuantity <= 0) break;
+
+                    $qtyToDeduct = min($remainingQuantity, $stock->quantity_on_hand);
+
+                    // Update stock quantity
+                    $stock->quantity_on_hand -= $qtyToDeduct;
+                    $stockItemCost = $qtyToDeduct * $stock->unit_cost;
+                    $totalCost += $stockItemCost;
+
+                    if ($stock->quantity_on_hand <= 0) {
+                        $stock->status = 'depleted';
+                    }
+                    $stock->save();
+
+                    // Create historical transaction
+                    $transaction = SupplyTransaction::create([
+                        'supply_id' => $item->supply_id,
+                        'transaction_type' => 'issue',
+                        'transaction_date' => $risDate->toDateString(),
+                        'reference_no' => $risSlip->ris_no,
+                        'quantity' => $qtyToDeduct,
+                        'unit_cost' => $stock->unit_cost,
+                        'total_cost' => $stockItemCost,
+                        'department_id' => $risSlip->division,
+                        'user_id' => auth()->id(),
+                        'remarks' => "Historical issue via RIS #{$risSlip->ris_no}" .
+                                   ($item->remarks ? " - {$item->remarks}" : ""),
+                        'fund_cluster' => $risSlip->fund_cluster,
+                        'balance_quantity' => $stock->quantity_on_hand,
+                        'balance_unit_cost' => $stock->unit_cost,
+                        'balance_total_cost' => $stock->quantity_on_hand * $stock->unit_cost,
+                        'created_at' => $risDate,
+                        'updated_at' => $risDate,
+                    ]);
+
+                    $remainingQuantity -= $qtyToDeduct;
+                }
+
+                if ($remainingQuantity > 0) {
+                    Log::warning("Historical RIS: Insufficient stock for complete fulfillment", [
+                        'ris_no' => $risSlip->ris_no,
+                        'supply_id' => $item->supply_id,
+                        'requested' => $issueQty,
+                        'fulfilled' => $issueQty - $remainingQuantity,
+                        'shortfall' => $remainingQuantity
+                    ]);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * AJAX: Get all active supplies (even if quantity_on_hand == 0)
+     */
+    public function getAvailableSupplies(Request $request)
+    {
+        if (! auth()->user()->hasRole(['admin','cao'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $supplies = Supply::where('is_active', true)
+            ->orderBy('item_name')
+            ->get()
+            ->map(function($supply) {
+                // total on‐hand, even if zero
+                $available = SupplyStock::getTotalAvailableQuantity($supply->supply_id);
+                return [
+                    'supply_id'          => $supply->supply_id,
+                    'stock_no'           => $supply->stock_no,
+                    'item_name'          => $supply->item_name,
+                    'description'        => $supply->description,
+                    'unit_of_measurement'=> $supply->unit_of_measurement,
+                    'available_quantity' => $available,
+                ];
+            });
+
+        return response()->json(['supplies' => $supplies]);
+    }
+
+
+    /**
+     * AJAX: Validate stock availability for manual entry
+     */
+    public function validateManualStock(Request $request)
+    {
+        if (!auth()->user()->hasRole(['admin', 'cao'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.supply_id' => 'required|exists:supplies,supply_id',
+            'items.*.quantity_requested' => 'required|integer|min:1',
+        ]);
+
+        $stockValidationErrors = [];
+        $currentAvailability = [];
+
+        foreach ($validated['items'] as $index => $item) {
+            $supplyId = $item['supply_id'];
+            $requestedQty = $item['quantity_requested'];
+
+            // Check if supply has any stock (IAR exists)
+            $stock = SupplyStock::where('supply_id', $supplyId)
+                ->where('status', 'available')
+                ->where('quantity_on_hand', '>', 0)
+                ->first();
+
+            if (!$stock) {
+                $supply = Supply::find($supplyId);
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
+                    'message' => 'No IAR found for this supply. Cannot request items without inventory record.',
+                    'available' => 0
+                ];
+                $currentAvailability[$supplyId] = 0;
+                continue;
+            }
+
+            // Calculate current real-time availability
+            $pendingRequested = RisItem::where('supply_id', $supplyId)
+                ->whereHas('risSlip', function($q) {
+                    $q->whereIn('status', ['draft','approved']);
+                })
+                ->sum('quantity_requested');
+
+            $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
+            $currentAvailability[$supplyId] = $currentAvailable;
+
+            if ($requestedQty > $currentAvailable) {
+                $supply = Supply::find($supplyId);
+                $stockValidationErrors[] = [
+                    'supply_id' => $supplyId,
+                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
+                    'requested' => $requestedQty,
+                    'available' => $currentAvailable,
+                    'message' => "Only {$currentAvailable} units available (requested: {$requestedQty})"
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => empty($stockValidationErrors),
+            'errors' => $stockValidationErrors,
+            'current_availability' => $currentAvailability
+        ]);
     }
 
 

@@ -41,14 +41,22 @@ class RisSlip extends Model
         'declined_by',
         'declined_at',
         'decline_reason',
+        // NEW: Manual entry fields
+        'is_manual_entry',
+        'reference_source',
+        'manual_entry_by',
+        'manual_entry_at',
+        'manual_entry_notes',
     ];
 
     protected $casts = [
-        'ris_date'      => 'date',
-        'approved_at'   => 'datetime',
-        'issued_at'     => 'datetime',
-        'received_at'   => 'datetime',
-        'declined_at'   => 'datetime',
+        'ris_date'           => 'date',
+        'approved_at'        => 'datetime',
+        'issued_at'          => 'datetime',
+        'received_at'        => 'datetime',
+        'declined_at'        => 'datetime',
+        'manual_entry_at'    => 'datetime',
+        'is_manual_entry'    => 'boolean',
     ];
 
     protected $attributes = [
@@ -57,6 +65,7 @@ class RisSlip extends Model
         'approver_signature_type' => 'sgd',
         'issuer_signature_type' => 'sgd',
         'receiver_signature_type' => 'sgd',
+        'is_manual_entry' => false,
     ];
 
     // Relationships
@@ -100,6 +109,12 @@ class RisSlip extends Model
         return $this->belongsTo(User::class, 'declined_by');
     }
 
+    // NEW: Manual entry relationship
+    public function manualEntryUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manual_entry_by');
+    }
+
     // Status helper methods
     public function canBeApproved(): bool
     {
@@ -126,6 +141,25 @@ class RisSlip extends Model
         return RisStatus::isFinal($this->status);
     }
 
+    // NEW: Manual entry helper methods
+    public function isManualEntry(): bool
+    {
+        return $this->is_manual_entry;
+    }
+
+    public function isHistoricalEntry(): bool
+    {
+        return $this->is_manual_entry && $this->ris_date->lt(now()->subWeek());
+    }
+
+    public function getEntryTypeAttribute(): string
+    {
+        if ($this->is_manual_entry) {
+            return $this->isHistoricalEntry() ? 'Historical Entry' : 'Manual Entry';
+        }
+        return 'User Request';
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return RisStatus::getLabel($this->status);
@@ -136,10 +170,10 @@ class RisSlip extends Model
         return RisStatus::getBadgeClass($this->status);
     }
 
-    // Validation rules
-    public static function getValidationRules(): array
+    // Enhanced validation rules for manual entries
+    public static function getValidationRules(bool $isManualEntry = false): array
     {
-        return [
+        $rules = [
             'entity_name' => 'required|string|max:255',
             'division' => 'required|exists:departments,id',
             'office' => 'nullable|string|max:255',
@@ -148,6 +182,20 @@ class RisSlip extends Model
             'purpose' => 'required|string|max:1000',
             'status' => 'required|in:' . implode(',', RisStatus::all()),
         ];
+
+        if ($isManualEntry) {
+            $rules['ris_date'] = [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:' . now()->subYears(5)->format('Y-m-d')
+            ];
+            $rules['requested_by'] = 'required|exists:users,id';
+            $rules['reference_source'] = 'nullable|string|max:255';
+            $rules['final_status'] = 'required|in:completed,posted,declined';
+        }
+
+        return $rules;
     }
 
     // Scopes
@@ -184,5 +232,35 @@ class RisSlip extends Model
     public function scopeCompleted($query)
     {
         return $query->byStatus(RisStatus::POSTED)->whereNotNull('received_at');
+    }
+
+    // NEW: Scopes for manual entries
+    public function scopeManualEntries($query)
+    {
+        return $query->where('is_manual_entry', true);
+    }
+
+    public function scopeUserRequests($query)
+    {
+        return $query->where('is_manual_entry', false);
+    }
+
+    public function scopeHistoricalEntries($query)
+    {
+        return $query->where('is_manual_entry', true)
+                    ->where('ris_date', '<', now()->subWeek());
+    }
+
+    // NEW: Boot method to set manual entry metadata
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if ($model->is_manual_entry) {
+                $model->manual_entry_by = auth()->id();
+                $model->manual_entry_at = now();
+            }
+        });
     }
 }

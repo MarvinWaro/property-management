@@ -11,7 +11,6 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Property;
 
-
 class User extends Authenticatable
 {
     use HasApiTokens;
@@ -35,17 +34,9 @@ class User extends Authenticatable
         'department_id',
         'designation_id',
         'status',
-        'needs_password_change', // <— Add here
-        'signature_path', // Add this new field
+        'needs_password_change',
+        'signature_path',
     ];
-
-    // protected $casts = [
-    //     'email_verified_at' => 'datetime',
-    //     'password' => 'hashed',
-    //     'needs_password_change' => 'boolean',
-    // ];
-
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -82,41 +73,37 @@ class User extends Authenticatable
         ];
     }
 
-    // In App\Models\User.php
+    /**
+     * RELATIONSHIPS
+     */
+
+    /**
+     * User belongs to a department
+     */
     public function department()
     {
         return $this->belongsTo(\App\Models\Department::class);
     }
 
+    /**
+     * User belongs to a designation
+     */
     public function designation()
     {
         return $this->belongsTo(\App\Models\Designation::class);
     }
 
-    // In app/Models/User.php
+    /**
+     * User has many properties
+     */
     public function properties()
     {
         return $this->hasMany(\App\Models\Property::class, 'user_id');
     }
 
-    // In User.php model
-    public function hasRole($role)
-    {
-        return $this->role === $role;
-    }
-
-    // Check if user has admin-level privileges (admin or cao)
-    public function hasAdminPrivileges()
-    {
-        return in_array($this->role, ['admin', 'cao']);
-    }
-
-    // Check if user has any of the specified roles
-    public function hasAnyRole(array $roles)
-    {
-        return in_array($this->role, $roles);
-    }
-
+    /**
+     * User transaction relationships
+     */
     public function transactions()
     {
         return $this->belongsToMany(SupplyTransaction::class, 'user_transactions', 'user_id', 'transaction_id')
@@ -134,4 +121,141 @@ class User extends Authenticatable
         return $this->transactions()->wherePivot('role', 'receiver');
     }
 
+    /**
+     * ROLE HELPER METHODS - ENHANCED TO HANDLE ARRAYS
+     */
+
+    /**
+     * Check if user has a specific role or any of the given roles
+     *
+     * @param string|array $roles
+     * @return bool
+     */
+    public function hasRole($roles)
+    {
+        // Handle single role (string)
+        if (is_string($roles)) {
+            return $this->role === $roles;
+        }
+
+        // Handle multiple roles (array)
+        if (is_array($roles)) {
+            return in_array($this->role, $roles);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has admin-level privileges (admin or cao)
+     */
+    public function hasAdminPrivileges()
+    {
+        return in_array($this->role, ['admin', 'cao']);
+    }
+
+    /**
+     * Check if user has any of the specified roles
+     */
+    public function hasAnyRole(array $roles)
+    {
+        return in_array($this->role, $roles);
+    }
+
+    /**
+     * Individual role checkers
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isCao()
+    {
+        return $this->role === 'cao';
+    }
+
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    /**
+     * STATUS/ACTIVE METHODS
+     * Since your model uses 'status' instead of 'is_active'
+     */
+
+    /**
+     * Check if user is active
+     * Assumes 'active' status means the user is active
+     */
+    public function getIsActiveAttribute()
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Scope to get only active users
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope to get users by role
+     */
+    public function scopeByRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    /**
+     * Scope to get admin and cao users
+     */
+    public function scopeAdminAndCao($query)
+    {
+        return $query->whereIn('role', ['admin', 'cao']);
+    }
+
+    /**
+     * ACCESSORS
+     */
+
+    /**
+     * Get the department name
+     */
+    public function getDepartmentNameAttribute()
+    {
+        return $this->department ? $this->department->name : 'No Department';
+    }
+
+    /**
+     * Get the designation name
+     */
+    public function getDesignationNameAttribute()
+    {
+        return $this->designation ? $this->designation->name : 'No Designation';
+    }
+
+    /**
+     * Get the full role name
+     */
+    public function getRoleNameAttribute()
+    {
+        return match($this->role) {
+            'admin' => 'Administrator',
+            'cao' => 'Chief Administrative Officer',
+            'staff' => 'Staff',
+            default => 'Unknown Role'
+        };
+    }
+
+    /**
+     * Get user's full name with role for display
+     */
+    public function getDisplayNameAttribute()
+    {
+        return $this->name . ' (' . $this->role_name . ')';
+    }
 }
