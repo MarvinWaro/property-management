@@ -1394,7 +1394,7 @@ class RisSlipController extends Controller
 
 
     /**
-     * Store manually created RIS (for historical data) - ENHANCED VERSION
+     * Store manually created RIS (for historical data) - COMPLETE UPDATED VERSION
      */
     public function storeManual(Request $request, ReferenceNumberService $referenceNumberService)
     {
@@ -1412,7 +1412,7 @@ class RisSlipController extends Controller
                 'before_or_equal:today',
                 'after_or_equal:' . now()->subYears(5)->format('Y-m-d')
             ],
-            'reference_source' => 'nullable|string|max:255',
+            'reference_no' => 'nullable|string|max:255|unique:ris_slips,ris_no', // ADDED THIS
             'entity_name' => 'required|string|max:255',
             'division' => 'required|exists:departments,id',
             'office' => 'nullable|string|max:255',
@@ -1427,6 +1427,8 @@ class RisSlipController extends Controller
             'items.*.quantity_requested' => 'required|integer|min:1',
             'items.*.quantity_issued' => 'nullable|integer|min:0',
             'items.*.remarks' => 'nullable|string|max:500',
+        ], [
+            'reference_no.unique' => 'This RIS number already exists. Please use a different number.',
         ]);
 
         // Additional validation for decline reason
@@ -1489,9 +1491,18 @@ class RisSlipController extends Controller
                         ->withInput();
                 }
 
-                // Generate RIS number for the historical date
+                // Parse the RIS date
                 $risDate = Carbon::parse($validated['ris_date']);
-                $newRisNumber = $this->generateHistoricalRisNumber($risDate);
+
+                // UPDATED: Use provided reference_no or generate a new one
+                $newRisNumber = $validated['reference_no'] ?? $this->generateHistoricalRisNumber($risDate);
+
+                // Double-check uniqueness if using provided reference_no
+                if ($validated['reference_no'] && RisSlip::where('ris_no', $newRisNumber)->exists()) {
+                    return back()
+                        ->withErrors(['reference_no' => 'This RIS number already exists.'])
+                        ->withInput();
+                }
 
                 // Create the RIS Slip with historical date and manual entry fields
                 $risSlip = RisSlip::create([
@@ -1509,7 +1520,7 @@ class RisSlipController extends Controller
 
                     // MANUAL ENTRY FIELDS
                     'is_manual_entry' => true,
-                    'reference_source' => $validated['reference_source'],
+                    'reference_source' => $validated['reference_no'] ?? null, // Store the manual RIS number
                     'manual_entry_by' => auth()->id(),
                     'manual_entry_at' => now(),
                     'manual_entry_notes' => "Historical entry for {$risDate->format('M d, Y')}",
@@ -1527,7 +1538,9 @@ class RisSlipController extends Controller
                         'quantity_requested' => $item['quantity_requested'],
                         'quantity_issued' => $item['quantity_issued'] ?? 0,
                         'stock_available' => true, // We validated stock exists
-                        'remarks' => $item['remarks'],
+                        'remarks' => $item['remarks'] ?? null,
+                        'created_at' => $risDate,
+                        'updated_at' => $risDate,
                     ]);
                 }
 
@@ -1542,7 +1555,7 @@ class RisSlipController extends Controller
                     'created_by_name' => auth()->user()->name,
                     'requested_by' => $validated['requested_by'],
                     'final_status' => $validated['final_status'],
-                    'reference_source' => $validated['reference_source'],
+                    'reference_no' => $validated['reference_no'] ?? 'auto-generated',
                     'items_count' => count($validated['items']),
                     'entity_name' => $validated['entity_name'],
                     'purpose' => substr($validated['purpose'], 0, 100) . '...'
@@ -1559,7 +1572,7 @@ class RisSlipController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
                 'ris_date' => $validated['ris_date'] ?? null,
-                'reference_source' => $validated['reference_source'] ?? null
+                'reference_no' => $validated['reference_no'] ?? null
             ]);
 
             return back()

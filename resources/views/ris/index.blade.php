@@ -154,6 +154,39 @@
                             </button>
                         </div>
 
+                        <!-- Add this right after the modal header, before the scrollable content area -->
+
+                        <!-- Error Display Section -->
+                        @if ($errors->any())
+                            <div class="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-900">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-red-800 dark:text-red-300">There were errors with your submission</h4>
+                                        <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+
+                                        @if ($errors->has('stock_validation'))
+                                            <div class="mt-3">
+                                                <h5 class="text-sm font-medium text-red-800 dark:text-red-300 mb-1">Stock Validation Issues:</h5>
+                                                @foreach ($errors->get('stock_validation')[0] as $stockError)
+                                                    <div class="text-xs bg-red-100 dark:bg-red-900/30 p-2 rounded mb-1">
+                                                        <strong>{{ $stockError['supply_name'] ?? 'Unknown Item' }}:</strong>
+                                                        {{ $stockError['message'] }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <form action="{{ route('ris.store-manual') }}" method="POST"
                             class="flex flex-col flex-1 overflow-hidden">
                             @csrf
@@ -164,45 +197,54 @@
                                 <div class="p-6">
 
                                     <!-- Date Selection (Important for Historical Data) -->
-                                    <div
-                                        class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-                                        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
-                                            📅 Historical Date Information
-                                        </h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label
-                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    RIS Date <span class="text-red-500">*</span>
-                                                </label>
-                                                <input type="date"
-                                                    name="ris_date"
-                                                    id="ris_date"
-                                                    value="{{ old('ris_date') }}"
-                                                    max="{{ now()->format('Y-m-d') }}"
-                                                    min="{{ now()->subYears(5)->format('Y-m-d') }}"
-                                                    required
-                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
-                                                    dark:bg-gray-700 dark:text-white rounded-md
-                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                            </div>
-                                            <div>
-                                                <label for="ris_no"
-                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    RIS NO.
-                                                </label>
-                                                <input ttype="text"
-                                                    name="ris_no"
-                                                    id="ris_no"
-                                                    value="{{ old('ris_no', '') }}"
-                                                    placeholder="RIS YYYY-MM-XXX" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
-                                                    dark:bg-gray-700 dark:text-white rounded-md
-                                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                                    @error('ris_no')
-                                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                                    @enderror
-                                            </div>
+
+                                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+                                    <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
+                                        📅 Historical Date Information
+                                    </h4>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {{-- ► RIS Date --}}
+                                        <div>
+                                        <label for="ris_date"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            RIS Date <span class="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            id="ris_date"
+                                            name="ris_date"
+                                            value="{{ old('ris_date') }}"
+                                            max="{{ now()->format('Y-m-d') }}"
+                                            min="{{ now()->subYears(5)->format('Y-m-d') }}"
+                                            required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                        >
+                                        @error('ris_date')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
                                         </div>
+
+                                        {{-- ► RIS No. --}}
+                                        <div>
+                                        <label for="reference_no"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            RIS No.
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="reference_no"
+                                            name="reference_no"
+                                            value="{{ old('reference_no', '') }}"
+                                            placeholder="RIS YYYY-MM-XXX"
+                                            required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                        >
+                                        @error('reference_no')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        </div>
+                                    </div>
                                     </div>
 
                                     <!-- Basic RIS Information -->
@@ -1052,28 +1094,24 @@
                 </script>
 
                 <script>
-                    document.addEventListener('DOMContentLoaded', function(){
-                        const dateField = document.getElementById('ris_date');
-                        const refField  = document.getElementById('ris_no');
-                        if (!dateField || !refField) return;
+                document.addEventListener('DOMContentLoaded', () => {
+                    const dateField = document.getElementById('ris_date');
+                    const risNoField = document.getElementById('reference_no');
+                    if (!dateField || !risNoField) return;
 
-                        dateField.addEventListener('change', function(){
-                            fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(this.value), {
-                            credentials: 'same-origin',
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                            })
-                            .then(res => {
-                            if (!res.ok) throw new Error(res.statusText);
-                            return res.json();
-                            })
-                            .then(json => {
-                            refField.value = json.defaultRis;
-                            })
-                            .catch(err => console.error('RIS lookup failed:', err));
-                        });
+                    dateField.addEventListener('change', () => {
+                    fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+                    .then(json => {
+                        risNoField.value = json.defaultRis;
+                    })
+                    .catch(err => console.error('RIS lookup failed:', err));
                     });
+                });
                 </script>
-
 
 
                 <div class="p-5">
@@ -1350,6 +1388,309 @@
             toggleClearButton();
         });
     </script>
+
+
+<!-- Add these NEW script tags AFTER your existing scripts -->
+
+<!-- Script 1: Handle Final Status Change -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle final status dropdown change
+        const finalStatusSelect = document.getElementById('finalStatusSelect');
+        const declineReasonDiv = document.getElementById('declineReasonDiv');
+
+        if (finalStatusSelect) {
+            finalStatusSelect.addEventListener('change', function() {
+                if (this.value === 'declined') {
+                    declineReasonDiv.classList.remove('hidden');
+                    // Make decline reason required
+                    const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                    if (declineReasonInput) {
+                        declineReasonInput.required = true;
+                    }
+                } else {
+                    declineReasonDiv.classList.add('hidden');
+                    // Remove required attribute
+                    const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                    if (declineReasonInput) {
+                        declineReasonInput.required = false;
+                        declineReasonInput.value = '';
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<!-- Script 2: Reopen Modal on Validation Errors -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there are errors and if we're coming from manual entry form
+        @if ($errors->any() && old('is_manual_entry'))
+            console.log('Reopening modal due to validation errors...');
+
+            // Reopen the manual entry modal
+            const modal = document.getElementById('manualEntryModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Re-populate the form with old values
+                @if (old('ris_date'))
+                    const risDateInput = document.querySelector('input[name="ris_date"]');
+                    if (risDateInput) {
+                        risDateInput.value = "{{ old('ris_date') }}";
+                    }
+                @endif
+
+                @if (old('reference_no'))
+                    const referenceNoInput = document.querySelector('input[name="reference_no"]');
+                    if (referenceNoInput) {
+                        referenceNoInput.value = "{{ old('reference_no') }}";
+                    }
+                @endif
+
+                @if (old('entity_name'))
+                    const entityNameInput = document.querySelector('input[name="entity_name"]');
+                    if (entityNameInput) {
+                        entityNameInput.value = "{{ old('entity_name') }}";
+                    }
+                @endif
+
+                @if (old('division'))
+                    const divisionSelect = document.querySelector('select[name="division"]');
+                    if (divisionSelect) {
+                        divisionSelect.value = "{{ old('division') }}";
+                    }
+                @endif
+
+                @if (old('office'))
+                    const officeInput = document.querySelector('input[name="office"]');
+                    if (officeInput) {
+                        officeInput.value = "{{ old('office') }}";
+                    }
+                @endif
+
+                @if (old('fund_cluster'))
+                    const fundClusterSelect = document.querySelector('select[name="fund_cluster"]');
+                    if (fundClusterSelect) {
+                        fundClusterSelect.value = "{{ old('fund_cluster') }}";
+                    }
+                @endif
+
+                @if (old('responsibility_center_code'))
+                    const responsibilityCodeInput = document.querySelector('input[name="responsibility_center_code"]');
+                    if (responsibilityCodeInput) {
+                        responsibilityCodeInput.value = "{{ old('responsibility_center_code') }}";
+                    }
+                @endif
+
+                @if (old('requested_by'))
+                    const requestedBySelect = document.querySelector('select[name="requested_by"]');
+                    if (requestedBySelect) {
+                        requestedBySelect.value = "{{ old('requested_by') }}";
+                    }
+                @endif
+
+                @if (old('purpose'))
+                    const purposeTextarea = document.querySelector('textarea[name="purpose"]');
+                    if (purposeTextarea) {
+                        purposeTextarea.value = "{{ old('purpose') }}";
+                    }
+                @endif
+
+                @if (old('final_status'))
+                    const finalStatusSelect = document.querySelector('select[name="final_status"]');
+                    if (finalStatusSelect) {
+                        finalStatusSelect.value = "{{ old('final_status') }}";
+
+                        // Show decline reason field if status was declined
+                        if ("{{ old('final_status') }}" === 'declined') {
+                            const declineReasonDiv = document.getElementById('declineReasonDiv');
+                            if (declineReasonDiv) {
+                                declineReasonDiv.classList.remove('hidden');
+                            }
+
+                            @if (old('decline_reason'))
+                                const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                                if (declineReasonInput) {
+                                    declineReasonInput.value = "{{ old('decline_reason') }}";
+                                }
+                            @endif
+                        }
+                    }
+                @endif
+
+                // Trigger change event on RIS date to regenerate RIS number
+                const risDateInput = document.querySelector('input[name="ris_date"]');
+                if (risDateInput && risDateInput.value) {
+                    risDateInput.dispatchEvent(new Event('change'));
+                }
+
+                // Load available supplies
+                if (typeof loadAvailableSupplies === 'function') {
+                    loadAvailableSupplies();
+                }
+
+                // Show error message
+                setTimeout(() => {
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'fixed top-4 right-4 z-[70] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-md animate-modal-slide-up';
+                    errorAlert.innerHTML = `
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 flex-shrink-0 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">There were errors with your submission</p>
+                                <p class="text-xs mt-1 opacity-90">Please check the form for details.</p>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:bg-black/10 rounded p-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    document.body.appendChild(errorAlert);
+                    setTimeout(() => errorAlert.remove(), 5000);
+                }, 500);
+            }
+        @endif
+    });
+</script>
+
+<!-- Script 3: Enhanced Form Validation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add real-time validation to required fields
+        const requiredFields = {
+            'ris_date': 'RIS Date',
+            'entity_name': 'Entity Name',
+            'division': 'Division',
+            'requested_by': 'Requested By',
+            'purpose': 'Purpose',
+            'final_status': 'Final Status'
+        };
+
+        Object.keys(requiredFields).forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        this.classList.add('border-red-500');
+
+                        // Remove any existing error message
+                        const existingError = this.parentElement.querySelector('.field-error-message');
+                        if (existingError) {
+                            existingError.remove();
+                        }
+
+                        // Add error message
+                        const errorMsg = document.createElement('p');
+                        errorMsg.className = 'field-error-message text-xs text-red-500 mt-1';
+                        errorMsg.textContent = `${requiredFields[fieldName]} is required`;
+                        this.parentElement.appendChild(errorMsg);
+                    } else {
+                        this.classList.remove('border-red-500');
+                        const existingError = this.parentElement.querySelector('.field-error-message');
+                        if (existingError) {
+                            existingError.remove();
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<!-- Add this simple warning script if you don't want to implement the AJAX solution -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add warning when selecting items in manual entry
+        const addItemBtn = document.getElementById('addManualItemBtn');
+        const risDateInput = document.querySelector('input[name="ris_date"]');
+
+        if (addItemBtn && risDateInput) {
+            // Override the add item button click to show warning
+            addItemBtn.addEventListener('click', function(e) {
+                const selectedDate = new Date(risDateInput.value);
+                const today = new Date();
+
+                // Check if date is in the past
+                if (selectedDate < today) {
+                    const daysDiff = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
+
+                    if (daysDiff > 30) {
+                        const confirmAdd = confirm(
+                            `⚠️ Warning: You are creating a historical RIS for ${selectedDate.toLocaleDateString()}.\n\n` +
+                            `This is ${daysDiff} days in the past.\n\n` +
+                            `Please ensure that:\n` +
+                            `1. The supplies were already received (IAR exists) before this date\n` +
+                            `2. There was sufficient stock available on this date\n\n` +
+                            `The system will validate this when you submit.\n\n` +
+                            `Continue adding items?`
+                        );
+
+                        if (!confirmAdd) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Show permanent warning banner for historical entries
+        const form = document.querySelector('#manualEntryModal form');
+        if (form && risDateInput) {
+            risDateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const existingBanner = document.getElementById('historical-entry-banner');
+
+                // Remove existing banner
+                if (existingBanner) {
+                    existingBanner.remove();
+                }
+
+                // Add warning banner for dates older than 7 days
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                if (selectedDate < sevenDaysAgo) {
+                    const banner = document.createElement('div');
+                    banner.id = 'historical-entry-banner';
+                    banner.className = 'p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-900';
+                    banner.innerHTML = `
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-amber-800 dark:text-amber-300">Historical Entry Mode</h4>
+                                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                    You are creating an entry for <strong>${selectedDate.toLocaleDateString()}</strong>.
+                                    The system will verify that supplies were available on this date.
+                                </p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Insert after the header but before the form content
+                    const modalContent = document.querySelector('#manualEntryModal .bg-white');
+                    const header = modalContent.querySelector('.border-b');
+                    header.insertAdjacentElement('afterend', banner);
+                }
+            });
+
+            // Trigger change event if date is already set
+            if (risDateInput.value) {
+                risDateInput.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+</script>
 
 
 </x-app-layout>
