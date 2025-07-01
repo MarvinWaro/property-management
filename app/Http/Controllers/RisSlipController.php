@@ -1845,6 +1845,22 @@ class RisSlipController extends Controller
         ]);
     }
 
+    /**
+     * AJAX → return the next RIS for a given date.
+     */
+    public function nextRis(Request $request)
+    {
+        $data = $request->validate([
+            'ris_date' => 'required|date',
+        ]);
+
+        $date      = Carbon::parse($data['ris_date']);
+        // mirror your generateHistoricalRisNumber() logic or use ReferenceNumberService:
+        $defaultRis = $this->generateHistoricalRisNumber($date);
+
+        return response()->json(['defaultRis' => $defaultRis]);
+    }
+
 
 }
 
