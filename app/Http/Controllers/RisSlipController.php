@@ -1794,69 +1794,39 @@ class RisSlipController extends Controller
      */
     public function validateManualStock(Request $request)
     {
-        if (!auth()->user()->hasRole(['admin', 'cao'])) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'items' => 'required|array|min:1',
+        $data = $request->validate([
+            'ris_date'          => 'required|date',
+            'items'             => 'required|array|min:1',
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
-            'items.*.quantity_requested' => 'required|integer|min:1',
         ]);
 
-        $stockValidationErrors = [];
-        $currentAvailability = [];
+        $risDate = Carbon::parse($data['ris_date'])->endOfDay();
+        $availabilities = [];
 
-        foreach ($validated['items'] as $index => $item) {
-            $supplyId = $item['supply_id'];
-            $requestedQty = $item['quantity_requested'];
+        foreach ($data['items'] as $item) {
+            $id = $item['supply_id'];
 
-            // Check if supply has any stock (IAR exists)
-            $stock = SupplyStock::where('supply_id', $supplyId)
-                ->where('status', 'available')
-                ->where('quantity_on_hand', '>', 0)
-                ->first();
+            // sum receipts ≤ risDate
+            $received = SupplyTransaction::where('supply_id', $id)
+                ->where('transaction_type','receipt')
+                ->whereDate('transaction_date','<=', $risDate)
+                ->sum('quantity');
 
-            if (!$stock) {
-                $supply = Supply::find($supplyId);
-                $stockValidationErrors[] = [
-                    'supply_id' => $supplyId,
-                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
-                    'message' => 'No IAR found for this supply. Cannot request items without inventory record.',
-                    'available' => 0
-                ];
-                $currentAvailability[$supplyId] = 0;
-                continue;
-            }
+            // sum issues ≤ risDate
+            $issued = SupplyTransaction::where('supply_id', $id)
+                ->where('transaction_type','issue')
+                ->whereDate('transaction_date','<=', $risDate)
+                ->sum('quantity');
 
-            // Calculate current real-time availability
-            $pendingRequested = RisItem::where('supply_id', $supplyId)
-                ->whereHas('risSlip', function($q) {
-                    $q->whereIn('status', ['draft','approved']);
-                })
-                ->sum('quantity_requested');
-
-            $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
-            $currentAvailability[$supplyId] = $currentAvailable;
-
-            if ($requestedQty > $currentAvailable) {
-                $supply = Supply::find($supplyId);
-                $stockValidationErrors[] = [
-                    'supply_id' => $supplyId,
-                    'supply_name' => $supply ? $supply->item_name : 'Unknown Item',
-                    'requested' => $requestedQty,
-                    'available' => $currentAvailable,
-                    'message' => "Only {$currentAvailable} units available (requested: {$requestedQty})"
-                ];
-            }
+            $availabilities[$id] = max(0, $received - $issued);
         }
 
         return response()->json([
-            'success' => empty($stockValidationErrors),
-            'errors' => $stockValidationErrors,
-            'current_availability' => $currentAvailability
+            'success'              => true,
+            'current_availability' => $availabilities,
         ]);
     }
+
 
     /**
      * AJAX → return the next RIS for a given date.
@@ -1873,6 +1843,8 @@ class RisSlipController extends Controller
 
         return response()->json(['defaultRis' => $defaultRis]);
     }
+
+
 
 
 }
