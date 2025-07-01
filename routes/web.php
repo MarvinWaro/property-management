@@ -42,6 +42,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/api/user-initial-counts', [NotificationController::class, 'getUserInitialCounts']);
 
     // Shared routes (accessible by admin, cao, and staff)
+    // web.php
+
+    // must come BEFORE Route::get('/ris/{risSlip}', …)
+    Route::get('/ris/next', [RisSlipController::class, 'nextRis'])->name('ris.next')->middleware(['auth','admin-cao']);
+
     Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
     Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store');
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');

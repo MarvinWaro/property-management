@@ -175,23 +175,32 @@
                                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     RIS Date <span class="text-red-500">*</span>
                                                 </label>
-                                                <input type="date" name="ris_date" required
+                                                <input type="date"
+                                                    name="ris_date"
+                                                    id="ris_date"
+                                                    value="{{ old('ris_date') }}"
                                                     max="{{ now()->format('Y-m-d') }}"
                                                     min="{{ now()->subYears(5)->format('Y-m-d') }}"
+                                                    required
                                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
                                                     dark:bg-gray-700 dark:text-white rounded-md
                                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                             </div>
                                             <div>
-                                                <label
+                                                <label for="ris_no"
                                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    Reference/Source
+                                                    RIS NO.
                                                 </label>
-                                                <input type="text" name="reference_source"
-                                                    placeholder="e.g., Excel File, Physical Document"
-                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                <input ttype="text"
+                                                    name="ris_no"
+                                                    id="ris_no"
+                                                    value="{{ old('ris_no', '') }}"
+                                                    placeholder="RIS YYYY-MM-XXX" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
                                                     dark:bg-gray-700 dark:text-white rounded-md
                                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                    @error('ris_no')
+                                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                    @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -1041,6 +1050,30 @@
                         console.log('✅ Manual RIS entry initialization complete');
                     });
                 </script>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function(){
+                        const dateField = document.getElementById('ris_date');
+                        const refField  = document.getElementById('ris_no');
+                        if (!dateField || !refField) return;
+
+                        dateField.addEventListener('change', function(){
+                            fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(this.value), {
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(res => {
+                            if (!res.ok) throw new Error(res.statusText);
+                            return res.json();
+                            })
+                            .then(json => {
+                            refField.value = json.defaultRis;
+                            })
+                            .catch(err => console.error('RIS lookup failed:', err));
+                        });
+                    });
+                </script>
+
 
 
                 <div class="p-5">
