@@ -1693,4 +1693,75 @@
 </script>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const risDateInput = document.querySelector('input[name="ris_date"]');
+    const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // helper: fetch availability for one supply-row
+    function fetchAvailability(supplyId, rowIndex) {
+        fetch("{{ route('ris.validate-manual-stock') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken
+        },
+        body: JSON.stringify({
+            ris_date: risDateInput.value,
+            items: [{ supply_id: supplyId }]
+        })
+        })
+        .then(r => r.json())
+        .then(json => {
+        const available = json.current_availability[supplyId] || 0;
+        const span = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .available-qty`);
+        const req  = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .requested-qty`);
+        const iss  = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .issued-qty`);
+
+        // update display
+        span.textContent = available;
+        span.className = `available-qty font-medium ${available>0?'text-green-600 dark:text-green-400':'text-red-600 dark:text-red-400'}`;
+
+        // enforce max / disable when zero
+        req.max       = available;
+        iss.max       = available;
+        req.disabled  = available===0;
+        iss.disabled  = available===0;
+
+        if (parseInt(req.value,10) > available) req.value = available;
+        if (parseInt(iss.value,10) > available) iss.value = available;
+        })
+        .catch(console.error);
+    }
+
+    // whenever the date changes, re-run for every row
+    risDateInput.addEventListener('change', () => {
+        document.querySelectorAll('.manual-item-row').forEach((row, idx) => {
+        const select = row.querySelector('.supply-select');
+        if (select.value) fetchAvailability(select.value, idx);
+        });
+    });
+
+    // delegate supply-select changes
+    document.getElementById('manualItemsTable').addEventListener('change', e => {
+        if (!e.target.classList.contains('supply-select')) return;
+
+        // figure out which row index this is
+        const rows = Array.from(document.querySelectorAll('.manual-item-row'));
+        const idx  = rows.indexOf(e.target.closest('tr'));
+
+        if (e.target.value) {
+        fetchAvailability(e.target.value, idx);
+        } else {
+        // reset to zero
+        const span = rows[idx].querySelector('.available-qty');
+        span.textContent = '0';
+        span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
+        }
+    });
+    });
+</script>
+
+
+
 </x-app-layout>

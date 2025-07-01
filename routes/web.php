@@ -207,6 +207,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // NEW: Manual RIS Entry Route (Admin/CAO only)
         Route::post('/ris/manual-entry', [RisSlipController::class, 'storeManual'])->name('ris.store-manual');
 
+        // web.php (inside your admin-cao group)
+        Route::post('/ris/validate-manual-stock', [RisSlipController::class, 'validateManualStock'])
+            ->name('ris.validate-manual-stock')
+            ->middleware(['auth','admin-cao']);
+
+
 
 
 
