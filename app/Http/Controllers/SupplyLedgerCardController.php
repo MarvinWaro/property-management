@@ -67,75 +67,79 @@ class SupplyLedgerCardController extends Controller
     /**
      * Display ledger card for a specific supply
      */
-    public function show(Request $request, $supplyId)
-    {
-        $supply = Supply::with('category')->findOrFail($supplyId);
-        $fundCluster = $request->get('fund_cluster', '101'); // Default to 101 if not specified
+public function show(Request $request, $supplyId)
+{
+    $supply = Supply::with('category')->findOrFail($supplyId);
+    $fundCluster = $request->get('fund_cluster', '101'); // Default to 101 if not specified
 
-        // Get selected year (default to current year)
-        $selectedYear = $request->get('year', Carbon::now()->year);
+    // Get selected year (default to current year)
+    $selectedYear = $request->get('year', Carbon::now()->year);
 
-        // Get all transactions for this supply, ordered by date
-        $transactions = SupplyTransaction::with(['department', 'user'])
-            ->where('supply_id', $supplyId)
-            ->orderBy('transaction_date')
-            ->orderBy('created_at')
-            ->get();
+    // Pull all transactions for this supply, ordered by:
+    //   1) transaction_date ASC
+    //   2) reference_no     ASC
+    //   3) created_at       ASC
+    $transactions = SupplyTransaction::with(['department', 'user'])
+        ->where('supply_id', $supplyId)
+        ->orderBy('transaction_date', 'asc')
+        ->orderBy('reference_no',       'asc')
+        ->orderBy('created_at',         'asc')
+        ->get();
 
-        // Get available fund clusters for this supply
-        $fundClusters = SupplyStock::where('supply_id', $supplyId)
-            ->select('fund_cluster')
-            ->distinct()
-            ->whereNotNull('fund_cluster')
-            ->pluck('fund_cluster');
+    // Available fund clusters
+    $fundClusters = SupplyStock::where('supply_id', $supplyId)
+        ->select('fund_cluster')
+        ->distinct()
+        ->whereNotNull('fund_cluster')
+        ->pluck('fund_cluster');
 
-        // Get available years for transactions
-        $availableYears = SupplyTransaction::where('supply_id', $supplyId)
-            ->selectRaw('YEAR(transaction_date) as year')
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+    // Available years
+    $availableYears = SupplyTransaction::where('supply_id', $supplyId)
+        ->selectRaw('YEAR(transaction_date) as year')
+        ->distinct()
+        ->orderBy('year', 'desc')
+        ->pluck('year');
 
-        // If no transactions yet, add current year
-        if ($availableYears->isEmpty()) {
-            $availableYears = collect([Carbon::now()->year]);
-        }
-
-        // Calculate current stock
-        $currentStock = SupplyStock::where('supply_id', $supplyId)
-            ->where('fund_cluster', $fundCluster)
-            ->sum('quantity_on_hand');
-
-        // Get average unit cost for this supply
-        $averageUnitCost = SupplyStock::where('supply_id', $supplyId)
-            ->where('fund_cluster', $fundCluster)
-            ->where('quantity_on_hand', '>', 0)
-            ->avg('unit_cost') ?? 0;
-
-        // Prepare the ledger card data
-        $ledgerCardEntries = $this->prepareLedgerCardEntries(
-            $transactions,
-            $fundCluster,
-            $averageUnitCost,
-            $selectedYear
-        );
-
-        // --- NEW: Determine the current moving average cost ---
-        $lastEntry = end($ledgerCardEntries);
-        $movingAverageCost = $lastEntry['balance_unit_cost'] ?? 0;
-
-        return view('supply-ledger-cards.show', compact(
-            'supply',
-            'ledgerCardEntries',
-            'fundClusters',
-            'fundCluster',
-            'currentStock',
-            'averageUnitCost',
-            'availableYears',
-            'selectedYear',
-            'movingAverageCost'   // pass new variable to view
-        ));
+    if ($availableYears->isEmpty()) {
+        $availableYears = collect([Carbon::now()->year]);
     }
+
+    // Current on-hand stock
+    $currentStock = SupplyStock::where('supply_id', $supplyId)
+        ->where('fund_cluster', $fundCluster)
+        ->sum('quantity_on_hand');
+
+    // Average unit cost for moving‐average calculation
+    $averageUnitCost = SupplyStock::where('supply_id', $supplyId)
+        ->where('fund_cluster', $fundCluster)
+        ->where('quantity_on_hand', '>', 0)
+        ->avg('unit_cost') ?? 0;
+
+    // Build your ledger rows
+    $ledgerCardEntries = $this->prepareLedgerCardEntries(
+        $transactions,
+        $fundCluster,
+        $averageUnitCost,
+        $selectedYear
+    );
+
+    // Current moving‐average cost is the last row’s balance_unit_cost
+    $lastEntry = end($ledgerCardEntries);
+    $movingAverageCost = $lastEntry['balance_unit_cost'] ?? 0;
+
+    return view('supply-ledger-cards.show', compact(
+        'supply',
+        'ledgerCardEntries',
+        'fundClusters',
+        'fundCluster',
+        'currentStock',
+        'averageUnitCost',
+        'availableYears',
+        'selectedYear',
+        'movingAverageCost'
+    ));
+}
+
 
     /**
      * Prepare ledger card entries with running balance

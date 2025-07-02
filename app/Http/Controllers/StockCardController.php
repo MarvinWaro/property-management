@@ -73,11 +73,15 @@ class StockCardController extends Controller
         // Get selected year (default to current year)
         $selectedYear = $request->get('year', Carbon::now()->year);
 
-        // Get all transactions for this supply, ordered by date
+        // Get all transactions for this supply, ordered by:
+        //   1) transaction_date ASC
+        //   2) reference_no     ASC (so same-day RIS/IAR line grouping)
+        //   3) created_at       ASC (final tie-breaker)
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
-            ->orderBy('transaction_date')
-            ->orderBy('created_at')
+            ->orderBy('transaction_date', 'asc')
+            ->orderBy('reference_no',   'asc')
+            ->orderBy('created_at',     'asc')
             ->get();
 
         // Get available fund clusters for this supply
@@ -105,7 +109,11 @@ class StockCardController extends Controller
             ->sum('quantity_on_hand');
 
         // Prepare the stock card data
-        $stockCardEntries = $this->prepareStockCardEntries($transactions, $fundCluster, $selectedYear);
+        $stockCardEntries = $this->prepareStockCardEntries(
+            $transactions,
+            $fundCluster,
+            $selectedYear
+        );
 
         return view('stock-cards.show', compact(
             'supply',
@@ -117,6 +125,7 @@ class StockCardController extends Controller
             'selectedYear'
         ));
     }
+
 
     /**
      * Prepare stock card entries with running balance
