@@ -88,7 +88,7 @@ class SupplyStockController extends Controller
         $supplies    = Supply::all();
         $suppliers   = Supplier::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
-        $stocks      = $stocksQuery->paginate(5);
+        $stocks      = $stocksQuery->paginate(10);
 
         // ─── NEW: generate a default IAR for the modal’s reference_no input
         //    pick any existing supply_id (we just need an int for the generator)

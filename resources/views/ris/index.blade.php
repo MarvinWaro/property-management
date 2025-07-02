@@ -1390,227 +1390,228 @@
     </script>
 
 
-<!-- Add these NEW script tags AFTER your existing scripts -->
+    <!-- Add these NEW script tags AFTER your existing scripts -->
 
-<!-- Script 1: Handle Final Status Change -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle final status dropdown change
-        const finalStatusSelect = document.getElementById('finalStatusSelect');
-        const declineReasonDiv = document.getElementById('declineReasonDiv');
+    <!-- Script 1: Handle Final Status Change -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle final status dropdown change
+            const finalStatusSelect = document.getElementById('finalStatusSelect');
+            const declineReasonDiv = document.getElementById('declineReasonDiv');
 
-        if (finalStatusSelect) {
-            finalStatusSelect.addEventListener('change', function() {
-                if (this.value === 'declined') {
-                    declineReasonDiv.classList.remove('hidden');
-                    // Make decline reason required
-                    const declineReasonInput = document.querySelector('input[name="decline_reason"]');
-                    if (declineReasonInput) {
-                        declineReasonInput.required = true;
-                    }
-                } else {
-                    declineReasonDiv.classList.add('hidden');
-                    // Remove required attribute
-                    const declineReasonInput = document.querySelector('input[name="decline_reason"]');
-                    if (declineReasonInput) {
-                        declineReasonInput.required = false;
-                        declineReasonInput.value = '';
-                    }
-                }
-            });
-        }
-    });
-</script>
-
-<!-- Script 2: Reopen Modal on Validation Errors -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if there are errors and if we're coming from manual entry form
-        @if ($errors->any() && old('is_manual_entry'))
-            console.log('Reopening modal due to validation errors...');
-
-            // Reopen the manual entry modal
-            const modal = document.getElementById('manualEntryModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-
-                // Re-populate the form with old values
-                @if (old('ris_date'))
-                    const risDateInput = document.querySelector('input[name="ris_date"]');
-                    if (risDateInput) {
-                        risDateInput.value = "{{ old('ris_date') }}";
-                    }
-                @endif
-
-                @if (old('reference_no'))
-                    const referenceNoInput = document.querySelector('input[name="reference_no"]');
-                    if (referenceNoInput) {
-                        referenceNoInput.value = "{{ old('reference_no') }}";
-                    }
-                @endif
-
-                @if (old('entity_name'))
-                    const entityNameInput = document.querySelector('input[name="entity_name"]');
-                    if (entityNameInput) {
-                        entityNameInput.value = "{{ old('entity_name') }}";
-                    }
-                @endif
-
-                @if (old('division'))
-                    const divisionSelect = document.querySelector('select[name="division"]');
-                    if (divisionSelect) {
-                        divisionSelect.value = "{{ old('division') }}";
-                    }
-                @endif
-
-                @if (old('office'))
-                    const officeInput = document.querySelector('input[name="office"]');
-                    if (officeInput) {
-                        officeInput.value = "{{ old('office') }}";
-                    }
-                @endif
-
-                @if (old('fund_cluster'))
-                    const fundClusterSelect = document.querySelector('select[name="fund_cluster"]');
-                    if (fundClusterSelect) {
-                        fundClusterSelect.value = "{{ old('fund_cluster') }}";
-                    }
-                @endif
-
-                @if (old('responsibility_center_code'))
-                    const responsibilityCodeInput = document.querySelector('input[name="responsibility_center_code"]');
-                    if (responsibilityCodeInput) {
-                        responsibilityCodeInput.value = "{{ old('responsibility_center_code') }}";
-                    }
-                @endif
-
-                @if (old('requested_by'))
-                    const requestedBySelect = document.querySelector('select[name="requested_by"]');
-                    if (requestedBySelect) {
-                        requestedBySelect.value = "{{ old('requested_by') }}";
-                    }
-                @endif
-
-                @if (old('purpose'))
-                    const purposeTextarea = document.querySelector('textarea[name="purpose"]');
-                    if (purposeTextarea) {
-                        purposeTextarea.value = "{{ old('purpose') }}";
-                    }
-                @endif
-
-                @if (old('final_status'))
-                    const finalStatusSelect = document.querySelector('select[name="final_status"]');
-                    if (finalStatusSelect) {
-                        finalStatusSelect.value = "{{ old('final_status') }}";
-
-                        // Show decline reason field if status was declined
-                        if ("{{ old('final_status') }}" === 'declined') {
-                            const declineReasonDiv = document.getElementById('declineReasonDiv');
-                            if (declineReasonDiv) {
-                                declineReasonDiv.classList.remove('hidden');
-                            }
-
-                            @if (old('decline_reason'))
-                                const declineReasonInput = document.querySelector('input[name="decline_reason"]');
-                                if (declineReasonInput) {
-                                    declineReasonInput.value = "{{ old('decline_reason') }}";
-                                }
-                            @endif
+            if (finalStatusSelect) {
+                finalStatusSelect.addEventListener('change', function() {
+                    if (this.value === 'declined') {
+                        declineReasonDiv.classList.remove('hidden');
+                        // Make decline reason required
+                        const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                        if (declineReasonInput) {
+                            declineReasonInput.required = true;
                         }
-                    }
-                @endif
-
-                // Trigger change event on RIS date to regenerate RIS number
-                const risDateInput = document.querySelector('input[name="ris_date"]');
-                if (risDateInput && risDateInput.value) {
-                    risDateInput.dispatchEvent(new Event('change'));
-                }
-
-                // Load available supplies
-                if (typeof loadAvailableSupplies === 'function') {
-                    loadAvailableSupplies();
-                }
-
-                // Show error message
-                setTimeout(() => {
-                    const errorAlert = document.createElement('div');
-                    errorAlert.className = 'fixed top-4 right-4 z-[70] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-md animate-modal-slide-up';
-                    errorAlert.innerHTML = `
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 flex-shrink-0 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div class="flex-1">
-                                <p class="text-sm font-medium">There were errors with your submission</p>
-                                <p class="text-xs mt-1 opacity-90">Please check the form for details.</p>
-                            </div>
-                            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:bg-black/10 rounded p-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    `;
-                    document.body.appendChild(errorAlert);
-                    setTimeout(() => errorAlert.remove(), 5000);
-                }, 500);
-            }
-        @endif
-    });
-</script>
-
-<!-- Script 3: Enhanced Form Validation -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add real-time validation to required fields
-        const requiredFields = {
-            'ris_date': 'RIS Date',
-            'entity_name': 'Entity Name',
-            'division': 'Division',
-            'requested_by': 'Requested By',
-            'purpose': 'Purpose',
-            'final_status': 'Final Status'
-        };
-
-        Object.keys(requiredFields).forEach(fieldName => {
-            const field = document.querySelector(`[name="${fieldName}"]`);
-            if (field) {
-                field.addEventListener('blur', function() {
-                    if (!this.value.trim()) {
-                        this.classList.add('border-red-500');
-
-                        // Remove any existing error message
-                        const existingError = this.parentElement.querySelector('.field-error-message');
-                        if (existingError) {
-                            existingError.remove();
-                        }
-
-                        // Add error message
-                        const errorMsg = document.createElement('p');
-                        errorMsg.className = 'field-error-message text-xs text-red-500 mt-1';
-                        errorMsg.textContent = `${requiredFields[fieldName]} is required`;
-                        this.parentElement.appendChild(errorMsg);
                     } else {
-                        this.classList.remove('border-red-500');
-                        const existingError = this.parentElement.querySelector('.field-error-message');
-                        if (existingError) {
-                            existingError.remove();
+                        declineReasonDiv.classList.add('hidden');
+                        // Remove required attribute
+                        const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                        if (declineReasonInput) {
+                            declineReasonInput.required = false;
+                            declineReasonInput.value = '';
                         }
                     }
                 });
             }
         });
-    });
-</script>
+    </script>
+
+    <!-- Script 2: Reopen Modal on Validation Errors -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there are errors and if we're coming from manual entry form
+            @if ($errors->any() && old('is_manual_entry'))
+                console.log('Reopening modal due to validation errors...');
+
+                // Reopen the manual entry modal
+                const modal = document.getElementById('manualEntryModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+
+                    // Re-populate the form with old values
+                    @if (old('ris_date'))
+                        const risDateInput = document.querySelector('input[name="ris_date"]');
+                        if (risDateInput) {
+                            risDateInput.value = "{{ old('ris_date') }}";
+                        }
+                    @endif
+
+                    @if (old('reference_no'))
+                        const referenceNoInput = document.querySelector('input[name="reference_no"]');
+                        if (referenceNoInput) {
+                            referenceNoInput.value = "{{ old('reference_no') }}";
+                        }
+                    @endif
+
+                    @if (old('entity_name'))
+                        const entityNameInput = document.querySelector('input[name="entity_name"]');
+                        if (entityNameInput) {
+                            entityNameInput.value = "{{ old('entity_name') }}";
+                        }
+                    @endif
+
+                    @if (old('division'))
+                        const divisionSelect = document.querySelector('select[name="division"]');
+                        if (divisionSelect) {
+                            divisionSelect.value = "{{ old('division') }}";
+                        }
+                    @endif
+
+                    @if (old('office'))
+                        const officeInput = document.querySelector('input[name="office"]');
+                        if (officeInput) {
+                            officeInput.value = "{{ old('office') }}";
+                        }
+                    @endif
+
+                    @if (old('fund_cluster'))
+                        const fundClusterSelect = document.querySelector('select[name="fund_cluster"]');
+                        if (fundClusterSelect) {
+                            fundClusterSelect.value = "{{ old('fund_cluster') }}";
+                        }
+                    @endif
+
+                    @if (old('responsibility_center_code'))
+                        const responsibilityCodeInput = document.querySelector('input[name="responsibility_center_code"]');
+                        if (responsibilityCodeInput) {
+                            responsibilityCodeInput.value = "{{ old('responsibility_center_code') }}";
+                        }
+                    @endif
+
+                    @if (old('requested_by'))
+                        const requestedBySelect = document.querySelector('select[name="requested_by"]');
+                        if (requestedBySelect) {
+                            requestedBySelect.value = "{{ old('requested_by') }}";
+                        }
+                    @endif
+
+                    @if (old('purpose'))
+                        const purposeTextarea = document.querySelector('textarea[name="purpose"]');
+                        if (purposeTextarea) {
+                            purposeTextarea.value = "{{ old('purpose') }}";
+                        }
+                    @endif
+
+                    @if (old('final_status'))
+                        const finalStatusSelect = document.querySelector('select[name="final_status"]');
+                        if (finalStatusSelect) {
+                            finalStatusSelect.value = "{{ old('final_status') }}";
+
+                            // Show decline reason field if status was declined
+                            if ("{{ old('final_status') }}" === 'declined') {
+                                const declineReasonDiv = document.getElementById('declineReasonDiv');
+                                if (declineReasonDiv) {
+                                    declineReasonDiv.classList.remove('hidden');
+                                }
+
+                                @if (old('decline_reason'))
+                                    const declineReasonInput = document.querySelector('input[name="decline_reason"]');
+                                    if (declineReasonInput) {
+                                        declineReasonInput.value = "{{ old('decline_reason') }}";
+                                    }
+                                @endif
+                            }
+                        }
+                    @endif
+
+                    // Trigger change event on RIS date to regenerate RIS number
+                    const risDateInput = document.querySelector('input[name="ris_date"]');
+                    if (risDateInput && risDateInput.value) {
+                        risDateInput.dispatchEvent(new Event('change'));
+                    }
+
+                    // Load available supplies
+                    if (typeof loadAvailableSupplies === 'function') {
+                        loadAvailableSupplies();
+                    }
+
+                    // Show error message
+                    setTimeout(() => {
+                        const errorAlert = document.createElement('div');
+                        errorAlert.className = 'fixed top-4 right-4 z-[70] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-md animate-modal-slide-up';
+                        errorAlert.innerHTML = `
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 flex-shrink-0 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">There were errors with your submission</p>
+                                    <p class="text-xs mt-1 opacity-90">Please check the form for details.</p>
+                                </div>
+                                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:bg-black/10 rounded p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(errorAlert);
+                        setTimeout(() => errorAlert.remove(), 5000);
+                    }, 500);
+                }
+            @endif
+        });
+    </script>
+
+    <!-- Script 3: Enhanced Form Validation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add real-time validation to required fields
+            const requiredFields = {
+                'ris_date': 'RIS Date',
+                'entity_name': 'Entity Name',
+                'division': 'Division',
+                'requested_by': 'Requested By',
+                'purpose': 'Purpose',
+                'final_status': 'Final Status'
+            };
+
+            Object.keys(requiredFields).forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    field.addEventListener('blur', function() {
+                        if (!this.value.trim()) {
+                            this.classList.add('border-red-500');
+
+                            // Remove any existing error message
+                            const existingError = this.parentElement.querySelector('.field-error-message');
+                            if (existingError) {
+                                existingError.remove();
+                            }
+
+                            // Add error message
+                            const errorMsg = document.createElement('p');
+                            errorMsg.className = 'field-error-message text-xs text-red-500 mt-1';
+                            errorMsg.textContent = `${requiredFields[fieldName]} is required`;
+                            this.parentElement.appendChild(errorMsg);
+                        } else {
+                            this.classList.remove('border-red-500');
+                            const existingError = this.parentElement.querySelector('.field-error-message');
+                            if (existingError) {
+                                existingError.remove();
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
         const risDateInput = document.querySelector('input[name="ris_date"]');
-        const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const tableBody    = document.getElementById('manualItemsTable');
+        const csrfToken    = document.querySelector('meta[name="csrf-token"]').content;
 
-        // fetch availability for one supply row
+        // fetch availability as of ris_date for one supply row
         function fetchAvailability(supplyId, rowIndex) {
             fetch("{{ route('ris.validate-manual-stock') }}", {
             method: "POST",
@@ -1626,56 +1627,55 @@
             .then(res => res.json())
             .then(json => {
             const available = json.current_availability[supplyId] || 0;
-            const rows = document.querySelectorAll('.manual-item-row');
-            const row  = rows[rowIndex];
-            const span = row.querySelector('.available-qty');
-            const req  = row.querySelector('.requested-qty');
-            const iss  = row.querySelector('.issued-qty');
+            const row       = Array.from(tableBody.querySelectorAll('tr.manual-item-row'))[rowIndex];
+            const span      = row.querySelector('.available-qty');
+            const req       = row.querySelector('.requested-qty');
+            const iss       = row.querySelector('.issued-qty');
 
-            // update UI
+            // update display
             span.textContent = available;
-            span.className = `available-qty font-medium ${available > 0
+            span.className = `available-qty font-medium ${
+                available > 0
                 ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'}`;
+                : 'text-red-600   dark:text-red-400'
+            }`;
 
             // enforce limits
             req.max       = available;
             iss.max       = available;
             req.disabled  = (available === 0);
             iss.disabled  = (available === 0);
-
-            if (parseInt(req.value,10) > available) req.value = available;
-            if (parseInt(iss.value,10) > available) iss.value = available;
+            if (+req.value > available) req.value = available;
+            if (+iss.value > available) iss.value = available;
             })
             .catch(console.error);
         }
 
-        // whenever the RIS date changes, refresh *all* rows
+        // when RIS date changes, refresh all rows
         risDateInput.addEventListener('change', () => {
-            document.querySelectorAll('.manual-item-row').forEach((row, idx) => {
-            const select = row.querySelector('.supply-select');
-            if (select.value) {
-                fetchAvailability(select.value, idx);
-            } else {
+            Array.from(tableBody.querySelectorAll('tr.manual-item-row'))
+            .forEach((row, idx) => {
+                const sel = row.querySelector('.supply-select');
+                if (sel.value) {
+                fetchAvailability(sel.value, idx);
+                } else {
                 // reset if no supply chosen
                 const span = row.querySelector('.available-qty');
                 span.textContent = '0';
                 span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
-            }
+                }
             });
         });
 
-        // delegate supply‐select changes to fetch its availability
-        document.getElementById('manualItemsTable').addEventListener('change', e => {
-            if (! e.target.classList.contains('supply-select')) return;
-            const rows = Array.from(document.querySelectorAll('.manual-item-row'));
+        // when you pick a supply in a row, fetch just that row’s availability
+        tableBody.addEventListener('change', e => {
+            if (!e.target.classList.contains('supply-select')) return;
+            const rows = Array.from(tableBody.querySelectorAll('tr.manual-item-row'));
             const idx  = rows.indexOf(e.target.closest('tr'));
             const supId = e.target.value;
-
             if (supId) {
             fetchAvailability(supId, idx);
             } else {
-            // reset display
             const span = rows[idx].querySelector('.available-qty');
             span.textContent = '0';
             span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
@@ -1683,6 +1683,7 @@
         });
         });
     </script>
+
 
 
 </x-app-layout>

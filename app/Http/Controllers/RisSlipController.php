@@ -1800,38 +1800,27 @@ class RisSlipController extends Controller
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
         ]);
 
+        // interpret the RIS date as endOfDay to include all transactions on that day
         $risDate = Carbon::parse($data['ris_date'])->endOfDay();
+
         $availabilities = [];
 
         foreach ($data['items'] as $item) {
-            $id = $item['supply_id'];
+            $supplyId = $item['supply_id'];
 
-            // 1) Find the date of the very first receipt (IAR) for this supply
-            $firstReceipt = SupplyTransaction::where('supply_id', $id)
+            // total receipts on or before the RIS date
+            $received = SupplyTransaction::where('supply_id', $supplyId)
                 ->where('transaction_type', 'receipt')
-                ->orderBy('transaction_date', 'asc')
-                ->first();
+                ->whereDate('transaction_date', '<=', $risDate)
+                ->sum('quantity');
 
-            // If no IAR exists *or* RIS date is before that first receipt → show 0
-            if (! $firstReceipt || $risDate->lt(Carbon::parse($firstReceipt->transaction_date))) {
-                $availabilities[$id] = 0;
-                continue;
-            }
+            // total issues on or before the RIS date
+            $issued = SupplyTransaction::where('supply_id', $supplyId)
+                ->where('transaction_type', 'issue')
+                ->whereDate('transaction_date', '<=', $risDate)
+                ->sum('quantity');
 
-            // 2) Otherwise, take *current* on-hand minus any pending RIS requests
-            $stock = SupplyStock::where('supply_id', $id)
-                ->where('status', 'available')
-                ->first();
-
-            $onHand = $stock ? $stock->quantity_on_hand : 0;
-
-            $pending = RisItem::where('supply_id', $id)
-                ->whereHas('risSlip', function($q) {
-                    $q->whereIn('status', ['draft', 'approved']);
-                })
-                ->sum('quantity_requested');
-
-            $availabilities[$id] = max(0, $onHand - $pending);
+            $availabilities[$supplyId] = max(0, $received - $issued);
         }
 
         return response()->json([
