@@ -391,11 +391,11 @@
                                     <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
                                         <div>
                                             <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                                Inventory Acceptance Report
+                                                Add New Stock
                                             </h3>
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            {{-- <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                                 Create new stock entries with a single IAR reference
-                                            </p>
+                                            </p> --}}
                                         </div>
                                         <button type="button"
                                             class="text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg p-2

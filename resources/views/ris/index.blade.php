@@ -1604,164 +1604,85 @@
     });
 </script>
 
-<!-- Add this simple warning script if you don't want to implement the AJAX solution -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add warning when selecting items in manual entry
-        const addItemBtn = document.getElementById('addManualItemBtn');
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
         const risDateInput = document.querySelector('input[name="ris_date"]');
+        const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        if (addItemBtn && risDateInput) {
-            // Override the add item button click to show warning
-            addItemBtn.addEventListener('click', function(e) {
-                const selectedDate = new Date(risDateInput.value);
-                const today = new Date();
+        // fetch availability for one supply row
+        function fetchAvailability(supplyId, rowIndex) {
+            fetch("{{ route('ris.validate-manual-stock') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: JSON.stringify({
+                ris_date: risDateInput.value,
+                items: [{ supply_id: supplyId }]
+            })
+            })
+            .then(res => res.json())
+            .then(json => {
+            const available = json.current_availability[supplyId] || 0;
+            const rows = document.querySelectorAll('.manual-item-row');
+            const row  = rows[rowIndex];
+            const span = row.querySelector('.available-qty');
+            const req  = row.querySelector('.requested-qty');
+            const iss  = row.querySelector('.issued-qty');
 
-                // Check if date is in the past
-                if (selectedDate < today) {
-                    const daysDiff = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
+            // update UI
+            span.textContent = available;
+            span.className = `available-qty font-medium ${available > 0
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'}`;
 
-                    if (daysDiff > 30) {
-                        const confirmAdd = confirm(
-                            `⚠️ Warning: You are creating a historical RIS for ${selectedDate.toLocaleDateString()}.\n\n` +
-                            `This is ${daysDiff} days in the past.\n\n` +
-                            `Please ensure that:\n` +
-                            `1. The supplies were already received (IAR exists) before this date\n` +
-                            `2. There was sufficient stock available on this date\n\n` +
-                            `The system will validate this when you submit.\n\n` +
-                            `Continue adding items?`
-                        );
+            // enforce limits
+            req.max       = available;
+            iss.max       = available;
+            req.disabled  = (available === 0);
+            iss.disabled  = (available === 0);
 
-                        if (!confirmAdd) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return false;
-                        }
-                    }
-                }
-            });
+            if (parseInt(req.value,10) > available) req.value = available;
+            if (parseInt(iss.value,10) > available) iss.value = available;
+            })
+            .catch(console.error);
         }
 
-        // Show permanent warning banner for historical entries
-        const form = document.querySelector('#manualEntryModal form');
-        if (form && risDateInput) {
-            risDateInput.addEventListener('change', function() {
-                const selectedDate = new Date(this.value);
-                const existingBanner = document.getElementById('historical-entry-banner');
-
-                // Remove existing banner
-                if (existingBanner) {
-                    existingBanner.remove();
-                }
-
-                // Add warning banner for dates older than 7 days
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-                if (selectedDate < sevenDaysAgo) {
-                    const banner = document.createElement('div');
-                    banner.id = 'historical-entry-banner';
-                    banner.className = 'p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-900';
-                    banner.innerHTML = `
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                            </svg>
-                            <div class="flex-1">
-                                <h4 class="text-sm font-medium text-amber-800 dark:text-amber-300">Historical Entry Mode</h4>
-                                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                                    You are creating an entry for <strong>${selectedDate.toLocaleDateString()}</strong>.
-                                    The system will verify that supplies were available on this date.
-                                </p>
-                            </div>
-                        </div>
-                    `;
-
-                    // Insert after the header but before the form content
-                    const modalContent = document.querySelector('#manualEntryModal .bg-white');
-                    const header = modalContent.querySelector('.border-b');
-                    header.insertAdjacentElement('afterend', banner);
-                }
-            });
-
-            // Trigger change event if date is already set
-            if (risDateInput.value) {
-                risDateInput.dispatchEvent(new Event('change'));
+        // whenever the RIS date changes, refresh *all* rows
+        risDateInput.addEventListener('change', () => {
+            document.querySelectorAll('.manual-item-row').forEach((row, idx) => {
+            const select = row.querySelector('.supply-select');
+            if (select.value) {
+                fetchAvailability(select.value, idx);
+            } else {
+                // reset if no supply chosen
+                const span = row.querySelector('.available-qty');
+                span.textContent = '0';
+                span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
             }
-        }
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const risDateInput = document.querySelector('input[name="ris_date"]');
-    const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    // helper: fetch availability for one supply-row
-    function fetchAvailability(supplyId, rowIndex) {
-        fetch("{{ route('ris.validate-manual-stock') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": csrfToken
-        },
-        body: JSON.stringify({
-            ris_date: risDateInput.value,
-            items: [{ supply_id: supplyId }]
-        })
-        })
-        .then(r => r.json())
-        .then(json => {
-        const available = json.current_availability[supplyId] || 0;
-        const span = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .available-qty`);
-        const req  = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .requested-qty`);
-        const iss  = document.querySelector(`.manual-item-row:nth-child(${rowIndex+1}) .issued-qty`);
-
-        // update display
-        span.textContent = available;
-        span.className = `available-qty font-medium ${available>0?'text-green-600 dark:text-green-400':'text-red-600 dark:text-red-400'}`;
-
-        // enforce max / disable when zero
-        req.max       = available;
-        iss.max       = available;
-        req.disabled  = available===0;
-        iss.disabled  = available===0;
-
-        if (parseInt(req.value,10) > available) req.value = available;
-        if (parseInt(iss.value,10) > available) iss.value = available;
-        })
-        .catch(console.error);
-    }
-
-    // whenever the date changes, re-run for every row
-    risDateInput.addEventListener('change', () => {
-        document.querySelectorAll('.manual-item-row').forEach((row, idx) => {
-        const select = row.querySelector('.supply-select');
-        if (select.value) fetchAvailability(select.value, idx);
+            });
         });
-    });
 
-    // delegate supply-select changes
-    document.getElementById('manualItemsTable').addEventListener('change', e => {
-        if (!e.target.classList.contains('supply-select')) return;
+        // delegate supply‐select changes to fetch its availability
+        document.getElementById('manualItemsTable').addEventListener('change', e => {
+            if (! e.target.classList.contains('supply-select')) return;
+            const rows = Array.from(document.querySelectorAll('.manual-item-row'));
+            const idx  = rows.indexOf(e.target.closest('tr'));
+            const supId = e.target.value;
 
-        // figure out which row index this is
-        const rows = Array.from(document.querySelectorAll('.manual-item-row'));
-        const idx  = rows.indexOf(e.target.closest('tr'));
-
-        if (e.target.value) {
-        fetchAvailability(e.target.value, idx);
-        } else {
-        // reset to zero
-        const span = rows[idx].querySelector('.available-qty');
-        span.textContent = '0';
-        span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
-        }
-    });
-    });
-</script>
-
+            if (supId) {
+            fetchAvailability(supId, idx);
+            } else {
+            // reset display
+            const span = rows[idx].querySelector('.available-qty');
+            span.textContent = '0';
+            span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
+            }
+        });
+        });
+    </script>
 
 
 </x-app-layout>

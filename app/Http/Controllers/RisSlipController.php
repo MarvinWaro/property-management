@@ -1806,19 +1806,32 @@ class RisSlipController extends Controller
         foreach ($data['items'] as $item) {
             $id = $item['supply_id'];
 
-            // sum receipts ≤ risDate
-            $received = SupplyTransaction::where('supply_id', $id)
-                ->where('transaction_type','receipt')
-                ->whereDate('transaction_date','<=', $risDate)
-                ->sum('quantity');
+            // 1) Find the date of the very first receipt (IAR) for this supply
+            $firstReceipt = SupplyTransaction::where('supply_id', $id)
+                ->where('transaction_type', 'receipt')
+                ->orderBy('transaction_date', 'asc')
+                ->first();
 
-            // sum issues ≤ risDate
-            $issued = SupplyTransaction::where('supply_id', $id)
-                ->where('transaction_type','issue')
-                ->whereDate('transaction_date','<=', $risDate)
-                ->sum('quantity');
+            // If no IAR exists *or* RIS date is before that first receipt → show 0
+            if (! $firstReceipt || $risDate->lt(Carbon::parse($firstReceipt->transaction_date))) {
+                $availabilities[$id] = 0;
+                continue;
+            }
 
-            $availabilities[$id] = max(0, $received - $issued);
+            // 2) Otherwise, take *current* on-hand minus any pending RIS requests
+            $stock = SupplyStock::where('supply_id', $id)
+                ->where('status', 'available')
+                ->first();
+
+            $onHand = $stock ? $stock->quantity_on_hand : 0;
+
+            $pending = RisItem::where('supply_id', $id)
+                ->whereHas('risSlip', function($q) {
+                    $q->whereIn('status', ['draft', 'approved']);
+                })
+                ->sum('quantity_requested');
+
+            $availabilities[$id] = max(0, $onHand - $pending);
         }
 
         return response()->json([
