@@ -29,7 +29,7 @@ class SupplyController extends Controller
         }
 
         // Execute the query to get supplies with pagination
-        $supplies = $suppliesQuery->paginate(5);
+        $supplies = $suppliesQuery->paginate(10);
 
         // Pass only categories and supplies to your view
         return view('supplies.index', compact('categories', 'supplies'));

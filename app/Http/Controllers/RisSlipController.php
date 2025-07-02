@@ -1800,25 +1800,27 @@ class RisSlipController extends Controller
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
         ]);
 
+        // interpret the RIS date as endOfDay to include all transactions on that day
         $risDate = Carbon::parse($data['ris_date'])->endOfDay();
+
         $availabilities = [];
 
         foreach ($data['items'] as $item) {
-            $id = $item['supply_id'];
+            $supplyId = $item['supply_id'];
 
-            // sum receipts ≤ risDate
-            $received = SupplyTransaction::where('supply_id', $id)
-                ->where('transaction_type','receipt')
-                ->whereDate('transaction_date','<=', $risDate)
+            // total receipts on or before the RIS date
+            $received = SupplyTransaction::where('supply_id', $supplyId)
+                ->where('transaction_type', 'receipt')
+                ->whereDate('transaction_date', '<=', $risDate)
                 ->sum('quantity');
 
-            // sum issues ≤ risDate
-            $issued = SupplyTransaction::where('supply_id', $id)
-                ->where('transaction_type','issue')
-                ->whereDate('transaction_date','<=', $risDate)
+            // total issues on or before the RIS date
+            $issued = SupplyTransaction::where('supply_id', $supplyId)
+                ->where('transaction_type', 'issue')
+                ->whereDate('transaction_date', '<=', $risDate)
                 ->sum('quantity');
 
-            $availabilities[$id] = max(0, $received - $issued);
+            $availabilities[$supplyId] = max(0, $received - $issued);
         }
 
         return response()->json([
