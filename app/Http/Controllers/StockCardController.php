@@ -73,15 +73,15 @@ class StockCardController extends Controller
         // Get selected year (default to current year)
         $selectedYear = $request->get('year', Carbon::now()->year);
 
-        // Get all transactions for this supply, ordered by:
-        //   1) transaction_date ASC
-        //   2) reference_no     ASC (so same-day RIS/IAR line grouping)
-        //   3) created_at       ASC (final tie-breaker)
+        // Get selected month (null means show all months for the year)
+        $selectedMonth = $request->get('month', null);
+
+        // Get all transactions for this supply
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
             ->orderBy('transaction_date', 'asc')
-            ->orderBy('reference_no',   'asc')
-            ->orderBy('created_at',     'asc')
+            ->orderBy('reference_no', 'asc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         // Get available fund clusters for this supply
@@ -103,6 +103,20 @@ class StockCardController extends Controller
             $availableYears = collect([Carbon::now()->year]);
         }
 
+        // Get available months for the selected year
+        $availableMonths = SupplyTransaction::where('supply_id', $supplyId)
+            ->whereYear('transaction_date', $selectedYear)
+            ->selectRaw('MONTH(transaction_date) as month')
+            ->distinct()
+            ->orderBy('month', 'asc')
+            ->pluck('month')
+            ->map(function ($month) {
+                return [
+                    'value' => $month,
+                    'name' => Carbon::create()->month($month)->format('F')
+                ];
+            });
+
         // Calculate current stock
         $currentStock = SupplyStock::where('supply_id', $supplyId)
             ->where('fund_cluster', $fundCluster)
@@ -112,7 +126,8 @@ class StockCardController extends Controller
         $stockCardEntries = $this->prepareStockCardEntries(
             $transactions,
             $fundCluster,
-            $selectedYear
+            $selectedYear,
+            $selectedMonth
         );
 
         return view('stock-cards.show', compact(
@@ -122,30 +137,35 @@ class StockCardController extends Controller
             'fundCluster',
             'currentStock',
             'availableYears',
-            'selectedYear'
+            'selectedYear',
+            'availableMonths',
+            'selectedMonth'
         ));
     }
 
-
-    /**
-     * Prepare stock card entries with running balance
-     */
-    private function prepareStockCardEntries($transactions, $fundCluster, $selectedYear)
+    private function prepareStockCardEntries($transactions, $fundCluster, $selectedYear, $selectedMonth = null)
     {
         $entries = [];
         $runningBalance = 0;
         $hasBeginningBalance = false;
 
-        // Filter transactions by selected year and previous years (for beginning balance)
-        $yearStartDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
-        $yearEndDate = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
+        // Determine the date range based on whether a month is selected
+        if ($selectedMonth) {
+            // If month is selected, show only that month
+            $startDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->startOfDay();
+            $endDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->endOfMonth()->endOfDay();
+        } else {
+            // If no month selected, show entire year
+            $startDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
+            $endDate = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
+        }
 
-        // Calculate beginning balance from all transactions before selected year
-        $prevYearTransactions = $transactions->filter(function ($txn) use ($yearStartDate) {
-            return $txn->transaction_date < $yearStartDate;
+        // Calculate beginning balance from all transactions before the start date
+        $prevTransactions = $transactions->filter(function ($txn) use ($startDate) {
+            return $txn->transaction_date < $startDate;
         });
 
-        foreach ($prevYearTransactions as $txn) {
+        foreach ($prevTransactions as $txn) {
             if ($txn->transaction_type == 'receipt') {
                 $runningBalance += $txn->quantity;
             } elseif ($txn->transaction_type == 'issue') {
@@ -153,9 +173,13 @@ class StockCardController extends Controller
             }
         }
 
-        // Add beginning balance entry for selected year
+        // Add beginning balance entry
+        $beginningBalanceDate = $selectedMonth
+            ? Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('Y-m-d')
+            : $startDate->format('Y-m-d');
+
         $entries[] = [
-            'date' => $yearStartDate->format('Y-m-d'),
+            'date' => $beginningBalanceDate,
             'reference' => 'Beginning Balance',
             'receipt_qty' => null,
             'issue_qty' => null,
@@ -167,13 +191,13 @@ class StockCardController extends Controller
 
         $hasBeginningBalance = true;
 
-        // Filter transactions for selected year
-        $yearTransactions = $transactions->filter(function ($txn) use ($yearStartDate, $yearEndDate) {
-            return $txn->transaction_date >= $yearStartDate && $txn->transaction_date <= $yearEndDate;
+        // Filter transactions for selected period
+        $periodTransactions = $transactions->filter(function ($txn) use ($startDate, $endDate) {
+            return $txn->transaction_date >= $startDate && $txn->transaction_date <= $endDate;
         });
 
-        // Process each transaction for the selected year
-        foreach ($yearTransactions as $transaction) {
+        // Process each transaction for the selected period
+        foreach ($periodTransactions as $transaction) {
             // Update running balance based on transaction type
             if ($transaction->transaction_type == 'receipt') {
                 $receiptQty = $transaction->quantity;

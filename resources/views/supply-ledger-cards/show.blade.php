@@ -59,6 +59,7 @@
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}"
                                 class="flex space-x-2">
                                 <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
+                                <input type="hidden" name="month" value="{{ $selectedMonth }}">
                                 <select name="year" onchange="this.form.submit()"
                                     class="px-4 py-2 rounded-lg text-sm
                                         bg-white text-[#a01b1a] border border-[#a01b1a]
@@ -72,10 +73,32 @@
                                 </select>
                             </form>
 
+                            <!-- Month Selector (NEW) -->
+                            @if($availableMonths->isNotEmpty())
+                                <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}"
+                                    class="flex space-x-2">
+                                    <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
+                                    <input type="hidden" name="year" value="{{ $selectedYear }}">
+                                    <select name="month" onchange="this.form.submit()"
+                                        class="px-4 py-2 rounded-lg text-sm
+                                            bg-white text-[#a01b1a] border border-[#a01b1a]
+                                            focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
+                                        <option value="">All Months</option>
+                                        @foreach ($availableMonths as $month)
+                                            <option value="{{ $month['value'] }}"
+                                                {{ $selectedMonth == $month['value'] ? 'selected' : '' }}>
+                                                {{ $month['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            @endif
+
                             <!-- Fund Cluster Selector -->
                             <form method="GET" action="{{ route('supply-ledger-cards.show', $supply->supply_id) }}"
                                 class="flex space-x-2">
                                 <input type="hidden" name="year" value="{{ $selectedYear }}">
+                                <input type="hidden" name="month" value="{{ $selectedMonth }}">
                                 <select name="fund_cluster" onchange="this.form.submit()"
                                     class="px-4 py-2 rounded-lg text-sm
                                         bg-white text-[#a01b1a] border border-[#a01b1a]
