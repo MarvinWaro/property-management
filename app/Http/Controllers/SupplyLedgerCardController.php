@@ -67,100 +67,126 @@ class SupplyLedgerCardController extends Controller
     /**
      * Display ledger card for a specific supply
      */
-public function show(Request $request, $supplyId)
-{
-    $supply = Supply::with('category')->findOrFail($supplyId);
-    $fundCluster = $request->get('fund_cluster', '101'); // Default to 101 if not specified
+    public function show(Request $request, $supplyId)
+    {
+        $supply = Supply::with('category')->findOrFail($supplyId);
+        $fundCluster = $request->get('fund_cluster', '101'); // Default to 101 if not specified
 
-    // Get selected year (default to current year)
-    $selectedYear = $request->get('year', Carbon::now()->year);
+        // Get selected year (default to current year)
+        $selectedYear = $request->get('year', Carbon::now()->year);
 
-    // Pull all transactions for this supply, ordered by:
-    //   1) transaction_date ASC
-    //   2) reference_no     ASC
-    //   3) created_at       ASC
-    $transactions = SupplyTransaction::with(['department', 'user'])
-        ->where('supply_id', $supplyId)
-        ->orderBy('transaction_date', 'asc')
-        ->orderBy('reference_no',       'asc')
-        ->orderBy('created_at',         'asc')
-        ->get();
+        // Get selected month (null means show all months for the year)
+        $selectedMonth = $request->get('month', null);
 
-    // Available fund clusters
-    $fundClusters = SupplyStock::where('supply_id', $supplyId)
-        ->select('fund_cluster')
-        ->distinct()
-        ->whereNotNull('fund_cluster')
-        ->pluck('fund_cluster');
+        // Pull all transactions for this supply, ordered by:
+        //   1) transaction_date ASC
+        //   2) reference_no     ASC
+        //   3) created_at       ASC
+        $transactions = SupplyTransaction::with(['department', 'user'])
+            ->where('supply_id', $supplyId)
+            ->orderBy('transaction_date', 'asc')
+            ->orderBy('reference_no', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-    // Available years
-    $availableYears = SupplyTransaction::where('supply_id', $supplyId)
-        ->selectRaw('YEAR(transaction_date) as year')
-        ->distinct()
-        ->orderBy('year', 'desc')
-        ->pluck('year');
+        // Available fund clusters
+        $fundClusters = SupplyStock::where('supply_id', $supplyId)
+            ->select('fund_cluster')
+            ->distinct()
+            ->whereNotNull('fund_cluster')
+            ->pluck('fund_cluster');
 
-    if ($availableYears->isEmpty()) {
-        $availableYears = collect([Carbon::now()->year]);
+        // Available years
+        $availableYears = SupplyTransaction::where('supply_id', $supplyId)
+            ->selectRaw('YEAR(transaction_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([Carbon::now()->year]);
+        }
+
+        // Get available months for the selected year
+        $availableMonths = SupplyTransaction::where('supply_id', $supplyId)
+            ->whereYear('transaction_date', $selectedYear)
+            ->selectRaw('MONTH(transaction_date) as month')
+            ->distinct()
+            ->orderBy('month', 'asc')
+            ->pluck('month')
+            ->map(function ($month) {
+                return [
+                    'value' => $month,
+                    'name' => Carbon::create()->month($month)->format('F')
+                ];
+            });
+
+        // Current on-hand stock
+        $currentStock = SupplyStock::where('supply_id', $supplyId)
+            ->where('fund_cluster', $fundCluster)
+            ->sum('quantity_on_hand');
+
+        // Average unit cost for moving‐average calculation
+        $averageUnitCost = SupplyStock::where('supply_id', $supplyId)
+            ->where('fund_cluster', $fundCluster)
+            ->where('quantity_on_hand', '>', 0)
+            ->avg('unit_cost') ?? 0;
+
+        // Build your ledger rows
+        $ledgerCardEntries = $this->prepareLedgerCardEntries(
+            $transactions,
+            $fundCluster,
+            $averageUnitCost,
+            $selectedYear,
+            $selectedMonth
+        );
+
+        // Current moving‐average cost is the last row's balance_unit_cost
+        $lastEntry = end($ledgerCardEntries);
+        $movingAverageCost = $lastEntry['balance_unit_cost'] ?? 0;
+
+        return view('supply-ledger-cards.show', compact(
+            'supply',
+            'ledgerCardEntries',
+            'fundClusters',
+            'fundCluster',
+            'currentStock',
+            'averageUnitCost',
+            'availableYears',
+            'selectedYear',
+            'availableMonths',
+            'selectedMonth',
+            'movingAverageCost'
+        ));
     }
-
-    // Current on-hand stock
-    $currentStock = SupplyStock::where('supply_id', $supplyId)
-        ->where('fund_cluster', $fundCluster)
-        ->sum('quantity_on_hand');
-
-    // Average unit cost for moving‐average calculation
-    $averageUnitCost = SupplyStock::where('supply_id', $supplyId)
-        ->where('fund_cluster', $fundCluster)
-        ->where('quantity_on_hand', '>', 0)
-        ->avg('unit_cost') ?? 0;
-
-    // Build your ledger rows
-    $ledgerCardEntries = $this->prepareLedgerCardEntries(
-        $transactions,
-        $fundCluster,
-        $averageUnitCost,
-        $selectedYear
-    );
-
-    // Current moving‐average cost is the last row’s balance_unit_cost
-    $lastEntry = end($ledgerCardEntries);
-    $movingAverageCost = $lastEntry['balance_unit_cost'] ?? 0;
-
-    return view('supply-ledger-cards.show', compact(
-        'supply',
-        'ledgerCardEntries',
-        'fundClusters',
-        'fundCluster',
-        'currentStock',
-        'averageUnitCost',
-        'availableYears',
-        'selectedYear',
-        'movingAverageCost'
-    ));
-}
-
 
     /**
      * Prepare ledger card entries with running balance
      */
-    private function prepareLedgerCardEntries($transactions, $fundCluster, $averageUnitCost, $selectedYear)
+    private function prepareLedgerCardEntries($transactions, $fundCluster, $averageUnitCost, $selectedYear, $selectedMonth = null)
     {
         $entries = [];
         $runningBalance = 0;
         $runningTotalCost = 0;
         $weightedAverageUnitCost = 0;
 
-        // Filter transactions by selected year and previous years (for beginning balance)
-        $yearStartDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
-        $yearEndDate   = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
+        // Determine the date range based on whether a month is selected
+        if ($selectedMonth) {
+            // If month is selected, show only that month
+            $startDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->startOfDay();
+            $endDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->endOfMonth()->endOfDay();
+        } else {
+            // If no month selected, show entire year
+            $startDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfDay();
+            $endDate = Carbon::createFromDate($selectedYear, 12, 31)->endOfDay();
+        }
 
-        // Calculate beginning balance from all transactions before selected year
-        $prevYearTransactions = $transactions->filter(function ($txn) use ($yearStartDate) {
-            return $txn->transaction_date < $yearStartDate;
+        // Calculate beginning balance from all transactions before the start date
+        $prevTransactions = $transactions->filter(function ($txn) use ($startDate) {
+            return $txn->transaction_date < $startDate;
         });
 
-        foreach ($prevYearTransactions as $txn) {
+        foreach ($prevTransactions as $txn) {
             if ($txn->transaction_type == 'receipt') {
                 $runningBalance += $txn->quantity;
                 $runningTotalCost += $txn->total_cost; // Use total_cost from transaction
@@ -177,9 +203,13 @@ public function show(Request $request, $supplyId)
         // Calculate weighted average for beginning balance
         $weightedAverageUnitCost = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
 
-        // Add beginning balance entry
+        // Add beginning balance entry with appropriate date
+        $beginningBalanceDate = $selectedMonth
+            ? Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('Y-m-d')
+            : $startDate->format('Y-m-d');
+
         $entries[] = [
-            'date'               => $yearStartDate->format('Y-m-d'),
+            'date'               => $beginningBalanceDate,
             'reference'          => 'Beginning Balance',
             'receipt_qty'        => null,
             'receipt_unit_cost'  => null,
@@ -194,13 +224,13 @@ public function show(Request $request, $supplyId)
             'transaction_id'     => null,
         ];
 
-        // Filter transactions for selected year
-        $yearTransactions = $transactions->filter(function ($txn) use ($yearStartDate, $yearEndDate) {
-            return $txn->transaction_date >= $yearStartDate && $txn->transaction_date <= $yearEndDate;
+        // Filter transactions for selected period
+        $periodTransactions = $transactions->filter(function ($txn) use ($startDate, $endDate) {
+            return $txn->transaction_date >= $startDate && $txn->transaction_date <= $endDate;
         });
 
-        // Process each transaction for the selected year
-        foreach ($yearTransactions as $transaction) {
+        // Process each transaction for the selected period
+        foreach ($periodTransactions as $transaction) {
             if ($transaction->transaction_type == 'receipt') {
                 // For receipts, use the actual transaction values
                 $receiptQty       = $transaction->quantity;
