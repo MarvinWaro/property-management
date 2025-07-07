@@ -125,8 +125,7 @@
                     @endif
 
                     <!-- Table Description Caption -->
-                    <div
-                        class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                    <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
                         <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Supply Stocks</h3>
                         <p>
                             This section provides a comprehensive overview of CHED supply stocks,
@@ -135,241 +134,239 @@
                         </p>
                     </div>
 
-                    <!-- Supply Stock Table - Minimalist Design -->
+                    <!-- Supply Stock Table - Removed vertical scroll, keeping horizontal scroll for mobile -->
                     <div class="overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
-                            <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left border-collapse">
-                                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supply Item</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
-                                            {{-- <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th> --}}
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Expiry Date</th>
+                            <table class="w-full text-sm text-left border-collapse">
+                                <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supply Item</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Quantity</th>
+                                        {{-- <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Cost & Value</th> --}}
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Status</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Expiry Date</th>
+                                        @if(auth()->user()->hasRole('admin'))
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($stocks as $stock)
+                                        <tr class="{{ $stock->status_background }} border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                            <!-- ID -->
+                                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                {{ $stock->stock_id }}
+                                            </td>
+                                            <!-- Supply Item -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                <div class="font-medium">{{ $stock->supply->item_name }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ $stock->supply->stock_no }}</div>
+                                            </td>
+                                            <!-- Supplier -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                @if($stock->supplier)
+                                                    <div class="text-sm">{{ $stock->supplier->name }}</div>
+                                                @else
+                                                    <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Department -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                @if($stock->department)
+                                                    <div class="text-sm">{{ $stock->department->name }}</div>
+                                                @else
+                                                    <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                                                @endif
+                                            </td>
+                                            <!-- Quantity -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
+                                            </td>
+
+                                            <!-- Combined Cost & Value -->
+                                            {{-- <td class="px-6 py-4 dark:text-white">
+                                                <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    Total: ₱{{ number_format($stock->total_cost, 2) }}
+                                                </div>
+                                            </td> --}}
+
+                                            <!-- Status -->
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $stock->status_badge_color }}">
+                                                    {{ $stock->status_display }}
+                                                </span>
+
+                                                @if($stock->dynamic_status === 'low_stock')
+                                                    <div class="text-xs text-[#f59e0b] dark:text-[#fbbf24] mt-1 flex items-center">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        Need to reorder
+                                                    </div>
+                                                @elseif($stock->dynamic_status === 'depleted')
+                                                    <div class="text-xs text-[#ce201f] dark:text-[#ce201f] mt-1 flex items-center">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        Out of stock
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <!-- Expiry Date -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                @if ($stock->expiry_date)
+                                                    <span class="@if (\Carbon\Carbon::parse($stock->expiry_date)->isPast()) text-[#ce201f] dark:text-[#ce201f] @endif">
+                                                        {{ \Carbon\Carbon::parse($stock->expiry_date)->format('M d, Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-500 dark:text-gray-400">N/A</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Actions -->
                                             @if(auth()->user()->hasRole('admin'))
-                                                <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
+                                                <td class="px-6 py-4 text-center">
+                                                    <div class="flex items-center justify-center space-x-2">
+                                                        <!-- + Add Stock -->
+                                                        <button type="button" data-modal-target="createStockModal"
+                                                            data-modal-toggle="createStockModal"
+                                                            class="add-stock-btn p-2 text-[#ce201f] hover:bg-[#ce201f]/10 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f]
+                                                            dark:hover:bg-[#ce201f]/20 transition-all duration-200"
+                                                            data-supply-id="{{ $stock->supply_id }}"
+                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-fund-cluster="{{ $stock->fund_cluster }}"
+                                                            title="Add stock to {{ $stock->supply->item_name }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <!-- Edit Stock (Adjustment/Re‑value) -->
+                                                        <button type="button"
+                                                            class="edit-stock-btn p-2 text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24]
+                                                            dark:hover:bg-[#f59e0b]/20 transition-all duration-200"
+                                                            data-stock-id="{{ $stock->stock_id }}"
+                                                            data-supply-id="{{ $stock->supply_id }}"
+                                                            data-supply-name="{{ $stock->supply->item_name }}"
+                                                            data-quantity="{{ $stock->quantity_on_hand }}"
+                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
+                                                            data-status="{{ $stock->status }}"
+                                                            data-expiry-date="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
+                                                            data-fund-cluster="{{ $stock->fund_cluster }}"
+                                                            data-days-to-consume="{{ $stock->days_to_consume }}"
+                                                            data-remarks="{{ $stock->remarks }}"
+                                                            data-supplier-id="{{ $stock->supplier_id }}"
+                                                            data-department-id="{{ $stock->department_id }}"
+                                                            data-modal-target="editStockModal"
+                                                            data-modal-toggle="editStockModal" title="Re‑value stock">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <!-- Stock Card Button -->
+                                                        <a href="{{ route('stock-cards.show', $stock->supply_id) }}"
+                                                            class="p-2 text-[#10b981] hover:bg-[#10b981]/10 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:text-[#34d399]
+                                                            dark:hover:bg-[#10b981]/20 transition-all duration-200"
+                                                            title="View Stock Card">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <path d="M14 2v6h6"></path>
+                                                                <path d="M16 13H8"></path>
+                                                                <path d="M16 17H8"></path>
+                                                                <path d="M10 9H8"></path>
+                                                            </svg>
+                                                        </a>
+
+                                                        <!-- Supply Ledger Card Button -->
+                                                        <a href="{{ route('supply-ledger-cards.show', $stock->supply_id) }}"
+                                                            class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-gray-300 dark:text-gray-400
+                                                            dark:hover:bg-gray-700 transition-all duration-200"
+                                                            title="View Supply Ledger Card">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                                <path d="M14 2v6h6"></path>
+                                                                <path d="M16 13H8"></path>
+                                                                <path d="M16 17H8"></path>
+                                                                <path d="M10 9H8"></path>
+                                                            </svg>
+                                                        </a>
+
+                                                        <!-- Delete Stock -->
+                                                        <button type="button"
+                                                            class="delete-stock-btn p-2 text-[#ce201f] hover:bg-[#ce201f]/10 rounded-lg
+                                                            focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f]
+                                                            dark:hover:bg-[#ce201f]/20 transition-all duration-200"
+                                                            data-stock-id="{{ $stock->stock_id }}"
+                                                            title="Delete stock">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             @endif
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($stocks as $stock)
-                                            <tr class="{{ $stock->status_background }} border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                                <!-- ID -->
-                                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                    {{ $stock->stock_id }}
-                                                </td>
-                                                <!-- Supply Item -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    <div class="font-medium">{{ $stock->supply->item_name }}</div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                        {{ $stock->supply->stock_no }}</div>
-                                                </td>
-                                                <!-- Supplier -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    @if($stock->supplier)
-                                                        <div class="text-sm">{{ $stock->supplier->name }}</div>
-                                                    @else
-                                                        <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
-                                                    @endif
-                                                </td>
-
-                                                <!-- Department -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    @if($stock->department)
-                                                        <div class="text-sm">{{ $stock->department->name }}</div>
-                                                    @else
-                                                        <span class="text-gray-400 dark:text-gray-500 text-sm">-</span>
-                                                    @endif
-                                                </td>
-                                                <!-- Quantity -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    {{ number_format($stock->quantity_on_hand) }} {{ $stock->supply->unit_of_measurement }}
-                                                </td>
-
-                                                <!-- Combined Cost & Value -->
-                                                {{-- <td class="px-6 py-4 dark:text-white">
-                                                    <div class="font-medium">₱{{ number_format($stock->unit_cost, 2) }}</div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                        Total: ₱{{ number_format($stock->total_cost, 2) }}
-                                                    </div>
-                                                </td> --}}
-
-                                                <!-- Status -->
-                                                <td class="px-6 py-4">
-                                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $stock->status_badge_color }}">
-                                                        {{ $stock->status_display }}
-                                                    </span>
-
-                                                    @if($stock->dynamic_status === 'low_stock')
-                                                        <div class="text-xs text-[#f59e0b] dark:text-[#fbbf24] mt-1 flex items-center">
-                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-8 text-center">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <!-- empty‑state SVG + copy -->
+                                                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                                    </svg>
+                                                    <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
+                                                        No stock entries found</p>
+                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
+                                                        started by adding new stock items</p>
+                                                    @if(auth()->user()->hasRole('admin'))
+                                                        <button type="button" data-modal-target="createStockModal"
+                                                            data-modal-toggle="createStockModal"
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white
+                                                            font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30
+                                                            dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]">
+                                                            <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                                viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                                    clip-rule="evenodd"></path>
                                                             </svg>
-                                                            Need to reorder
-                                                        </div>
-                                                    @elseif($stock->dynamic_status === 'depleted')
-                                                        <div class="text-xs text-[#ce201f] dark:text-[#ce201f] mt-1 flex items-center">
-                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Out of stock
-                                                        </div>
+                                                            Add Stock
+                                                        </button>
                                                     @endif
-                                                </td>
-                                                <!-- Expiry Date -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    @if ($stock->expiry_date)
-                                                        <span class="@if (\Carbon\Carbon::parse($stock->expiry_date)->isPast()) text-[#ce201f] dark:text-[#ce201f] @endif">
-                                                            {{ \Carbon\Carbon::parse($stock->expiry_date)->format('M d, Y') }}
-                                                        </span>
-                                                    @else
-                                                        <span class="text-gray-500 dark:text-gray-400">N/A</span>
-                                                    @endif
-                                                </td>
-
-                                                <!-- Actions -->
-                                                @if(auth()->user()->hasRole('admin'))
-                                                    <td class="px-6 py-4 text-center">
-                                                        <div class="flex items-center justify-center space-x-2">
-                                                            <!-- + Add Stock -->
-                                                            <button type="button" data-modal-target="createStockModal"
-                                                                data-modal-toggle="createStockModal"
-                                                                class="add-stock-btn p-2 text-[#ce201f] hover:bg-[#ce201f]/10 rounded-lg
-                                                                focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f]
-                                                                dark:hover:bg-[#ce201f]/20 transition-all duration-200"
-                                                                data-supply-id="{{ $stock->supply_id }}"
-                                                                data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
-                                                                data-fund-cluster="{{ $stock->fund_cluster }}"
-                                                                title="Add stock to {{ $stock->supply->item_name }}">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-                                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                                                </svg>
-                                                            </button>
-
-                                                            <!-- Edit Stock (Adjustment/Re‑value) -->
-                                                            <button type="button"
-                                                                class="edit-stock-btn p-2 text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded-lg
-                                                                focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24]
-                                                                dark:hover:bg-[#f59e0b]/20 transition-all duration-200"
-                                                                data-stock-id="{{ $stock->stock_id }}"
-                                                                data-supply-id="{{ $stock->supply_id }}"
-                                                                data-supply-name="{{ $stock->supply->item_name }}"
-                                                                data-quantity="{{ $stock->quantity_on_hand }}"
-                                                                data-unit-cost="{{ number_format($stock->unit_cost, 2) }}"
-                                                                data-status="{{ $stock->status }}"
-                                                                data-expiry-date="{{ optional($stock->expiry_date)->format('Y-m-d') }}"
-                                                                data-fund-cluster="{{ $stock->fund_cluster }}"
-                                                                data-days-to-consume="{{ $stock->days_to_consume }}"
-                                                                data-remarks="{{ $stock->remarks }}"
-                                                                data-supplier-id="{{ $stock->supplier_id }}"
-                                                                data-department-id="{{ $stock->department_id }}"
-                                                                data-modal-target="editStockModal"
-                                                                data-modal-toggle="editStockModal" title="Re‑value stock">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                    height="16" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                                </svg>
-                                                            </button>
-
-                                                            <!-- Stock Card Button -->
-                                                            <a href="{{ route('stock-cards.show', $stock->supply_id) }}"
-                                                                class="p-2 text-[#10b981] hover:bg-[#10b981]/10 rounded-lg
-                                                                focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:text-[#34d399]
-                                                                dark:hover:bg-[#10b981]/20 transition-all duration-200"
-                                                                title="View Stock Card">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                                    stroke-linejoin="round">
-                                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                                    <path d="M14 2v6h6"></path>
-                                                                    <path d="M16 13H8"></path>
-                                                                    <path d="M16 17H8"></path>
-                                                                    <path d="M10 9H8"></path>
-                                                                </svg>
-                                                            </a>
-
-                                                            <!-- Supply Ledger Card Button -->
-                                                            <a href="{{ route('supply-ledger-cards.show', $stock->supply_id) }}"
-                                                                class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg
-                                                                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:text-gray-400
-                                                                dark:hover:bg-gray-700 transition-all duration-200"
-                                                                title="View Supply Ledger Card">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                                    stroke-linejoin="round">
-                                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                                    <path d="M14 2v6h6"></path>
-                                                                    <path d="M16 13H8"></path>
-                                                                    <path d="M16 17H8"></path>
-                                                                    <path d="M10 9H8"></path>
-                                                                </svg>
-                                                            </a>
-
-                                                            <!-- Delete Stock -->
-                                                            <button type="button"
-                                                                class="delete-stock-btn p-2 text-[#ce201f] hover:bg-[#ce201f]/10 rounded-lg
-                                                                focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f]
-                                                                dark:hover:bg-[#ce201f]/20 transition-all duration-200"
-                                                                data-stock-id="{{ $stock->stock_id }}"
-                                                                title="Delete stock">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                    height="16" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M3 6h18" />
-                                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                    <line x1="10" x2="10" y1="11" y2="17" />
-                                                                    <line x1="14" x2="14" y1="11" y2="17" />
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                @endif
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="9" class="px-6 py-8 text-center">
-                                                    <div class="flex flex-col items-center justify-center">
-                                                        <!-- empty‑state SVG + copy -->
-                                                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                                                        </svg>
-                                                        <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
-                                                            No stock entries found</p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
-                                                            started by adding new stock items</p>
-                                                        @if(auth()->user()->hasRole('admin'))
-                                                            <button type="button" data-modal-target="createStockModal"
-                                                                data-modal-toggle="createStockModal"
-                                                                class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white
-                                                                font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30
-                                                                dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]">
-                                                                <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                        clip-rule="evenodd"></path>
-                                                                </svg>
-                                                                Add Stock
-                                                            </button>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 

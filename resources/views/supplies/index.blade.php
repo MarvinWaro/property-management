@@ -126,8 +126,7 @@
                     @endif
 
                     <!-- Table Description Caption -->
-                    <div
-                        class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+                    <div class="p-4 mb-4 text-sm text-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
                         <h3 class="text-lg font-semibold mb-1 text-gray-900 dark:text-white">CHED Supplies</h3>
                         <p>
                             This section provides a comprehensive overview of CHED supplies,
@@ -137,131 +136,129 @@
                         </p>
                     </div>
 
-                    <!-- Supply Table - Fixed without Supplier and Department columns -->
+                    <!-- Supply Table - Removed vertical scroll, keeping horizontal scroll for mobile -->
                     <div class="overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
-                            <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left border-collapse">
-                                    <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Stock No</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Item Details</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Unit</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Reorder Point</th>
+                            <table class="w-full text-sm text-left border-collapse">
+                                <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Stock No</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Item Details</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Unit</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Reorder Point</th>
+                                        @if(auth()->user()->hasRole('admin'))
+                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($supplies as $supply)
+                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            <!-- Supply ID -->
+                                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {{ $supply->supply_id }}
+                                            </td>
+                                            <!-- Stock No -->
+                                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {{ $supply->stock_no }}
+                                            </td>
+                                            <!-- Item Details (Name + Category) -->
+                                            <td class="px-6 py-4">
+                                                <div class="text-gray-900 font-medium dark:text-white">{{ $supply->item_name }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $supply->category->name ?? 'Uncategorized' }}</div>
+                                            </td>
+                                            <!-- Unit -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                {{ $supply->unit_of_measurement }}
+                                            </td>
+                                            <!-- Reorder Point -->
+                                            <td class="px-6 py-4 dark:text-white">
+                                                {{ $supply->reorder_point }}
+                                            </td>
+                                            <!-- Actions -->
                                             @if(auth()->user()->hasRole('admin'))
-                                                <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
-                                            @endif
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($supplies as $supply)
-                                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                                <!-- Supply ID -->
-                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    {{ $supply->supply_id }}
-                                                </td>
-                                                <!-- Stock No -->
-                                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    {{ $supply->stock_no }}
-                                                </td>
-                                                <!-- Item Details (Name + Category) -->
-                                                <td class="px-6 py-4">
-                                                    <div class="text-gray-900 font-medium dark:text-white">{{ $supply->item_name }}</div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $supply->category->name ?? 'Uncategorized' }}</div>
-                                                </td>
-                                                <!-- Unit -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    {{ $supply->unit_of_measurement }}
-                                                </td>
-                                                <!-- Reorder Point -->
-                                                <td class="px-6 py-4 dark:text-white">
-                                                    {{ $supply->reorder_point }}
-                                                </td>
-                                                <!-- Actions -->
-                                                @if(auth()->user()->hasRole('admin'))
-                                                    <td class="px-6 py-4 text-center dark:text-white">
-                                                        <div class="flex items-center justify-center space-x-2">
-                                                            <!-- Edit Button - Now with Yellow styling -->
-                                                            <button type="button" data-modal-target="editSupplyModal"
-                                                                data-modal-toggle="editSupplyModal"
-                                                                class="edit-supply-btn p-2 text-yellow-600 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:text-yellow-400 dark:hover:bg-gray-700 transition-all duration-200"
-                                                                data-supply-id="{{ $supply->supply_id }}"
-                                                                data-stock-no="{{ $supply->stock_no }}"
-                                                                data-item-name="{{ $supply->item_name }}"
-                                                                data-description="{{ $supply->description }}"
-                                                                data-unit="{{ $supply->unit_of_measurement }}"
-                                                                data-category-id="{{ $supply->category_id }}"
-                                                                data-reorder-point="{{ $supply->reorder_point }}"
-                                                                data-acquisition-cost="{{ number_format($supply->acquisition_cost, 2) }}">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                    height="16" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path
-                                                                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                    <path
-                                                                        d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                                </svg>
-                                                            </button>
+                                                <td class="px-6 py-4 text-center dark:text-white">
+                                                    <div class="flex items-center justify-center space-x-2">
+                                                        <!-- Edit Button - Now with Yellow styling -->
+                                                        <button type="button" data-modal-target="editSupplyModal"
+                                                            data-modal-toggle="editSupplyModal"
+                                                            class="edit-supply-btn p-2 text-yellow-600 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:text-yellow-400 dark:hover:bg-gray-700 transition-all duration-200"
+                                                            data-supply-id="{{ $supply->supply_id }}"
+                                                            data-stock-no="{{ $supply->stock_no }}"
+                                                            data-item-name="{{ $supply->item_name }}"
+                                                            data-description="{{ $supply->description }}"
+                                                            data-unit="{{ $supply->unit_of_measurement }}"
+                                                            data-category-id="{{ $supply->category_id }}"
+                                                            data-reorder-point="{{ $supply->reorder_point }}"
+                                                            data-acquisition-cost="{{ number_format($supply->acquisition_cost, 2) }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path
+                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                <path
+                                                                    d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                                                            </svg>
+                                                        </button>
 
-                                                            <!-- Delete Button -->
-                                                            <button type="button"
-                                                                data-modal-target="deleteSupplyModal{{ $supply->supply_id }}"
-                                                                data-modal-toggle="deleteSupplyModal{{ $supply->supply_id }}"
-                                                                class="p-2 text-red-600 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:text-red-400 dark:hover:bg-gray-700 transition-all duration-200">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                    height="16" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M3 6h18" />
-                                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                    <line x1="10" x2="10" y1="11" y2="17" />
-                                                                    <line x1="14" x2="14" y1="11" y2="17" />
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                @endif
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="6" class="px-6 py-8 text-center">
-                                                    <div class="flex flex-col items-center justify-center">
-                                                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
-                                                            </path>
-                                                        </svg>
-                                                        <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
-                                                            No Supply found</p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-                                                            Get started by adding a new Item/Supply</p>
-                                                        @if(auth()->user()->hasRole('admin'))
-                                                            <button type="button" data-modal-target="createSupplyModal"
-                                                                data-modal-toggle="createSupplyModal"
-                                                                class="mt-4 inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700">
-                                                                <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                        clip-rule="evenodd"></path>
-                                                                </svg>
-                                                                Add Items/Supply
-                                                            </button>
-                                                        @endif
+                                                        <!-- Delete Button -->
+                                                        <button type="button"
+                                                            data-modal-target="deleteSupplyModal{{ $supply->supply_id }}"
+                                                            data-modal-toggle="deleteSupplyModal{{ $supply->supply_id }}"
+                                                            class="p-2 text-red-600 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:text-red-400 dark:hover:bg-gray-700 transition-all duration-200">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line x1="10" x2="10" y1="11" y2="17" />
+                                                                <line x1="14" x2="14" y1="11" y2="17" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                                            @endif
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="px-6 py-8 text-center">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <svg class="w-12 h-12 text-gray-300 mb-4" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
+                                                        </path>
+                                                    </svg>
+                                                    <p class="text-lg font-medium text-gray-400 dark:text-gray-500">
+                                                        No Supply found</p>
+                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+                                                        Get started by adding a new Item/Supply</p>
+                                                    @if(auth()->user()->hasRole('admin'))
+                                                        <button type="button" data-modal-target="createSupplyModal"
+                                                            data-modal-toggle="createSupplyModal"
+                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700">
+                                                            <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                                viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Add Items/Supply
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
