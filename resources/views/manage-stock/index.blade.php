@@ -237,7 +237,7 @@
                                                             </svg>
                                                         </button>
                                                         <!-- Edit Stock -->
-                                                        <button type="button"
+                                                        <button type="button" data-modal-target="editStockModal" data-modal-toggle="editStockModal"
                                                             class="edit-stock-btn p-2 text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded-lg
                                                             focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24]
                                                             dark:hover:bg-[#f59e0b]/20 transition-all duration-200"
