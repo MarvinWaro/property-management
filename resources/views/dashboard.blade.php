@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">{{ $staffCount }}</p>
+                                    <p class="text-3xl font-semibold text-gray-900 dark:text-white">{{ $employeeCount }}</p>
                                     @if ($lastUpdated)
                                         <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

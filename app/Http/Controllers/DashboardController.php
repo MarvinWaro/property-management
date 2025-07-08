@@ -22,8 +22,8 @@ class DashboardController extends Controller
         // Get search query if exists
         $search = $request->get('search');
 
-        // Staff count (for employees card)
-        $staffCount = User::where('role', 'staff')->count();
+        // FIXED: Employee count (including staff, admin, and cao)
+        $employeeCount = User::whereIn('role', ['staff', 'admin', 'cao'])->count();
 
         // Total supplies count
         $totalSupplies = Supply::count();
@@ -106,7 +106,7 @@ class DashboardController extends Controller
         $designations = Designation::all();
 
         return view('dashboard', compact(
-            'staffCount',
+            'employeeCount',  // Changed from staffCount to employeeCount
             'totalSupplies',
             'totalStockValue',
             'lowStockItems',
