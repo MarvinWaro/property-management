@@ -45,18 +45,18 @@ class DashboardController extends Controller
             ->whereRaw('COALESCE(ss.total_qty, 0) <= supplies.reorder_point')
             ->count();
 
-        // Transactions this month
+        // SIMPLE FIX: Count transactions this month using created_at (when they were actually recorded)
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        $transactionsThisMonth = SupplyTransaction::whereMonth('transaction_date', $currentMonth)
-            ->whereYear('transaction_date', $currentYear)
+        $transactionsThisMonth = SupplyTransaction::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
             ->count();
 
         // Get percentage change from last month
         $lastMonth = Carbon::now()->subMonth();
-        $transactionsLastMonth = SupplyTransaction::whereMonth('transaction_date', $lastMonth->month)
-            ->whereYear('transaction_date', $lastMonth->year)
+        $transactionsLastMonth = SupplyTransaction::whereMonth('created_at', $lastMonth->month)
+            ->whereYear('created_at', $lastMonth->year)
             ->count();
 
         $transactionPercentChange = $transactionsLastMonth > 0
@@ -121,7 +121,7 @@ class DashboardController extends Controller
             'designations',
             'search',
             'stockItems',
-            'lastTransactionUpdateTime'  // Changed variable name to reflect that it's the update time
+            'lastTransactionUpdateTime'
         ));
     }
 

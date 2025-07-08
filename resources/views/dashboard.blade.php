@@ -130,40 +130,6 @@
 
             </div>
 
-            <!-- Alternative Version with Accent Colors (Optional) -->
-            {{-- <div class="hidden grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
-
-                <!-- Employees Card with Blue Accent -->
-                <a href="#user-section" class="group">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl border-l-4 border-blue-500 shadow-sm p-6 hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-4">
-                                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Employees</p>
-                                    <div class="w-8 h-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                            <circle cx="9" cy="7" r="4"/>
-                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $staffCount }}</p>
-                                    @if ($lastUpdated)
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Updated {{ $lastUpdated->diffForHumans() }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Add other cards with different accent colors: green, yellow, red -->
-
-            </div> --}}
-
             <!-- New Section: List of Registered Users -->
             <div id="user-section" class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
                 <!-- Table Header with Search and Add Button -->
@@ -1891,8 +1857,6 @@
         window.location.href = window.location.pathname;
     }
 </script>
-
-// Add this script to your dashboard page alongside your existing scripts
 
 <script>
     // Modal Accessibility Fix - Add this to resolve aria-hidden focus issues

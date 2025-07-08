@@ -113,65 +113,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      */
     Route::middleware(['admin-cao'])->group(function () {
 
-        // ADD THIS TEMPORARY TEST ROUTE TO YOUR web.php (inside admin-cao middleware group)
-
-        Route::get('/test-supplies-data', function() {
-            try {
-                $currentUser = auth()->user();
-
-                $result = [
-                    'user_can_access' => $currentUser->hasRole(['admin', 'cao']),
-                    'user_role' => $currentUser->role,
-                    'database_counts' => [
-                        'total_supplies' => \App\Models\Supply::count(),
-                        'active_supplies' => \App\Models\Supply::where('is_active', true)->count(),
-                        'total_supply_stocks' => \App\Models\SupplyStock::count(),
-                        'available_supply_stocks' => \App\Models\SupplyStock::where('status', 'available')->where('quantity_on_hand', '>', 0)->count(),
-                    ]
-                ];
-
-                // Test the exact same logic as your controller
-                if ($currentUser->hasRole(['admin', 'cao'])) {
-
-                    // Test the supplies query from your controller
-                    $availableSupplies = \App\Models\SupplyStock::with(['supply'])
-                        ->where('status', 'available')
-                        ->where('quantity_on_hand', '>', 0)
-                        ->get()
-                        ->map(function ($stock) {
-                            return (object) [
-                                'supply_id' => $stock->supply_id,
-                                'supply' => $stock->supply,
-                                'quantity_on_hand' => $stock->quantity_on_hand,
-                                'fund_cluster' => $stock->fund_cluster,
-                                'stock_no' => $stock->supply->stock_no,
-                                'item_name' => $stock->supply->item_name,
-                                'description' => $stock->supply->description,
-                                'unit_of_measurement' => $stock->supply->unit_of_measurement,
-                            ];
-                        });
-
-                    $result['supplies'] = [
-                        'count' => $availableSupplies->count(),
-                        'type' => gettype($availableSupplies),
-                        'is_collection' => $availableSupplies instanceof \Illuminate\Support\Collection,
-                        'first_3' => $availableSupplies->take(3)->toArray(),
-                        'all_data' => $availableSupplies->toArray() // This is what should be passed to blade
-                    ];
-                }
-
-                return response()->json($result, 200, [], JSON_PRETTY_PRINT);
-
-            } catch (\Exception $e) {
-                return response()->json([
-                    'error' => 'Test failed',
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => basename($e->getFile())
-                ], 500, [], JSON_PRETTY_PRINT);
-            }
-        })->name('test.supplies-data');
-
         // these now share your normal web session cookie
 
         // Dashboard Routes
@@ -212,12 +153,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             ->name('ris.validate-manual-stock')
             ->middleware(['auth','admin-cao']);
 
-
-
-
-
         // RSMI (Report of Supplies and Materials Issued) routes
-        // Add these routes to your existing web.php file within the middleware group
         // RSMI (Report of Supplies and Materials Issued) routes
         Route::get('/rsmi', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'index'])->name('rsmi.index');
         Route::get('/rsmi/generate', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'generate'])->name('rsmi.generate');
