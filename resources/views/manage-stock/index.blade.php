@@ -672,6 +672,7 @@
                         </div>
 
                         <!-- Add these styles -->
+
                         <style>
                             @keyframes modal-slide-up {
                                 from {
@@ -716,12 +717,32 @@
                                 background: #555;
                             }
 
-
-                            /* Custom dropdown styles */
-                            .supply-dropdown-menu {
-                                max-width: 400px;
+                            /* FIXED: Allow dropdowns to escape the modal boundaries */
+                            .supply-select-wrapper {
+                                position: relative;
+                                z-index: 1;
                             }
 
+                            .supply-dropdown-menu {
+                                position: fixed !important;
+                                z-index: 99999 !important; /* Increased z-index */
+                                max-width: 400px;
+                                min-width: 300px;
+                                /* Remove conflicting positioning */
+                            }
+
+                            /* FIXED: Allow table container to let dropdowns overflow */
+                            .overflow-hidden {
+                                overflow: visible !important;
+                            }
+
+                            /* FIXED: Specific override for the table container */
+                            .overflow-x-auto {
+                                overflow-x: auto;
+                                overflow-y: visible !important;
+                            }
+
+                            /* Custom dropdown styles */
                             .supply-options-container::-webkit-scrollbar {
                                 width: 6px;
                             }
@@ -747,35 +768,6 @@
                             .supply-option:hover {
                                 transform: translateX(2px);
                             }
-
-                            /* Add this to your styles section */
-
-
-                            .supply-dropdown-menu {
-                                position: fixed !important;
-                                z-index: 9999 !important;
-                            }
-                            /* Allow only the supply‐item dropdowns to escape their boxed parent */
-                            .supply-select-wrapper {
-                                /* make sure parent doesn’t clip its children */
-                                overflow: visible !important;
-                                position: relative;        /* keep dropdown positioned to its trigger */
-                                z-index: 0;                /* dropdown itself will lift itself */
-                            }
-
-                            .supply-dropdown-menu {
-                                position: absolute !important;
-                                top: calc(100% + 0.25rem);  /* just below the trigger */
-                                left: 0;
-                                width: 100%;
-                                max-width: 400px;
-                                z-index: 9999 !important;
-                            }
-
-
-
-                            /* Keep the table scrollable but allow dropdowns to escape */
-
                         </style>
 
                         <script>
