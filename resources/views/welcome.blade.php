@@ -4,11 +4,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>CISMS XII - Comprehensive Inventory and Supply Management System</title>
+        <title>CISMS XII - CHED Inventory and Supply Management System</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+
+        <link rel="icon" type="image/png" href="{{ asset('img/ched-logo.png') }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="apple-touch-icon" href="{{ asset('img/ched-logo.png') }}">
 
         <!-- Styles -->
         <style>

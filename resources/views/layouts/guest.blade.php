@@ -7,7 +7,9 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/ched-logo-180x180.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('img/ched-logo.png') }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="apple-touch-icon" href="{{ asset('img/ched-logo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
