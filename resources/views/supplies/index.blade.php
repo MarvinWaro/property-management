@@ -142,9 +142,10 @@
                             <table class="w-full text-sm text-left border-collapse">
                                 <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                        {{-- <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th> --}}
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Stock No</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Item Details</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Category</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Unit</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Reorder Point</th>
                                         @if(auth()->user()->hasRole('admin'))
@@ -156,18 +157,29 @@
                                     @forelse($supplies as $supply)
                                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                             <!-- Supply ID -->
-                                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {{-- <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 {{ $supply->supply_id }}
-                                            </td>
+                                            </td> --}}
+
                                             <!-- Stock No -->
                                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 {{ $supply->stock_no }}
                                             </td>
-                                            <!-- Item Details (Name + Category) -->
+
+                                            <!-- Item Details (Name + Description) -->
                                             <td class="px-6 py-4">
                                                 <div class="text-gray-900 font-medium dark:text-white">{{ $supply->item_name }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $supply->category->name ?? 'Uncategorized' }}</div>
+                                                @if($supply->description)
+                                                    <div class="text-xs italic text-blue-600 dark:text-blue-400">
+                                                        {{ $supply->description }}
+                                                    </div>
+                                                @endif
                                             </td>
+
+                                            <td class="px-6 py-4 dark:text-white">
+                                                {{ $supply->category->name ?? 'Uncategorized' }}
+                                            </td>
+
                                             <!-- Unit -->
                                             <td class="px-6 py-4 dark:text-white">
                                                 {{ $supply->unit_of_measurement }}

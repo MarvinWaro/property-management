@@ -116,7 +116,7 @@
                                                 <td class="px-6 py-4 font-medium">
                                                     <div class="text-gray-900 dark:text-white">{{ $supplier->name }}
                                                     </div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    <div class="text-sm text-blue-600 dark:text-blue-400 italic">
                                                         {{ $supplier->email ?? 'No email provided' }}</div>
                                                 </td>
                                                 <td class="px-6 py-4 text-gray-900 dark:text-white">

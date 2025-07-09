@@ -141,7 +141,7 @@
                             <table class="w-full text-sm text-left border-collapse">
                                 <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">STOCK NO</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supply Item</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Supplier</th>
                                         <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Department</th>
@@ -158,13 +158,20 @@
                                         <tr class="{{ $stock->status_background }} border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                             <!-- ID -->
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                {{ $stock->stock_id }}
+                                                {{-- {{ $stock->stock_id }} --}}
+                                                {{ $stock->supply->stock_no }}
                                             </td>
                                             <!-- Supply Item -->
                                             <td class="px-6 py-4 dark:text-white">
                                                 <div class="font-medium">{{ $stock->supply->item_name }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                    {{ $stock->supply->stock_no }}</div>
+                                                    {{-- {{ $stock->supply->stock_no }} --}}
+                                                </div>
+                                                @if($stock->supply->description)
+                                                    <div class="text-xs text-blue-600 dark:text-blue-400 italic mt-1">
+                                                        {{ $stock->supply->description }}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <!-- Supplier -->
                                             <td class="px-6 py-4 dark:text-white">
