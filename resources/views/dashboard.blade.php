@@ -1552,7 +1552,6 @@
 
 
 <!-- Include Chart.js via CDN -->
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Helper function to update chart text colors based on current mode
@@ -1695,6 +1694,8 @@
         });
     });
 </script>
+
+
 
 <script>
     // Client-side filtering function
