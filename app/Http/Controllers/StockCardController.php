@@ -173,10 +173,15 @@ class StockCardController extends Controller
             }
         }
 
-        // Add beginning balance entry
-        $beginningBalanceDate = $selectedMonth
-            ? Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('Y-m-d')
-            : $startDate->format('Y-m-d');
+        // --- UPDATED: Use Dec 31 previous year or day before month start ---
+        if ($selectedMonth) {
+            // For monthly, use the last day of the previous month
+            $beginningBalanceDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->subDay()->format('Y-m-d');
+        } else {
+            // For yearly, use December 31 of previous year
+            $beginningBalanceDate = Carbon::createFromDate($selectedYear, 1, 1)->subDay()->format('Y-m-d');
+        }
+        // ------------------------------------------------------------------
 
         $entries[] = [
             'date' => $beginningBalanceDate,
@@ -232,6 +237,7 @@ class StockCardController extends Controller
 
         return $entries;
     }
+
 
     /**
      * Export stock card to PDF
