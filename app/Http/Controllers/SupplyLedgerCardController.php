@@ -203,10 +203,15 @@ class SupplyLedgerCardController extends Controller
         // Calculate weighted average for beginning balance
         $weightedAverageUnitCost = $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
 
-        // Add beginning balance entry with appropriate date
-        $beginningBalanceDate = $selectedMonth
-            ? Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('Y-m-d')
-            : $startDate->format('Y-m-d');
+        // --- UPDATED BEGINNING BALANCE DATE LOGIC ---
+        if ($selectedMonth) {
+            // For monthly, use the last day of the previous month
+            $beginningBalanceDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->subDay()->format('Y-m-d');
+        } else {
+            // For yearly, use December 31 of previous year
+            $beginningBalanceDate = Carbon::createFromDate($selectedYear, 1, 1)->subDay()->format('Y-m-d');
+        }
+        // --------------------------------------------
 
         $entries[] = [
             'date'               => $beginningBalanceDate,
@@ -304,6 +309,7 @@ class SupplyLedgerCardController extends Controller
 
         return $entries;
     }
+
 
     /**
      * Export ledger card to PDF
