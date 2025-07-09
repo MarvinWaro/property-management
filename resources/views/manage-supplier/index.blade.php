@@ -96,7 +96,7 @@
                             <div class="overflow-y-auto max-h-[500px]">
                                 <table class="w-full text-sm text-left">
                                     <thead
-                                        <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                                        class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
                                         <tr>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
                                             <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Name / Email</th>
