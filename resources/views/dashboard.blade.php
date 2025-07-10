@@ -205,6 +205,112 @@
                 </div>
             </div>
 
+            <!-- NEW: Donut Charts Section -->
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Department Distribution Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-[#ce201f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 8h6m-6 4h6m-6 4h6m2-6h.01M19 12h.01"/>
+                                    </svg>
+                                    Division Distribution
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Transaction distribution by department</p>
+                            </div>
+                            <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+                                <select id="deptMonthFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="all">All Months</option>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <select id="deptYearFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="all">All Years</option>
+                                    <!-- Years will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="relative" style="height: 300px;">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+
+                        <!-- Department Stats -->
+                        <div class="mt-4 grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-[#ce201f]" id="totalDepartments">0</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Active Divisions</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-blue-600" id="topDepartment">-</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Most Active</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Status Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-[#ce201f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    Stock Status Overview
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Current inventory status breakdown</p>
+                            </div>
+                            <div class="mt-4 sm:mt-0">
+                                <button id="refreshStockBtn" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg hover:bg-gray-100 focus:ring-[#ce201f] focus:border-[#ce201f] px-3 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="relative" style="height: 300px;">
+                            <canvas id="stockStatusChart"></canvas>
+                        </div>
+
+                        <!-- Stock Stats -->
+                        <div class="mt-4 grid grid-cols-3 gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-green-600" id="wellStockedCount">0</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Well Stocked</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-yellow-600" id="lowStockCount">0</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Low Stock</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-red-600" id="outOfStockCount">0</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Out of Stock</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- New Section: List of Registered Users -->
             <div id="user-section" class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
                 <!-- Table Header with Search and Add Button -->
@@ -1900,8 +2006,265 @@
     // ...
 </script>
 
+<!-- Donut Charts JavaScript -->
+<script>
+    // Donut Charts Configuration and Data
+    let departmentChart;
+    let stockStatusChart;
+    let departmentData = @json($departmentTransactions ?? []);
+    let stockData = @json($stockStatusData ?? []);
 
+    // Donut chart color schemes
+    const donutColors = {
+        departments: [
+            '#ce201f', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6',
+            '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6b7280',
+            '#ef4444', '#14b8a6', '#f59e0b', '#8b5cf6'
+        ],
+        stock: {
+            wellStocked: '#10b981',   // Green
+            lowStock: '#f59e0b',      // Yellow
+            outOfStock: '#ef4444'     // Red
+        }
+    };
 
+    // Initialize Donut Charts when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit for the line chart to initialize first
+        setTimeout(() => {
+            initializeDepartmentChart();
+            initializeStockChart();
+            populateDeptYearFilter();
+
+            // Add event listeners for department chart filters
+            document.getElementById('deptMonthFilter').addEventListener('change', updateDepartmentChart);
+            document.getElementById('deptYearFilter').addEventListener('change', updateDepartmentChart);
+            document.getElementById('refreshStockBtn').addEventListener('click', refreshStockChart);
+        }, 500);
+    });
+
+    function initializeDepartmentChart() {
+        const ctx = document.getElementById('departmentChart').getContext('2d');
+
+        departmentChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: donutColors.departments,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 11
+                            },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        updateDepartmentChart();
+    }
+
+    function initializeStockChart() {
+        const ctx = document.getElementById('stockStatusChart').getContext('2d');
+
+        stockStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Well Stocked', 'Low Stock', 'Out of Stock'],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        donutColors.stock.wellStocked,
+                        donutColors.stock.lowStock,
+                        donutColors.stock.outOfStock
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 11
+                            },
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} supplies (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        updateStockChart();
+    }
+
+    function populateDeptYearFilter() {
+        const yearFilter = document.getElementById('deptYearFilter');
+        const years = new Set();
+
+        // Collect all years from department data
+        Object.keys(departmentData || {}).forEach(dept => {
+            if (typeof departmentData[dept] === 'object') {
+                Object.keys(departmentData[dept]).forEach(year => {
+                    years.add(year);
+                });
+            }
+        });
+
+        const sortedYears = Array.from(years).sort().reverse();
+
+        // Clear existing options except "All Years"
+        yearFilter.innerHTML = '<option value="all">All Years</option>';
+
+        sortedYears.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearFilter.appendChild(option);
+        });
+    }
+
+    function updateDepartmentChart() {
+        const selectedMonth = document.getElementById('deptMonthFilter').value;
+        const selectedYear = document.getElementById('deptYearFilter').value;
+
+        const filteredData = {};
+
+        // Filter department data based on selected month and year
+        Object.keys(departmentData || {}).forEach(dept => {
+            let deptTotal = 0;
+
+            if (typeof departmentData[dept] === 'object') {
+                const years = selectedYear === 'all' ? Object.keys(departmentData[dept]) : [selectedYear];
+
+                years.forEach(year => {
+                    if (departmentData[dept][year]) {
+                        if (selectedMonth === 'all') {
+                            // Sum all months for this year
+                            Object.values(departmentData[dept][year]).forEach(count => {
+                                deptTotal += count;
+                            });
+                        } else {
+                            // Get specific month
+                            deptTotal += departmentData[dept][year][selectedMonth] || 0;
+                        }
+                    }
+                });
+            }
+
+            if (deptTotal > 0) {
+                filteredData[dept] = deptTotal;
+            }
+        });
+
+        // Update chart data
+        const labels = Object.keys(filteredData);
+        const data = Object.values(filteredData);
+
+        departmentChart.data.labels = labels;
+        departmentChart.data.datasets[0].data = data;
+        departmentChart.update();
+
+        // Update department stats
+        const totalDepartments = labels.length;
+        const topDept = labels.length > 0
+            ? labels[data.indexOf(Math.max(...data))]
+            : '-';
+
+        document.getElementById('totalDepartments').textContent = totalDepartments;
+        document.getElementById('topDepartment').textContent = topDept;
+    }
+
+    function updateStockChart() {
+        // Update chart with current stock data
+        const wellStocked = stockData.wellStocked || 0;
+        const lowStock = stockData.lowStock || 0;
+        const outOfStock = stockData.outOfStock || 0;
+
+        stockStatusChart.data.datasets[0].data = [wellStocked, lowStock, outOfStock];
+        stockStatusChart.update();
+
+        // Update stock stats
+        document.getElementById('wellStockedCount').textContent = wellStocked;
+        document.getElementById('lowStockCount').textContent = lowStock;
+        document.getElementById('outOfStockCount').textContent = outOfStock;
+    }
+
+    function refreshStockChart() {
+        // Add a loading state
+        const refreshBtn = document.getElementById('refreshStockBtn');
+        const originalText = refreshBtn.innerHTML;
+
+        refreshBtn.innerHTML = `
+            <svg class="w-4 h-4 mr-1 inline animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Refreshing...
+        `;
+        refreshBtn.disabled = true;
+
+        // Simulate refresh (you can replace this with an actual API call)
+        setTimeout(() => {
+            // In a real implementation, you would fetch fresh data here
+            // fetch('/api/stock-status').then(response => response.json()).then(data => { ... })
+
+            updateStockChart();
+
+            // Reset button
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+        }, 1000);
+    }
+</script>
 
 <script>
     // Client-side filtering function
