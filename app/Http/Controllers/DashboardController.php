@@ -45,18 +45,18 @@ class DashboardController extends Controller
             ->whereRaw('COALESCE(ss.total_qty, 0) <= supplies.reorder_point')
             ->count();
 
-        // SIMPLE FIX: Count transactions this month using created_at (when they were actually recorded)
+        // UPDATED: Count transactions this month using transaction_date (business date) for consistency
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        $transactionsThisMonth = SupplyTransaction::whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
+        $transactionsThisMonth = SupplyTransaction::whereMonth('transaction_date', $currentMonth)
+            ->whereYear('transaction_date', $currentYear)
             ->count();
 
-        // Get percentage change from last month
+        // Get percentage change from last month (also using transaction_date)
         $lastMonth = Carbon::now()->subMonth();
-        $transactionsLastMonth = SupplyTransaction::whereMonth('created_at', $lastMonth->month)
-            ->whereYear('created_at', $lastMonth->year)
+        $transactionsLastMonth = SupplyTransaction::whereMonth('transaction_date', $lastMonth->month)
+            ->whereYear('transaction_date', $lastMonth->year)
             ->count();
 
         $transactionPercentChange = $transactionsLastMonth > 0
@@ -73,6 +73,15 @@ class DashboardController extends Controller
         $lastUpdated = $lastUpdatedRecord ? $lastUpdatedRecord->updated_at : null;
         $totalProperties = Property::count();
         $totalLocations = Location::count();
+
+        // NEW: Get monthly transactions data for chart
+        $monthlyTransactions = $this->getMonthlyTransactionsData();
+
+        // NEW: Get department distribution data for donut chart
+        $departmentTransactions = $this->getDepartmentTransactionsData();
+
+        // NEW: Get stock status data for donut chart
+        $stockStatusData = $this->getStockStatusData();
 
         // For user listing with search functionality
         $users = User::with('department', 'designation')
@@ -121,10 +130,268 @@ class DashboardController extends Controller
             'designations',
             'search',
             'stockItems',
-            'lastTransactionUpdateTime'
+            'lastTransactionUpdateTime',
+            'monthlyTransactions', // NEW: Add chart data
+            'departmentTransactions', // NEW: Add department donut chart data
+            'stockStatusData' // NEW: Add stock status donut chart data
         ));
     }
 
+    /**
+     * NEW: Get monthly transactions data for the chart with transaction type breakdown
+     * Uses transaction_date (business date) and groups by transaction type
+     */
+    private function getMonthlyTransactionsData()
+    {
+        try {
+            // Get transactions data for the last 3 years grouped by transaction type
+            $transactions = SupplyTransaction::select(
+                    'transaction_type',
+                    DB::raw('YEAR(transaction_date) as year'),
+                    DB::raw('MONTH(transaction_date) as month'),
+                    DB::raw('COUNT(*) as total')
+                )
+                ->where('transaction_date', '>=', Carbon::now()->subYears(3))
+                ->groupBy('transaction_type', 'year', 'month')
+                ->orderBy('transaction_type', 'asc')
+                ->orderBy('year', 'asc')
+                ->orderBy('month', 'asc')
+                ->get();
+
+            // Format data for Chart.js: [transaction_type][year][month] = count
+            $monthlyData = [];
+            foreach ($transactions as $transaction) {
+                $monthlyData[$transaction->transaction_type][$transaction->year][$transaction->month] = $transaction->total;
+            }
+
+            return $monthlyData;
+
+        } catch (\Exception $e) {
+            // Log the error and return empty array if something goes wrong
+            \Log::error('Error fetching monthly transactions data: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * NEW: Get department transactions data for donut chart
+     * Groups transactions by department, year, and month for filtering
+     */
+    private function getDepartmentTransactionsData()
+    {
+        try {
+            // Get transactions grouped by department, year, and month
+            $transactions = SupplyTransaction::with('department')
+                ->select(
+                    'department_id',
+                    DB::raw('YEAR(transaction_date) as year'),
+                    DB::raw('MONTH(transaction_date) as month'),
+                    DB::raw('COUNT(*) as total')
+                )
+                ->where('transaction_date', '>=', Carbon::now()->subYears(3))
+                ->groupBy('department_id', 'year', 'month')
+                ->orderBy('year', 'asc')
+                ->orderBy('month', 'asc')
+                ->get();
+
+            // Format data: [department_name][year][month] = count
+            $departmentData = [];
+            foreach ($transactions as $transaction) {
+                $deptName = $transaction->department ? $transaction->department->name : 'Unknown Department';
+                $departmentData[$deptName][$transaction->year][$transaction->month] = $transaction->total;
+            }
+
+            return $departmentData;
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching department transactions data: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * NEW: Get stock status data for donut chart
+     * Categorizes supplies based on current stock levels vs reorder points
+     */
+    private function getStockStatusData()
+    {
+        try {
+            // Get supplies with their current stock levels
+            $supplies = DB::table('supplies')
+                ->leftJoin(DB::raw('(SELECT supply_id, SUM(quantity_on_hand) as total_qty FROM supply_stocks WHERE status = "available" GROUP BY supply_id) as ss'),
+                    'supplies.supply_id', '=', 'ss.supply_id')
+                ->select(
+                    'supplies.supply_id',
+                    'supplies.item_name',
+                    'supplies.reorder_point',
+                    DB::raw('COALESCE(ss.total_qty, 0) as current_stock')
+                )
+                ->get();
+
+            $wellStocked = 0;
+            $lowStock = 0;
+            $outOfStock = 0;
+
+            foreach ($supplies as $supply) {
+                $currentStock = (int) $supply->current_stock;
+                $reorderPoint = (int) $supply->reorder_point;
+
+                if ($currentStock == 0) {
+                    $outOfStock++;
+                } elseif ($currentStock <= $reorderPoint) {
+                    $lowStock++;
+                } else {
+                    $wellStocked++;
+                }
+            }
+
+            return [
+                'wellStocked' => $wellStocked,
+                'lowStock' => $lowStock,
+                'outOfStock' => $outOfStock
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching stock status data: ' . $e->getMessage());
+            return [
+                'wellStocked' => 0,
+                'lowStock' => 0,
+                'outOfStock' => 0
+            ];
+        }
+    }
+    private function getMonthlyTransactionsDataWithRIS()
+    {
+        try {
+            // Get SupplyTransaction data using transaction_date
+            $supplyTransactions = SupplyTransaction::select(
+                    DB::raw('YEAR(transaction_date) as year'),
+                    DB::raw('MONTH(transaction_date) as month'),
+                    DB::raw('COUNT(*) as total')
+                )
+                ->where('transaction_date', '>=', Carbon::now()->subYears(3))
+                ->groupBy('year', 'month')
+                ->get();
+
+            // Get RIS data (if you want to include RIS slips in the count)
+            // Adjust the date field based on your RIS table structure
+            $risTransactions = RisSlip::select(
+                    DB::raw('YEAR(created_at) as year'), // Adjust this field if RIS has a different date field
+                    DB::raw('MONTH(created_at) as month'),
+                    DB::raw('COUNT(*) as total')
+                )
+                ->where('created_at', '>=', Carbon::now()->subYears(3))
+                ->groupBy('year', 'month')
+                ->get();
+
+            // Combine both transaction types
+            $allTransactions = $supplyTransactions->concat($risTransactions);
+
+            // Aggregate the combined data
+            $monthlyData = [];
+            foreach ($allTransactions as $transaction) {
+                if (!isset($monthlyData[$transaction->year])) {
+                    $monthlyData[$transaction->year] = [];
+                }
+                if (!isset($monthlyData[$transaction->year][$transaction->month])) {
+                    $monthlyData[$transaction->year][$transaction->month] = 0;
+                }
+                $monthlyData[$transaction->year][$transaction->month] += $transaction->total;
+            }
+
+            return $monthlyData;
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching monthly transactions data with RIS: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * OPTIONAL: Get additional analytics data for future use
+     * Updated to use transaction_date for consistency
+     */
+    private function getTransactionAnalytics()
+    {
+        try {
+            $analytics = [
+                'total_supply_transactions' => SupplyTransaction::count(),
+                'total_ris_slips' => RisSlip::count(),
+                'transactions_this_year' => SupplyTransaction::whereYear('transaction_date', Carbon::now()->year)->count(),
+                'average_monthly_transactions' => round(SupplyTransaction::count() / max(1, SupplyTransaction::selectRaw('COUNT(DISTINCT YEAR(transaction_date), MONTH(transaction_date)) as months')->value('months'))),
+                'most_active_month' => SupplyTransaction::selectRaw('MONTH(transaction_date) as month, COUNT(*) as total')
+                    ->groupBy('month')
+                    ->orderBy('total', 'desc')
+                    ->first(),
+            ];
+
+            return $analytics;
+        } catch (\Exception $e) {
+            \Log::error('Error fetching transaction analytics: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * DEBUG: Temporary method to check what data is being returned
+     * Updated for transaction type breakdown and donut chart data
+     */
+    public function debugChartData()
+    {
+        $data = $this->getMonthlyTransactionsData();
+        $deptData = $this->getDepartmentTransactionsData();
+        $stockData = $this->getStockStatusData();
+
+        // Also get raw query results for debugging
+        $rawData = SupplyTransaction::select(
+                'transaction_type',
+                DB::raw('YEAR(transaction_date) as year'),
+                DB::raw('MONTH(transaction_date) as month'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw('MIN(transaction_date) as first_date'),
+                DB::raw('MAX(transaction_date) as last_date')
+            )
+            ->where('transaction_date', '>=', Carbon::now()->subYears(3))
+            ->groupBy('transaction_type', 'year', 'month')
+            ->orderBy('transaction_type', 'asc')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Get transaction type counts
+        $typeCounts = SupplyTransaction::select('transaction_type', DB::raw('COUNT(*) as total'))
+            ->groupBy('transaction_type')
+            ->get();
+
+        // Get department counts
+        $deptCounts = SupplyTransaction::with('department')
+            ->select('department_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('department_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'department' => $item->department ? $item->department->name : 'Unknown',
+                    'total' => $item->total
+                ];
+            });
+
+        return response()->json([
+            'line_chart_data' => $data,
+            'department_donut_data' => $deptData,
+            'stock_status_data' => $stockData,
+            'raw_transactions_data' => $rawData,
+            'transaction_type_counts' => $typeCounts,
+            'department_counts' => $deptCounts,
+            'total_transactions' => SupplyTransaction::count(),
+            'total_supplies' => Supply::count(),
+            'date_range' => [
+                'from' => Carbon::now()->subYears(3)->format('Y-m-d'),
+                'to' => Carbon::now()->format('Y-m-d')
+            ]
+        ]);
+    }
+
+    // Keep your existing assets method unchanged
     public function assets()
     {
         // Count all users
