@@ -226,6 +226,10 @@
     @auth
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // Define favicon path globally
+            const faviconPath = '{{ asset("favicon.ico") }}';
+
             // Initialize Pusher with debug mode and fallback transports
             const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
@@ -347,7 +351,7 @@
                 canvas.height = 32;
                 const ctx = canvas.getContext('2d');
 
-                const faviconPath = '{{ asset("favicon.ico") }}';
+                // const faviconPath = '{{ asset("favicon.ico") }}';
 
                 const favicon = document.querySelector("link[rel='icon']") || document.querySelector("link[rel='shortcut icon']");
                 const newFavicon = document.createElement('link');
