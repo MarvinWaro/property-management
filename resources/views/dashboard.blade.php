@@ -143,7 +143,7 @@
                             </h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Monthly transaction trends across all years</p>
                         </div>
-                        <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+                        <div class="mt-4 sm:mt-0 flex flex-wrap items-center gap-3">
                             <!-- Year Filter -->
                             <div class="relative">
                                 <select id="yearFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -151,6 +151,17 @@
                                     <!-- Years will be populated dynamically -->
                                 </select>
                             </div>
+
+                            <!-- Transaction Type Filter -->
+                            <div class="relative">
+                                <select id="transactionTypeFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="all">All Types</option>
+                                    <option value="receipt">Receipt (IN)</option>
+                                    <option value="issue">Issue (OUT)</option>
+                                    <option value="adjustment">Adjustment</option>
+                                </select>
+                            </div>
+
                             <!-- Chart Type Toggle -->
                             <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                                 <button id="lineChartBtn" class="chart-type-btn active px-3 py-1 text-xs font-medium rounded-md transition-all duration-200">
@@ -177,7 +188,7 @@
                     </div>
 
                     <!-- Chart Stats Summary -->
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
                         <div class="text-center">
                             <p class="text-2xl font-bold text-[#ce201f]" id="totalTransactions">0</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Total Transactions</p>
@@ -189,10 +200,6 @@
                         <div class="text-center">
                             <p class="text-2xl font-bold text-green-600" id="highestMonth">-</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Highest Month</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-2xl font-bold text-orange-600" id="currentTrend">-</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Trend</p>
                         </div>
                     </div>
                 </div>
@@ -1546,12 +1553,13 @@
     let chartData = @json($monthlyTransactions ?? []); // This will be provided by the controller
     let currentChartType = 'line';
 
-    // Color schemes
+    // Color schemes for different transaction types
     const colors = {
         primary: '#ce201f',
+        receipt: '#10b981',    // Green for IN transactions
+        issue: '#ef4444',      // Red for OUT transactions
+        adjustment: '#f59e0b', // Yellow for adjustments
         secondary: '#3b82f6',
-        success: '#10b981',
-        warning: '#f59e0b',
         info: '#06b6d4'
     };
 
@@ -1565,8 +1573,9 @@
         document.getElementById('lineChartBtn').addEventListener('click', () => switchChartType('line'));
         document.getElementById('barChartBtn').addEventListener('click', () => switchChartType('bar'));
 
-        // Year filter listener
-        document.getElementById('yearFilter').addEventListener('change', filterByYear);
+        // Filter listeners
+        document.getElementById('yearFilter').addEventListener('change', applyFilters);
+        document.getElementById('transactionTypeFilter').addEventListener('change', applyFilters);
     });
 
     function initializeChart() {
@@ -1593,6 +1602,18 @@
                             padding: 20,
                             font: {
                                 size: 12
+                            },
+                            generateLabels: function(chart) {
+                                const datasets = chart.data.datasets;
+                                return datasets.map((dataset, i) => ({
+                                    text: dataset.label,
+                                    fillStyle: dataset.backgroundColor,
+                                    strokeStyle: dataset.borderColor,
+                                    lineWidth: dataset.borderWidth,
+                                    hidden: !chart.isDatasetVisible(i),
+                                    datasetIndex: i,
+                                    pointStyle: 'circle'
+                                }));
                             }
                         }
                     },
@@ -1674,29 +1695,75 @@
             }];
         }
 
-        const years = Object.keys(chartData).sort();
-        const colorPalette = [colors.primary, colors.secondary, colors.success, colors.warning, colors.info];
+        const selectedYear = document.getElementById('yearFilter').value;
+        const selectedType = document.getElementById('transactionTypeFilter').value;
+        const datasets = [];
 
-        return years.map((year, index) => {
-            const color = colorPalette[index % colorPalette.length];
-            const monthlyData = Array(12).fill(0);
+        if (selectedType === 'all') {
+            // Show all transaction types as separate lines
+            const transactionTypes = ['receipt', 'issue', 'adjustment'];
 
-            // Fill in the actual data
-            if (chartData[year]) {
-                Object.keys(chartData[year]).forEach(month => {
-                    monthlyData[parseInt(month) - 1] = chartData[year][month];
+            transactionTypes.forEach(type => {
+                if (chartData[type]) {
+                    const years = selectedYear === 'all' ? Object.keys(chartData[type]).sort() : [selectedYear];
+
+                    years.forEach((year, yearIndex) => {
+                        if (chartData[type][year]) {
+                            const monthlyData = Array(12).fill(0);
+                            Object.keys(chartData[type][year]).forEach(month => {
+                                monthlyData[parseInt(month) - 1] = chartData[type][year][month];
+                            });
+
+                            const typeColor = colors[type];
+                            const label = years.length > 1 ? `${type.charAt(0).toUpperCase() + type.slice(1)} (${year})` : type.charAt(0).toUpperCase() + type.slice(1);
+
+                            datasets.push({
+                                label: label,
+                                data: monthlyData,
+                                borderColor: typeColor,
+                                backgroundColor: currentChartType === 'bar' ? typeColor + '30' : typeColor + '10',
+                                borderWidth: 2,
+                                fill: currentChartType === 'line' ? false : true
+                            });
+                        }
+                    });
+                }
+            });
+        } else {
+            // Show only selected transaction type
+            if (chartData[selectedType]) {
+                const years = selectedYear === 'all' ? Object.keys(chartData[selectedType]).sort() : [selectedYear];
+
+                years.forEach((year, yearIndex) => {
+                    if (chartData[selectedType][year]) {
+                        const monthlyData = Array(12).fill(0);
+                        Object.keys(chartData[selectedType][year]).forEach(month => {
+                            monthlyData[parseInt(month) - 1] = chartData[selectedType][year][month];
+                        });
+
+                        const typeColor = colors[selectedType];
+                        const label = years.length > 1 ? `${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} (${year})` : selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
+
+                        datasets.push({
+                            label: label,
+                            data: monthlyData,
+                            borderColor: typeColor,
+                            backgroundColor: currentChartType === 'bar' ? typeColor + '30' : typeColor + '10',
+                            borderWidth: 2,
+                            fill: currentChartType === 'line' ? false : true
+                        });
+                    }
                 });
             }
+        }
 
-            return {
-                label: year,
-                data: monthlyData,
-                borderColor: color,
-                backgroundColor: currentChartType === 'bar' ? color + '30' : color + '10',
-                borderWidth: 2,
-                fill: currentChartType === 'line' ? false : true
-            };
-        });
+        return datasets.length > 0 ? datasets : [{
+            label: 'No Data Available',
+            data: Array(12).fill(0),
+            borderColor: colors.primary,
+            backgroundColor: currentChartType === 'bar' ? colors.primary + '20' : colors.primary + '10',
+            borderWidth: 2
+        }];
     }
 
     function switchChartType(type) {
@@ -1716,7 +1783,18 @@
 
     function populateYearFilter() {
         const yearFilter = document.getElementById('yearFilter');
-        const years = Object.keys(chartData || {}).sort().reverse();
+        const allYears = new Set();
+
+        // Collect all years from all transaction types
+        Object.keys(chartData || {}).forEach(type => {
+            if (typeof chartData[type] === 'object') {
+                Object.keys(chartData[type]).forEach(year => {
+                    allYears.add(year);
+                });
+            }
+        });
+
+        const years = Array.from(allYears).sort().reverse();
 
         // Clear existing options except "All Years"
         yearFilter.innerHTML = '<option value="all">All Years</option>';
@@ -1729,59 +1807,53 @@
         });
     }
 
-    function filterByYear() {
-        const selectedYear = document.getElementById('yearFilter').value;
-
-        if (selectedYear === 'all') {
-            transactionsChart.data.datasets = generateDatasets();
-        } else {
-            const yearData = chartData[selectedYear] || {};
-            const monthlyData = Array(12).fill(0);
-
-            Object.keys(yearData).forEach(month => {
-                monthlyData[parseInt(month) - 1] = yearData[month];
-            });
-
-            transactionsChart.data.datasets = [{
-                label: selectedYear,
-                data: monthlyData,
-                borderColor: colors.primary,
-                backgroundColor: currentChartType === 'bar' ? colors.primary + '30' : colors.primary + '10',
-                borderWidth: 2,
-                fill: currentChartType === 'line' ? false : true
-            }];
-        }
-
+    function applyFilters() {
+        transactionsChart.data.datasets = generateDatasets();
         transactionsChart.update();
         updateChartStats();
     }
 
     function updateChartStats() {
         const selectedYear = document.getElementById('yearFilter').value;
+        const selectedType = document.getElementById('transactionTypeFilter').value;
+
         let totalTransactions = 0;
         let monthlyTotals = Array(12).fill(0);
         let highestMonth = 0;
         let highestMonthName = '';
 
-        if (selectedYear === 'all') {
-            // Calculate across all years
-            Object.keys(chartData || {}).forEach(year => {
-                Object.keys(chartData[year]).forEach(month => {
-                    const monthIndex = parseInt(month) - 1;
-                    const value = chartData[year][month];
-                    totalTransactions += value;
-                    monthlyTotals[monthIndex] += value;
-                });
+        if (selectedType === 'all') {
+            // Calculate across all transaction types
+            Object.keys(chartData || {}).forEach(type => {
+                if (typeof chartData[type] === 'object') {
+                    const years = selectedYear === 'all' ? Object.keys(chartData[type]) : [selectedYear];
+                    years.forEach(year => {
+                        if (chartData[type][year]) {
+                            Object.keys(chartData[type][year]).forEach(month => {
+                                const monthIndex = parseInt(month) - 1;
+                                const value = chartData[type][year][month];
+                                totalTransactions += value;
+                                monthlyTotals[monthIndex] += value;
+                            });
+                        }
+                    });
+                }
             });
         } else {
-            // Calculate for selected year only
-            const yearData = chartData[selectedYear] || {};
-            Object.keys(yearData).forEach(month => {
-                const monthIndex = parseInt(month) - 1;
-                const value = yearData[month];
-                totalTransactions += value;
-                monthlyTotals[monthIndex] = value;
-            });
+            // Calculate for selected transaction type only
+            if (chartData[selectedType]) {
+                const years = selectedYear === 'all' ? Object.keys(chartData[selectedType]) : [selectedYear];
+                years.forEach(year => {
+                    if (chartData[selectedType][year]) {
+                        Object.keys(chartData[selectedType][year]).forEach(month => {
+                            const monthIndex = parseInt(month) - 1;
+                            const value = chartData[selectedType][year][month];
+                            totalTransactions += value;
+                            monthlyTotals[monthIndex] += value;
+                        });
+                    }
+                });
+            }
         }
 
         // Find highest month
@@ -1796,18 +1868,10 @@
         const nonZeroMonths = monthlyTotals.filter(total => total > 0).length;
         const avgPerMonth = nonZeroMonths > 0 ? Math.round(totalTransactions / nonZeroMonths) : 0;
 
-        // Calculate trend (comparing last 3 months vs previous 3 months)
-        const recent3 = monthlyTotals.slice(-3).reduce((a, b) => a + b, 0);
-        const previous3 = monthlyTotals.slice(-6, -3).reduce((a, b) => a + b, 0);
-        let trend = 'Stable';
-        if (recent3 > previous3) trend = '↗ Increasing';
-        else if (recent3 < previous3) trend = '↘ Decreasing';
-
         // Update DOM
         document.getElementById('totalTransactions').textContent = totalTransactions.toLocaleString();
         document.getElementById('avgPerMonth').textContent = avgPerMonth.toLocaleString();
         document.getElementById('highestMonth').textContent = highestMonthName || '-';
-        document.getElementById('currentTrend').textContent = trend;
     }
 
     // CSS for chart type buttons
