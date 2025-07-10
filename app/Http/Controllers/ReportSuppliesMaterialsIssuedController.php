@@ -45,12 +45,23 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Get departments
         $departments = Department::orderBy('name')->get();
 
-        // Get fund clusters
-        $fundClusters = DB::table('supply_stocks')
-            ->select('fund_cluster')
-            ->distinct()
+        // FIXED: Get fund clusters from actual RIS slips that have been posted
+        $fundClusters = RisSlip::where('status', 'posted')
+            ->whereNotNull('issued_at')
             ->whereNotNull('fund_cluster')
-            ->pluck('fund_cluster');
+            ->distinct()
+            ->pluck('fund_cluster')
+            ->sort()
+            ->values();
+
+        // If no fund clusters found from RIS slips, fallback to supply_stocks
+        if ($fundClusters->isEmpty()) {
+            $fundClusters = DB::table('supply_stocks')
+                ->select('fund_cluster')
+                ->distinct()
+                ->whereNotNull('fund_cluster')
+                ->pluck('fund_cluster');
+        }
 
         return view('rsmi.index', compact(
             'availableMonths',
@@ -75,12 +86,16 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $startDate = Carbon::parse($month . '-01')->startOfMonth();
         $endDate = Carbon::parse($month . '-01')->endOfMonth();
 
-        // Get transactions for the period
+        // FIXED: Get transactions for the period filtered by RIS slip fund cluster
         $transactionsQuery = SupplyTransaction::with(['supply.category', 'department'])
             ->where('transaction_type', 'issue')
             ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->whereHas('supply.stocks', function($q) use ($fundCluster) {
-                $q->where('fund_cluster', $fundCluster);
+            ->whereIn('reference_no', function($query) use ($fundCluster) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('fund_cluster', $fundCluster)
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
             });
 
         if ($departmentId) {
