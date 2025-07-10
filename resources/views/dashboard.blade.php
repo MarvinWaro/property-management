@@ -130,6 +130,74 @@
 
             </div>
 
+            <!-- NEW: Transactions Analytics Chart Section -->
+            <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-[#ce201f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Transactions Overview
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Monthly transaction trends across all years</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+                            <!-- Year Filter -->
+                            <div class="relative">
+                                <select id="yearFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="all">All Years</option>
+                                    <!-- Years will be populated dynamically -->
+                                </select>
+                            </div>
+                            <!-- Chart Type Toggle -->
+                            <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button id="lineChartBtn" class="chart-type-btn active px-3 py-1 text-xs font-medium rounded-md transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4"/>
+                                    </svg>
+                                    Line
+                                </button>
+                                <button id="barChartBtn" class="chart-type-btn px-3 py-1 text-xs font-medium rounded-md transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Bar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="p-6">
+                    <div class="relative" style="height: 400px;">
+                        <canvas id="transactionsChart"></canvas>
+                    </div>
+
+                    <!-- Chart Stats Summary -->
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-[#ce201f]" id="totalTransactions">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Total Transactions</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600" id="avgPerMonth">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Avg Per Month</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-green-600" id="highestMonth">-</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Highest Month</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-orange-600" id="currentTrend">-</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Trend</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- New Section: List of Registered Users -->
             <div id="user-section" class="px-4 py-6 bg-white dark:bg-gray-800 shadow-md rounded-lg my-7">
                 <!-- Table Header with Search and Add Button -->
@@ -1466,234 +1534,308 @@
                 </div>
             @endif
 
-            <!-- Existing Charts Section -->
-            <div class="grid grid-cols-12 gap-6 mt-8">
-                <!-- Line Chart (8 columns) -->
-                <div class="col-span-12 md:col-span-8">
-                    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4">
-                        <canvas id="lineChart" class="w-full h-64"></canvas>
-                    </div>
-                </div>
-                <!-- Doughnut Chart (4 columns) -->
-                <div class="col-span-12 md:col-span-4">
-                    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4">
-                        <canvas id="doughnutChart" class="w-full h-64"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Section: Pie Chart and Recent Activities (4:8 grid, leveled) -->
-            <div class="grid grid-cols-12 gap-6 mt-8">
-                <!-- Pie Chart (4 columns) -->
-                <div class="col-span-12 md:col-span-4">
-                    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4 h-64">
-                        <canvas id="pieChart" class="w-full h-full"></canvas>
-                    </div>
-                </div>
-                <!-- Recent Activities (8 columns) -->
-                <div class="col-span-12 md:col-span-8">
-                    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4 h-64 flex flex-col">
-                        <h3 class="text-lg font-semibold mb-4 dark:text-white">Recent Activities</h3>
-                        <ul class="space-y-4 flex-1">
-                            <!-- Activity: Added -->
-                            <li class="flex items-center">
-                                <div class="p-2 bg-green-100 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-gray-700 dark:text-gray-300"><strong>John Doe</strong> added a new
-                                        employee.</p>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</span>
-                                </div>
-                            </li>
-                            <!-- Activity: Edited -->
-                            <li class="flex items-center">
-                                <div class="p-2 bg-yellow-100 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15.232 5.232l3.536 3.536M9 11l6-6m-6 6l-4 4v4h4l4-4" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-gray-700 dark:text-gray-300"><strong>Jane Smith</strong> edited
-                                        property details.</p>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">5 hours ago</span>
-                                </div>
-                            </li>
-                            <!-- Activity: Removed -->
-                            <li class="flex items-center">
-                                <div class="p-2 bg-red-100 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v2H9V4a1 1 0 011-1z" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-gray-700 dark:text-gray-300"><strong>Admin</strong> removed a supply
-                                        item.</p>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">1 day ago</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ... your existing dashboard code aboves testing? ... -->
         </div>
     </div>
 </x-app-layout>
 
 
-<!-- Include Chart.js via CDN -->
+<!-- Chart JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Helper function to update chart text colors based on current mode
-        function updateChartColors() {
-            const isDark = document.documentElement.classList.contains('dark');
-            const newLegendColor = isDark ? '#fff' : '#000';
-            const newTickColor = isDark ? '#fff' : '#000';
+    // Chart Configuration and Data
+    let transactionsChart;
+    let chartData = @json($monthlyTransactions ?? []); // This will be provided by the controller
+    let currentChartType = 'line';
 
-            if (lineChart) {
-                lineChart.options.plugins.legend.labels.color = newLegendColor;
-                if (lineChart.options.scales.x) {
-                    lineChart.options.scales.x.ticks.color = newTickColor;
-                }
-                if (lineChart.options.scales.y) {
-                    lineChart.options.scales.y.ticks.color = newTickColor;
-                }
-                lineChart.update();
-            }
-            if (doughnutChart) {
-                doughnutChart.options.plugins.legend.labels.color = newLegendColor;
-                doughnutChart.update();
-            }
-            if (pieChart) {
-                pieChart.options.plugins.legend.labels.color = newLegendColor;
-                pieChart.update();
-            }
-        }
+    // Color schemes
+    const colors = {
+        primary: '#ce201f',
+        secondary: '#3b82f6',
+        success: '#10b981',
+        warning: '#f59e0b',
+        info: '#06b6d4'
+    };
 
-        let lineChart, doughnutChart, pieChart;
+    // Initialize Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeChart();
+        populateYearFilter();
+        updateChartStats();
 
-        // Line Chart Initialization
-        const ctxLine = document.getElementById("lineChart").getContext("2d");
-        lineChart = new Chart(ctxLine, {
-            type: 'line',
+        // Chart type toggle listeners
+        document.getElementById('lineChartBtn').addEventListener('click', () => switchChartType('line'));
+        document.getElementById('barChartBtn').addEventListener('click', () => switchChartType('bar'));
+
+        // Year filter listener
+        document.getElementById('yearFilter').addEventListener('change', filterByYear);
+    });
+
+    function initializeChart() {
+        const ctx = document.getElementById('transactionsChart').getContext('2d');
+
+        const config = {
+            type: currentChartType,
             data: {
-                labels: ["January", "February", "March", "April", "May", "June"],
-                datasets: [{
-                    label: "User Growth",
-                    data: [100, 150, 200, 180, 220, 300],
-                    fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                }]
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: generateDatasets()
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
                     legend: {
+                        position: 'top',
                         labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        cornerRadius: 8,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} transactions`;
+                            }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Month',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: false
                         }
                     },
                     y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Transactions',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        },
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            stepSize: 1
                         }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.4
+                    },
+                    point: {
+                        radius: 4,
+                        hoverRadius: 6,
+                        borderWidth: 2
                     }
                 }
             }
-        });
+        };
 
-        // Doughnut Chart Initialization
-        const ctxDoughnut = document.getElementById("doughnutChart").getContext("2d");
-        doughnutChart = new Chart(ctxDoughnut, {
-            type: 'doughnut',
-            data: {
-                labels: ["Properties", "Supplies", "Locations"],
-                datasets: [{
-                    label: "Distribution",
-                    data: [300, 50, 100],
-                    backgroundColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(54, 162, 235)',
-                        'rgb(75, 192, 192)'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
-                        }
-                    }
-                }
+        transactionsChart = new Chart(ctx, config);
+    }
+
+    function generateDatasets() {
+        if (!chartData || Object.keys(chartData).length === 0) {
+            return [{
+                label: 'No Data Available',
+                data: Array(12).fill(0),
+                borderColor: colors.primary,
+                backgroundColor: currentChartType === 'bar' ? colors.primary + '20' : colors.primary + '10',
+                borderWidth: 2
+            }];
+        }
+
+        const years = Object.keys(chartData).sort();
+        const colorPalette = [colors.primary, colors.secondary, colors.success, colors.warning, colors.info];
+
+        return years.map((year, index) => {
+            const color = colorPalette[index % colorPalette.length];
+            const monthlyData = Array(12).fill(0);
+
+            // Fill in the actual data
+            if (chartData[year]) {
+                Object.keys(chartData[year]).forEach(month => {
+                    monthlyData[parseInt(month) - 1] = chartData[year][month];
+                });
+            }
+
+            return {
+                label: year,
+                data: monthlyData,
+                borderColor: color,
+                backgroundColor: currentChartType === 'bar' ? color + '30' : color + '10',
+                borderWidth: 2,
+                fill: currentChartType === 'line' ? false : true
+            };
+        });
+    }
+
+    function switchChartType(type) {
+        currentChartType = type;
+
+        // Update button states
+        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(type + 'ChartBtn').classList.add('active');
+
+        // Update chart
+        transactionsChart.config.type = type;
+        transactionsChart.data.datasets = generateDatasets();
+        transactionsChart.update();
+    }
+
+    function populateYearFilter() {
+        const yearFilter = document.getElementById('yearFilter');
+        const years = Object.keys(chartData || {}).sort().reverse();
+
+        // Clear existing options except "All Years"
+        yearFilter.innerHTML = '<option value="all">All Years</option>';
+
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearFilter.appendChild(option);
+        });
+    }
+
+    function filterByYear() {
+        const selectedYear = document.getElementById('yearFilter').value;
+
+        if (selectedYear === 'all') {
+            transactionsChart.data.datasets = generateDatasets();
+        } else {
+            const yearData = chartData[selectedYear] || {};
+            const monthlyData = Array(12).fill(0);
+
+            Object.keys(yearData).forEach(month => {
+                monthlyData[parseInt(month) - 1] = yearData[month];
+            });
+
+            transactionsChart.data.datasets = [{
+                label: selectedYear,
+                data: monthlyData,
+                borderColor: colors.primary,
+                backgroundColor: currentChartType === 'bar' ? colors.primary + '30' : colors.primary + '10',
+                borderWidth: 2,
+                fill: currentChartType === 'line' ? false : true
+            }];
+        }
+
+        transactionsChart.update();
+        updateChartStats();
+    }
+
+    function updateChartStats() {
+        const selectedYear = document.getElementById('yearFilter').value;
+        let totalTransactions = 0;
+        let monthlyTotals = Array(12).fill(0);
+        let highestMonth = 0;
+        let highestMonthName = '';
+
+        if (selectedYear === 'all') {
+            // Calculate across all years
+            Object.keys(chartData || {}).forEach(year => {
+                Object.keys(chartData[year]).forEach(month => {
+                    const monthIndex = parseInt(month) - 1;
+                    const value = chartData[year][month];
+                    totalTransactions += value;
+                    monthlyTotals[monthIndex] += value;
+                });
+            });
+        } else {
+            // Calculate for selected year only
+            const yearData = chartData[selectedYear] || {};
+            Object.keys(yearData).forEach(month => {
+                const monthIndex = parseInt(month) - 1;
+                const value = yearData[month];
+                totalTransactions += value;
+                monthlyTotals[monthIndex] = value;
+            });
+        }
+
+        // Find highest month
+        monthlyTotals.forEach((total, index) => {
+            if (total > highestMonth) {
+                highestMonth = total;
+                highestMonthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][index];
             }
         });
 
-        // Pie Chart Initialization
-        const ctxPie = document.getElementById("pieChart").getContext("2d");
-        pieChart = new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-                labels: ['Added', 'Edited', 'Removed'],
-                datasets: [{
-                    label: 'Activities',
-                    data: [12, 7, 3],
-                    backgroundColor: [
-                        'rgb(34, 197, 94)',
-                        'rgb(234, 179, 8)',
-                        'rgb(239, 68, 68)'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
-                        }
-                    }
-                }
-            }
-        });
+        // Calculate average
+        const nonZeroMonths = monthlyTotals.filter(total => total > 0).length;
+        const avgPerMonth = nonZeroMonths > 0 ? Math.round(totalTransactions / nonZeroMonths) : 0;
 
-        // Set up a MutationObserver to watch for class changes (dark mode toggle)
-        const observer = new MutationObserver((mutationsList) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    updateChartColors();
-                }
+        // Calculate trend (comparing last 3 months vs previous 3 months)
+        const recent3 = monthlyTotals.slice(-3).reduce((a, b) => a + b, 0);
+        const previous3 = monthlyTotals.slice(-6, -3).reduce((a, b) => a + b, 0);
+        let trend = 'Stable';
+        if (recent3 > previous3) trend = '↗ Increasing';
+        else if (recent3 < previous3) trend = '↘ Decreasing';
+
+        // Update DOM
+        document.getElementById('totalTransactions').textContent = totalTransactions.toLocaleString();
+        document.getElementById('avgPerMonth').textContent = avgPerMonth.toLocaleString();
+        document.getElementById('highestMonth').textContent = highestMonthName || '-';
+        document.getElementById('currentTrend').textContent = trend;
+    }
+
+    // CSS for chart type buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .chart-type-btn {
+                color: #6b7280;
+                background: transparent;
             }
-        });
-        observer.observe(document.documentElement, {
-            attributes: true
-        });
+            .chart-type-btn.active {
+                color: #ce201f;
+                background: white;
+                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            }
+            .dark .chart-type-btn.active {
+                background: #374151;
+                color: #ce201f;
+            }
+        `;
+        document.head.appendChild(style);
     });
+
+    // All your existing JavaScript functions remain unchanged below this point
+    // Including filterTable, clearAllFilters, modal functions, etc.
+    // ...
 </script>
+
 
 
 
