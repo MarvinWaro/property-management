@@ -157,19 +157,28 @@
                         <!-- Add this right after the modal header, before the scrollable content area -->
 
                         <!-- Error Display Section -->
+                        <!-- Replace the existing Error Display Section in your modal with this enhanced version -->
+                        <!-- Error Display Section -->
                         @if ($errors->any())
                             <div class="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-900">
                                 <div class="flex">
-                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                                     </svg>
-                                    <div>
+                                    <div class="flex-1">
                                         <h4 class="text-sm font-medium text-red-800 dark:text-red-300">There were errors with your submission</h4>
-                                        <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
+
+                                        @if ($errors->has('duplicate_items'))
+                                            <div class="mt-3 p-3 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                                <h5 class="text-sm font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    Duplicate Item Found
+                                                </h5>
+                                                <p class="text-sm text-red-700 dark:text-red-400">{{ $errors->first('duplicate_items') }}</p>
+                                            </div>
+                                        @endif
 
                                         @if ($errors->has('stock_validation'))
                                             <div class="mt-3">
@@ -182,10 +191,40 @@
                                                 @endforeach
                                             </div>
                                         @endif
+
+                                        @php
+                                            $otherErrors = collect($errors->all())->filter(function($error) use ($errors) {
+                                                return !$errors->has('duplicate_items') &&
+                                                    !$errors->has('stock_validation') &&
+                                                    !str_contains($error, 'duplicate items') &&
+                                                    !str_contains($error, 'stock validation');
+                                            });
+                                        @endphp
+
+                                        @if ($otherErrors->count() > 0)
+                                            <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
+                                                @foreach ($otherErrors as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         @endif
+
+                        @if ($errors->any())
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const modal = document.getElementById('manualEntryModal');
+                                    if (modal && modal.classList.contains('hidden')) {
+                                        modal.classList.remove('hidden');
+                                        document.body.style.overflow = 'hidden';
+                                    }
+                                });
+                            </script>
+                        @endif
+
 
                         <form action="{{ route('ris.store-manual') }}" method="POST"
                             class="flex flex-col flex-1 overflow-hidden">
@@ -607,72 +646,7 @@
                     }
                 </style>
 
-                <!-- ADD THIS DEBUG SECTION TEMPORARILY BEFORE YOUR JAVASCRIPT -->
-                {{-- <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <h3 class="text-lg font-bold text-red-800 mb-2">SUPPLIES DEBUG (Remove in production)</h3>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies type:</strong> {{ gettype($availableSupplies) }}
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies count:</strong> {{ $availableSupplies->count() ?? 'null' }}
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies is empty:</strong> {{ $availableSupplies->isEmpty() ? 'YES' : 'NO' }}
-                    </div>
-
-                    @if($availableSupplies->count() > 0)
-                        <div class="mb-2">
-                            <strong>First Supply Structure:</strong>
-                            <pre class="text-xs bg-white p-2 rounded border">{{ json_encode($availableSupplies->first(), JSON_PRETTY_PRINT) }}</pre>
-                        </div>
-                    @endif
-
-                    <div class="mb-2">
-                        <strong>JSON Data for JavaScript:</strong>
-                        <pre class="text-xs bg-white p-2 rounded border">{{ json_encode($availableSupplies, JSON_PRETTY_PRINT) }}</pre>
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>Raw Database Counts:</strong>
-                        <ul class="text-sm">
-                            <li>Total Supplies: {{ \App\Models\Supply::count() }}</li>
-                            <li>Active Supplies: {{ \App\Models\Supply::where('is_active', true)->count() }}</li>
-                            <li>Total Supply Stocks: {{ \App\Models\SupplyStock::count() }}</li>
-                            <li>Available Supply Stocks: {{ \App\Models\SupplyStock::where('status', 'available')->where('quantity_on_hand', '>', 0)->count() }}</li>
-                        </ul>
-                    </div>
-                </div> --}}
-
-                <!-- ADD THIS SIMPLE TEST SCRIPT BEFORE YOUR MAIN JAVASCRIPT -->
-                {{-- <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    console.log('=== CONTROLLER DATA TEST ===');
-
-                    // Test what's being passed from controller
-                    console.log('User role:', '{{ auth()->user()->role ?? "no-role" }}');
-                    console.log('Has admin/cao role:', {{ auth()->user()->hasRole(['admin', 'cao']) ? 'true' : 'false' }});
-                    console.log('Users count:', {{ $users->count() ?? 0 }});
-                    console.log('Supplies count:', {{ $availableSupplies->count() ?? 0 }});
-
-                    // Test the actual data
-                    let testSupplies = @json($availableSupplies ?? []);
-                    console.log('Raw supplies from controller:', testSupplies);
-                    console.log('Supplies data type:', typeof testSupplies);
-                    console.log('Is supplies array:', Array.isArray(testSupplies));
-
-                    if (typeof testSupplies === 'object' && !Array.isArray(testSupplies)) {
-                        console.log('Supplies object keys:', Object.keys(testSupplies));
-                        console.log('Supplies object values count:', Object.keys(testSupplies).length);
-                    }
-
-                    console.log('=== END CONTROLLER DATA TEST ===');
-                });
-                </script> --}}
-
-                <!-- REPLACE YOUR ENTIRE MANUAL ENTRY JAVASCRIPT SECTION WITH THIS -->
+                <!-- Replace the existing JavaScript section in your modal with this enhanced version -->
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         console.log('DOM loaded, initializing manual RIS entry...');
@@ -686,10 +660,13 @@
                         const emptyState = document.getElementById('manualEmptyState');
                         const template = document.getElementById('manualItemRowTemplate');
                         const risDateInput = document.querySelector('input[name="ris_date"]');
+                        const risNoInput = document.querySelector('input[name="reference_no"]');
                         const submitBtn = document.getElementById('submitManualEntry');
 
                         let itemIndex = 0;
                         let availableSupplies = [];
+                        let selectedSupplyIds = []; // Track selected supplies
+                        let isInitialized = false; // Track if modal has been initialized
 
                         console.log('Modal exists:', !!modal);
                         console.log('Open button exists:', !!openBtn);
@@ -780,7 +757,139 @@
                             setTimeout(() => alert.remove(), 5000);
                         }
 
-                        // Load available supplies function
+                        // NEW: Enhanced RIS Number Auto-Generation with UX feedback
+                        function generateRisNumber(selectedDate = null) {
+                            const dateToUse = selectedDate || risDateInput?.value;
+
+                            if (!dateToUse || !risNoInput) {
+                                console.log('Date or RIS No input not available');
+                                return;
+                            }
+
+                            console.log('🔄 Generating RIS number for date:', dateToUse);
+
+                            // Show loading state on RIS No field
+                            const originalValue = risNoInput.value;
+                            const originalPlaceholder = risNoInput.placeholder;
+
+                            risNoInput.value = '';
+                            risNoInput.placeholder = 'Generating RIS number...';
+                            risNoInput.disabled = true;
+                            risNoInput.classList.add('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+
+                            fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateToUse), {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                credentials: 'same-origin'
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('✅ RIS number generated:', data);
+
+                                // Silently populate the RIS number
+                                risNoInput.value = data.defaultRis;
+                                risNoInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+
+                                // Brief subtle success feedback (no notification)
+                                risNoInput.classList.add('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
+                                setTimeout(() => {
+                                    risNoInput.classList.remove('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
+                                }, 800);
+                            })
+                            .catch(error => {
+                                console.error('❌ RIS number generation failed:', error);
+
+                                // Show error state
+                                risNoInput.value = originalValue;
+                                risNoInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+                                risNoInput.classList.add('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
+
+                                // Remove error styling after a moment
+                                setTimeout(() => {
+                                    risNoInput.classList.remove('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
+                                }, 2000);
+
+                                showAlert(`Failed to generate RIS number: ${error.message}`, 'error');
+                            })
+                            .finally(() => {
+                                // Reset field state
+                                risNoInput.disabled = false;
+                                risNoInput.placeholder = originalPlaceholder;
+                            });
+                        }
+
+                        // FIXED: Function to clear modal state completely
+                        function resetModalState() {
+                            console.log('🔄 Resetting modal state...');
+
+                            // Clear all existing rows
+                            itemsTable.innerHTML = '';
+
+                            // Reset tracking variables
+                            itemIndex = 0;
+                            selectedSupplyIds = [];
+
+                            // Remove any existing warnings
+                            const existingWarning = document.querySelector('.supplies-warning');
+                            if (existingWarning) {
+                                existingWarning.remove();
+                            }
+
+                            // Update empty state
+                            updateEmptyState();
+
+                            console.log('✅ Modal state reset complete');
+                        }
+
+                        // FIXED: Function to update available supplies in dropdowns
+                        function updateSupplyDropdowns() {
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+
+                            allSelects.forEach((select, index) => {
+                                const currentValue = select.value;
+                                const options = select.querySelectorAll('option');
+
+                                options.forEach(option => {
+                                    if (option.value && option.value !== currentValue) {
+                                        // Check if this supply is already selected in another row
+                                        const isSelected = selectedSupplyIds.includes(option.value);
+
+                                        if (isSelected) {
+                                            option.disabled = true;
+                                            option.textContent = option.textContent.replace(' (Already selected)', '') + ' (Already selected)';
+                                        } else {
+                                            option.disabled = false;
+                                            option.textContent = option.textContent.replace(' (Already selected)', '');
+                                        }
+                                    }
+                                });
+                            });
+                        }
+
+                        // FIXED: Function to update selected supplies list
+                        function updateSelectedSupplies() {
+                            selectedSupplyIds = [];
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+
+                            allSelects.forEach(select => {
+                                if (select.value) {
+                                    selectedSupplyIds.push(select.value);
+                                }
+                            });
+
+                            console.log('📝 Updated selected supplies:', selectedSupplyIds);
+                            updateSupplyDropdowns();
+                        }
+
+                        // FIXED: Load available supplies function with better error handling
                         function loadAvailableSupplies() {
                             console.log('=== Loading Available Supplies ===');
 
@@ -812,7 +921,7 @@
                                     suppliesData = [];
                                 }
 
-                                // Process supplies
+                                // FIXED: Reset availableSupplies before processing
                                 availableSupplies = [];
 
                                 if (suppliesData.length > 0) {
@@ -863,41 +972,132 @@
                         // Modal controls
                         openBtn?.addEventListener('click', () => {
                             console.log('Open button clicked');
+
+                            // FIXED: Reset state before opening
+                            resetModalState();
+
                             modal.classList.remove('hidden');
                             document.body.style.overflow = 'hidden';
 
-                            // Set default date
+                            // ENHANCED: Set default date and auto-generate RIS number
                             if (risDateInput && !risDateInput.value) {
-                                risDateInput.value = new Date().toISOString().split('T')[0];
+                                const today = new Date().toISOString().split('T')[0];
+                                risDateInput.value = today;
+
+                                // Auto-generate RIS number for today's date
+                                setTimeout(() => {
+                                    generateRisNumber(today);
+                                }, 100); // Small delay to ensure UI is ready
+                            } else if (risDateInput && risDateInput.value) {
+                                // Generate RIS number for existing date
+                                setTimeout(() => {
+                                    generateRisNumber(risDateInput.value);
+                                }, 100);
                             }
 
                             // Load supplies
                             loadAvailableSupplies();
+
+                            // Mark as initialized
+                            isInitialized = true;
                         });
 
                         function closeModal() {
                             modal.classList.add('hidden');
                             document.body.style.overflow = '';
                             document.querySelector('#manualEntryModal form')?.reset();
-                            itemsTable.innerHTML = '';
-                            itemIndex = 0;
-                            availableSupplies = [];
-                            updateEmptyState();
+
+                            // FIXED: Reset state when closing
+                            resetModalState();
+
+                            isInitialized = false;
                         }
 
                         closeBtn?.addEventListener('click', closeModal);
                         cancelBtn?.addEventListener('click', closeModal);
 
+                        // ENHANCED: RIS Date change handler with better UX
+                        risDateInput?.addEventListener('change', function() {
+                            const selectedDate = this.value;
+                            console.log('📅 RIS Date changed to:', selectedDate);
+
+                            if (selectedDate) {
+                                // Generate new RIS number for the selected date
+                                generateRisNumber(selectedDate);
+
+                                // Update availability for existing items based on new date
+                                const allSelects = itemsTable.querySelectorAll('.supply-select');
+                                allSelects.forEach((select, index) => {
+                                    if (select.value) {
+                                        // Trigger availability update for this supply
+                                        fetchAvailabilityForDate(select.value, index, selectedDate);
+                                    }
+                                });
+                            }
+                        });
+
+                        // NEW: Function to fetch availability for a specific date (for existing items)
+                        function fetchAvailabilityForDate(supplyId, rowIndex, date) {
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                            fetch("{{ route('ris.validate-manual-stock') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": csrfToken
+                                },
+                                body: JSON.stringify({
+                                    ris_date: date,
+                                    items: [{ supply_id: supplyId }]
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(json => {
+                                const available = json.current_availability[supplyId] || 0;
+                                const rows = Array.from(itemsTable.querySelectorAll('tr.manual-item-row'));
+                                const row = rows[rowIndex];
+
+                                if (row) {
+                                    const span = row.querySelector('.available-qty');
+                                    const req = row.querySelector('.requested-qty');
+                                    const iss = row.querySelector('.issued-qty');
+
+                                    // Update display
+                                    span.textContent = available;
+                                    span.className = `available-qty font-medium ${
+                                        available > 0
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600   dark:text-red-400'
+                                    }`;
+
+                                    // Enforce limits
+                                    req.max = available;
+                                    iss.max = available;
+                                    req.disabled = (available === 0);
+                                    iss.disabled = (available === 0);
+
+                                    // Adjust values if they exceed new availability
+                                    if (+req.value > available) req.value = available;
+                                    if (+iss.value > available) iss.value = available;
+                                }
+                            })
+                            .catch(console.error);
+                        }
+
                         // Add item functionality
                         addItemBtn?.addEventListener('click', addManualItem);
-
-
 
                         function addManualItem() {
                             console.log('Add item clicked, available supplies:', availableSupplies.length);
 
                             if (availableSupplies.length === 0) {
                                 showAlert('No supplies available in the system.', 'warning');
+                                return;
+                            }
+
+                            // Check if all supplies are already selected
+                            if (selectedSupplyIds.length >= availableSupplies.length) {
+                                showAlert('All available supplies have been added.', 'warning');
                                 return;
                             }
 
@@ -925,6 +1125,13 @@
                                     option.setAttribute('data-stock-no', supply.stock_no);
                                     option.setAttribute('data-unit', supply.unit_of_measurement);
                                     option.textContent = `${supply.item_name} (${supply.stock_no})`;
+
+                                    // FIXED: Check if already selected but don't disable in new rows
+                                    if (selectedSupplyIds.includes(supply.supply_id)) {
+                                        option.disabled = true;
+                                        option.textContent += ' (Already selected)';
+                                    }
+
                                     supplySelect.appendChild(option);
                                 });
 
@@ -933,6 +1140,22 @@
                                     const selectedOption = this.options[this.selectedIndex];
 
                                     if (selectedOption.value) {
+                                        // FIXED: Check for duplicates more reliably
+                                        const allSelects = itemsTable.querySelectorAll('.supply-select');
+                                        let isDuplicate = false;
+
+                                        allSelects.forEach(otherSelect => {
+                                            if (otherSelect !== this && otherSelect.value === selectedOption.value) {
+                                                isDuplicate = true;
+                                            }
+                                        });
+
+                                        if (isDuplicate) {
+                                            showAlert('This item has already been added to this requisition. Each item can only appear once per RIS.', 'error');
+                                            this.value = '';
+                                            return;
+                                        }
+
                                         const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
 
                                         console.log(`Selected supply: ${selectedOption.textContent}, Available: ${available}`);
@@ -958,6 +1181,13 @@
                                         if (requestedQtyInput) requestedQtyInput.value = '';
                                         if (issuedQtyInput) issuedQtyInput.value = '';
 
+                                        // NEW: Fetch real-time availability for selected date
+                                        const currentDate = risDateInput?.value;
+                                        if (currentDate) {
+                                            const rowIndex = Array.from(itemsTable.querySelectorAll('tr.manual-item-row')).indexOf(this.closest('tr'));
+                                            fetchAvailabilityForDate(selectedOption.value, rowIndex, currentDate);
+                                        }
+
                                     } else {
                                         // No supply selected
                                         if (availableQtySpan) {
@@ -977,6 +1207,9 @@
                                             issuedQtyInput.value = '';
                                         }
                                     }
+
+                                    // FIXED: Update selected supplies list after change
+                                    updateSelectedSupplies();
                                 });
 
                                 console.log(`Added ${availableSupplies.length} options to select`);
@@ -1025,6 +1258,7 @@
 
                                 setTimeout(() => {
                                     row.remove();
+                                    updateSelectedSupplies(); // Update after removal
                                     updateEmptyState();
                                 }, 300);
                             });
@@ -1076,6 +1310,26 @@
                                 return;
                             }
 
+                            // Check for duplicate supplies before submission
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+                            const suppliesInForm = [];
+                            let hasDuplicates = false;
+
+                            allSelects.forEach(select => {
+                                if (select.value) {
+                                    if (suppliesInForm.includes(select.value)) {
+                                        hasDuplicates = true;
+                                    } else {
+                                        suppliesInForm.push(select.value);
+                                    }
+                                }
+                            });
+
+                            if (hasDuplicates) {
+                                showAlert('Duplicate items found. Each item can only appear once in the requisition.', 'error');
+                                return;
+                            }
+
                             // Show loading
                             if (submitBtn) {
                                 submitBtn.disabled = true;
@@ -1086,31 +1340,157 @@
                             this.submit();
                         });
 
-                        // Initialize
+                        // Status change handler
+                        const finalStatusSelect = document.getElementById('finalStatusSelect');
+                        const declineReasonDiv = document.getElementById('declineReasonDiv');
+
+                        finalStatusSelect?.addEventListener('change', function() {
+                            if (this.value === 'declined') {
+                                declineReasonDiv?.classList.remove('hidden');
+                            } else {
+                                declineReasonDiv?.classList.add('hidden');
+                            }
+                        });
+
+                        // FIXED: Initialize on first load
                         updateEmptyState();
 
                         console.log('✅ Manual RIS entry initialization complete');
+
+                        // FIXED: If modal should be open due to validation errors, reinitialize properly
+                        @if ($errors->any() && old('is_manual_entry'))
+                            console.log('🔄 Reopening modal due to validation errors...');
+
+                            // Reset state first
+                            resetModalState();
+
+                            // Load supplies with fresh data
+                            loadAvailableSupplies();
+
+                            // Set the date and generate RIS number if date is available
+                            @if (old('ris_date'))
+                                const savedDate = "{{ old('ris_date') }}";
+                                if (risDateInput) {
+                                    risDateInput.value = savedDate;
+                                    setTimeout(() => {
+                                        generateRisNumber(savedDate);
+                                    }, 500);
+                                }
+                            @endif
+
+                            // Mark as initialized
+                            isInitialized = true;
+                        @endif
+                    });
+                </script>
+
+                <!-- Keep your existing RIS date change handler for backward compatibility -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const risDateInput = document.querySelector('input[name="ris_date"]');
+                        const tableBody = document.getElementById('manualItemsTable');
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                        // Fetch availability as of ris_date for one supply row
+                        function fetchAvailability(supplyId, rowIndex) {
+                            if (!risDateInput?.value) return;
+
+                            fetch("{{ route('ris.validate-manual-stock') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": csrfToken
+                                },
+                                body: JSON.stringify({
+                                    ris_date: risDateInput.value,
+                                    items: [{ supply_id: supplyId }]
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(json => {
+                                const available = json.current_availability[supplyId] || 0;
+                                const row = Array.from(tableBody.querySelectorAll('tr.manual-item-row'))[rowIndex];
+
+                                if (row) {
+                                    const span = row.querySelector('.available-qty');
+                                    const req = row.querySelector('.requested-qty');
+                                    const iss = row.querySelector('.issued-qty');
+
+                                    // Update display
+                                    span.textContent = available;
+                                    span.className = `available-qty font-medium ${
+                                        available > 0
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600   dark:text-red-400'
+                                    }`;
+
+                                    // Enforce limits
+                                    req.max = available;
+                                    iss.max = available;
+                                    req.disabled = (available === 0);
+                                    iss.disabled = (available === 0);
+                                    if (+req.value > available) req.value = available;
+                                    if (+iss.value > available) iss.value = available;
+                                }
+                            })
+                            .catch(console.error);
+                        }
+
+                        // When RIS date changes, refresh all rows
+                        risDateInput?.addEventListener('change', () => {
+                            Array.from(tableBody.querySelectorAll('tr.manual-item-row'))
+                            .forEach((row, idx) => {
+                                const sel = row.querySelector('.supply-select');
+                                if (sel.value) {
+                                    fetchAvailability(sel.value, idx);
+                                } else {
+                                    // Reset if no supply chosen
+                                    const span = row.querySelector('.available-qty');
+                                    if (span) {
+                                        span.textContent = '0';
+                                        span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
+                                    }
+                                }
+                            });
+                        });
+
+                        // When you pick a supply in a row, fetch just that row's availability
+                        tableBody?.addEventListener('change', e => {
+                            if (!e.target.classList.contains('supply-select')) return;
+                            const rows = Array.from(tableBody.querySelectorAll('tr.manual-item-row'));
+                            const idx = rows.indexOf(e.target.closest('tr'));
+                            const supId = e.target.value;
+                            if (supId) {
+                                fetchAvailability(supId, idx);
+                            } else {
+                                const span = rows[idx]?.querySelector('.available-qty');
+                                if (span) {
+                                    span.textContent = '0';
+                                    span.className = 'available-qty font-medium text-gray-400 dark:text-gray-500';
+                                }
+                            }
+                        });
                     });
                 </script>
 
                 <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const dateField = document.getElementById('ris_date');
-                    const risNoField = document.getElementById('reference_no');
-                    if (!dateField || !risNoField) return;
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const dateField = document.getElementById('ris_date');
+                        const risNoField = document.getElementById('reference_no');
+                        if (!dateField || !risNoField) return;
 
-                    dateField.addEventListener('change', () => {
-                    fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        credentials: 'same-origin'
-                    })
-                    .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
-                    .then(json => {
-                        risNoField.value = json.defaultRis;
-                    })
-                    .catch(err => console.error('RIS lookup failed:', err));
+                        dateField.addEventListener('change', () => {
+                        fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            credentials: 'same-origin'
+                        })
+                        .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+                        .then(json => {
+                            risNoField.value = json.defaultRis;
+                        })
+                        .catch(err => console.error('RIS lookup failed:', err));
+                        });
                     });
-                });
                 </script>
 
 
@@ -1350,9 +1730,7 @@
         });
     </script>
 
-
     <!-- Add these NEW script tags AFTER your existing scripts -->
-
     <!-- Script 1: Handle Final Status Change -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1565,7 +1943,6 @@
         });
     </script>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
         const risDateInput = document.querySelector('input[name="ris_date"]');
@@ -1644,7 +2021,5 @@
         });
         });
     </script>
-
-
 
 </x-app-layout>

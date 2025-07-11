@@ -1392,9 +1392,8 @@ class RisSlipController extends Controller
         exit;
     }
 
-
     /**
-     * Store manually created RIS (for historical data) - COMPLETE UPDATED VERSION
+     * Store manually created RIS (for historical data) - UPDATED WITH DUPLICATE ITEM VALIDATION
      */
     public function storeManual(Request $request, ReferenceNumberService $referenceNumberService)
     {
@@ -1403,7 +1402,7 @@ class RisSlipController extends Controller
             return back()->with('error', 'Unauthorized to create manual RIS entries.');
         }
 
-        // Enhanced validation for manual entries
+        // Enhanced validation for manual entries (NO 'unique' on reference_no)
         $validated = $request->validate([
             'is_manual_entry' => 'required|boolean',
             'ris_date' => [
@@ -1412,7 +1411,7 @@ class RisSlipController extends Controller
                 'before_or_equal:today',
                 'after_or_equal:' . now()->subYears(5)->format('Y-m-d')
             ],
-            'reference_no' => 'nullable|string|max:255|unique:ris_slips,ris_no', // ADDED THIS
+            'reference_no' => 'nullable|string|max:255',
             'entity_name' => 'required|string|max:255',
             'division' => 'required|exists:departments,id',
             'office' => 'nullable|string|max:255',
@@ -1428,34 +1427,57 @@ class RisSlipController extends Controller
             'items.*.quantity_issued' => 'nullable|integer|min:0',
             'items.*.remarks' => 'nullable|string|max:500',
         ], [
-            'reference_no.unique' => 'This RIS number already exists. Please use a different number.',
+            // Optionally you can customize other messages here
         ]);
 
-        // Additional validation for decline reason
+        // If "declined" status, require a reason
         if ($validated['final_status'] === 'declined' && empty($validated['decline_reason'])) {
             return back()->withErrors([
                 'decline_reason' => 'Decline reason is required when status is declined.'
             ])->withInput();
         }
 
+        // 1️⃣ Check: Duplicate item for this RIS number (across all slips)
+        if (!empty($validated['reference_no'])) {
+            $existingItems = \App\Models\RisSlip::where('ris_no', $validated['reference_no'])
+                ->with('items')
+                ->get()
+                ->flatMap(function($ris) { return $ris->items->pluck('supply_id'); })
+                ->unique()
+                ->toArray();
+
+            $newItems = collect($validated['items'])->pluck('supply_id')->toArray();
+            $duplicates = array_intersect($existingItems, $newItems);
+
+            if (count($duplicates) > 0) {
+                // Get item names for clearer error
+                $itemNames = \App\Models\Supply::whereIn('supply_id', $duplicates)->pluck('item_name')->toArray();
+                $duplicateList = implode(', ', $itemNames);
+
+                return back()
+                    ->withErrors([
+                        'reference_no' => 'This RIS number already has the following item(s): ' . $duplicateList . '. Each item can only appear once per RIS number.'
+                    ])
+                    ->withInput();
+            }
+        }
+
         try {
-            return DB::transaction(function() use ($validated, $referenceNumberService) {
+            return \DB::transaction(function() use ($validated, $referenceNumberService) {
 
-                // CRITICAL VALIDATION: Check if all supplies have valid IAR/Stock
+                // 2️⃣ Stock validation: same as before
                 $stockValidationErrors = [];
-
                 foreach ($validated['items'] as $index => $item) {
                     $supplyId = $item['supply_id'];
                     $requestedQty = $item['quantity_requested'];
 
-                    // Check if supply has any stock (IAR exists)
-                    $stock = SupplyStock::where('supply_id', $supplyId)
+                    $stock = \App\Models\SupplyStock::where('supply_id', $supplyId)
                         ->where('status', 'available')
                         ->where('quantity_on_hand', '>', 0)
                         ->first();
 
                     if (!$stock) {
-                        $supply = Supply::find($supplyId);
+                        $supply = \App\Models\Supply::find($supplyId);
                         $stockValidationErrors[] = [
                             'supply_name' => $supply ? $supply->item_name : 'Unknown',
                             'message' => 'No IAR found for this supply. Cannot request items without inventory record.'
@@ -1463,8 +1485,7 @@ class RisSlipController extends Controller
                         continue;
                     }
 
-                    // For historical data, we still validate against available quantity
-                    $pendingRequested = RisItem::where('supply_id', $supplyId)
+                    $pendingRequested = \App\Models\RisItem::where('supply_id', $supplyId)
                         ->whereHas('risSlip', function($q) {
                             $q->whereIn('status', ['draft', 'approved']);
                         })
@@ -1473,7 +1494,7 @@ class RisSlipController extends Controller
                     $currentAvailable = max(0, $stock->quantity_on_hand - $pendingRequested);
 
                     if ($requestedQty > $currentAvailable) {
-                        $supply = Supply::find($supplyId);
+                        $supply = \App\Models\Supply::find($supplyId);
                         $stockValidationErrors[] = [
                             'supply_name' => $supply ? $supply->item_name : 'Unknown',
                             'requested' => $requestedQty,
@@ -1491,21 +1512,13 @@ class RisSlipController extends Controller
                         ->withInput();
                 }
 
-                // Parse the RIS date
-                $risDate = Carbon::parse($validated['ris_date']);
-
-                // UPDATED: Use provided reference_no or generate a new one
+                // 3️⃣ Prepare and Save RIS Slip
+                $risDate = \Carbon\Carbon::parse($validated['ris_date']);
                 $newRisNumber = $validated['reference_no'] ?? $this->generateHistoricalRisNumber($risDate);
 
-                // Double-check uniqueness if using provided reference_no
-                if ($validated['reference_no'] && RisSlip::where('ris_no', $newRisNumber)->exists()) {
-                    return back()
-                        ->withErrors(['reference_no' => 'This RIS number already exists.'])
-                        ->withInput();
-                }
+                // Note: Don't need to check for ris_no uniqueness now
 
-                // Create the RIS Slip with historical date and manual entry fields
-                $risSlip = RisSlip::create([
+                $risSlip = \App\Models\RisSlip::create([
                     'ris_no' => $newRisNumber,
                     'ris_date' => $risDate,
                     'entity_name' => $validated['entity_name'],
@@ -1520,7 +1533,7 @@ class RisSlipController extends Controller
 
                     // MANUAL ENTRY FIELDS
                     'is_manual_entry' => true,
-                    'reference_source' => $validated['reference_no'] ?? null, // Store the manual RIS number
+                    'reference_source' => $validated['reference_no'] ?? null,
                     'manual_entry_by' => auth()->id(),
                     'manual_entry_at' => now(),
                     'manual_entry_notes' => "Historical entry for {$risDate->format('M d, Y')}",
@@ -1530,25 +1543,25 @@ class RisSlipController extends Controller
                     'updated_at' => $risDate,
                 ]);
 
-                // Create RIS Items
+                // 4️⃣ RIS Items
                 foreach ($validated['items'] as $item) {
-                    RisItem::create([
+                    \App\Models\RisItem::create([
                         'ris_id' => $risSlip->ris_id,
                         'supply_id' => $item['supply_id'],
                         'quantity_requested' => $item['quantity_requested'],
                         'quantity_issued' => $item['quantity_issued'] ?? 0,
-                        'stock_available' => true, // We validated stock exists
+                        'stock_available' => true,
                         'remarks' => $item['remarks'] ?? null,
                         'created_at' => $risDate,
                         'updated_at' => $risDate,
                     ]);
                 }
 
-                // Apply historical status transitions
+                // 5️⃣ Historical status transitions
                 $this->applyHistoricalStatus($risSlip, $validated, $risDate);
 
-                // Log manual entry for audit
-                Log::info('Manual RIS entry created', [
+                // 6️⃣ Audit log
+                \Log::info('Manual RIS entry created', [
                     'ris_no' => $newRisNumber,
                     'ris_date' => $risDate->format('Y-m-d'),
                     'created_by' => auth()->id(),
@@ -1567,7 +1580,7 @@ class RisSlipController extends Controller
             });
 
         } catch (\Exception $e) {
-            Log::error('Failed to create manual RIS', [
+            \Log::error('Failed to create manual RIS', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
@@ -1580,6 +1593,7 @@ class RisSlipController extends Controller
                 ->withInput();
         }
     }
+
 
     /**
      * Generate unique RIS number for historical dates - handles gaps properly
@@ -1845,9 +1859,6 @@ class RisSlipController extends Controller
 
         return response()->json(['defaultRis' => $defaultRis]);
     }
-
-
-
 
 }
 

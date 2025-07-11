@@ -7,7 +7,7 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <!-- Category Section - Minimal Design -->
+            {{-- <!-- Category Section - Minimal Design -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-5">
                     <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
@@ -26,8 +26,7 @@
                         @endforeach
                     </div>
                 </div>
-            </div>
-
+            </div> --}}
 
             <!-- Supplies Section - Now in its own card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
