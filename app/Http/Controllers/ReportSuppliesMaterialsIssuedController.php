@@ -421,7 +421,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
     }
 
     /**
-     * Get monthly comparison data
+     * Get monthly comparison data - FIXED VERSION
      */
     public function monthlyComparison(Request $request)
     {
@@ -434,10 +434,15 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
+            // FIXED: Filter by RIS slip fund cluster instead of supply stock fund cluster
             $monthlyTotal = SupplyTransaction::where('transaction_type', 'issue')
                 ->whereBetween('transaction_date', [$startDate, $endDate])
-                ->whereHas('supply.stocks', function($q) use ($fundCluster) {
-                    $q->where('fund_cluster', $fundCluster);
+                ->whereIn('reference_no', function($query) use ($fundCluster) {
+                    $query->select('ris_no')
+                        ->from('ris_slips')
+                        ->where('fund_cluster', $fundCluster)
+                        ->where('status', 'posted')
+                        ->whereNotNull('issued_at');
                 })
                 ->sum('total_cost');
 
