@@ -1603,27 +1603,47 @@ class RisSlipController extends Controller
         $year = $date->format('Y');
         $month = $date->format('m');
 
-        // Get all existing RIS numbers for that month, sorted by number
-        $existingNumbers = RisSlip::where('ris_no', 'like', "RIS {$year}-{$month}-%")
+        // FIXED: Get all existing RIS numbers for that month with better pattern matching
+        $pattern = "RIS {$year}-{$month}-";
+
+        $existingNumbers = RisSlip::where('ris_no', 'like', $pattern . '%')
             ->pluck('ris_no')
-            ->map(function($risNo) {
-                $parts = explode('-', $risNo);
-                return intval($parts[2] ?? 0);
+            ->map(function($risNo) use ($pattern) {
+                // Extract the number part more reliably
+                $numberPart = str_replace($pattern, '', $risNo);
+                return intval($numberPart);
+            })
+            ->filter(function($num) {
+                return $num > 0; // Only valid numbers
             })
             ->sort()
             ->values();
 
-        // Find the next available number (handles gaps)
-        $next = 1;
-        foreach ($existingNumbers as $num) {
-            if ($num == $next) {
-                $next++;
-            } else {
-                break; // Found a gap
-            }
+        Log::info('RIS Generation Debug', [
+            'date' => $date->format('Y-m-d'),
+            'pattern' => $pattern,
+            'found_numbers' => $existingNumbers->toArray(),
+            'max_number' => $existingNumbers->max()
+        ]);
+
+        // FIXED: Find the next available number
+        if ($existingNumbers->isEmpty()) {
+            $next = 1;
+        } else {
+            // Get the highest existing number and add 1
+            $next = $existingNumbers->max() + 1;
         }
 
-        return sprintf("RIS %s-%s-%03d", $year, $month, $next);
+        $newRisNumber = sprintf("RIS %s-%s-%03d", $year, $month, $next);
+
+        Log::info('RIS Generated', [
+            'date' => $date->format('Y-m-d'),
+            'existing_count' => $existingNumbers->count(),
+            'next_number' => $next,
+            'generated_ris' => $newRisNumber
+        ]);
+
+        return $newRisNumber;
     }
 
     /**
@@ -1853,11 +1873,33 @@ class RisSlipController extends Controller
             'ris_date' => 'required|date',
         ]);
 
-        $date      = Carbon::parse($data['ris_date']);
-        // mirror your generateHistoricalRisNumber() logic or use ReferenceNumberService:
-        $defaultRis = $this->generateHistoricalRisNumber($date);
+        try {
+            $date = Carbon::parse($data['ris_date']);
+            $defaultRis = $this->generateHistoricalRisNumber($date);
 
-        return response()->json(['defaultRis' => $defaultRis]);
+            Log::info('Next RIS Request', [
+                'requested_date' => $data['ris_date'],
+                'parsed_date' => $date->format('Y-m-d'),
+                'generated_ris' => $defaultRis
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'defaultRis' => $defaultRis,
+                'date' => $date->format('Y-m-d')
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('RIS Generation Failed', [
+                'error' => $e->getMessage(),
+                'requested_date' => $data['ris_date'] ?? 'N/A'
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to generate RIS number: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 }
