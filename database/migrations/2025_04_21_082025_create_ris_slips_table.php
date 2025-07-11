@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ris_slips', function (Blueprint $table) {
             $table->id('ris_id');
-            $table->string('ris_no')->unique();
+            $table->string('ris_no');
             $table->date('ris_date')->default(now());
 
             $table->string('entity_name');

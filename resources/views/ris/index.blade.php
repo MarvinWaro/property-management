@@ -157,19 +157,28 @@
                         <!-- Add this right after the modal header, before the scrollable content area -->
 
                         <!-- Error Display Section -->
+                        <!-- Replace the existing Error Display Section in your modal with this enhanced version -->
+                        <!-- Error Display Section -->
                         @if ($errors->any())
                             <div class="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-900">
                                 <div class="flex">
-                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                                     </svg>
-                                    <div>
+                                    <div class="flex-1">
                                         <h4 class="text-sm font-medium text-red-800 dark:text-red-300">There were errors with your submission</h4>
-                                        <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
+
+                                        @if ($errors->has('duplicate_items'))
+                                            <div class="mt-3 p-3 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                                <h5 class="text-sm font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    Duplicate Item Found
+                                                </h5>
+                                                <p class="text-sm text-red-700 dark:text-red-400">{{ $errors->first('duplicate_items') }}</p>
+                                            </div>
+                                        @endif
 
                                         @if ($errors->has('stock_validation'))
                                             <div class="mt-3">
@@ -182,10 +191,40 @@
                                                 @endforeach
                                             </div>
                                         @endif
+
+                                        @php
+                                            $otherErrors = collect($errors->all())->filter(function($error) use ($errors) {
+                                                return !$errors->has('duplicate_items') &&
+                                                    !$errors->has('stock_validation') &&
+                                                    !str_contains($error, 'duplicate items') &&
+                                                    !str_contains($error, 'stock validation');
+                                            });
+                                        @endphp
+
+                                        @if ($otherErrors->count() > 0)
+                                            <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc list-inside">
+                                                @foreach ($otherErrors as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         @endif
+
+                        @if ($errors->any())
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const modal = document.getElementById('manualEntryModal');
+                                    if (modal && modal.classList.contains('hidden')) {
+                                        modal.classList.remove('hidden');
+                                        document.body.style.overflow = 'hidden';
+                                    }
+                                });
+                            </script>
+                        @endif
+
 
                         <form action="{{ route('ris.store-manual') }}" method="POST"
                             class="flex flex-col flex-1 overflow-hidden">
@@ -607,72 +646,7 @@
                     }
                 </style>
 
-                <!-- ADD THIS DEBUG SECTION TEMPORARILY BEFORE YOUR JAVASCRIPT -->
-                {{-- <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <h3 class="text-lg font-bold text-red-800 mb-2">SUPPLIES DEBUG (Remove in production)</h3>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies type:</strong> {{ gettype($availableSupplies) }}
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies count:</strong> {{ $availableSupplies->count() ?? 'null' }}
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>$availableSupplies is empty:</strong> {{ $availableSupplies->isEmpty() ? 'YES' : 'NO' }}
-                    </div>
-
-                    @if($availableSupplies->count() > 0)
-                        <div class="mb-2">
-                            <strong>First Supply Structure:</strong>
-                            <pre class="text-xs bg-white p-2 rounded border">{{ json_encode($availableSupplies->first(), JSON_PRETTY_PRINT) }}</pre>
-                        </div>
-                    @endif
-
-                    <div class="mb-2">
-                        <strong>JSON Data for JavaScript:</strong>
-                        <pre class="text-xs bg-white p-2 rounded border">{{ json_encode($availableSupplies, JSON_PRETTY_PRINT) }}</pre>
-                    </div>
-
-                    <div class="mb-2">
-                        <strong>Raw Database Counts:</strong>
-                        <ul class="text-sm">
-                            <li>Total Supplies: {{ \App\Models\Supply::count() }}</li>
-                            <li>Active Supplies: {{ \App\Models\Supply::where('is_active', true)->count() }}</li>
-                            <li>Total Supply Stocks: {{ \App\Models\SupplyStock::count() }}</li>
-                            <li>Available Supply Stocks: {{ \App\Models\SupplyStock::where('status', 'available')->where('quantity_on_hand', '>', 0)->count() }}</li>
-                        </ul>
-                    </div>
-                </div> --}}
-
-                <!-- ADD THIS SIMPLE TEST SCRIPT BEFORE YOUR MAIN JAVASCRIPT -->
-                {{-- <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    console.log('=== CONTROLLER DATA TEST ===');
-
-                    // Test what's being passed from controller
-                    console.log('User role:', '{{ auth()->user()->role ?? "no-role" }}');
-                    console.log('Has admin/cao role:', {{ auth()->user()->hasRole(['admin', 'cao']) ? 'true' : 'false' }});
-                    console.log('Users count:', {{ $users->count() ?? 0 }});
-                    console.log('Supplies count:', {{ $availableSupplies->count() ?? 0 }});
-
-                    // Test the actual data
-                    let testSupplies = @json($availableSupplies ?? []);
-                    console.log('Raw supplies from controller:', testSupplies);
-                    console.log('Supplies data type:', typeof testSupplies);
-                    console.log('Is supplies array:', Array.isArray(testSupplies));
-
-                    if (typeof testSupplies === 'object' && !Array.isArray(testSupplies)) {
-                        console.log('Supplies object keys:', Object.keys(testSupplies));
-                        console.log('Supplies object values count:', Object.keys(testSupplies).length);
-                    }
-
-                    console.log('=== END CONTROLLER DATA TEST ===');
-                });
-                </script> --}}
-
-                <!-- REPLACE YOUR ENTIRE MANUAL ENTRY JAVASCRIPT SECTION WITH THIS -->
+                <!-- Updated JavaScript for the manual entry modal with duplicate validation -->
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         console.log('DOM loaded, initializing manual RIS entry...');
@@ -690,6 +664,7 @@
 
                         let itemIndex = 0;
                         let availableSupplies = [];
+                        let selectedSupplyIds = []; // Track selected supplies
 
                         console.log('Modal exists:', !!modal);
                         console.log('Open button exists:', !!openBtn);
@@ -778,6 +753,49 @@
 
                             document.body.appendChild(alert);
                             setTimeout(() => alert.remove(), 5000);
+                        }
+
+                        // NEW: Function to update available supplies in dropdowns
+                        function updateSupplyDropdowns() {
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+
+                            allSelects.forEach((select, index) => {
+                                const currentValue = select.value;
+                                const options = select.querySelectorAll('option');
+
+                                options.forEach(option => {
+                                    if (option.value && option.value !== currentValue) {
+                                        // Check if this supply is already selected in another row
+                                        const isSelected = selectedSupplyIds.includes(option.value) &&
+                                                        !select.classList.contains(`supply-${option.value}`);
+
+                                        if (isSelected) {
+                                            option.disabled = true;
+                                            option.textContent = option.textContent.replace(' (Already selected)', '') + ' (Already selected)';
+                                        } else {
+                                            option.disabled = false;
+                                            option.textContent = option.textContent.replace(' (Already selected)', '');
+                                        }
+                                    }
+                                });
+                            });
+                        }
+
+                        // NEW: Function to update selected supplies list
+                        function updateSelectedSupplies() {
+                            selectedSupplyIds = [];
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+
+                            allSelects.forEach(select => {
+                                if (select.value) {
+                                    selectedSupplyIds.push(select.value);
+                                    // Add class to identify which supply this select has
+                                    select.className = select.className.replace(/supply-\d+/g, '');
+                                    select.classList.add(`supply-${select.value}`);
+                                }
+                            });
+
+                            updateSupplyDropdowns();
                         }
 
                         // Load available supplies function
@@ -882,6 +900,7 @@
                             itemsTable.innerHTML = '';
                             itemIndex = 0;
                             availableSupplies = [];
+                            selectedSupplyIds = []; // Reset selected supplies
                             updateEmptyState();
                         }
 
@@ -891,13 +910,17 @@
                         // Add item functionality
                         addItemBtn?.addEventListener('click', addManualItem);
 
-
-
                         function addManualItem() {
                             console.log('Add item clicked, available supplies:', availableSupplies.length);
 
                             if (availableSupplies.length === 0) {
                                 showAlert('No supplies available in the system.', 'warning');
+                                return;
+                            }
+
+                            // Check if all supplies are already selected
+                            if (selectedSupplyIds.length >= availableSupplies.length) {
+                                showAlert('All available supplies have been added.', 'warning');
                                 return;
                             }
 
@@ -925,6 +948,13 @@
                                     option.setAttribute('data-stock-no', supply.stock_no);
                                     option.setAttribute('data-unit', supply.unit_of_measurement);
                                     option.textContent = `${supply.item_name} (${supply.stock_no})`;
+
+                                    // Disable if already selected
+                                    if (selectedSupplyIds.includes(supply.supply_id)) {
+                                        option.disabled = true;
+                                        option.textContent += ' (Already selected)';
+                                    }
+
                                     supplySelect.appendChild(option);
                                 });
 
@@ -933,6 +963,22 @@
                                     const selectedOption = this.options[this.selectedIndex];
 
                                     if (selectedOption.value) {
+                                        // Check if this supply is already selected in another row in this form
+                                        const allSelects = itemsTable.querySelectorAll('.supply-select');
+                                        let isDuplicate = false;
+
+                                        allSelects.forEach(otherSelect => {
+                                            if (otherSelect !== this && otherSelect.value === selectedOption.value) {
+                                                isDuplicate = true;
+                                            }
+                                        });
+
+                                        if (isDuplicate) {
+                                            showAlert('This item has already been added to this requisition. Each item can only appear once per RIS.', 'error');
+                                            this.value = '';
+                                            return;
+                                        }
+
                                         const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
 
                                         console.log(`Selected supply: ${selectedOption.textContent}, Available: ${available}`);
@@ -958,6 +1004,9 @@
                                         if (requestedQtyInput) requestedQtyInput.value = '';
                                         if (issuedQtyInput) issuedQtyInput.value = '';
 
+                                        // Update previous value
+                                        this.setAttribute('data-previous-value', selectedOption.value);
+
                                     } else {
                                         // No supply selected
                                         if (availableQtySpan) {
@@ -976,7 +1025,12 @@
                                             issuedQtyInput.disabled = false;
                                             issuedQtyInput.value = '';
                                         }
+
+                                        this.setAttribute('data-previous-value', '');
                                     }
+
+                                    // Update selected supplies list
+                                    updateSelectedSupplies();
                                 });
 
                                 console.log(`Added ${availableSupplies.length} options to select`);
@@ -1025,6 +1079,7 @@
 
                                 setTimeout(() => {
                                     row.remove();
+                                    updateSelectedSupplies(); // Update after removal
                                     updateEmptyState();
                                 }, 300);
                             });
@@ -1076,6 +1131,26 @@
                                 return;
                             }
 
+                            // Check for duplicate supplies before submission
+                            const allSelects = itemsTable.querySelectorAll('.supply-select');
+                            const suppliesInForm = [];
+                            let hasDuplicates = false;
+
+                            allSelects.forEach(select => {
+                                if (select.value) {
+                                    if (suppliesInForm.includes(select.value)) {
+                                        hasDuplicates = true;
+                                    } else {
+                                        suppliesInForm.push(select.value);
+                                    }
+                                }
+                            });
+
+                            if (hasDuplicates) {
+                                showAlert('Duplicate items found. Each item can only appear once in the requisition.', 'error');
+                                return;
+                            }
+
                             // Show loading
                             if (submitBtn) {
                                 submitBtn.disabled = true;
@@ -1086,31 +1161,62 @@
                             this.submit();
                         });
 
+                        // Status change handler
+                        const finalStatusSelect = document.getElementById('finalStatusSelect');
+                        const declineReasonDiv = document.getElementById('declineReasonDiv');
+
+                        finalStatusSelect?.addEventListener('change', function() {
+                            if (this.value === 'declined') {
+                                declineReasonDiv?.classList.remove('hidden');
+                            } else {
+                                declineReasonDiv?.classList.add('hidden');
+                            }
+                        });
+
                         // Initialize
                         updateEmptyState();
 
                         console.log('✅ Manual RIS entry initialization complete');
                     });
+
+                    // Date field and RIS No. auto-generation
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const dateField = document.getElementById('ris_date');
+                        const risNoField = document.getElementById('reference_no');
+                        if (!dateField || !risNoField) return;
+
+                        dateField.addEventListener('change', () => {
+                            fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                                credentials: 'same-origin'
+                            })
+                            .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+                            .then(json => {
+                                risNoField.value = json.defaultRis;
+                            })
+                            .catch(err => console.error('RIS lookup failed:', err));
+                        });
+                    });
                 </script>
 
                 <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const dateField = document.getElementById('ris_date');
-                    const risNoField = document.getElementById('reference_no');
-                    if (!dateField || !risNoField) return;
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const dateField = document.getElementById('ris_date');
+                        const risNoField = document.getElementById('reference_no');
+                        if (!dateField || !risNoField) return;
 
-                    dateField.addEventListener('change', () => {
-                    fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        credentials: 'same-origin'
-                    })
-                    .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
-                    .then(json => {
-                        risNoField.value = json.defaultRis;
-                    })
-                    .catch(err => console.error('RIS lookup failed:', err));
+                        dateField.addEventListener('change', () => {
+                        fetch(`{{ route('ris.next') }}?ris_date=` + encodeURIComponent(dateField.value), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            credentials: 'same-origin'
+                        })
+                        .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+                        .then(json => {
+                            risNoField.value = json.defaultRis;
+                        })
+                        .catch(err => console.error('RIS lookup failed:', err));
+                        });
                     });
-                });
                 </script>
 
 
@@ -1350,9 +1456,7 @@
         });
     </script>
 
-
     <!-- Add these NEW script tags AFTER your existing scripts -->
-
     <!-- Script 1: Handle Final Status Change -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1564,7 +1668,6 @@
             });
         });
     </script>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
