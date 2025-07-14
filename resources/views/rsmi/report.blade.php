@@ -44,6 +44,76 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Filter Section -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-md mb-6">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#ce201f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-2v-2.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Filter Report
+                    </h3>
+                    <form method="GET" action="{{ route('rsmi.generate') }}" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Month Filter -->
+                            <div>
+                                <label for="filter_month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+                                <select id="filter_month" name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                    focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                    dark:border-gray-500 dark:text-white transition-all duration-200">
+                                    @if(isset($availableMonths))
+                                        @forelse($availableMonths as $availableMonth)
+                                            <option value="{{ $availableMonth }}" {{ $month == $availableMonth ? 'selected' : '' }}>
+                                                {{ \Carbon\Carbon::parse($availableMonth . '-01')->format('F Y') }}
+                                            </option>
+                                        @empty
+                                            <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
+                                        @endforelse
+                                    @else
+                                        <option value="{{ $month }}" selected>{{ $startDate->format('F Y') }}</option>
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Fund Cluster Filter -->
+                            <div>
+                                <label for="filter_fund_cluster" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                <select id="filter_fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                    focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                    dark:border-gray-500 dark:text-white transition-all duration-200">
+                                    <option value="">All Fund Clusters</option>
+                                    @if(isset($fundClusters))
+                                        @foreach($fundClusters as $cluster)
+                                            <option value="{{ $cluster }}" {{ $fundCluster == $cluster ? 'selected' : '' }}>
+                                                Fund Cluster: {{ $cluster }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        @foreach(['101', '151'] as $cluster)
+                                            <option value="{{ $cluster }}" {{ $fundCluster == $cluster ? 'selected' : '' }}>
+                                                Fund Cluster: {{ $cluster }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Apply Filter Button -->
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a]
+                                    focus:ring-2 focus:outline-none focus:ring-[#ce201f]/30 transition-all duration-200
+                                    flex items-center justify-center shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-2v-2.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    Apply Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Report Header -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-md mb-6">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-[#ce201f]">

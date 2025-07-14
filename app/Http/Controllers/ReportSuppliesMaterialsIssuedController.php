@@ -113,12 +113,39 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $startDate = Carbon::parse($month . '-01')->startOfMonth();
         $endDate = Carbon::parse($month . '-01')->endOfMonth();
 
-        // UPDATED: Get transactions for the period with optional fund cluster filtering
+        // Get filter data for the inline filters
+        $availableMonths = RisSlip::where('status', 'posted')
+            ->whereNotNull('issued_at')
+            ->selectRaw('DATE_FORMAT(issued_at, "%Y-%m") as month')
+            ->distinct()
+            ->orderBy('month', 'desc')
+            ->pluck('month');
+
+        // If no available months, add current month as fallback
+        if ($availableMonths->isEmpty()) {
+            $availableMonths = collect([Carbon::now()->format('Y-m')]);
+        }
+
+        // Get fund clusters from actual RIS slips that have been posted
+        $fundClusters = RisSlip::where('status', 'posted')
+            ->whereNotNull('issued_at')
+            ->whereNotNull('fund_cluster')
+            ->distinct()
+            ->pluck('fund_cluster')
+            ->sort()
+            ->values();
+
+        // If no fund clusters found, provide defaults
+        if ($fundClusters->isEmpty()) {
+            $fundClusters = collect(['101', '151']);
+        }
+
+        // Get transactions for the period with optional fund cluster filtering
         $transactionsQuery = SupplyTransaction::with(['supply.category', 'department'])
             ->where('transaction_type', 'issue')
             ->whereBetween('transaction_date', [$startDate, $endDate]);
 
-        // UPDATED: Apply fund cluster filter only if specified
+        // Apply fund cluster filter only if specified
         if ($fundCluster) {
             // Filter by specific fund cluster
             $transactionsQuery->whereIn('reference_no', function($query) use ($fundCluster) {
@@ -138,7 +165,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             });
         }
 
-        // Apply department filter if specified
+        // Apply department filter if specified (keep this for backward compatibility with export links)
         if ($departmentId) {
             $transactionsQuery->where('department_id', $departmentId);
         }
@@ -206,7 +233,9 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'endDate',
             'entityName',
             'fundCluster',
-            'departmentId'
+            'departmentId',
+            'availableMonths',
+            'fundClusters'
         ));
     }
 
@@ -914,46 +943,82 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
-        $departmentId = $request->get('department_id');
-        $fundCluster = $request->get('fund_cluster', '101');
+        // Validate the request
+        $validated = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'fund_cluster' => 'nullable|in:101,151',
+            'department_id' => 'nullable|exists:departments,id'
+        ]);
+
+        $month = $validated['month'] ?? Carbon::now()->format('Y-m');
+        $departmentId = $validated['department_id'] ?? null;
+        $fundCluster = $validated['fund_cluster'] ?? null; // null = All Fund Clusters
 
         // Parse month
         $startDate = Carbon::parse($month . '-01')->startOfMonth();
         $endDate = Carbon::parse($month . '-01')->endOfMonth();
 
-        // Get transactions (using your existing logic)
+        // FIXED: Get transactions with proper RIS slip fund cluster filtering
         $transactionsQuery = SupplyTransaction::with(['supply', 'department'])
             ->where('transaction_type', 'issue')
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->whereHas('supply.stocks', fn($q) => $q->where('fund_cluster', $fundCluster));
+            ->whereBetween('transaction_date', [$startDate, $endDate]);
 
+        // FIXED: Apply fund cluster filter by RIS slip fund cluster, not supply stock fund cluster
+        if ($fundCluster) {
+            // Filter by specific fund cluster
+            $transactionsQuery->whereIn('reference_no', function($query) use ($fundCluster) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('fund_cluster', $fundCluster)
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        } else {
+            // "All Fund Clusters" - filter by any posted RIS slip
+            $transactionsQuery->whereIn('reference_no', function($query) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        }
+
+        // Apply department filter if specified
         if ($departmentId) {
             $transactionsQuery->where('department_id', $departmentId);
         }
 
         $transactions = $transactionsQuery->get();
 
-        // Group by RIS number (using your existing grouping logic)
-        $reportData = $transactions
-            ->groupBy('reference_no')
-            ->map(fn($items, $risNo) => [
+        // Get RIS slip information for fund cluster data
+        $risSlips = RisSlip::whereIn('ris_no', $transactions->pluck('reference_no')->unique())
+            ->select('ris_no', 'fund_cluster')
+            ->get()
+            ->keyBy('ris_no');
+
+        // Group by RIS number with fund cluster information
+        $reportData = $transactions->groupBy('reference_no')->map(function($items, $risNo) use ($risSlips) {
+            $risSlip = $risSlips->get($risNo);
+            return [
                 'ris_no' => $risNo,
+                'fund_cluster' => $risSlip ? $risSlip->fund_cluster : null,
                 'department' => 'CHEDRO XII',
                 'issued_date' => $items->first()->transaction_date,
-                'items' => $items->map(fn($tx) => [
-                    'stock_no' => $tx->supply->stock_no,
-                    'item_name' => trim(
-                        $tx->supply->item_name .
-                        ($tx->supply->description ? ', ' . $tx->supply->description : '')
-                    ),
-                    'unit' => $tx->supply->unit_of_measurement,
-                    'quantity_issued' => $tx->quantity,
-                    'unit_cost' => $tx->unit_cost,
-                    'total_cost' => $tx->total_cost,
-                ]),
-            ])
-            ->sortKeys();
+                'items' => $items->map(function($tx) {
+                    return [
+                        'stock_no' => $tx->supply->stock_no,
+                        'item_name' => trim(
+                            $tx->supply->item_name .
+                            ($tx->supply->description ? ', ' . $tx->supply->description : '')
+                        ),
+                        'unit' => $tx->supply->unit_of_measurement,
+                        'quantity_issued' => $tx->quantity,
+                        'unit_cost' => $tx->unit_cost,
+                        'total_cost' => $tx->total_cost,
+                    ];
+                }),
+            ];
+        })->sortKeys();
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
@@ -991,8 +1056,10 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('F5')->getFont()->setBold(true);
         $sheet->getStyle('G5:H5')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
 
+        // UPDATED: Fund Cluster display - handle "All" case
         $sheet->setCellValue('A6', 'Fund Cluster:');
-        $sheet->setCellValue('B6', $fundCluster);
+        $fundClusterDisplay = $fundCluster ? $fundCluster : 'All Fund Clusters';
+        $sheet->setCellValue('B6', $fundClusterDisplay);
         $sheet->mergeCells('B6:E6');
         $sheet->getStyle('A6')->getFont()->setBold(true);
         $sheet->getStyle('B6')->getFont()->setBold(true);
@@ -1006,7 +1073,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getStyle('G6')->getFont()->setBold(true);
         $sheet->getStyle('G6:H6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
 
-        // FIXED: Instructions with proper merged cells and borders (no gap - row 8)
+        // Instructions with proper merged cells and borders (no gap - row 8)
         $instructionRow = 8;
 
         // Left instruction: "To be filled up by the Supply and/or Property Division/Unit" (A-F merged)
@@ -1235,7 +1302,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
-        // Data rows - only show up to 15 items as in template
+        // Data rows
         $currentRow++;
         $recapStartRow = $currentRow;
         $recapItemCount = 0;
@@ -1362,9 +1429,20 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $sheet->getColumnDimension('G')->setWidth(15);
         $sheet->getColumnDimension('H')->setWidth(20);
 
-        // Write file
+        // Write file with enhanced filename
         $writer = new Xlsx($spreadsheet);
-        $filename = 'RSMI_Report_' . $startDate->format('Y_m') . '.xlsx';
+        $fundClusterSuffix = $fundCluster ? "_FC{$fundCluster}" : "_AllFC";
+        $filename = 'RSMI_Report_' . $startDate->format('Y_m') . $fundClusterSuffix . '.xlsx';
+
+        // Log for debugging
+        \Log::info('RSMI Excel Export Generated', [
+            'month' => $month,
+            'fund_cluster' => $fundCluster ?? 'All',
+            'department_id' => $departmentId,
+            'transactions_count' => $transactions->count(),
+            'report_data_count' => $reportData->count(),
+            'filename' => $filename
+        ]);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
