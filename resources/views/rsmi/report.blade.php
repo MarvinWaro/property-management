@@ -123,7 +123,7 @@
                             Report of Supplies and Materials Issued
                         </h3>
 
-                        <div class="space-y-1 text-gray-600 dark:text-gray-300">
+                        <div class=" text-gray-600 dark:text-gray-300">
                             <p class="font-medium text-lg">{{ $entityName }}</p>
 
                             <div class="flex items-center justify-center space-x-6 text-sm">

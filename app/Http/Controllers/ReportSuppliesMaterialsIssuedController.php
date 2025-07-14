@@ -25,9 +25,7 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 
 class ReportSuppliesMaterialsIssuedController extends Controller
 {
-    /**
-     * Display RSMI main page with filters
-     */
+
     public function index(Request $request)
     {
         $selectedMonth = $request->get('month', Carbon::now()->format('Y-m'));
@@ -93,9 +91,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * Generate RSMI report
-     */
     public function generate(Request $request)
     {
         // Validate the request
@@ -239,9 +234,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * Generate detailed RSMI report (by supply item) with analytics data
-     */
     public function detailed(Request $request)
     {
         // Validate the request
@@ -391,9 +383,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * Generate analytics data for detailed report charts
-     */
     private function generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster)
     {
         // 1. Category-wise distribution
@@ -410,8 +399,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $topExpensiveItems = $transactions->groupBy('supply_id')->map(function($items) {
             $supply = $items->first()->supply;
             return [
-                'item_name' => $supply->item_name,
-                'stock_no' => $supply->stock_no,
+                'item_name' => $supply->item_name ?? 'Unknown Item',
+                'stock_no' => $supply->stock_no ?? 'N/A',
                 'total_cost' => $items->sum('total_cost'),
                 'quantity' => $items->sum('quantity')
             ];
@@ -451,29 +440,38 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // 6. Unit cost analysis
         $unitCostAnalysis = $transactions->groupBy('supply_id')->map(function($items) {
             $supply = $items->first()->supply;
-            $avgCost = $items->avg('unit_cost');
-            $maxCost = $items->max('unit_cost');
-            $minCost = $items->min('unit_cost');
+            $costs = $items->pluck('unit_cost')->filter();
 
-            return [
-                'item_name' => $supply->item_name,
-                'avg_cost' => $avgCost,
-                'max_cost' => $maxCost,
-                'min_cost' => $minCost,
-                'cost_variance' => $maxCost - $minCost,
-                'total_quantity' => $items->sum('quantity')
-            ];
-        })->where('cost_variance', '>', 0)->sortByDesc('cost_variance')->take(10)->values();
+            if ($costs->count() > 1) {
+                $avgCost = $costs->avg();
+                $maxCost = $costs->max();
+                $minCost = $costs->min();
+                $variance = $maxCost - $minCost;
+
+                return [
+                    'item_name' => $supply->item_name ?? 'Unknown Item',
+                    'avg_cost' => $avgCost,
+                    'max_cost' => $maxCost,
+                    'min_cost' => $minCost,
+                    'cost_variance' => $variance,
+                    'total_quantity' => $items->sum('quantity')
+                ];
+            }
+            return null;
+        })->filter()->where('cost_variance', '>', 0)->sortByDesc('cost_variance')->take(10)->values();
 
         // 7. Summary statistics
+        $totalCost = $transactions->sum('total_cost');
+        $transactionCount = $transactions->count();
+
         $summaryStats = [
-            'total_value' => $transactions->sum('total_cost'),
-            'total_transactions' => $transactions->count(),
+            'total_value' => $totalCost,
+            'total_transactions' => $transactionCount,
             'unique_items' => $transactions->pluck('supply_id')->unique()->count(),
             'unique_departments' => $transactions->pluck('department_id')->unique()->count(),
             'unique_ris' => $transactions->pluck('reference_no')->unique()->count(),
-            'avg_transaction_value' => $transactions->avg('total_cost'),
-            'highest_single_transaction' => $transactions->max('total_cost'),
+            'avg_transaction_value' => $transactionCount > 0 ? $totalCost / $transactionCount : 0,
+            'highest_single_transaction' => $transactions->max('total_cost') ?? 0,
             'date_range' => [
                 'start' => $startDate->format('M d, Y'),
                 'end' => $endDate->format('M d, Y')
@@ -491,9 +489,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ];
     }
 
-    /**
-     * Export RSMI to PDF
-     */
     public function exportPdf(Request $request)
     {
         $month = $request->get('month', Carbon::now()->format('Y-m'));
@@ -628,9 +623,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         return view('rsmi.monthly-comparison', compact('monthlyData', 'year', 'fundCluster'));
     }
 
-    /**
-     * Generate RSMI summary report grouped by stock number
-     */
     public function summary(Request $request)
     {
         $month = $request->get('month', Carbon::now()->format('Y-m'));
@@ -685,22 +677,47 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
     public function analytics(Request $request)
     {
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
-        $departmentId = $request->get('department_id');
-        $fundCluster = $request->get('fund_cluster', '101');
+        // Validate the request
+        $validated = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'fund_cluster' => 'nullable|in:101,151',
+            'department_id' => 'nullable|exists:departments,id'
+        ]);
+
+        $month = $validated['month'] ?? Carbon::now()->format('Y-m');
+        $departmentId = $validated['department_id'] ?? null;
+        $fundCluster = $validated['fund_cluster'] ?? null; // Allow null for "All Fund Clusters"
 
         // Parse month
         $startDate = Carbon::parse($month . '-01')->startOfMonth();
         $endDate = Carbon::parse($month . '-01')->endOfMonth();
 
-        // Get all issued items from transactions
+        // FIXED: Get all issued items from transactions with proper fund cluster filtering
         $transactionsQuery = SupplyTransaction::with(['supply.category', 'department'])
             ->where('transaction_type', 'issue')
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->whereHas('supply.stocks', function($q) use ($fundCluster) {
-                $q->where('fund_cluster', $fundCluster);
-            });
+            ->whereBetween('transaction_date', [$startDate, $endDate]);
 
+        // FIXED: Filter by RIS slip fund cluster instead of supply stock fund cluster
+        if ($fundCluster) {
+            // Filter by specific fund cluster
+            $transactionsQuery->whereIn('reference_no', function($query) use ($fundCluster) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('fund_cluster', $fundCluster)
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        } else {
+            // "All Fund Clusters" - filter by any posted RIS slip
+            $transactionsQuery->whereIn('reference_no', function($query) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        }
+
+        // Apply department filter if specified
         if ($departmentId) {
             $transactionsQuery->where('department_id', $departmentId);
         }
@@ -711,6 +728,16 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $analyticsData = $this->generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster);
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
+
+        // Log for debugging
+        \Log::info('RSMI Analytics Generated', [
+            'month' => $month,
+            'fund_cluster' => $fundCluster ?? 'All',
+            'department_id' => $departmentId,
+            'transactions_count' => $transactions->count(),
+            'categories_count' => $analyticsData['categories']->count(),
+            'departments_count' => $analyticsData['departments']->count()
+        ]);
 
         return view('rsmi.analytics', compact(
             'month',
@@ -723,9 +750,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * Show yearly analytics for RSMI
-     */
     public function yearlyAnalytics(Request $request)
     {
         $year = $request->get('year', Carbon::now()->year);
@@ -741,9 +765,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * Generate comprehensive yearly analytics data
-     */
+
     private function generateYearlyAnalytics($year, $fundCluster)
     {
         $startDate = Carbon::createFromDate($year, 1, 1)->startOfYear();
