@@ -117,7 +117,21 @@
                                     </select>
                                 </div>
 
-                                <div class="pt-5">
+                                <div>
+                                    <label for="detailed_fund_cluster" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                    <select id="detailed_fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                        focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                        dark:border-gray-500 dark:text-white transition-all duration-200">
+                                        <option value="">All Fund Clusters</option>
+                                        @foreach($fundClusters as $cluster)
+                                            <option value="{{ $cluster }}">
+                                                Fund Cluster: {{ $cluster }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="pt-2">
                                     <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#10b981] rounded-lg hover:bg-[#059669]
                                         focus:ring-2 focus:outline-none focus:ring-[#10b981]/30 transition-all duration-200
                                         flex items-center justify-center shadow-sm">
@@ -169,6 +183,7 @@
                             <ul class="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-7 list-disc">
                                 <li>Generate monthly reports for official documentation and record-keeping</li>
                                 <li>Use detailed reports to track specific item movements across departments</li>
+                                <li>Filter by fund cluster (101 or 151) to separate budget allocations</li>
                                 <li>The comparison chart helps identify usage patterns and plan future procurement</li>
                             </ul>
                         </div>

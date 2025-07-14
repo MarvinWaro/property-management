@@ -152,59 +152,138 @@ class ReportSuppliesMaterialsIssuedController extends Controller
      */
     public function detailed(Request $request)
     {
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
-        $departmentId = $request->get('department_id');
-        $fundCluster = $request->get('fund_cluster', '101');
+        // Validate the request
+        $validated = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'fund_cluster' => 'nullable|in:101,151',
+            'department_id' => 'nullable|exists:departments,id'
+        ]);
+
+        $month = $validated['month'] ?? Carbon::now()->format('Y-m');
+        $fundCluster = $validated['fund_cluster'] ?? null; // Allow null for "All Fund Clusters"
+        $departmentId = $validated['department_id'] ?? null;
 
         // Parse month
         $startDate = Carbon::parse($month . '-01')->startOfMonth();
         $endDate = Carbon::parse($month . '-01')->endOfMonth();
 
-        // Get all issued items from transactions
+        // Get available months for the dropdown (from posted RIS slips)
+        $availableMonths = RisSlip::where('status', 'posted')
+            ->whereNotNull('issued_at')
+            ->whereHas('items', function($query) {
+                $query->where('quantity_issued', '>', 0);
+            })
+            ->selectRaw('DATE_FORMAT(ris_date, "%Y-%m") as month')
+            ->distinct()
+            ->orderBy('month', 'desc')
+            ->pluck('month');
+
+        // If no available months, add current month as fallback
+        if ($availableMonths->isEmpty()) {
+            $availableMonths = collect([Carbon::now()->format('Y-m')]);
+        }
+
+        // Get available fund clusters from posted RIS slips
+        $fundClusters = RisSlip::where('status', 'posted')
+            ->whereNotNull('issued_at')
+            ->whereNotNull('fund_cluster')
+            ->distinct()
+            ->pluck('fund_cluster')
+            ->filter()
+            ->sort()
+            ->values();
+
+        // If no fund clusters found, provide defaults
+        if ($fundClusters->isEmpty()) {
+            $fundClusters = collect(['101', '151']);
+        }
+
+        // UPDATED: Get all issued items from transactions with proper fund cluster filtering
         $transactionsQuery = SupplyTransaction::with(['supply.category', 'department'])
             ->where('transaction_type', 'issue')
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->whereHas('supply.stocks', function($q) use ($fundCluster) {
-                $q->where('fund_cluster', $fundCluster);
-            });
+            ->whereBetween('transaction_date', [$startDate, $endDate]);
 
+        // FIXED: Filter by RIS slip fund cluster instead of supply stock fund cluster
+        if ($fundCluster) {
+            $transactionsQuery->whereIn('reference_no', function($query) use ($fundCluster) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('fund_cluster', $fundCluster)
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        } else {
+            // If no fund cluster specified, still filter by posted RIS slips
+            $transactionsQuery->whereIn('reference_no', function($query) {
+                $query->select('ris_no')
+                    ->from('ris_slips')
+                    ->where('status', 'posted')
+                    ->whereNotNull('issued_at');
+            });
+        }
+
+        // Apply department filter if specified
         if ($departmentId) {
             $transactionsQuery->where('department_id', $departmentId);
         }
 
         $transactions = $transactionsQuery->get();
 
-        // Group by supply
-        $reportData = $transactions->groupBy('supply_id')->map(function($items) {
+        // Get RIS slip information for fund cluster data
+        $risSlips = RisSlip::whereIn('ris_no', $transactions->pluck('reference_no')->unique())
+            ->select('ris_no', 'fund_cluster')
+            ->get()
+            ->keyBy('ris_no');
+
+        // Group by supply and include fund cluster information
+        $reportData = $transactions->groupBy('supply_id')->map(function($items) use ($risSlips) {
             $supply = $items->first()->supply;
             $totalQuantity = $items->sum('quantity');
             $totalCost = $items->sum('total_cost');
 
+            // Map transactions with fund cluster information
+            $transactionData = $items->map(function($item) use ($risSlips) {
+                $risSlip = $risSlips->get($item->reference_no);
+                return [
+                    'ris_no' => $item->reference_no,
+                    'fund_cluster' => $risSlip ? $risSlip->fund_cluster : null,
+                    'department' => $item->department->name ?? 'N/A',
+                    'date' => $item->transaction_date,
+                    'quantity' => $item->quantity,
+                    'unit_cost' => $item->unit_cost,
+                    'total' => $item->total_cost
+                ];
+            });
+
             return [
+                'supply_id' => $supply->supply_id,
                 'stock_no' => $supply->stock_no,
                 'item_name' => $supply->item_name,
+                'description' => $supply->description,
                 'unit' => $supply->unit_of_measurement,
                 'category' => $supply->category->name ?? 'Uncategorized',
                 'total_quantity' => $totalQuantity,
                 'average_unit_cost' => $totalQuantity > 0 ? $totalCost / $totalQuantity : 0,
                 'total_cost' => $totalCost,
-                'transactions' => $items->map(function($item) {
-                    return [
-                        'ris_no' => $item->reference_no,
-                        'department' => $item->department->name ?? 'N/A',
-                        'date' => $item->transaction_date,
-                        'quantity' => $item->quantity,
-                        'unit_cost' => $item->unit_cost,
-                        'total' => $item->total_cost
-                    ];
-                })
+                'transactions' => $transactionData
             ];
-        })->sortBy('stock_no');
+        })->sortBy('stock_no')->values();
 
         // Generate analytics data for charts
         $analyticsData = $this->generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster);
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
+
+        // Log for debugging
+        \Log::info('RSMI Detailed Report Generated', [
+            'month' => $month,
+            'fund_cluster' => $fundCluster,
+            'department_id' => $departmentId,
+            'total_supplies' => $reportData->count(),
+            'total_transactions' => $transactions->count(),
+            'available_months_count' => $availableMonths->count(),
+            'fund_clusters_count' => $fundClusters->count()
+        ]);
 
         return view('rsmi.detailed', compact(
             'reportData',
@@ -214,7 +293,9 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'entityName',
             'fundCluster',
             'departmentId',
-            'analyticsData'
+            'analyticsData',
+            'availableMonths',
+            'fundClusters'
         ));
     }
 

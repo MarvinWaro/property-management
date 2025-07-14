@@ -3,6 +3,9 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Detailed RSMI Report by Item - {{ $startDate->format('F Y') }}
+                @if($fundCluster)
+                    <span class="text-sm font-normal text-gray-600 dark:text-gray-400">(Fund Cluster: {{ $fundCluster }})</span>
+                @endif
             </h2>
             <div class="flex space-x-2">
                 <a href="{{ route('rsmi.index') }}"
@@ -19,31 +22,72 @@
                         <span>Analytics</span>
                     </span>
                 </a>
-                {{-- <a href="{{ route('rsmi.export-pdf') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&format=detailed"
-                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
-                    <span class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span>Export as PDF</span>
-                    </span>
-                </a> --}}
             </div>
         </div>
     </x-slot>
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Search Bar -->
+            <!-- Filter Section -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-md mb-6">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Filter Options</h3>
+                    <form method="GET" action="{{ route('rsmi.detailed') }}" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Month Filter -->
+                            <div>
+                                <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+                                <select id="month" name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                    focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                    dark:border-gray-500 dark:text-white transition-all duration-200">
+                                    @forelse($availableMonths as $availableMonth)
+                                        <option value="{{ $availableMonth }}" {{ $month == $availableMonth ? 'selected' : '' }}>
+                                            {{ \Carbon\Carbon::parse($availableMonth . '-01')->format('F Y') }}
+                                        </option>
+                                    @empty
+                                        <option value="{{ now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
+                                    @endforelse
+                                </select>
+                            </div>
+
+                            <!-- Fund Cluster Filter -->
+                            <div>
+                                <label for="fund_cluster" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                <select id="fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                    focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                    dark:border-gray-500 dark:text-white transition-all duration-200">
+                                    <option value="">All Fund Clusters</option>
+                                    @foreach($fundClusters as $cluster)
+                                        <option value="{{ $cluster }}" {{ $fundCluster == $cluster ? 'selected' : '' }}>
+                                            Fund Cluster: {{ $cluster }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filter Button -->
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#ce201f] rounded-lg hover:bg-[#a01b1a]
+                                    focus:ring-2 focus:outline-none focus:ring-[#ce201f]/30 transition-all duration-200
+                                    flex items-center justify-center shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-2v-2.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    Apply Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Search Bar -->
                 <div class="p-4">
                     <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
                         <div class="w-full">
                             <div class="relative">
                                 <input type="text" id="rsmi-search"
                                     class="block w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] transition-all duration-200"
-                                    placeholder="Search by item name, stock number, or RIS number...">
+                                    placeholder="Search by item name, stock number, RIS number, or fund cluster...">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -86,12 +130,18 @@
                          data-stock-no="{{ $supplyData['stock_no'] }}"
                          data-item-name="{{ $supplyData['item_name'] }}"
                          data-ris-numbers="{{ $supplyData['transactions']->pluck('ris_no')->implode(' ') }}"
-                         data-category="{{ $supplyData['category'] }}">
+                         data-category="{{ $supplyData['category'] }}"
+                         data-fund-clusters="{{ $supplyData['transactions']->pluck('fund_cluster')->unique()->implode(' ') }}">
                         <div class="p-5 border-b border-gray-200 dark:border-gray-700 bg-[#ce201f]">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center text-white">
                                 <div>
                                     <h3 class="text-lg font-bold">{{ $supplyData['item_name'] }}</h3>
                                     <p class="text-white/90">Stock No: {{ $supplyData['stock_no'] }} | Category: {{ $supplyData['category'] }}</p>
+                                    @if($supplyData['transactions']->pluck('fund_cluster')->unique()->count() > 1)
+                                        <p class="text-white/80 text-sm">Fund Clusters: {{ $supplyData['transactions']->pluck('fund_cluster')->unique()->implode(', ') }}</p>
+                                    @elseif($supplyData['transactions']->first()['fund_cluster'])
+                                        <p class="text-white/80 text-sm">Fund Cluster: {{ $supplyData['transactions']->first()['fund_cluster'] }}</p>
+                                    @endif
                                 </div>
                                 <div class="text-right mt-2 md:mt-0">
                                     <p class="text-sm text-white/90">Total Quantity Issued</p>
@@ -123,6 +173,7 @@
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
                                             <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">RIS No.</th>
+                                            <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Fund Cluster</th>
                                             <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Division</th>
                                             <th scope="col" class="px-4 py-2 font-bold text-gray-800 dark:text-gray-200">Date</th>
                                             <th scope="col" class="px-4 py-2 text-right font-bold text-gray-800 dark:text-gray-200">Quantity</th>
@@ -134,6 +185,14 @@
                                         @foreach($supplyData['transactions'] as $txn)
                                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                                                 <td class="px-4 py-2">{{ $txn['ris_no'] }}</td>
+                                                <td class="px-4 py-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                        {{ $txn['fund_cluster'] == '101' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                           ($txn['fund_cluster'] == '151' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200') }}">
+                                                        {{ $txn['fund_cluster'] ?? 'N/A' }}
+                                                    </span>
+                                                </td>
                                                 <td class="px-4 py-2">{{ $txn['department'] }}</td>
                                                 <td class="px-4 py-2">{{ \Carbon\Carbon::parse($txn['date'])->format('M d, Y') }}</td>
                                                 <td class="px-4 py-2 text-right">{{ number_format($txn['quantity']) }}</td>
@@ -203,11 +262,13 @@
                     const itemName = card.getAttribute('data-item-name').toLowerCase();
                     const risNumbers = card.getAttribute('data-ris-numbers').toLowerCase();
                     const category = card.getAttribute('data-category').toLowerCase();
+                    const fundClusters = card.getAttribute('data-fund-clusters').toLowerCase();
 
                     if (stockNo.includes(searchTerm) ||
                         itemName.includes(searchTerm) ||
                         risNumbers.includes(searchTerm) ||
-                        category.includes(searchTerm)) {
+                        category.includes(searchTerm) ||
+                        fundClusters.includes(searchTerm)) {
                         card.classList.remove('hidden');
                         visibleCount++;
                     } else {
