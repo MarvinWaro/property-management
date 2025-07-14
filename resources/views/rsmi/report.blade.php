@@ -3,15 +3,19 @@
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Report of Supplies and Materials Issued - {{ $startDate->format('F Y') }}
+                @if($fundCluster)
+                    <span class="text-sm font-normal text-gray-600 dark:text-gray-400">(Fund Cluster: {{ $fundCluster }})</span>
+                @else
+                    <span class="text-sm font-normal text-gray-600 dark:text-gray-400">(All Fund Clusters)</span>
+                @endif
             </h2>
-            {{-- Replace the export button section in your blade file with this: --}}
             <div class="flex space-x-2">
                 <a href="{{ route('rsmi.index') }}"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 transition-all duration-200">
                     Back to RSMI
                 </a>
 
-                {{-- NEW COA Format Export Button --}}
+                {{-- Export PDF Button --}}
                 <a href="{{ route('rsmi.export-pdf-formatted') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-red-400/30 transition-all duration-200 shadow-sm">
                     <span class="flex items-center space-x-2">
@@ -23,7 +27,7 @@
                     </span>
                 </a>
 
-                {{-- NEW Excel Export Button --}}
+                {{-- Export Excel Button --}}
                 <a href="{{ route('rsmi.export-excel') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-[#217346] rounded-lg hover:bg-[#164e2e] focus:ring-2 focus:outline-none focus:ring-[#217346]/30 transition-all duration-200 shadow-sm">
                     <span class="flex items-center space-x-2">
@@ -34,7 +38,6 @@
                         <span>Export Excel</span>
                     </span>
                 </a>
-                
             </div>
         </div>
     </x-slot>
@@ -47,7 +50,11 @@
                     <div class="text-white text-center">
                         <h3 class="text-xl font-bold">REPORT OF SUPPLIES AND MATERIALS ISSUED</h3>
                         <p class="text-white/90 mt-1">{{ $entityName }}</p>
-                        <p class="text-white/90">Fund Cluster: {{ $fundCluster }}</p>
+                        @if($fundCluster)
+                            <p class="text-white/90">Fund Cluster: {{ $fundCluster }}</p>
+                        @else
+                            <p class="text-white/90">All Fund Clusters</p>
+                        @endif
                         <p class="text-white/90">Date: {{ $startDate->format('F Y') }}</p>
                     </div>
                 </div>
@@ -68,10 +75,27 @@
                             <p class="text-2xl font-bold text-gray-800 dark:text-gray-200">{{ number_format($summary['unique_supplies']) }}</p>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Departments Served</p>
-                            <p class="text-2xl font-bold text-[#f59e0b]">{{ number_format($summary['departments_served']) }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">RIS Count</p>
+                            <p class="text-2xl font-bold text-[#f59e0b]">{{ number_format($summary['ris_count'] ?? 0) }}</p>
                         </div>
                     </div>
+
+                    @if(!$fundCluster && isset($summary['fund_clusters_used']) && $summary['fund_clusters_used']->count() > 0)
+                    <!-- Fund Clusters Summary (only show when "All Fund Clusters" is selected) -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fund Clusters in this Report:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($summary['fund_clusters_used'] as $cluster)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                    {{ $cluster == '101' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                       ($cluster == '151' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                       'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200') }}">
+                                    Fund Cluster {{ $cluster }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -82,6 +106,9 @@
                         <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                             <tr>
                                 <th scope="col" class="px-4 py-3 text-center font-bold text-gray-800 dark:text-gray-200">RIS No.</th>
+                                @if(!$fundCluster)
+                                    <th scope="col" class="px-4 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Fund Cluster</th>
+                                @endif
                                 <th scope="col" class="px-4 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Responsibility<br>Center Code</th>
                                 <th scope="col" class="px-4 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Stock No.</th>
                                 <th scope="col" class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200">Item</th>
@@ -100,6 +127,18 @@
                                                 {{ $risData['ris_no'] }}
                                             @endif
                                         </td>
+                                        @if(!$fundCluster)
+                                            <td class="px-4 py-3 text-center">
+                                                @if($index === 0)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                        {{ $risData['fund_cluster'] == '101' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                           ($risData['fund_cluster'] == '151' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200') }}">
+                                                        {{ $risData['fund_cluster'] ?? 'N/A' }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endif
                                         <td class="px-4 py-3 text-center">
                                             @if($index === 0)
                                                 &nbsp; {{-- Responsibility Center Code intentionally left blank --}}
@@ -117,7 +156,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="bg-gray-100 dark:bg-gray-700 font-bold">
-                                <td colspan="7" class="px-4 py-3 text-right">GRAND TOTAL:</td>
+                                <td colspan="{{ !$fundCluster ? '8' : '7' }}" class="px-4 py-3 text-right">GRAND TOTAL:</td>
                                 <td class="px-4 py-3 text-center text-[#10b981]">
                                     ₱{{ number_format($summary['total_cost'], 2) }}
                                 </td>
