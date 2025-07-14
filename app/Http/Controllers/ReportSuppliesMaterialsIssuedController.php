@@ -599,9 +599,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         return $pdf->download($filename);
     }
 
-    /**
-     * Get monthly comparison data - FIXED VERSION
-     */
     public function monthlyComparison(Request $request)
     {
         $year = $request->get('year', Carbon::now()->year);
