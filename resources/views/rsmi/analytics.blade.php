@@ -127,15 +127,15 @@
                     </div>
                 </div>
 
-                <!-- Daily Trend Chart -->
+                <!-- OPTION 4: Supply Efficiency Chart (HTML) -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Daily Issuance Trend</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Daily total cost of issued supplies</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Supply Efficiency Analysis</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Transaction frequency vs average cost per transaction</p>
                     </div>
                     <div class="p-6">
                         <div class="h-80">
-                            <canvas id="dailyTrendChart"></canvas>
+                            <canvas id="supplyEfficiencyChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -345,27 +345,39 @@
                 });
             }
 
-            // 2. Daily Trend Line Chart
-            if (document.getElementById('dailyTrendChart')) {
-                const dailyCtx = document.getElementById('dailyTrendChart').getContext('2d');
-                new Chart(dailyCtx, {
-                    type: 'line',
+            // OPTION 4: Supply Efficiency Chart JavaScript
+            if (document.getElementById('supplyEfficiencyChart')) {
+                const efficiencyCtx = document.getElementById('supplyEfficiencyChart').getContext('2d');
+                new Chart(efficiencyCtx, {
+                    type: 'scatter',
                     data: {
-                        labels: analyticsData.daily_trend.map(item => {
-                            const date = new Date(item.date);
-                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        }),
                         datasets: [{
-                            label: 'Daily Cost',
-                            data: analyticsData.daily_trend.map(item => item.total_cost),
+                            label: 'Supply Items',
+                            data: analyticsData.supply_efficiency.map(item => ({
+                                x: item.transaction_frequency,
+                                y: item.avg_cost_per_transaction,
+                                itemName: item.item_name,
+                                stockNo: item.stock_no,
+                                totalCost: item.total_cost,
+                                efficiencyScore: item.efficiency_score
+                            })),
+                            backgroundColor: function(context) {
+                                const value = context.parsed.y;
+                                if (value > 10000) return 'rgba(31, 41, 55, 0.7)';      // High cost - dark
+                                else if (value > 5000) return 'rgba(75, 85, 99, 0.7)';  // Medium cost - gray
+                                else if (value > 1000) return 'rgba(107, 114, 128, 0.7)'; // Low cost - light gray
+                                else return 'rgba(156, 163, 175, 0.7)';                  // Very low cost - lighter
+                            },
                             borderColor: 'rgba(75, 85, 99, 1)',
-                            backgroundColor: 'rgba(75, 85, 99, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: 'rgba(75, 85, 99, 1)',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
+                            borderWidth: 1,
+                            pointRadius: function(context) {
+                                // Size points based on total cost
+                                const totalCost = context.raw.totalCost;
+                                if (totalCost > 50000) return 8;
+                                else if (totalCost > 20000) return 6;
+                                else if (totalCost > 10000) return 4;
+                                else return 3;
+                            }
                         }]
                     },
                     options: {
@@ -375,15 +387,38 @@
                             legend: { display: false },
                             tooltip: {
                                 callbacks: {
+                                    title: function(context) {
+                                        return context[0].raw.itemName;
+                                    },
                                     label: function(context) {
-                                        return `Cost: ₱${context.raw.toLocaleString()}`;
+                                        const data = context.raw;
+                                        return [
+                                            `Stock No: ${data.stockNo}`,
+                                            `Frequency: ${data.x} transactions`,
+                                            `Avg Cost/Transaction: ₱${data.y.toLocaleString()}`,
+                                            `Total Cost: ₱${data.totalCost.toLocaleString()}`,
+                                            `Efficiency Score: ${data.efficiencyScore.toFixed(2)}`
+                                        ];
                                     }
                                 }
                             }
                         },
                         scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                title: {
+                                    display: true,
+                                    text: 'Transaction Frequency'
+                                },
+                                grid: { color: 'rgba(156, 163, 175, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
                             y: {
-                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Average Cost per Transaction (₱)'
+                                },
                                 grid: { color: 'rgba(156, 163, 175, 0.1)' },
                                 ticks: {
                                     callback: function(value) {
@@ -391,10 +426,6 @@
                                     },
                                     font: { size: 10 }
                                 }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { font: { size: 10 } }
                             }
                         }
                     }
