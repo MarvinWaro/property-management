@@ -68,6 +68,7 @@
                                     <select id="fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
                                         focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
                                         dark:border-gray-500 dark:text-white transition-all duration-200">
+                                        <option value="">All Fund Clusters</option>
                                         @foreach($fundClusters as $cluster)
                                             <option value="{{ $cluster }}" {{ $selectedFundCluster == $cluster ? 'selected' : '' }}>
                                                 Fund Cluster: {{ $cluster }}
@@ -117,16 +118,28 @@
                                     </select>
                                 </div>
 
-                                <div class="pt-5">
-                                    <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#10b981] rounded-lg hover:bg-[#059669]
-                                        focus:ring-2 focus:outline-none focus:ring-[#10b981]/30 transition-all duration-200
-                                        flex items-center justify-center shadow-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
-                                        </svg>
-                                        View Detailed Report
-                                    </button>
+                                <div>
+                                    <label for="detailed_fund_cluster" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fund Cluster</label>
+                                    <select id="detailed_fund_cluster" name="fund_cluster" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                                        focus:ring-1 focus:ring-[#ce201f] focus:border-[#ce201f] dark:bg-gray-600
+                                        dark:border-gray-500 dark:text-white transition-all duration-200">
+                                        <option value="">All Fund Clusters</option>
+                                        @foreach($fundClusters as $cluster)
+                                            <option value="{{ $cluster }}">
+                                                Fund Cluster: {{ $cluster }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
+
+                                <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#10b981] rounded-lg hover:bg-[#059669]
+                                    focus:ring-2 focus:outline-none focus:ring-[#10b981]/30 transition-all duration-200
+                                    flex items-center justify-center shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
+                                    </svg>
+                                    View Detailed Report
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -169,6 +182,8 @@
                             <ul class="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-7 list-disc">
                                 <li>Generate monthly reports for official documentation and record-keeping</li>
                                 <li>Use detailed reports to track specific item movements across departments</li>
+                                <li>Select "All Fund Clusters" to see combined data from both 101 and 151</li>
+                                <li>Filter by specific fund cluster (101 or 151) to separate budget allocations</li>
                                 <li>The comparison chart helps identify usage patterns and plan future procurement</li>
                             </ul>
                         </div>

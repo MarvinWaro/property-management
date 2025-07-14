@@ -3,6 +3,11 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 RSMI Analytics - {{ $startDate->format('F Y') }}
+                @if($fundCluster)
+                    <span class="text-sm font-normal text-gray-600 dark:text-gray-400">(Fund Cluster: {{ $fundCluster }})</span>
+                @else
+                    <span class="text-sm font-normal text-gray-600 dark:text-gray-400">(All Fund Clusters)</span>
+                @endif
             </h2>
             <div class="flex space-x-2">
                 <a href="{{ route('rsmi.detailed') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}"
@@ -23,134 +28,96 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- Summary Cards -->
-            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full mb-8">
-
-                <!-- Total Value Card (Blue) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-blue-300 dark:bg-blue-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-blue-400 dark:bg-blue-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Total Value
-                            </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                ₱{{ number_format($analyticsData['summary_stats']['total_value'], 2) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">
-                                <span>Total issued amount</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white dark:group-hover:bg-blue-600">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500 dark:text-blue-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
-                            </svg>
-                        </div>
+            <!-- Fund Cluster Filter Buttons -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mb-3 sm:mb-0">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Fund Cluster Filter</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Select fund cluster to view analytics</p>
                     </div>
-                </div>
-
-                <!-- Items Issued Card (Green) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-green-300 dark:bg-green-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-green-400 dark:bg-green-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Items Issued
-                            </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                {{ number_format($analyticsData['summary_stats']['unique_items']) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
-                                <span>Unique supplies issued</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-green-500 group-hover:text-white dark:group-hover:bg-green-600">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-500 dark:text-green-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Departments Card (Purple) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-purple-300 dark:bg-purple-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-purple-400 dark:bg-purple-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Departments
-                            </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                {{ number_format($analyticsData['summary_stats']['unique_departments']) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400">
-                                <span>Departments served</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white dark:group-hover:bg-purple-600">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500 dark:text-purple-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Transactions Card (Orange) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-orange-300 dark:bg-orange-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-orange-400 dark:bg-orange-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Transactions
-                            </dt>
-                            <dd class="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white">
-                                {{ number_format($analyticsData['summary_stats']['total_transactions']) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
+                    <div class="flex flex-wrap gap-2">
+                        <!-- All Fund Clusters Button -->
+                        <a href="{{ route('rsmi.analytics') }}?month={{ $month }}&department_id={{ $departmentId }}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200
+                            {{ !$fundCluster ? 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-800 dark:border-gray-200' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <span class="flex items-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
-                                <span>Total transactions</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white dark:group-hover:bg-orange-600">
-                            <svg class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-orange-500 dark:text-orange-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+                                <span>All Fund Clusters</span>
+                            </span>
+                        </a>
+
+                        <!-- Fund Cluster 101 Button -->
+                        <a href="{{ route('rsmi.analytics') }}?month={{ $month }}&fund_cluster=101&department_id={{ $departmentId }}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200
+                            {{ $fundCluster == '101' ? 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-800 dark:border-gray-200' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <span class="flex items-center space-x-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span>Fund Cluster 101</span>
+                            </span>
+                        </a>
+
+                        <!-- Fund Cluster 151 Button -->
+                        <a href="{{ route('rsmi.analytics') }}?month={{ $month }}&fund_cluster=151&department_id={{ $departmentId }}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200
+                            {{ $fundCluster == '151' ? 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-800 dark:border-gray-200' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <span class="flex items-center space-x-2">
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                <span>Fund Cluster 151</span>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards - Minimal Dashboard Style -->
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
+                <!-- Total Value Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Value</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">₱{{ number_format($analyticsData['summary_stats']['total_value'], 2) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total issued amount</p>
+                    </div>
+                </div>
+
+                <!-- Items Issued Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Items Issued</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($analyticsData['summary_stats']['unique_items']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Unique supplies issued</p>
+                    </div>
+                </div>
+
+                <!-- Departments Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Departments</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($analyticsData['summary_stats']['unique_departments']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Departments served</p>
+                    </div>
+                </div>
+
+                <!-- Transactions Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Transactions</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($analyticsData['summary_stats']['total_transactions']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total transactions</p>
                     </div>
                 </div>
             </div>
 
             <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Category Distribution Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Distribution by Category</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Distribution by Category</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total cost breakdown by supply categories</p>
                     </div>
                     <div class="p-6">
@@ -161,9 +128,9 @@
                 </div>
 
                 <!-- Daily Trend Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Daily Issuance Trend</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Daily Issuance Trend</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Daily total cost of issued supplies</p>
                     </div>
                     <div class="p-6">
@@ -174,9 +141,9 @@
                 </div>
 
                 <!-- Top Expensive Items Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Top 10 Most Expensive Items</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top 10 Most Expensive Items</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Items with highest total cost</p>
                     </div>
                     <div class="p-6">
@@ -187,9 +154,9 @@
                 </div>
 
                 <!-- Department Distribution Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Department Distribution</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Department Distribution</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Cost distribution across departments</p>
                     </div>
                     <div class="p-6">
@@ -201,11 +168,11 @@
             </div>
 
             <!-- Data Tables Section -->
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Top RIS Summary -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Top RIS by Value</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top RIS by Value</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Highest value requisitions</p>
                     </div>
                     <div class="p-6">
@@ -213,16 +180,16 @@
                             <table class="w-full text-sm">
                                 <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 sticky top-0">
                                     <tr>
-                                        <th class="px-3 py-3 text-left font-medium text-gray-500 dark:text-gray-400">RIS No.</th>
-                                        <th class="px-3 py-3 text-right font-medium text-gray-500 dark:text-gray-400">Value</th>
-                                        <th class="px-3 py-3 text-center font-medium text-gray-500 dark:text-gray-400">Items</th>
+                                        <th class="px-3 py-3 text-left font-medium text-gray-700 dark:text-gray-300">RIS No.</th>
+                                        <th class="px-3 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Value</th>
+                                        <th class="px-3 py-3 text-center font-medium text-gray-700 dark:text-gray-300">Items</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($analyticsData['ris_summary'] as $ris)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-3 py-3 font-medium text-gray-900 dark:text-white">{{ $ris['ris_no'] }}</td>
-                                        <td class="px-3 py-3 text-right text-green-600 dark:text-green-400 font-medium">₱{{ number_format($ris['total_cost'], 2) }}</td>
+                                        <td class="px-3 py-3 text-right text-gray-800 dark:text-gray-200 font-medium">₱{{ number_format($ris['total_cost'], 2) }}</td>
                                         <td class="px-3 py-3 text-center text-gray-600 dark:text-gray-400">{{ $ris['item_count'] }}</td>
                                     </tr>
                                     @endforeach
@@ -233,26 +200,26 @@
                 </div>
 
                 <!-- Unit Cost Variance -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Unit Cost Variance</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Unit Cost Variance</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Items with cost variations</p>
                     </div>
                     <div class="p-6">
                         <div class="overflow-y-auto max-h-96">
                             @if($analyticsData['unit_cost_analysis']->count() > 0)
-                            <div class="space-y-4">
+                            <div class="space-y-3">
                                 @foreach($analyticsData['unit_cost_analysis'] as $item)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                                     <p class="font-medium text-sm text-gray-900 dark:text-white truncate" title="{{ $item['item_name'] }}">
-                                        {{ Str::limit($item['item_name'], 40) }}
+                                        {{ Str::limit($item['item_name'], 35) }}
                                     </p>
-                                    <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
                                         <span>Min: ₱{{ number_format($item['min_cost'], 2) }}</span>
                                         <span>Max: ₱{{ number_format($item['max_cost'], 2) }}</span>
                                     </div>
                                     <div class="mt-2">
-                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded dark:bg-red-900 dark:text-red-300">
+                                        <span class="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded dark:bg-gray-600 dark:text-gray-200">
                                             Variance: ₱{{ number_format($item['cost_variance'], 2) }}
                                         </span>
                                     </div>
@@ -272,20 +239,20 @@
                 </div>
 
                 <!-- Quick Insights -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Quick Insights</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Insights</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Key metrics at a glance</p>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Avg Transaction Value</span>
                                 <span class="font-medium text-gray-900 dark:text-white">₱{{ number_format($analyticsData['summary_stats']['avg_transaction_value'], 2) }}</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Highest Single Transaction</span>
-                                <span class="font-medium text-green-600 dark:text-green-400">₱{{ number_format($analyticsData['summary_stats']['highest_single_transaction'], 2) }}</span>
+                                <span class="font-medium text-gray-800 dark:text-gray-200">₱{{ number_format($analyticsData['summary_stats']['highest_single_transaction'], 2) }}</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Total Categories</span>
@@ -299,12 +266,12 @@
                                 </span>
                             </div>
                             @if($analyticsData['categories']->count() > 0)
-                            <div class="pt-2 border-t dark:border-gray-700">
-                                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <div class="pt-2 border-t dark:border-gray-600">
+                                <div class="p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
                                     <span class="text-sm text-gray-600 dark:text-gray-400">Top Category</span>
                                     <div class="mt-1">
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $analyticsData['categories']->first()['category'] }}</span>
-                                        <span class="text-xs text-green-600 dark:text-green-400 ml-2">₱{{ number_format($analyticsData['categories']->first()['total_cost'], 2) }}</span>
+                                        <span class="text-xs text-gray-700 dark:text-gray-300 ml-2">₱{{ number_format($analyticsData['categories']->first()['total_cost'], 2) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -323,18 +290,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             const analyticsData = {!! json_encode($analyticsData) !!};
 
-            // Color palette
+            // Minimal gray color palette
             const colors = [
-                'rgba(59, 130, 246, 0.8)',   // Blue
-                'rgba(16, 185, 129, 0.8)',   // Green
-                'rgba(245, 158, 11, 0.8)',   // Yellow
-                'rgba(239, 68, 68, 0.8)',    // Red
-                'rgba(139, 92, 246, 0.8)',   // Purple
-                'rgba(236, 72, 153, 0.8)',   // Pink
-                'rgba(14, 165, 233, 0.8)',   // Sky
-                'rgba(34, 197, 94, 0.8)',    // Emerald
-                'rgba(249, 115, 22, 0.8)',   // Orange
-                'rgba(168, 85, 247, 0.8)'    // Violet
+                'rgba(107, 114, 128, 0.8)',   // Gray-500
+                'rgba(75, 85, 99, 0.8)',     // Gray-600
+                'rgba(55, 65, 81, 0.8)',     // Gray-700
+                'rgba(31, 41, 55, 0.8)',     // Gray-800
+                'rgba(17, 24, 39, 0.8)',     // Gray-900
+                'rgba(156, 163, 175, 0.8)',  // Gray-400
+                'rgba(209, 213, 219, 0.8)',  // Gray-300
+                'rgba(229, 231, 235, 0.8)',  // Gray-200
+                'rgba(243, 244, 246, 0.8)',  // Gray-100
+                'rgba(249, 250, 251, 0.8)'   // Gray-50
             ];
 
             // 1. Category Distribution Doughnut Chart
@@ -391,11 +358,11 @@
                         datasets: [{
                             label: 'Daily Cost',
                             data: analyticsData.daily_trend.map(item => item.total_cost),
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(75, 85, 99, 1)',
+                            backgroundColor: 'rgba(75, 85, 99, 0.1)',
                             tension: 0.4,
                             fill: true,
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(75, 85, 99, 1)',
                             pointBorderColor: '#ffffff',
                             pointBorderWidth: 2,
                             pointRadius: 4
@@ -447,8 +414,8 @@
                         datasets: [{
                             label: 'Total Cost',
                             data: analyticsData.top_expensive_items.map(item => item.total_cost),
-                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                            borderColor: 'rgba(239, 68, 68, 1)',
+                            backgroundColor: 'rgba(107, 114, 128, 0.8)',
+                            borderColor: 'rgba(75, 85, 99, 1)',
                             borderWidth: 1,
                             borderRadius: 4
                         }]
