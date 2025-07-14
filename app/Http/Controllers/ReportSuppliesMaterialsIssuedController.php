@@ -406,16 +406,27 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             ];
         })->sortByDesc('total_cost')->take(10)->values();
 
-        // 3. Daily issuance trend
-        $dailyTrend = $transactions->groupBy(function($item) {
-            return Carbon::parse($item->transaction_date)->format('Y-m-d');
-        })->map(function($items, $date) {
+        // 3. OPTION 4: Supply Efficiency Analysis - Cost per transaction and frequency
+        $supplyEfficiency = $transactions->groupBy('supply_id')->map(function($items) {
+            $supply = $items->first()->supply;
+            $totalCost = $items->sum('total_cost');
+            $totalQuantity = $items->sum('quantity');
+            $transactionCount = $items->count();
+
             return [
-                'date' => $date,
-                'total_cost' => $items->sum('total_cost'),
-                'transaction_count' => $items->count()
+                'item_name' => $supply->item_name ?? 'Unknown Item',
+                'stock_no' => $supply->stock_no ?? 'N/A',
+                'total_cost' => $totalCost,
+                'total_quantity' => $totalQuantity,
+                'transaction_frequency' => $transactionCount,
+                'avg_cost_per_transaction' => $transactionCount > 0 ? $totalCost / $transactionCount : 0,
+                'cost_per_unit' => $totalQuantity > 0 ? $totalCost / $totalQuantity : 0,
+                'efficiency_score' => $transactionCount > 0 && $totalQuantity > 0 ?
+                    ($totalQuantity / $transactionCount) / ($totalCost / $transactionCount) * 1000 : 0
             ];
-        })->sortBy('date')->values();
+        })->filter(function($item) {
+            return $item['transaction_frequency'] >= 1; // Include all items used at least once
+        })->sortByDesc('efficiency_score')->take(15)->values();
 
         // 4. Department-wise distribution
         $departmentData = $transactions->groupBy('department.name')->map(function($items, $department) {
@@ -481,7 +492,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         return [
             'categories' => $categoryData,
             'top_expensive_items' => $topExpensiveItems,
-            'daily_trend' => $dailyTrend,
+            'supply_efficiency' => $supplyEfficiency,  // CHANGED: from 'daily_trend' to 'supply_efficiency'
             'departments' => $departmentData,
             'ris_summary' => $risData,
             'unit_cost_analysis' => $unitCostAnalysis,
