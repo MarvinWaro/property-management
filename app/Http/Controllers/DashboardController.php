@@ -175,13 +175,14 @@ class DashboardController extends Controller
 
     /**
      * NEW: Get department transactions data for donut chart
-     * Groups transactions by department, year, and month for filtering
+     * Only includes transactions with a real department_id
      */
     private function getDepartmentTransactionsData()
     {
         try {
-            // Get transactions grouped by department, year, and month
+            // Fetch only transactions that have a department set
             $transactions = SupplyTransaction::with('department')
+                ->whereNotNull('department_id')
                 ->select(
                     'department_id',
                     DB::raw('YEAR(transaction_date) as year'),
@@ -194,20 +195,27 @@ class DashboardController extends Controller
                 ->orderBy('month', 'asc')
                 ->get();
 
-            // Format data: [department_name][year][month] = count
             $departmentData = [];
-            foreach ($transactions as $transaction) {
-                $deptName = $transaction->department ? $transaction->department->name : 'Unknown Department';
-                $departmentData[$deptName][$transaction->year][$transaction->month] = $transaction->total;
+
+            foreach ($transactions as $t) {
+                // Skip if for some reason the department relation is missing
+                if (! $t->department) {
+                    continue;
+                }
+
+                $name = $t->department->name;
+                $departmentData[$name][$t->year][$t->month] = $t->total;
             }
 
             return $departmentData;
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching department transactions data: ' . $e->getMessage());
+            Log::error('Error fetching department transactions data: '.$e->getMessage());
             return [];
         }
     }
+
+
 
     /**
      * NEW: Get stock status data for donut chart
@@ -260,6 +268,8 @@ class DashboardController extends Controller
             ];
         }
     }
+
+
     private function getMonthlyTransactionsDataWithRIS()
     {
         try {

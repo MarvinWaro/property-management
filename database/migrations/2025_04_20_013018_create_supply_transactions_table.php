@@ -15,7 +15,7 @@ return new class extends Migration
                 ->constrained('supplies', 'supply_id')
                 ->cascadeOnDelete();
 
-            $table->enum('transaction_type', ['receipt', 'issue', 'adjustment']); // <-- include adjustment
+            $table->enum('transaction_type', ['receipt', 'issue', 'adjustment']);
             $table->date('transaction_date');
             $table->string('reference_no');
 
@@ -25,7 +25,11 @@ return new class extends Migration
 
             $table->integer('balance_quantity');       // running balance after txn
 
-            $table->foreignId('department_id')->constrained('departments');
+            // Make department_id nullable here
+            $table->foreignId('department_id')
+                ->nullable()
+                ->constrained('departments');
+
             $table->foreignId('user_id')->constrained('users');
 
             $table->text('remarks')->nullable();

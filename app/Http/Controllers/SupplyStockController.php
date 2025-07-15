@@ -311,20 +311,22 @@ class SupplyStockController extends Controller
         $oldTotalCost = $stock->exists ? $stock->total_cost        : 0;
 
         // 3) this lot
-        $newLotQty   = $itemData['quantity_on_hand'];
-        $newLotCost  = $newLotQty * $itemData['unit_cost'];
+        $newLotQty  = $itemData['quantity_on_hand'];
+        $newLotCost = $newLotQty * $itemData['unit_cost'];
 
         // 4) updated totals
         $newTotalQty  = $oldQty + $newLotQty;
         $newTotalCost = $oldTotalCost + $newLotCost;
 
-        // 5) new weighted‐avg cost
-        $newAvgCost = $newTotalQty>0 ? $newTotalCost/$newTotalQty : 0;
+        // 5) new weighted-avg cost
+        $newAvgCost = $newTotalQty > 0
+            ? ($newTotalCost / $newTotalQty)
+            : 0;
 
-        // 6) save summary
+        // 6) save summary row
         $stock->fill([
             'quantity_on_hand' => $newTotalQty,
-            'unit_cost'        => round($newAvgCost,2),
+            'unit_cost'        => round($newAvgCost, 2),
             'total_cost'       => $newTotalCost,
             'expiry_date'      => $itemData['expiry_date'],
             'status'           => $itemData['status'],
@@ -334,29 +336,29 @@ class SupplyStockController extends Controller
             'department_id'    => $itemData['department_id'] ?? null,
         ])->save();
 
-        // 7) log transaction with original unit_cost and user‐picked date
-        $deptId = auth()->user()->department_id ?? 1;
+        // 7) log the transaction, but only use the form’s department_id
+        $deptId = $itemData['department_id'] ?? null;
 
         SupplyTransaction::create([
-            'supply_id'         => $itemData['supply_id'],
-            'transaction_type'  => 'receipt',
-            'transaction_date'  => $itemData['receipt_date'],
-            'reference_no'      => $referenceNo,
-            'quantity'          => $newLotQty,
-            'unit_cost'         => $itemData['unit_cost'],
-            'total_cost'        => $newLotCost,
-            'balance_quantity'  => $newTotalQty,
-            'balance_unit_cost' => round($newAvgCost,2),
-            'balance_total_cost'=> $newTotalCost,
-            'department_id'     => $deptId,
-            'user_id'           => auth()->id(),
-            'remarks'           => $itemData['remarks']
+            'supply_id'          => $itemData['supply_id'],
+            'transaction_type'   => 'receipt',
+            'transaction_date'   => $itemData['receipt_date'],
+            'reference_no'       => $referenceNo,
+            'quantity'           => $newLotQty,
+            'unit_cost'          => $itemData['unit_cost'],
+            'total_cost'         => $newLotCost,
+            'balance_quantity'   => $newTotalQty,
+            'balance_unit_cost'  => round($newAvgCost, 2),
+            'balance_total_cost' => $newTotalCost,
+            'department_id'      => $deptId,      // 👈 only if provided (can be null)
+            'user_id'            => auth()->id(),
+            'remarks'            => $itemData['remarks']
                                     ?? 'Stock receipt via IAR '.$referenceNo,
-            'fund_cluster'      => $itemData['fund_cluster'],
-            'days_to_consume'   => $itemData['days_to_consume'] ?? null,
+            'fund_cluster'       => $itemData['fund_cluster'],
+            'days_to_consume'    => $itemData['days_to_consume'] ?? null,
         ]);
 
-        // debug
+        // 8) debug
         Log::info('Stock Receipt Added', [
             'iar_reference' => $referenceNo,
             'supply_id'     => $itemData['supply_id'],
@@ -364,6 +366,7 @@ class SupplyStockController extends Controller
             'new_total_qty' => $newTotalQty,
         ]);
     }
+
 
     /**
      * Handle issue transactions (reduce stock)

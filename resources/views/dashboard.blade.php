@@ -245,7 +245,14 @@
                     </div>
 
                     <div class="p-6">
-                        <div class="relative" style="height: 300px;">
+                        <div id="noDepartmentData" class="hidden text-center py-8">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <p class="text-gray-500 dark:text-gray-400">No department data available</p>
+                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Transactions without departments are not shown</p>
+                        </div>
+                        <div id="departmentChartContainer" class="relative" style="height: 300px;">
                             <canvas id="departmentChart"></canvas>
                         </div>
 
@@ -2006,7 +2013,6 @@
     // ...
 </script>
 
-<!-- Donut Charts JavaScript -->
 <script>
     // Donut Charts Configuration and Data
     let departmentChart;
@@ -2093,6 +2099,92 @@
         updateDepartmentChart();
     }
 
+    function updateDepartmentChart() {
+        const selectedMonth = document.getElementById('deptMonthFilter').value;
+        const selectedYear = document.getElementById('deptYearFilter').value;
+
+        const filteredData = {};
+
+        // Filter department data based on selected month and year
+        Object.keys(departmentData || {}).forEach(dept => {
+            let deptTotal = 0;
+
+            if (typeof departmentData[dept] === 'object') {
+                const years = selectedYear === 'all' ? Object.keys(departmentData[dept]) : [selectedYear];
+
+                years.forEach(year => {
+                    if (departmentData[dept][year]) {
+                        if (selectedMonth === 'all') {
+                            // Sum all months for this year
+                            Object.values(departmentData[dept][year]).forEach(count => {
+                                deptTotal += count;
+                            });
+                        } else {
+                            // Get specific month
+                            deptTotal += departmentData[dept][year][selectedMonth] || 0;
+                        }
+                    }
+                });
+            }
+
+            if (deptTotal > 0) {
+                filteredData[dept] = deptTotal;
+            }
+        });
+
+        // Update chart data
+        const labels = Object.keys(filteredData);
+        const data = Object.values(filteredData);
+
+        // Show/hide chart or empty state
+        if (labels.length === 0) {
+            document.getElementById('noDepartmentData').classList.remove('hidden');
+            document.getElementById('departmentChartContainer').classList.add('hidden');
+        } else {
+            document.getElementById('noDepartmentData').classList.add('hidden');
+            document.getElementById('departmentChartContainer').classList.remove('hidden');
+
+            departmentChart.data.labels = labels;
+            departmentChart.data.datasets[0].data = data;
+            departmentChart.update();
+        }
+
+        // Update department stats
+        const totalDepartments = labels.length;
+        const topDept = labels.length > 0
+            ? labels[data.indexOf(Math.max(...data))]
+            : '-';
+
+        document.getElementById('totalDepartments').textContent = totalDepartments;
+        document.getElementById('topDepartment').textContent = topDept;
+    }
+
+    function populateDeptYearFilter() {
+        const yearFilter = document.getElementById('deptYearFilter');
+        const years = new Set();
+
+        // Collect all years from department data
+        Object.keys(departmentData || {}).forEach(dept => {
+            if (typeof departmentData[dept] === 'object') {
+                Object.keys(departmentData[dept]).forEach(year => {
+                    years.add(year);
+                });
+            }
+        });
+
+        const sortedYears = Array.from(years).sort().reverse();
+
+        // Clear existing options except "All Years"
+        yearFilter.innerHTML = '<option value="all">All Years</option>';
+
+        sortedYears.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearFilter.appendChild(option);
+        });
+    }
+
     function initializeStockChart() {
         const ctx = document.getElementById('stockStatusChart').getContext('2d');
 
@@ -2145,83 +2237,6 @@
         });
 
         updateStockChart();
-    }
-
-    function populateDeptYearFilter() {
-        const yearFilter = document.getElementById('deptYearFilter');
-        const years = new Set();
-
-        // Collect all years from department data
-        Object.keys(departmentData || {}).forEach(dept => {
-            if (typeof departmentData[dept] === 'object') {
-                Object.keys(departmentData[dept]).forEach(year => {
-                    years.add(year);
-                });
-            }
-        });
-
-        const sortedYears = Array.from(years).sort().reverse();
-
-        // Clear existing options except "All Years"
-        yearFilter.innerHTML = '<option value="all">All Years</option>';
-
-        sortedYears.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearFilter.appendChild(option);
-        });
-    }
-
-    function updateDepartmentChart() {
-        const selectedMonth = document.getElementById('deptMonthFilter').value;
-        const selectedYear = document.getElementById('deptYearFilter').value;
-
-        const filteredData = {};
-
-        // Filter department data based on selected month and year
-        Object.keys(departmentData || {}).forEach(dept => {
-            let deptTotal = 0;
-
-            if (typeof departmentData[dept] === 'object') {
-                const years = selectedYear === 'all' ? Object.keys(departmentData[dept]) : [selectedYear];
-
-                years.forEach(year => {
-                    if (departmentData[dept][year]) {
-                        if (selectedMonth === 'all') {
-                            // Sum all months for this year
-                            Object.values(departmentData[dept][year]).forEach(count => {
-                                deptTotal += count;
-                            });
-                        } else {
-                            // Get specific month
-                            deptTotal += departmentData[dept][year][selectedMonth] || 0;
-                        }
-                    }
-                });
-            }
-
-            if (deptTotal > 0) {
-                filteredData[dept] = deptTotal;
-            }
-        });
-
-        // Update chart data
-        const labels = Object.keys(filteredData);
-        const data = Object.values(filteredData);
-
-        departmentChart.data.labels = labels;
-        departmentChart.data.datasets[0].data = data;
-        departmentChart.update();
-
-        // Update department stats
-        const totalDepartments = labels.length;
-        const topDept = labels.length > 0
-            ? labels[data.indexOf(Math.max(...data))]
-            : '-';
-
-        document.getElementById('totalDepartments').textContent = totalDepartments;
-        document.getElementById('topDepartment').textContent = topDept;
     }
 
     function updateStockChart() {
