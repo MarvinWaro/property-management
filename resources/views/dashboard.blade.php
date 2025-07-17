@@ -218,9 +218,17 @@
                                     </svg>
                                     Division Distribution
                                 </h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Transaction distribution by department</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Transaction distribution by division</p>
                             </div>
+
                             <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+                                <select id="deptTypeFilter"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="all">All Types</option>
+                                    <option value="receipt">In (Receipt)</option>
+                                    <option value="issue">Out (Issue)</option>
+                                    <option value="adjustment">Adjustment</option>
+                                </select>
                                 <select id="deptMonthFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                     <option value="all">All Months</option>
                                     <option value="1">January</option>
@@ -2045,6 +2053,7 @@
             // Add event listeners for department chart filters
             document.getElementById('deptMonthFilter').addEventListener('change', updateDepartmentChart);
             document.getElementById('deptYearFilter').addEventListener('change', updateDepartmentChart);
+            document.getElementById('deptTypeFilter').addEventListener('change', updateDepartmentChart);
             document.getElementById('refreshStockBtn').addEventListener('click', refreshStockChart);
         }, 500);
     });
@@ -2100,63 +2109,61 @@
     }
 
     function updateDepartmentChart() {
-        const selectedMonth = document.getElementById('deptMonthFilter').value;
-        const selectedYear = document.getElementById('deptYearFilter').value;
+        const selType  = document.getElementById('deptTypeFilter').value;
+        const selMonth = document.getElementById('deptMonthFilter').value;
+        const selYear  = document.getElementById('deptYearFilter').value;
 
-        const filteredData = {};
+        const filtered = {};
 
-        // Filter department data based on selected month and year
-        Object.keys(departmentData || {}).forEach(dept => {
-            let deptTotal = 0;
+        // determine which types to include
+        const types = selType === 'all'
+            ? Object.keys(departmentData)
+            : [selType];
 
-            if (typeof departmentData[dept] === 'object') {
-                const years = selectedYear === 'all' ? Object.keys(departmentData[dept]) : [selectedYear];
+        types.forEach(type => {
+        const byDept = departmentData[type] || {};
+        Object.keys(byDept).forEach(dept => {
+            let total = 0;
+            const years = selYear === 'all'
+            ? Object.keys(byDept[dept])
+            : [selYear];
 
-                years.forEach(year => {
-                    if (departmentData[dept][year]) {
-                        if (selectedMonth === 'all') {
-                            // Sum all months for this year
-                            Object.values(departmentData[dept][year]).forEach(count => {
-                                deptTotal += count;
-                            });
-                        } else {
-                            // Get specific month
-                            deptTotal += departmentData[dept][year][selectedMonth] || 0;
-                        }
-                    }
-                });
+            years.forEach(y => {
+            const months = byDept[dept][y] || {};
+            if (selMonth === 'all') {
+                Object.values(months).forEach(v => total += v);
+            } else {
+                total += months[selMonth] || 0;
             }
+            });
 
-            if (deptTotal > 0) {
-                filteredData[dept] = deptTotal;
+            if (total > 0) {
+            filtered[dept] = (filtered[dept] || 0) + total;
             }
         });
+        });
 
-        // Update chart data
-        const labels = Object.keys(filteredData);
-        const data = Object.values(filteredData);
+        const labels = Object.keys(filtered);
+        const data   = Object.values(filtered);
 
-        // Show/hide chart or empty state
         if (labels.length === 0) {
-            document.getElementById('noDepartmentData').classList.remove('hidden');
-            document.getElementById('departmentChartContainer').classList.add('hidden');
+        document.getElementById('noDepartmentData').classList.remove('hidden');
+        document.getElementById('departmentChartContainer').classList.add('hidden');
         } else {
-            document.getElementById('noDepartmentData').classList.add('hidden');
-            document.getElementById('departmentChartContainer').classList.remove('hidden');
+        document.getElementById('noDepartmentData').classList.add('hidden');
+        document.getElementById('departmentChartContainer').classList.remove('hidden');
 
-            departmentChart.data.labels = labels;
-            departmentChart.data.datasets[0].data = data;
-            departmentChart.update();
+        departmentChart.data.labels = labels;
+        departmentChart.data.datasets[0].data = data;
+        departmentChart.update();
         }
 
-        // Update department stats
-        const totalDepartments = labels.length;
-        const topDept = labels.length > 0
+        // update stats
+        document.getElementById('totalDepartments').textContent = labels.length;
+        document.getElementById('topDepartment').textContent =
+        labels.length
             ? labels[data.indexOf(Math.max(...data))]
             : '-';
-
-        document.getElementById('totalDepartments').textContent = totalDepartments;
-        document.getElementById('topDepartment').textContent = topDept;
     }
 
     function populateDeptYearFilter() {

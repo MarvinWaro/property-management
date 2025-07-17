@@ -180,31 +180,30 @@ class DashboardController extends Controller
     private function getDepartmentTransactionsData()
     {
         try {
-            // Fetch only transactions that have a department set
             $transactions = SupplyTransaction::with('department')
                 ->whereNotNull('department_id')
                 ->select(
                     'department_id',
+                    'transaction_type',
                     DB::raw('YEAR(transaction_date) as year'),
                     DB::raw('MONTH(transaction_date) as month'),
                     DB::raw('COUNT(*) as total')
                 )
                 ->where('transaction_date', '>=', Carbon::now()->subYears(3))
-                ->groupBy('department_id', 'year', 'month')
-                ->orderBy('year', 'asc')
-                ->orderBy('month', 'asc')
+                ->groupBy('department_id','transaction_type','year','month')
+                ->orderBy('year','asc')
+                ->orderBy('month','asc')
                 ->get();
 
             $departmentData = [];
 
             foreach ($transactions as $t) {
-                // Skip if for some reason the department relation is missing
-                if (! $t->department) {
-                    continue;
-                }
+                // skip if no relation
+                if (! $t->department) continue;
 
-                $name = $t->department->name;
-                $departmentData[$name][$t->year][$t->month] = $t->total;
+                $type = $t->transaction_type;
+                $dept = $t->department->name;
+                $departmentData[$type][$dept][$t->year][$t->month] = $t->total;
             }
 
             return $departmentData;
