@@ -175,39 +175,46 @@ class DashboardController extends Controller
 
     /**
      * NEW: Get department transactions data for donut chart
-     * Groups transactions by department, year, and month for filtering
+     * Only includes transactions with a real department_id
      */
     private function getDepartmentTransactionsData()
     {
         try {
-            // Get transactions grouped by department, year, and month
             $transactions = SupplyTransaction::with('department')
+                ->whereNotNull('department_id')
                 ->select(
                     'department_id',
+                    'transaction_type',
                     DB::raw('YEAR(transaction_date) as year'),
                     DB::raw('MONTH(transaction_date) as month'),
                     DB::raw('COUNT(*) as total')
                 )
                 ->where('transaction_date', '>=', Carbon::now()->subYears(3))
-                ->groupBy('department_id', 'year', 'month')
-                ->orderBy('year', 'asc')
-                ->orderBy('month', 'asc')
+                ->groupBy('department_id','transaction_type','year','month')
+                ->orderBy('year','asc')
+                ->orderBy('month','asc')
                 ->get();
 
-            // Format data: [department_name][year][month] = count
             $departmentData = [];
-            foreach ($transactions as $transaction) {
-                $deptName = $transaction->department ? $transaction->department->name : 'Unknown Department';
-                $departmentData[$deptName][$transaction->year][$transaction->month] = $transaction->total;
+
+            foreach ($transactions as $t) {
+                // skip if no relation
+                if (! $t->department) continue;
+
+                $type = $t->transaction_type;
+                $dept = $t->department->name;
+                $departmentData[$type][$dept][$t->year][$t->month] = $t->total;
             }
 
             return $departmentData;
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching department transactions data: ' . $e->getMessage());
+            Log::error('Error fetching department transactions data: '.$e->getMessage());
             return [];
         }
     }
+
+
 
     /**
      * NEW: Get stock status data for donut chart
@@ -260,6 +267,8 @@ class DashboardController extends Controller
             ];
         }
     }
+
+
     private function getMonthlyTransactionsDataWithRIS()
     {
         try {

@@ -39,7 +39,7 @@ class SupplyTransactionController extends Controller
             'reference_no'     => 'nullable|string', // Changed to nullable
             'quantity'         => 'required|integer|min:0',   // qty 0 allowed for adjustment
             'unit_cost'        => 'required|numeric|min:0',
-            'department_id'    => 'required|exists:departments,id',
+            'department_id'    => 'nullable|exists:departments,id', // CHANGED TO NULLABLE
             'remarks'          => 'nullable|string',
             'requested_by'     => 'nullable|exists:users,id',  // Added for requester
             'received_by'      => 'nullable|exists:users,id',  // Added for receiver
@@ -66,6 +66,11 @@ class SupplyTransactionController extends Controller
 
         /* ▲ NEW: record who performed the transaction */
         $data['user_id'] = auth()->id();
+
+        // IMPORTANT: Only set department_id if it's actually provided and not empty
+        if (empty($data['department_id'])) {
+            unset($data['department_id']);
+        }
 
         /* 2 ▸ Lock summary row */
         $stock = SupplyStock::where('supply_id', $data['supply_id'])
