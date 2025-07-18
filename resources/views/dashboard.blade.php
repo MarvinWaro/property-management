@@ -208,7 +208,8 @@
             <!-- NEW: Donut Charts Section -->
             <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Department Distribution Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <!-- Division Distribution Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-visible">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <div>
@@ -221,7 +222,7 @@
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Transaction distribution by division</p>
                             </div>
 
-                            <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+                            <div class="mt-4 sm:mt-0 flex items-center space-x-2 relative z-50">
                                 <select id="deptTypeFilter"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-[#ce201f] focus:border-[#ce201f] block px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                     <option value="all">All Types</option>
@@ -2121,62 +2122,65 @@
             : [selType];
 
         types.forEach(type => {
-        const byDept = departmentData[type] || {};
-        Object.keys(byDept).forEach(dept => {
-            let total = 0;
-            const years = selYear === 'all'
-            ? Object.keys(byDept[dept])
-            : [selYear];
+            const byDept = departmentData[type] || {};
+            Object.keys(byDept).forEach(dept => {
+                let total = 0;
+                const years = selYear === 'all'
+                    ? Object.keys(byDept[dept])
+                    : [selYear];
 
-            years.forEach(y => {
-            const months = byDept[dept][y] || {};
-            if (selMonth === 'all') {
-                Object.values(months).forEach(v => total += v);
-            } else {
-                total += months[selMonth] || 0;
-            }
+                years.forEach(y => {
+                    const months = byDept[dept][y] || {};
+                    if (selMonth === 'all') {
+                        Object.values(months).forEach(v => total += v);
+                    } else {
+                        total += months[selMonth] || 0;
+                    }
+                });
+
+                if (total > 0) {
+                    filtered[dept] = (filtered[dept] || 0) + total;
+                }
             });
-
-            if (total > 0) {
-            filtered[dept] = (filtered[dept] || 0) + total;
-            }
-        });
         });
 
         const labels = Object.keys(filtered);
         const data   = Object.values(filtered);
 
         if (labels.length === 0) {
-        document.getElementById('noDepartmentData').classList.remove('hidden');
-        document.getElementById('departmentChartContainer').classList.add('hidden');
+            document.getElementById('noDepartmentData').classList.remove('hidden');
+            document.getElementById('departmentChartContainer').classList.add('hidden');
         } else {
-        document.getElementById('noDepartmentData').classList.add('hidden');
-        document.getElementById('departmentChartContainer').classList.remove('hidden');
+            document.getElementById('noDepartmentData').classList.add('hidden');
+            document.getElementById('departmentChartContainer').classList.remove('hidden');
 
-        departmentChart.data.labels = labels;
-        departmentChart.data.datasets[0].data = data;
-        departmentChart.update();
+            departmentChart.data.labels = labels;
+            departmentChart.data.datasets[0].data = data;
+            departmentChart.update();
         }
 
         // update stats
         document.getElementById('totalDepartments').textContent = labels.length;
         document.getElementById('topDepartment').textContent =
-        labels.length
-            ? labels[data.indexOf(Math.max(...data))]
-            : '-';
+            labels.length
+                ? labels[data.indexOf(Math.max(...data))]
+                : '-';
     }
 
     function populateDeptYearFilter() {
         const yearFilter = document.getElementById('deptYearFilter');
         const years = new Set();
 
-        // Collect all years from department data
-        Object.keys(departmentData || {}).forEach(dept => {
-            if (typeof departmentData[dept] === 'object') {
-                Object.keys(departmentData[dept]).forEach(year => {
+        // The structure is: departmentData[type][department][year][month]
+        // So we need to iterate through types first, then departments, then years
+        Object.keys(departmentData || {}).forEach(type => {
+            const departments = departmentData[type] || {};
+            Object.keys(departments).forEach(dept => {
+                const deptYears = departments[dept] || {};
+                Object.keys(deptYears).forEach(year => {
                     years.add(year);
                 });
-            }
+            });
         });
 
         const sortedYears = Array.from(years).sort().reverse();

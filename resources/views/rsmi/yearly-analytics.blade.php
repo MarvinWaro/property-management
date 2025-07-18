@@ -8,13 +8,13 @@
                 <!-- Year Selector -->
                 <form method="GET" class="flex items-center space-x-2">
                     <select name="year" onchange="this.form.submit()"
-                        class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         @for($y = date('Y'); $y >= date('Y') - 5; $y--)
                             <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
                     </select>
                     <select name="fund_cluster" onchange="this.form.submit()"
-                        class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="101" {{ $fundCluster == '101' ? 'selected' : '' }}>Fund Cluster 101</option>
                         <option value="102" {{ $fundCluster == '102' ? 'selected' : '' }}>Fund Cluster 102</option>
                     </select>
@@ -31,147 +31,51 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <!-- Yearly Summary Cards -->
+            <!-- Yearly Summary Cards - Grayscale Minimal Design -->
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full mb-8">
 
-                <!-- Total Value Card (Blue) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-blue-300 dark:bg-blue-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-blue-400 dark:bg-blue-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Total Value
-                            </dt>
-                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
-                                ₱{{ number_format($yearlyData['summary']['total_value'], 2) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">
-                                <span>Yearly total</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white dark:group-hover:bg-blue-600">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-blue-500 dark:text-blue-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
-                            </svg>
-                        </div>
+                <!-- Total Value Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Value</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">₱{{ number_format($yearlyData['summary']['total_value'], 2) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Yearly total</p>
                     </div>
                 </div>
 
-                <!-- Total Items Card (Green) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-green-300 dark:bg-green-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-green-400 dark:bg-green-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Total Items
-                            </dt>
-                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
-                                {{ number_format($yearlyData['summary']['total_items']) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-green-600 dark:text-green-400">
-                                <span>Items processed</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-green-500 group-hover:text-white dark:group-hover:bg-green-600">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-green-500 dark:text-green-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+                <!-- Total Items Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Items</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($yearlyData['summary']['total_items']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Items processed</p>
                     </div>
                 </div>
 
-                <!-- Total RIS Card (Purple) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-purple-300 dark:bg-purple-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-purple-400 dark:bg-purple-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Total RIS
-                            </dt>
-                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
-                                {{ number_format($yearlyData['summary']['total_ris']) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400">
-                                <span>Requisitions</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white dark:group-hover:bg-purple-600">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-500 dark:text-purple-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+                <!-- Total RIS Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total RIS</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($yearlyData['summary']['total_ris']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Requisitions</p>
                     </div>
                 </div>
 
-                <!-- Avg Monthly Card (Yellow) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-yellow-300 dark:bg-yellow-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-yellow-400 dark:bg-yellow-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Avg Monthly
-                            </dt>
-                            <dd class="text-xl sm:text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
-                                ₱{{ number_format($yearlyData['summary']['avg_monthly'], 2) }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                                <span>Per month</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-yellow-500 group-hover:text-white dark:group-hover:bg-yellow-600">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-yellow-500 dark:text-yellow-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm2 0h8v6H6V5z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+                <!-- Avg Monthly Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Avg Monthly</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">₱{{ number_format($yearlyData['summary']['avg_monthly'], 2) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Per month</p>
                     </div>
                 </div>
 
-                <!-- Peak Month Card (Red/Teal) -->
-                <div class="p-3 sm:p-4 lg:p-6 rounded-2xl shadow-xl dark:shadow-gray-900/30 cursor-pointer group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:translate-y-1">
-                    <!-- Background with gradient and subtle pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-teal-100 to-teal-200 dark:from-teal-900 dark:to-teal-800 opacity-90"></div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-teal-300 dark:bg-teal-700 opacity-40"></div>
-                    <div class="absolute top-0 right-0 w-16 h-16 rounded-full bg-teal-400 dark:bg-teal-600 opacity-20 transform translate-x-6 -translate-y-6"></div>
-
-                    <div class="flex justify-between relative z-10">
-                        <dl class="space-y-2">
-                            <dt class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                Peak Month
-                            </dt>
-                            <dd class="text-lg sm:text-xl lg:text-2xl font-light text-gray-900 dark:text-white">
-                                {{ $yearlyData['summary']['peak_month'] }}
-                            </dd>
-                            <dd class="flex items-center space-x-1 text-xs sm:text-sm font-medium text-teal-600 dark:text-teal-400">
-                                <span>Highest activity</span>
-                            </dd>
-                        </dl>
-                        <div class="rounded-full p-2 sm:p-2.5 lg:p-3 bg-white dark:bg-gray-800 h-fit shadow-md transition-all duration-300 group-hover:bg-teal-500 group-hover:text-white dark:group-hover:bg-teal-600">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-teal-500 dark:text-teal-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+                <!-- Peak Month Card -->
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-center">
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Peak Month</p>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ $yearlyData['summary']['peak_month'] }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Highest activity</p>
                     </div>
                 </div>
             </div>
@@ -179,9 +83,9 @@
             <!-- Charts Section -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <!-- Monthly Trend Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Monthly Spending Trend</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Spending Trend</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total cost per month throughout the year</p>
                     </div>
                     <div class="p-6">
@@ -192,9 +96,9 @@
                 </div>
 
                 <!-- Quarterly Comparison Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Quarterly Comparison</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quarterly Comparison</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Spending comparison by quarters</p>
                     </div>
                     <div class="p-6">
@@ -205,9 +109,9 @@
                 </div>
 
                 <!-- Category Yearly Distribution -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Category Distribution (Yearly)</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Category Distribution (Yearly)</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total spending by category for the entire year</p>
                     </div>
                     <div class="p-6">
@@ -218,9 +122,9 @@
                 </div>
 
                 <!-- Top Items (Yearly) Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Top 15 Items (Yearly)</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top 15 Items (Yearly)</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Most expensive items across the entire year</p>
                     </div>
                     <div class="p-6">
@@ -234,9 +138,9 @@
             <!-- Data Tables Section -->
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                 <!-- Monthly Breakdown Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Monthly Breakdown</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Monthly Breakdown</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Detailed monthly statistics</p>
                     </div>
                     <div class="p-6">
@@ -253,7 +157,7 @@
                                     @foreach($yearlyData['monthly_breakdown'] as $month)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-3 py-3 font-medium text-gray-900 dark:text-white">{{ $month['month'] }}</td>
-                                        <td class="px-3 py-3 text-right text-green-600 dark:text-green-400 font-medium">₱{{ number_format($month['total'], 2) }}</td>
+                                        <td class="px-3 py-3 text-right text-gray-800 dark:text-gray-200 font-medium">₱{{ number_format($month['total'], 2) }}</td>
                                         <td class="px-3 py-3 text-center text-gray-600 dark:text-gray-400">{{ $month['items'] }}</td>
                                     </tr>
                                     @endforeach
@@ -264,9 +168,9 @@
                 </div>
 
                 <!-- Top Categories (Yearly) -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Top Categories</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Categories</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Highest spending categories</p>
                     </div>
                     <div class="p-6">
@@ -276,14 +180,14 @@
                                 <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                                     <div class="flex justify-between items-start">
                                         <span class="font-medium text-sm text-gray-900 dark:text-white">{{ $category['category'] }}</span>
-                                        <span class="text-sm font-bold text-green-600 dark:text-green-400">₱{{ number_format($category['total'], 2) }}</span>
+                                        <span class="text-sm font-bold text-gray-800 dark:text-gray-200">₱{{ number_format($category['total'], 2) }}</span>
                                     </div>
                                     <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
                                         <span>Items: {{ $category['items'] }}</span>
                                         <span>RIS: {{ $category['ris_count'] }}</span>
                                     </div>
                                     <div class="mt-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ ($category['total'] / $yearlyData['summary']['total_value']) * 100 }}%"></div>
+                                        <div class="bg-gray-600 dark:bg-gray-400 h-2 rounded-full" style="width: {{ ($category['total'] / $yearlyData['summary']['total_value']) * 100 }}%"></div>
                                     </div>
                                 </div>
                                 @endforeach
@@ -293,37 +197,37 @@
                 </div>
 
                 <!-- Yearly Insights -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Yearly Insights</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Yearly Insights</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Key trends and patterns</p>
                     </div>
                     <div class="p-6">
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Busiest Month</span>
                                 <span class="font-medium text-gray-900 dark:text-white">{{ $yearlyData['insights']['busiest_month'] }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Most Expensive Item</span>
                                 <span class="font-medium text-gray-900 dark:text-white text-xs">{{ Str::limit($yearlyData['insights']['most_expensive_item'], 20) }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Most Used Category</span>
                                 <span class="font-medium text-gray-900 dark:text-white">{{ $yearlyData['insights']['most_used_category'] }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">Growth vs Last Year</span>
-                                <span class="font-medium {{ $yearlyData['insights']['growth_rate'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                <span class="font-medium {{ $yearlyData['insights']['growth_rate'] >= 0 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400' }}">
                                     {{ $yearlyData['insights']['growth_rate'] >= 0 ? '+' : '' }}{{ number_format($yearlyData['insights']['growth_rate'], 1) }}%
                                 </span>
                             </div>
                             <div class="pt-2 border-t dark:border-gray-700">
-                                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
                                     <span class="text-sm text-gray-600 dark:text-gray-400">Strongest Quarter</span>
                                     <div class="mt-1">
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $yearlyData['insights']['strongest_quarter'] }}</span>
-                                        <span class="text-xs text-blue-600 dark:text-blue-400 ml-2">₱{{ number_format($yearlyData['insights']['strongest_quarter_value'], 2) }}</span>
+                                        <span class="text-xs text-gray-700 dark:text-gray-300 ml-2">₱{{ number_format($yearlyData['insights']['strongest_quarter_value'], 2) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -341,18 +245,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             const yearlyData = {!! json_encode($yearlyData) !!};
 
-            // Color palette
+            // Minimal grayscale color palette
             const colors = [
-                'rgba(59, 130, 246, 0.8)',   // Blue
-                'rgba(16, 185, 129, 0.8)',   // Green
-                'rgba(245, 158, 11, 0.8)',   // Yellow
-                'rgba(239, 68, 68, 0.8)',    // Red
-                'rgba(139, 92, 246, 0.8)',   // Purple
-                'rgba(236, 72, 153, 0.8)',   // Pink
-                'rgba(14, 165, 233, 0.8)',   // Sky
-                'rgba(34, 197, 94, 0.8)',    // Emerald
-                'rgba(249, 115, 22, 0.8)',   // Orange
-                'rgba(168, 85, 247, 0.8)'    // Violet
+                'rgba(107, 114, 128, 0.8)',   // Gray-500
+                'rgba(75, 85, 99, 0.8)',      // Gray-600
+                'rgba(55, 65, 81, 0.8)',      // Gray-700
+                'rgba(31, 41, 55, 0.8)',      // Gray-800
+                'rgba(17, 24, 39, 0.8)',      // Gray-900
+                'rgba(156, 163, 175, 0.8)',   // Gray-400
+                'rgba(209, 213, 219, 0.8)',   // Gray-300
+                'rgba(229, 231, 235, 0.8)',   // Gray-200
+                'rgba(243, 244, 246, 0.8)',   // Gray-100
+                'rgba(249, 250, 251, 0.8)',   // Gray-50
+                'rgba(107, 114, 128, 0.6)',   // Gray-500 (lighter)
+                'rgba(75, 85, 99, 0.6)',      // Gray-600 (lighter)
+                'rgba(55, 65, 81, 0.6)',      // Gray-700 (lighter)
+                'rgba(31, 41, 55, 0.6)',      // Gray-800 (lighter)
+                'rgba(17, 24, 39, 0.6)'       // Gray-900 (lighter)
             ];
 
             // 1. Monthly Trend Chart
@@ -365,14 +274,14 @@
                         datasets: [{
                             label: 'Monthly Spending',
                             data: yearlyData.monthly_breakdown.map(item => item.total),
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: 'rgba(75, 85, 99, 1)',
+                            backgroundColor: 'rgba(75, 85, 99, 0.1)',
                             tension: 0.4,
                             fill: true,
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(75, 85, 99, 1)',
                             pointBorderColor: '#ffffff',
                             pointBorderWidth: 2,
-                            pointRadius: 5
+                            pointRadius: 4
                         }]
                     },
                     options: {
@@ -381,6 +290,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                 callbacks: {
                                     label: function(context) {
                                         return `Total: ₱${context.raw.toLocaleString()}`;
@@ -430,6 +340,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                 callbacks: {
                                     label: function(context) {
                                         return `Total: ₱${context.raw.toLocaleString()}`;
@@ -484,6 +395,7 @@
                                 }
                             },
                             tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                 callbacks: {
                                     label: function(context) {
                                         const value = context.raw;
@@ -511,8 +423,8 @@
                         datasets: [{
                             label: 'Total Cost',
                             data: yearlyData.top_items.map(item => item.total),
-                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                            borderColor: 'rgba(16, 185, 129, 1)',
+                            backgroundColor: 'rgba(107, 114, 128, 0.8)',
+                            borderColor: 'rgba(75, 85, 99, 1)',
                             borderWidth: 1,
                             borderRadius: 4
                         }]
@@ -524,6 +436,7 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                 callbacks: {
                                     title: function(context) {
                                         const index = context[0].dataIndex;
@@ -562,7 +475,5 @@
             }
         });
     </script>
-
-
 
 </x-app-layout>
