@@ -1399,7 +1399,7 @@ class RisSlipController extends Controller
             return back()->with('error', 'Unauthorized to create manual RIS entries.');
         }
 
-        // Simplified validation - no CAO form fields needed
+        // Simplified validation - no checkbox needed
         $validated = $request->validate([
             'is_manual_entry' => 'required|boolean',
             'ris_date' => [
@@ -1419,18 +1419,12 @@ class RisSlipController extends Controller
             'final_status' => 'required|in:completed,posted,declined',
             'decline_reason' => 'nullable|string|max:500',
 
-            // Simple receiver checkbox
-            'same_as_requester' => 'sometimes|boolean',
-
             'items' => 'required|array|min:1',
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
             'items.*.quantity_requested' => 'required|integer|min:1',
             'items.*.quantity_issued' => 'nullable|integer|min:0',
             'items.*.remarks' => 'nullable|string|max:500',
         ]);
-
-        // Convert checkbox to proper boolean
-        $validated['same_as_requester'] = (bool) ($validated['same_as_requester'] ?? false);
 
         // Automatically get current CAO information from database
         $currentCAO = $this->getCurrentCAOUser();
@@ -1562,8 +1556,8 @@ class RisSlipController extends Controller
                     ]);
                 }
 
-                // Apply historical status with automatic CAO
-                $this->applyHistoricalStatusWithCAO($risSlip, $validated, $risDate, $currentCAO);
+                // Apply historical status with automatic requester as receiver
+                $this->applyHistoricalStatusWithAutoReceiver($risSlip, $validated, $risDate, $currentCAO);
 
                 // Audit log
                 \Log::info('Manual RIS entry created', [
@@ -1640,10 +1634,8 @@ class RisSlipController extends Controller
         }
     }
 
-    /**
-     * Apply historical status with CAO ONLY for approval part
-     */
-    private function applyHistoricalStatusWithCAO(RisSlip $risSlip, array $validated, Carbon $risDate, array $caoInfo)
+
+    private function applyHistoricalStatusWithAutoReceiver(RisSlip $risSlip, array $validated, Carbon $risDate, array $caoInfo)
     {
         $currentUserId = auth()->id(); // Current user for issued/received
         $caoUserId = $caoInfo['id'];
@@ -1680,20 +1672,15 @@ class RisSlipController extends Controller
                 break;
 
             case 'completed':
-                // Determine receiver: use requester if checkbox checked, otherwise use CURRENT USER
-                $receiverId = $validated['same_as_requester']
-                    ? $validated['requested_by']
-                    : $currentUserId; // ← CURRENT USER, not CAO
-
                 $risSlip->update([
                     'status' => RisStatus::POSTED,
-                    'approved_by' => $caoUserId,        // ← CAO for approval
+                    'approved_by' => $caoUserId,                    // ← CAO for approval
                     'approved_at' => $risDate,
                     'approver_signature_type' => 'sgd',
-                    'issued_by' => $currentUserId,      // ← CURRENT USER for issued
+                    'issued_by' => $currentUserId,                  // ← CURRENT USER for issued
                     'issued_at' => $risDate,
                     'issuer_signature_type' => 'sgd',
-                    'received_by' => $receiverId,       // ← CURRENT USER or requester
+                    'received_by' => $validated['requested_by'],    // ← AUTOMATICALLY use requester as receiver
                     'received_at' => $risDate,
                     'receiver_signature_type' => 'sgd',
                     'updated_at' => $risDate,
@@ -1703,6 +1690,71 @@ class RisSlipController extends Controller
                 break;
         }
     }
+
+
+    // /**
+    //  * Apply historical status with CAO ONLY for approval part
+    //  */
+    // private function applyHistoricalStatusWithCAO(RisSlip $risSlip, array $validated, Carbon $risDate, array $caoInfo)
+    // {
+    //     $currentUserId = auth()->id(); // Current user for issued/received
+    //     $caoUserId = $caoInfo['id'];
+
+    //     // If no CAO user found, create one or use current user as fallback for approval
+    //     if (!$caoUserId) {
+    //         $caoUserId = $this->getOrCreateCAOUserRecord($caoInfo);
+    //     }
+
+    //     switch ($validated['final_status']) {
+    //         case 'declined':
+    //             $risSlip->update([
+    //                 'status' => RisStatus::DECLINED,
+    //                 'declined_by' => $caoUserId, // Use CAO for decline
+    //                 'declined_at' => $risDate,
+    //                 'decline_reason' => $validated['decline_reason'],
+    //                 'updated_at' => $risDate,
+    //             ]);
+    //             break;
+
+    //         case 'posted':
+    //             $risSlip->update([
+    //                 'status' => RisStatus::POSTED,
+    //                 'approved_by' => $caoUserId,        // ← CAO for approval
+    //                 'approved_at' => $risDate,
+    //                 'approver_signature_type' => 'sgd',
+    //                 'issued_by' => $currentUserId,      // ← CURRENT USER for issued
+    //                 'issued_at' => $risDate,
+    //                 'issuer_signature_type' => 'sgd',
+    //                 'updated_at' => $risDate,
+    //             ]);
+
+    //             $this->processHistoricalStockDeductions($risSlip, $risDate);
+    //             break;
+
+    //         case 'completed':
+    //             // Determine receiver: use requester if checkbox checked, otherwise use CURRENT USER
+    //             $receiverId = $validated['same_as_requester']
+    //                 ? $validated['requested_by']
+    //                 : $currentUserId; // ← CURRENT USER, not CAO
+
+    //             $risSlip->update([
+    //                 'status' => RisStatus::POSTED,
+    //                 'approved_by' => $caoUserId,        // ← CAO for approval
+    //                 'approved_at' => $risDate,
+    //                 'approver_signature_type' => 'sgd',
+    //                 'issued_by' => $currentUserId,      // ← CURRENT USER for issued
+    //                 'issued_at' => $risDate,
+    //                 'issuer_signature_type' => 'sgd',
+    //                 'received_by' => $receiverId,       // ← CURRENT USER or requester
+    //                 'received_at' => $risDate,
+    //                 'receiver_signature_type' => 'sgd',
+    //                 'updated_at' => $risDate,
+    //             ]);
+
+    //             $this->processHistoricalStockDeductions($risSlip, $risDate);
+    //             break;
+    //     }
+    // }
 
     /**
      * Create CAO user record if needed
