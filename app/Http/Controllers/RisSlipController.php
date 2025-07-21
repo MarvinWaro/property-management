@@ -1392,9 +1392,6 @@ class RisSlipController extends Controller
         exit;
     }
 
-    /**
-     * Store manually created RIS (for historical data) - UPDATED WITH DUPLICATE ITEM VALIDATION
-     */
     public function storeManual(Request $request, ReferenceNumberService $referenceNumberService)
     {
         // Only admin and CAO can create manual entries
@@ -1402,7 +1399,7 @@ class RisSlipController extends Controller
             return back()->with('error', 'Unauthorized to create manual RIS entries.');
         }
 
-        // Enhanced validation for manual entries (NO 'unique' on reference_no)
+        // Simplified validation - no CAO form fields needed
         $validated = $request->validate([
             'is_manual_entry' => 'required|boolean',
             'ris_date' => [
@@ -1421,14 +1418,22 @@ class RisSlipController extends Controller
             'purpose' => 'required|string|max:1000',
             'final_status' => 'required|in:completed,posted,declined',
             'decline_reason' => 'nullable|string|max:500',
+
+            // Simple receiver checkbox
+            'same_as_requester' => 'sometimes|boolean',
+
             'items' => 'required|array|min:1',
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
             'items.*.quantity_requested' => 'required|integer|min:1',
             'items.*.quantity_issued' => 'nullable|integer|min:0',
             'items.*.remarks' => 'nullable|string|max:500',
-        ], [
-            // Optionally you can customize other messages here
         ]);
+
+        // Convert checkbox to proper boolean
+        $validated['same_as_requester'] = (bool) ($validated['same_as_requester'] ?? false);
+
+        // Automatically get current CAO information from database
+        $currentCAO = $this->getCurrentCAOUser();
 
         // If "declined" status, require a reason
         if ($validated['final_status'] === 'declined' && empty($validated['decline_reason'])) {
@@ -1437,7 +1442,7 @@ class RisSlipController extends Controller
             ])->withInput();
         }
 
-        // 1️⃣ Check: Duplicate item for this RIS number (across all slips)
+        // Check for duplicate items (existing validation)
         if (!empty($validated['reference_no'])) {
             $existingItems = \App\Models\RisSlip::where('ris_no', $validated['reference_no'])
                 ->with('items')
@@ -1450,7 +1455,6 @@ class RisSlipController extends Controller
             $duplicates = array_intersect($existingItems, $newItems);
 
             if (count($duplicates) > 0) {
-                // Get item names for clearer error
                 $itemNames = \App\Models\Supply::whereIn('supply_id', $duplicates)->pluck('item_name')->toArray();
                 $duplicateList = implode(', ', $itemNames);
 
@@ -1463,9 +1467,9 @@ class RisSlipController extends Controller
         }
 
         try {
-            return \DB::transaction(function() use ($validated, $referenceNumberService) {
+            return \DB::transaction(function() use ($validated, $referenceNumberService, $currentCAO) {
 
-                // 2️⃣ Stock validation: same as before
+                // Stock validation (keeping existing logic)
                 $stockValidationErrors = [];
                 foreach ($validated['items'] as $index => $item) {
                     $supplyId = $item['supply_id'];
@@ -1504,7 +1508,6 @@ class RisSlipController extends Controller
                     }
                 }
 
-                // Return validation errors if any
                 if (!empty($stockValidationErrors)) {
                     return back()
                         ->withErrors(['stock_validation' => $stockValidationErrors])
@@ -1512,11 +1515,9 @@ class RisSlipController extends Controller
                         ->withInput();
                 }
 
-                // 3️⃣ Prepare and Save RIS Slip
+                // Prepare and Save RIS Slip
                 $risDate = \Carbon\Carbon::parse($validated['ris_date']);
                 $newRisNumber = $validated['reference_no'] ?? $this->generateHistoricalRisNumber($risDate);
-
-                // Note: Don't need to check for ris_no uniqueness now
 
                 $risSlip = \App\Models\RisSlip::create([
                     'ris_no' => $newRisNumber,
@@ -1527,9 +1528,9 @@ class RisSlipController extends Controller
                     'fund_cluster' => $validated['fund_cluster'],
                     'responsibility_center_code' => $validated['responsibility_center_code'],
                     'requested_by' => $validated['requested_by'],
-                    'requester_signature_type' => 'sgd', // Manual entries use SGD
+                    'requester_signature_type' => 'sgd',
                     'purpose' => $validated['purpose'],
-                    'status' => 'draft', // Start as draft, then update based on final_status
+                    'status' => 'draft',
 
                     // MANUAL ENTRY FIELDS
                     'is_manual_entry' => true,
@@ -1538,12 +1539,16 @@ class RisSlipController extends Controller
                     'manual_entry_at' => now(),
                     'manual_entry_notes' => "Historical entry for {$risDate->format('M d, Y')}",
 
+                    // AUTOMATIC CAO INFORMATION
+                    'cao_name' => $currentCAO['name'],
+                    'cao_designation' => $currentCAO['designation'],
+
                     // Set historical timestamps
                     'created_at' => $risDate,
                     'updated_at' => $risDate,
                 ]);
 
-                // 4️⃣ RIS Items
+                // RIS Items
                 foreach ($validated['items'] as $item) {
                     \App\Models\RisItem::create([
                         'ris_id' => $risSlip->ris_id,
@@ -1557,10 +1562,10 @@ class RisSlipController extends Controller
                     ]);
                 }
 
-                // 5️⃣ Historical status transitions
-                $this->applyHistoricalStatus($risSlip, $validated, $risDate);
+                // Apply historical status with automatic CAO
+                $this->applyHistoricalStatusWithCAO($risSlip, $validated, $risDate, $currentCAO);
 
-                // 6️⃣ Audit log
+                // Audit log
                 \Log::info('Manual RIS entry created', [
                     'ris_no' => $newRisNumber,
                     'ris_date' => $risDate->format('Y-m-d'),
@@ -1568,10 +1573,10 @@ class RisSlipController extends Controller
                     'created_by_name' => auth()->user()->name,
                     'requested_by' => $validated['requested_by'],
                     'final_status' => $validated['final_status'],
-                    'reference_no' => $validated['reference_no'] ?? 'auto-generated',
+                    'cao_name' => $currentCAO['name'],
+                    'cao_designation' => $currentCAO['designation'],
+                    'cao_id' => $currentCAO['id'],
                     'items_count' => count($validated['items']),
-                    'entity_name' => $validated['entity_name'],
-                    'purpose' => substr($validated['purpose'], 0, 100) . '...'
                 ]);
 
                 return redirect()
@@ -1584,13 +1589,149 @@ class RisSlipController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
-                'ris_date' => $validated['ris_date'] ?? null,
-                'reference_no' => $validated['reference_no'] ?? null
             ]);
 
             return back()
                 ->with('error', 'Failed to create manual RIS: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    /**
+     * Get current CAO user information from database
+     */
+    private function getCurrentCAOUser()
+    {
+        try {
+            // Find user with 'cao' role
+            $caoUser = User::where('role', 'cao')
+                ->where('status', 1)
+                ->first();
+
+            if (!$caoUser) {
+                \Log::warning('No active CAO found in database, using fallback values');
+
+                return [
+                    'id' => null,
+                    'name' => 'Maria Teresa L. Samonte, Ed.D.',
+                    'designation' => 'Chief Administrative Officer',
+                    'email' => 'cao@system.local'
+                ];
+            }
+
+            return [
+                'id' => $caoUser->id,
+                'name' => $caoUser->name,
+                'designation' => $caoUser->position ?? 'Chief Administrative Officer',
+                'email' => $caoUser->email
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching CAO user', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'id' => null,
+                'name' => 'Maria Teresa L. Samonte, Ed.D.',
+                'designation' => 'Chief Administrative Officer',
+                'email' => 'cao@system.local'
+            ];
+        }
+    }
+
+    /**
+     * Apply historical status with CAO ONLY for approval part
+     */
+    private function applyHistoricalStatusWithCAO(RisSlip $risSlip, array $validated, Carbon $risDate, array $caoInfo)
+    {
+        $currentUserId = auth()->id(); // Current user for issued/received
+        $caoUserId = $caoInfo['id'];
+
+        // If no CAO user found, create one or use current user as fallback for approval
+        if (!$caoUserId) {
+            $caoUserId = $this->getOrCreateCAOUserRecord($caoInfo);
+        }
+
+        switch ($validated['final_status']) {
+            case 'declined':
+                $risSlip->update([
+                    'status' => RisStatus::DECLINED,
+                    'declined_by' => $caoUserId, // Use CAO for decline
+                    'declined_at' => $risDate,
+                    'decline_reason' => $validated['decline_reason'],
+                    'updated_at' => $risDate,
+                ]);
+                break;
+
+            case 'posted':
+                $risSlip->update([
+                    'status' => RisStatus::POSTED,
+                    'approved_by' => $caoUserId,        // ← CAO for approval
+                    'approved_at' => $risDate,
+                    'approver_signature_type' => 'sgd',
+                    'issued_by' => $currentUserId,      // ← CURRENT USER for issued
+                    'issued_at' => $risDate,
+                    'issuer_signature_type' => 'sgd',
+                    'updated_at' => $risDate,
+                ]);
+
+                $this->processHistoricalStockDeductions($risSlip, $risDate);
+                break;
+
+            case 'completed':
+                // Determine receiver: use requester if checkbox checked, otherwise use CURRENT USER
+                $receiverId = $validated['same_as_requester']
+                    ? $validated['requested_by']
+                    : $currentUserId; // ← CURRENT USER, not CAO
+
+                $risSlip->update([
+                    'status' => RisStatus::POSTED,
+                    'approved_by' => $caoUserId,        // ← CAO for approval
+                    'approved_at' => $risDate,
+                    'approver_signature_type' => 'sgd',
+                    'issued_by' => $currentUserId,      // ← CURRENT USER for issued
+                    'issued_at' => $risDate,
+                    'issuer_signature_type' => 'sgd',
+                    'received_by' => $receiverId,       // ← CURRENT USER or requester
+                    'received_at' => $risDate,
+                    'receiver_signature_type' => 'sgd',
+                    'updated_at' => $risDate,
+                ]);
+
+                $this->processHistoricalStockDeductions($risSlip, $risDate);
+                break;
+        }
+    }
+
+    /**
+     * Create CAO user record if needed
+     */
+    private function getOrCreateCAOUserRecord(array $caoInfo)
+    {
+        try {
+            $caoUser = User::where('name', $caoInfo['name'])->first();
+
+            if (!$caoUser) {
+                $caoUser = User::create([
+                    'name' => $caoInfo['name'],
+                    'email' => $caoInfo['email'],
+                    'email_verified_at' => now(),
+                    'password' => Hash::make(Str::random(32)),
+                    'position' => $caoInfo['designation'],
+                    'role' => 'cao',
+                    'status' => 1,
+                ]);
+            }
+
+            return $caoUser->id;
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to create CAO user record', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return auth()->id();
         }
     }
 
@@ -1602,48 +1743,22 @@ class RisSlipController extends Controller
     {
         $year = $date->format('Y');
         $month = $date->format('m');
-
-        // FIXED: Get all existing RIS numbers for that month with better pattern matching
         $pattern = "RIS {$year}-{$month}-";
 
         $existingNumbers = RisSlip::where('ris_no', 'like', $pattern . '%')
             ->pluck('ris_no')
             ->map(function($risNo) use ($pattern) {
-                // Extract the number part more reliably
                 $numberPart = str_replace($pattern, '', $risNo);
                 return intval($numberPart);
             })
             ->filter(function($num) {
-                return $num > 0; // Only valid numbers
+                return $num > 0;
             })
             ->sort()
             ->values();
 
-        Log::info('RIS Generation Debug', [
-            'date' => $date->format('Y-m-d'),
-            'pattern' => $pattern,
-            'found_numbers' => $existingNumbers->toArray(),
-            'max_number' => $existingNumbers->max()
-        ]);
-
-        // FIXED: Find the next available number
-        if ($existingNumbers->isEmpty()) {
-            $next = 1;
-        } else {
-            // Get the highest existing number and add 1
-            $next = $existingNumbers->max() + 1;
-        }
-
-        $newRisNumber = sprintf("RIS %s-%s-%03d", $year, $month, $next);
-
-        Log::info('RIS Generated', [
-            'date' => $date->format('Y-m-d'),
-            'existing_count' => $existingNumbers->count(),
-            'next_number' => $next,
-            'generated_ris' => $newRisNumber
-        ]);
-
-        return $newRisNumber;
+        $next = $existingNumbers->isEmpty() ? 1 : $existingNumbers->max() + 1;
+        return sprintf("RIS %s-%s-%03d", $year, $month, $next);
     }
 
     /**
@@ -1721,16 +1836,12 @@ class RisSlipController extends Controller
         }
     }
 
-    /**
-     * Process stock deductions for historical manual entries
-     */
     private function processHistoricalStockDeductions(RisSlip $risSlip, Carbon $risDate)
     {
         foreach ($risSlip->items as $item) {
             $issueQty = $item->quantity_issued;
 
             if ($issueQty > 0) {
-                // Get available stocks (FIFO approach)
                 $matchingStocks = SupplyStock::where('supply_id', $item->supply_id)
                     ->where('status', 'available')
                     ->where('quantity_on_hand', '>', 0)
@@ -1739,25 +1850,20 @@ class RisSlipController extends Controller
                     ->get();
 
                 $remainingQuantity = $issueQty;
-                $totalCost = 0;
 
                 foreach ($matchingStocks as $stock) {
                     if ($remainingQuantity <= 0) break;
 
                     $qtyToDeduct = min($remainingQuantity, $stock->quantity_on_hand);
-
-                    // Update stock quantity
                     $stock->quantity_on_hand -= $qtyToDeduct;
                     $stockItemCost = $qtyToDeduct * $stock->unit_cost;
-                    $totalCost += $stockItemCost;
 
                     if ($stock->quantity_on_hand <= 0) {
                         $stock->status = 'depleted';
                     }
                     $stock->save();
 
-                    // Create historical transaction
-                    $transaction = SupplyTransaction::create([
+                    SupplyTransaction::create([
                         'supply_id' => $item->supply_id,
                         'transaction_type' => 'issue',
                         'transaction_date' => $risDate->toDateString(),
@@ -1767,8 +1873,7 @@ class RisSlipController extends Controller
                         'total_cost' => $stockItemCost,
                         'department_id' => $risSlip->division,
                         'user_id' => auth()->id(),
-                        'remarks' => "Historical issue via RIS #{$risSlip->ris_no}" .
-                                   ($item->remarks ? " - {$item->remarks}" : ""),
+                        'remarks' => "Historical issue via RIS #{$risSlip->ris_no}",
                         'fund_cluster' => $risSlip->fund_cluster,
                         'balance_quantity' => $stock->quantity_on_hand,
                         'balance_unit_cost' => $stock->unit_cost,
@@ -1778,16 +1883,6 @@ class RisSlipController extends Controller
                     ]);
 
                     $remainingQuantity -= $qtyToDeduct;
-                }
-
-                if ($remainingQuantity > 0) {
-                    Log::warning("Historical RIS: Insufficient stock for complete fulfillment", [
-                        'ris_no' => $risSlip->ris_no,
-                        'supply_id' => $item->supply_id,
-                        'requested' => $issueQty,
-                        'fulfilled' => $issueQty - $remainingQuantity,
-                        'shortfall' => $remainingQuantity
-                    ]);
                 }
             }
         }
@@ -1823,32 +1918,25 @@ class RisSlipController extends Controller
     }
 
 
-    /**
-     * AJAX: Validate stock availability for manual entry
-     */
     public function validateManualStock(Request $request)
     {
         $data = $request->validate([
-            'ris_date'          => 'required|date',
-            'items'             => 'required|array|min:1',
+            'ris_date' => 'required|date',
+            'items' => 'required|array|min:1',
             'items.*.supply_id' => 'required|exists:supplies,supply_id',
         ]);
 
-        // interpret the RIS date as endOfDay to include all transactions on that day
         $risDate = Carbon::parse($data['ris_date'])->endOfDay();
-
         $availabilities = [];
 
         foreach ($data['items'] as $item) {
             $supplyId = $item['supply_id'];
 
-            // total receipts on or before the RIS date
             $received = SupplyTransaction::where('supply_id', $supplyId)
                 ->where('transaction_type', 'receipt')
                 ->whereDate('transaction_date', '<=', $risDate)
                 ->sum('quantity');
 
-            // total issues on or before the RIS date
             $issued = SupplyTransaction::where('supply_id', $supplyId)
                 ->where('transaction_type', 'issue')
                 ->whereDate('transaction_date', '<=', $risDate)
@@ -1858,15 +1946,12 @@ class RisSlipController extends Controller
         }
 
         return response()->json([
-            'success'              => true,
+            'success' => true,
             'current_availability' => $availabilities,
         ]);
     }
 
 
-    /**
-     * AJAX → return the next RIS for a given date.
-     */
     public function nextRis(Request $request)
     {
         $data = $request->validate([
@@ -1877,12 +1962,6 @@ class RisSlipController extends Controller
             $date = Carbon::parse($data['ris_date']);
             $defaultRis = $this->generateHistoricalRisNumber($date);
 
-            Log::info('Next RIS Request', [
-                'requested_date' => $data['ris_date'],
-                'parsed_date' => $date->format('Y-m-d'),
-                'generated_ris' => $defaultRis
-            ]);
-
             return response()->json([
                 'success' => true,
                 'defaultRis' => $defaultRis,
@@ -1890,11 +1969,6 @@ class RisSlipController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('RIS Generation Failed', [
-                'error' => $e->getMessage(),
-                'requested_date' => $data['ris_date'] ?? 'N/A'
-            ]);
-
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to generate RIS number: ' . $e->getMessage()

@@ -154,10 +154,6 @@
                             </button>
                         </div>
 
-                        <!-- Add this right after the modal header, before the scrollable content area -->
-
-                        <!-- Error Display Section -->
-                        <!-- Replace the existing Error Display Section in your modal with this enhanced version -->
                         <!-- Error Display Section -->
                         @if ($errors->any())
                             <div class="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-900">
@@ -225,7 +221,6 @@
                             </script>
                         @endif
 
-
                         <form action="{{ route('ris.store-manual') }}" method="POST"
                             class="flex flex-col flex-1 overflow-hidden">
                             @csrf
@@ -236,7 +231,6 @@
                                 <div class="p-6">
 
                                     <!-- Date Selection (Important for Historical Data) -->
-
                                     <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
                                     <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">
                                         📅 Historical Date Information
@@ -408,42 +402,43 @@
                                         </div>
 
                                         <!-- Items Table -->
-                                        <div
-                                            class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                                            <table class="w-full">
-                                                <thead>
-                                                    <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                                        <th
-                                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                                            Supply Item
-                                                        </th>
-                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                                            style="width: 120px;">
-                                                            Available Qty
-                                                        </th>
-                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                                            style="width: 120px;">
-                                                            Requested Qty
-                                                        </th>
-                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                                            style="width: 120px;">
-                                                            Issued Qty
-                                                        </th>
-                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                                            style="width: 200px;">
-                                                            Remarks
-                                                        </th>
-                                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                                                            style="width: 60px;">
+                                        <div class="supply-items-table-container rounded-xl border border-gray-200 dark:border-gray-700" style="overflow: visible !important;">
+                                            <div style="overflow-x: auto; overflow-y: visible !important;">
+                                                <table class="w-full">
+                                                    <thead>
+                                                        <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                                            <th
+                                                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                Supply Item
+                                                            </th>
+                                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                                                style="width: 120px;">
+                                                                Available Qty
+                                                            </th>
+                                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                                                style="width: 120px;">
+                                                                Requested Qty
+                                                            </th>
+                                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                                                style="width: 120px;">
+                                                                Issued Qty
+                                                            </th>
+                                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                                                style="width: 200px;">
+                                                                Remarks
+                                                            </th>
+                                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                                                style="width: 60px;">
 
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="manualItemsTable"
-                                                    class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                                                    <!-- Dynamic rows will be added here -->
-                                                </tbody>
-                                            </table>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="manualItemsTable"
+                                                        class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                                                        <!-- Dynamic rows will be added here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
                                             <!-- Empty State -->
                                             <div id="manualEmptyState"
@@ -463,15 +458,13 @@
                                     </div>
 
                                     <!-- Status Selection for Historical Data -->
-                                    <div
-                                        class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
+                                    <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
                                         <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-3">
                                             📋 Historical Status Information
                                         </h4>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label
-                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Final Status <span class="text-red-500">*</span>
                                                 </label>
                                                 <select name="final_status" required id="finalStatusSelect"
@@ -485,8 +478,7 @@
                                                 </select>
                                             </div>
                                             <div id="declineReasonDiv" class="hidden">
-                                                <label
-                                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Decline Reason
                                                 </label>
                                                 <input type="text" name="decline_reason"
@@ -494,6 +486,22 @@
                                                     dark:bg-gray-700 dark:text-white rounded-md
                                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                             </div>
+                                        </div>
+
+                                        <!-- Simple receiver option for completed status -->
+                                        <div id="receiverOption" class="hidden mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-md">
+                                            <div class="flex items-center">
+                                                <!-- Hidden input to ensure unchecked checkbox sends '0' -->
+                                                <input type="hidden" name="same_as_requester" value="0">
+                                                <input type="checkbox" id="sameAsRequester" name="same_as_requester" value="1"
+                                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                                <label for="sameAsRequester" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                    Use requester as receiver
+                                                </label>
+                                            </div>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                ℹ️ Approval will automatically be attributed to the current CAO from the database
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -519,25 +527,84 @@
                     </div>
                 </div>
 
-                <!-- Template for manual item row -->
+                <!-- Template for manual item row with searchable dropdown -->
                 <template id="manualItemRowTemplate">
                     <tr
                         class="manual-item-row hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-150">
                         <td class="px-4 py-3">
-                            <select name="items[INDEX][supply_id]" required
-                                class="supply-select w-full px-3 py-2
-                                border border-gray-200 dark:border-gray-700 rounded-md text-sm
-                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Supply</option>
-                                @foreach ($availableSupplies as $stock)
-                                    <option value="{{ $stock->supply_id }}"
-                                        data-available="{{ $stock->quantity_on_hand }}"
-                                        data-stock-no="{{ $stock->supply->stock_no }}"
-                                        data-unit="{{ $stock->supply->unit_of_measurement }}">
-                                        {{ $stock->supply->item_name }} ({{ $stock->supply->stock_no }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            <!-- Fixed positioning searchable dropdown like IAR module -->
+                            <div class="supply-select-wrapper relative w-full">
+                                <!-- Hidden select for form submission -->
+                                <select name="items[INDEX][supply_id]" required class="supply-select hidden">
+                                    <option value="">Select Supply</option>
+                                </select>
+
+                                <!-- Display button -->
+                                <button type="button"
+                                    class="supply-dropdown-trigger w-full px-3 py-2 text-left border border-gray-200 dark:border-gray-700
+                                        rounded-md text-sm bg-white dark:bg-gray-700 dark:text-white
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                        flex items-center justify-between"
+                                    onclick="toggleSupplyDropdown(this)">
+                                    <span class="selected-supply-text text-gray-500 dark:text-gray-400">Select Supply</span>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Fixed positioned dropdown menu -->
+                                <div class="supply-dropdown-menu hidden bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600
+                                            rounded-lg shadow-lg overflow-hidden">
+                                    <!-- Search input -->
+                                    <div class="p-2 border-b border-gray-200 dark:border-gray-600">
+                                        <div class="relative">
+                                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                            </svg>
+                                            <input type="text"
+                                                class="supply-search-input w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600
+                                                        rounded-md bg-white dark:bg-gray-800 dark:text-white
+                                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Search supplies..."
+                                                onkeyup="filterSupplyOptions(this)">
+                                        </div>
+                                    </div>
+
+                                    <!-- Options list -->
+                                    <div class="supply-options-container max-h-[200px] overflow-y-auto">
+                                        @foreach ($availableSupplies as $stock)
+                                            <div class="supply-option px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer
+                                                        border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                                data-supply-id="{{ $stock->supply_id }}"
+                                                data-supply-name="{{ $stock->supply->item_name ?? 'Unknown Item' }}"
+                                                data-supply-stockno="{{ $stock->supply->stock_no ?? 'N/A' }}"
+                                                data-supply-description="{{ $stock->supply->description ?? '' }}"
+                                                data-available="{{ $stock->quantity_on_hand }}"
+                                                data-unit="{{ $stock->supply->unit_of_measurement ?? 'pcs' }}"
+                                                onclick="selectSupplyOption(this)">
+                                                <div class="font-medium text-sm text-gray-900 dark:text-white">
+                                                    {{ $stock->supply->item_name ?? 'Unknown Item' }} ({{ $stock->supply->stock_no ?? 'N/A' }})
+                                                </div>
+                                                @if($stock->supply->description ?? '')
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        {{ Str::limit($stock->supply->description, 60) }}
+                                                    </div>
+                                                @endif
+                                                <div class="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                                                    Available: {{ $stock->quantity_on_hand }} {{ $stock->supply->unit_of_measurement ?? 'pcs' }}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <!-- No results message -->
+                                    <div class="supply-no-results hidden p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        No supplies found matching your search
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                         <td class="px-4 py-3 text-center">
                             <span class="available-qty font-medium text-green-600 dark:text-green-400">0</span>
@@ -598,16 +665,12 @@
                     }
 
                     @keyframes shake {
-
-                        0%,
-                        100% {
+                        0%, 100% {
                             transform: translateX(0);
                         }
-
                         25% {
                             transform: translateX(-4px);
                         }
-
                         75% {
                             transform: translateX(4px);
                         }
@@ -644,12 +707,115 @@
                     .status-declined {
                         color: #ef4444;
                     }
+
+                    /* FIXED: More specific targeting to avoid breaking other layouts */
+                    .supply-items-table-container .overflow-hidden {
+                        overflow: visible !important;
+                    }
+
+                    .supply-items-table-container .overflow-x-auto {
+                        overflow-x: auto;
+                        overflow-y: visible !important;
+                    }
+
+                    /* Supply dropdown positioning - matches IAR module approach */
+                    .supply-dropdown-menu {
+                        position: fixed !important;
+                        z-index: 999999 !important; /* Increased z-index for maximum visibility */
+                        max-width: 400px;
+                        min-width: 300px;
+                        max-height: 300px;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                    }
+
+                    /* Ensure modal doesn't interfere with dropdown */
+                    #manualEntryModal {
+                        z-index: 50;
+                    }
+
+                    /* Supply option styling */
+                    .supply-option {
+                        transition: all 0.15s ease;
+                        cursor: pointer;
+                    }
+
+                    .supply-option:hover {
+                        transform: translateX(2px);
+                    }
+
+                    .supply-option.disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                        background-color: #fafafa;
+                    }
+
+                    .supply-option.disabled:hover {
+                        background-color: #fafafa;
+                        transform: none;
+                    }
+
+                    .supply-option.selected {
+                        background-color: #dbeafe;
+                        color: #1d4ed8;
+                        font-weight: 500;
+                    }
+
+                    /* Dark mode supply option styles */
+                    .dark .supply-option.disabled {
+                        background-color: #1f2937;
+                    }
+
+                    .dark .supply-option.disabled:hover {
+                        background-color: #1f2937;
+                    }
+
+                    .dark .supply-option.selected {
+                        background-color: #1e3a8a;
+                        color: #93c5fd;
+                    }
+
+                    /* Custom scrollbar for supply options */
+                    .supply-options-container::-webkit-scrollbar {
+                        width: 6px;
+                    }
+
+                    .supply-options-container::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 3px;
+                    }
+
+                    .supply-options-container::-webkit-scrollbar-thumb {
+                        background: #c1c1c1;
+                        border-radius: 3px;
+                    }
+
+                    .supply-options-container::-webkit-scrollbar-thumb:hover {
+                        background: #a8a8a8;
+                    }
+
+                    /* Dark mode scrollbar */
+                    .dark .supply-options-container::-webkit-scrollbar-track {
+                        background: #374151;
+                    }
+
+                    .dark .supply-options-container::-webkit-scrollbar-thumb {
+                        background: #6b7280;
+                    }
+
+                    .dark .supply-options-container::-webkit-scrollbar-thumb:hover {
+                        background: #9ca3af;
+                    }
+
+                    /* Search input focus styles */
+                    .supply-search-input:focus {
+                        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+                    }
                 </style>
 
-                <!-- Replace the existing JavaScript section in your modal with this enhanced version -->
+                <!-- Enhanced JavaScript with searchable dropdown functionality (SIMPLIFIED) -->
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        console.log('DOM loaded, initializing manual RIS entry...');
+                        console.log('DOM loaded, initializing manual RIS entry with simplified CAO handling...');
 
                         const modal = document.getElementById('manualEntryModal');
                         const openBtn = document.getElementById('openManualEntryModal');
@@ -665,14 +831,114 @@
 
                         let itemIndex = 0;
                         let availableSupplies = [];
-                        let selectedSupplyIds = []; // Track selected supplies
-                        let isInitialized = false; // Track if modal has been initialized
+                        let selectedSupplyIds = [];
+                        let isInitialized = false;
 
-                        console.log('Modal exists:', !!modal);
-                        console.log('Open button exists:', !!openBtn);
-                        console.log('Template exists:', !!template);
+                        // Supply dropdown functions (keeping existing functionality)
+                        window.toggleSupplyDropdown = function(trigger) {
+                            const dropdown = trigger.parentNode.querySelector('.supply-dropdown-menu');
+                            const allDropdowns = document.querySelectorAll('.supply-dropdown-menu');
 
-                        // Helper functions - defined in the same scope
+                            allDropdowns.forEach(d => {
+                                if (d !== dropdown) {
+                                    d.classList.add('hidden');
+                                }
+                            });
+
+                            if (dropdown.classList.contains('hidden')) {
+                                const rect = trigger.getBoundingClientRect();
+                                dropdown.style.position = 'fixed';
+                                dropdown.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                                dropdown.style.left = rect.left + 'px';
+                                dropdown.style.width = rect.width + 'px';
+                                dropdown.style.minWidth = '300px';
+                                dropdown.style.maxWidth = '400px';
+
+                                dropdown.classList.remove('hidden');
+
+                                const searchInput = dropdown.querySelector('.supply-search-input');
+                                setTimeout(() => searchInput.focus(), 100);
+                            } else {
+                                dropdown.classList.add('hidden');
+                            }
+                        }
+
+                        window.filterSupplyOptions = function(searchInput) {
+                            const searchTerm = searchInput.value.toLowerCase();
+                            const dropdown = searchInput.closest('.supply-dropdown-menu');
+                            const options = dropdown.querySelectorAll('.supply-option');
+                            const noResults = dropdown.querySelector('.supply-no-results');
+                            let visibleCount = 0;
+
+                            options.forEach(option => {
+                                const name = option.dataset.supplyName.toLowerCase();
+                                const stockNo = option.dataset.supplyStockno.toLowerCase();
+                                const description = (option.dataset.supplyDescription || '').toLowerCase();
+
+                                if (name.includes(searchTerm) || stockNo.includes(searchTerm) || description.includes(searchTerm)) {
+                                    option.style.display = 'block';
+                                    visibleCount++;
+                                } else {
+                                    option.style.display = 'none';
+                                }
+                            });
+
+                            if (visibleCount === 0) {
+                                noResults.classList.remove('hidden');
+                            } else {
+                                noResults.classList.add('hidden');
+                            }
+                        }
+
+                        window.selectSupplyOption = function(option) {
+                            const wrapper = option.closest('.supply-select-wrapper');
+                            const hiddenSelect = wrapper.querySelector('.supply-select');
+                            const trigger = wrapper.querySelector('.supply-dropdown-trigger');
+                            const selectedText = trigger.querySelector('.selected-supply-text');
+                            const dropdown = wrapper.querySelector('.supply-dropdown-menu');
+
+                            const supplyId = option.dataset.supplyId;
+                            const allSelects = document.querySelectorAll('.supply-select');
+                            let isDuplicate = false;
+
+                            allSelects.forEach(select => {
+                                if (select !== hiddenSelect && select.value === supplyId) {
+                                    isDuplicate = true;
+                                }
+                            });
+
+                            if (isDuplicate) {
+                                showAlert('This item has already been added to this requisition. Each item can only appear once per RIS.', 'error');
+                                return;
+                            }
+
+                            hiddenSelect.innerHTML = `
+                                <option value="">Select Supply</option>
+                                <option value="${supplyId}" selected
+                                        data-available="${option.dataset.available}"
+                                        data-stock-no="${option.dataset.supplyStockno}"
+                                        data-unit="${option.dataset.unit}">
+                                    ${option.dataset.supplyName} (${option.dataset.supplyStockno})
+                                </option>
+                            `;
+                            hiddenSelect.value = supplyId;
+
+                            selectedText.textContent = `${option.dataset.supplyName} (${option.dataset.supplyStockno})`;
+                            selectedText.className = 'selected-supply-text text-gray-900 dark:text-white';
+
+                            dropdown.classList.add('hidden');
+
+                            const searchInput = dropdown.querySelector('.supply-search-input');
+                            searchInput.value = '';
+                            filterSupplyOptions(searchInput);
+
+                            const changeEvent = new Event('change', { bubbles: true });
+                            hiddenSelect.dispatchEvent(changeEvent);
+
+                            updateSelectedSupplies();
+                        }
+
+                        // Helper functions
                         function showLoadingState() {
                             if (addItemBtn) {
                                 addItemBtn.disabled = true;
@@ -696,35 +962,6 @@
                                     Add Item
                                 `;
                             }
-                        }
-
-                        function showNoSuppliesMessage() {
-                            const itemsSection = document.querySelector('.mb-6:has(#manualItemsTable)');
-                            if (!itemsSection) return;
-
-                            // Remove existing warning if any
-                            const existingWarning = itemsSection.querySelector('.supplies-warning');
-                            if (existingWarning) {
-                                existingWarning.remove();
-                            }
-
-                            const alertDiv = document.createElement('div');
-                            alertDiv.className = 'supplies-warning mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg';
-                            alertDiv.innerHTML = `
-                                <div class="flex">
-                                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300">No Supplies Available</h4>
-                                        <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
-                                            For historical entries, you can still create the RIS. Individual items will be processed during creation.
-                                        </p>
-                                    </div>
-                                </div>
-                            `;
-
-                            itemsSection.insertBefore(alertDiv, itemsSection.firstChild);
                         }
 
                         function showAlert(message, type = 'error') {
@@ -757,18 +994,11 @@
                             setTimeout(() => alert.remove(), 5000);
                         }
 
-                        // NEW: Enhanced RIS Number Auto-Generation with UX feedback
+                        // Generate RIS Number function
                         function generateRisNumber(selectedDate = null) {
                             const dateToUse = selectedDate || risDateInput?.value;
+                            if (!dateToUse || !risNoInput) return;
 
-                            if (!dateToUse || !risNoInput) {
-                                console.log('Date or RIS No input not available');
-                                return;
-                            }
-
-                            console.log('🔄 Generating RIS number for date:', dateToUse);
-
-                            // Show loading state on RIS No field
                             const originalValue = risNoInput.value;
                             const originalPlaceholder = risNoInput.placeholder;
 
@@ -792,13 +1022,8 @@
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('✅ RIS number generated:', data);
-
-                                // Silently populate the RIS number
                                 risNoInput.value = data.defaultRis;
                                 risNoInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
-
-                                // Brief subtle success feedback (no notification)
                                 risNoInput.classList.add('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
                                 setTimeout(() => {
                                     risNoInput.classList.remove('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
@@ -806,112 +1031,70 @@
                             })
                             .catch(error => {
                                 console.error('❌ RIS number generation failed:', error);
-
-                                // Show error state
                                 risNoInput.value = originalValue;
                                 risNoInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
                                 risNoInput.classList.add('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
-
-                                // Remove error styling after a moment
                                 setTimeout(() => {
                                     risNoInput.classList.remove('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
                                 }, 2000);
-
                                 showAlert(`Failed to generate RIS number: ${error.message}`, 'error');
                             })
                             .finally(() => {
-                                // Reset field state
                                 risNoInput.disabled = false;
                                 risNoInput.placeholder = originalPlaceholder;
                             });
                         }
 
-                        // FIXED: Function to clear modal state completely
+                        // Reset modal state
                         function resetModalState() {
                             console.log('🔄 Resetting modal state...');
-
-                            // Clear all existing rows
                             itemsTable.innerHTML = '';
-
-                            // Reset tracking variables
                             itemIndex = 0;
                             selectedSupplyIds = [];
-
-                            // Remove any existing warnings
                             const existingWarning = document.querySelector('.supplies-warning');
                             if (existingWarning) {
                                 existingWarning.remove();
                             }
-
-                            // Update empty state
                             updateEmptyState();
-
-                            console.log('✅ Modal state reset complete');
                         }
 
-                        // FIXED: Function to update available supplies in dropdowns
-                        function updateSupplyDropdowns() {
-                            const allSelects = itemsTable.querySelectorAll('.supply-select');
-
-                            allSelects.forEach((select, index) => {
-                                const currentValue = select.value;
-                                const options = select.querySelectorAll('option');
-
-                                options.forEach(option => {
-                                    if (option.value && option.value !== currentValue) {
-                                        // Check if this supply is already selected in another row
-                                        const isSelected = selectedSupplyIds.includes(option.value);
-
-                                        if (isSelected) {
-                                            option.disabled = true;
-                                            option.textContent = option.textContent.replace(' (Already selected)', '') + ' (Already selected)';
-                                        } else {
-                                            option.disabled = false;
-                                            option.textContent = option.textContent.replace(' (Already selected)', '');
-                                        }
-                                    }
-                                });
-                            });
-                        }
-
-                        // FIXED: Function to update selected supplies list
+                        // Update selected supplies tracking
                         function updateSelectedSupplies() {
                             selectedSupplyIds = [];
                             const allSelects = itemsTable.querySelectorAll('.supply-select');
-
                             allSelects.forEach(select => {
                                 if (select.value) {
                                     selectedSupplyIds.push(select.value);
                                 }
                             });
 
-                            console.log('📝 Updated selected supplies:', selectedSupplyIds);
-                            updateSupplyDropdowns();
+                            const allDropdowns = itemsTable.querySelectorAll('.supply-dropdown-menu');
+                            allDropdowns.forEach(dropdown => {
+                                const options = dropdown.querySelectorAll('.supply-option');
+                                options.forEach(option => {
+                                    const supplyId = option.dataset.supplyId;
+                                    const isSelected = selectedSupplyIds.includes(supplyId);
+
+                                    if (isSelected) {
+                                        option.style.display = 'none';
+                                    } else {
+                                        option.style.display = 'block';
+                                    }
+                                });
+                            });
                         }
 
-                        // FIXED: Load available supplies function with better error handling
+                        // Load available supplies
                         function loadAvailableSupplies() {
                             console.log('=== Loading Available Supplies ===');
-
                             try {
                                 showLoadingState();
-
-                                // Get supplies data from controller
                                 let suppliesData = @json($availableSupplies ?? []);
 
-                                console.log('Raw supplies data:', suppliesData);
-                                console.log('Data type:', typeof suppliesData);
-                                console.log('Is array:', Array.isArray(suppliesData));
-
-                                // Convert object to array if needed
                                 if (typeof suppliesData === 'object' && !Array.isArray(suppliesData)) {
-                                    console.log('Converting object to array...');
                                     const keys = Object.keys(suppliesData);
-                                    console.log('Object keys:', keys);
-
                                     if (keys.length > 0) {
                                         suppliesData = Object.values(suppliesData);
-                                        console.log('Successfully converted to array, length:', suppliesData.length);
                                     } else {
                                         suppliesData = [];
                                     }
@@ -921,13 +1104,10 @@
                                     suppliesData = [];
                                 }
 
-                                // FIXED: Reset availableSupplies before processing
                                 availableSupplies = [];
 
                                 if (suppliesData.length > 0) {
-                                    suppliesData.forEach((stock, index) => {
-                                        console.log(`Processing supply ${index}:`, stock);
-
+                                    suppliesData.forEach((stock) => {
                                         const processedSupply = {
                                             supply_id: stock.supply_id,
                                             stock_no: stock.supply?.stock_no || stock.stock_no || 'N/A',
@@ -937,23 +1117,15 @@
                                             available_quantity: stock.actual_available || stock.quantity_on_hand || 0,
                                             fund_cluster: stock.fund_cluster || ''
                                         };
-
                                         availableSupplies.push(processedSupply);
-                                        console.log(`✅ Processed: ${processedSupply.item_name} (${processedSupply.stock_no})`);
                                     });
                                 }
 
                                 hideLoadingState();
 
-                                console.log('Final processed supplies:', availableSupplies);
-                                console.log('Total supplies available:', availableSupplies.length);
-
                                 if (availableSupplies.length === 0) {
-                                    console.log('No supplies processed, showing warning');
                                     showNoSuppliesMessage();
                                 } else {
-                                    console.log(`✅ Successfully loaded ${availableSupplies.length} supplies`);
-                                    // Remove any existing warning
                                     const existingWarning = document.querySelector('.supplies-warning');
                                     if (existingWarning) {
                                         existingWarning.remove();
@@ -969,36 +1141,53 @@
                             }
                         }
 
-                        // Modal controls
+                        function showNoSuppliesMessage() {
+                            const itemsSection = document.querySelector('.mb-6:has(#manualItemsTable)');
+                            if (!itemsSection) return;
+
+                            const existingWarning = itemsSection.querySelector('.supplies-warning');
+                            if (existingWarning) {
+                                existingWarning.remove();
+                            }
+
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'supplies-warning mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg';
+                            alertDiv.innerHTML = `
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300">No Supplies Available</h4>
+                                        <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                                            For historical entries, you can still create the RIS. Individual items will be processed during creation.
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+
+                            itemsSection.insertBefore(alertDiv, itemsSection.firstChild);
+                        }
+
+                        // SIMPLIFIED Modal controls (no CAO fetching)
                         openBtn?.addEventListener('click', () => {
-                            console.log('Open button clicked');
-
-                            // FIXED: Reset state before opening
                             resetModalState();
-
                             modal.classList.remove('hidden');
                             document.body.style.overflow = 'hidden';
 
-                            // ENHANCED: Set default date and auto-generate RIS number
                             if (risDateInput && !risDateInput.value) {
                                 const today = new Date().toISOString().split('T')[0];
                                 risDateInput.value = today;
-
-                                // Auto-generate RIS number for today's date
                                 setTimeout(() => {
                                     generateRisNumber(today);
-                                }, 100); // Small delay to ensure UI is ready
+                                }, 100);
                             } else if (risDateInput && risDateInput.value) {
-                                // Generate RIS number for existing date
                                 setTimeout(() => {
                                     generateRisNumber(risDateInput.value);
                                 }, 100);
                             }
 
-                            // Load supplies
                             loadAvailableSupplies();
-
-                            // Mark as initialized
                             isInitialized = true;
                         });
 
@@ -1006,37 +1195,27 @@
                             modal.classList.add('hidden');
                             document.body.style.overflow = '';
                             document.querySelector('#manualEntryModal form')?.reset();
-
-                            // FIXED: Reset state when closing
                             resetModalState();
-
                             isInitialized = false;
                         }
 
                         closeBtn?.addEventListener('click', closeModal);
                         cancelBtn?.addEventListener('click', closeModal);
 
-                        // ENHANCED: RIS Date change handler with better UX
+                        // RIS Date change handler
                         risDateInput?.addEventListener('change', function() {
                             const selectedDate = this.value;
-                            console.log('📅 RIS Date changed to:', selectedDate);
-
                             if (selectedDate) {
-                                // Generate new RIS number for the selected date
                                 generateRisNumber(selectedDate);
-
-                                // Update availability for existing items based on new date
                                 const allSelects = itemsTable.querySelectorAll('.supply-select');
                                 allSelects.forEach((select, index) => {
                                     if (select.value) {
-                                        // Trigger availability update for this supply
                                         fetchAvailabilityForDate(select.value, index, selectedDate);
                                     }
                                 });
                             }
                         });
 
-                        // NEW: Function to fetch availability for a specific date (for existing items)
                         function fetchAvailabilityForDate(supplyId, rowIndex, date) {
                             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -1062,21 +1241,18 @@
                                     const req = row.querySelector('.requested-qty');
                                     const iss = row.querySelector('.issued-qty');
 
-                                    // Update display
                                     span.textContent = available;
                                     span.className = `available-qty font-medium ${
                                         available > 0
                                         ? 'text-green-600 dark:text-green-400'
-                                        : 'text-red-600   dark:text-red-400'
+                                        : 'text-red-600 dark:text-red-400'
                                     }`;
 
-                                    // Enforce limits
                                     req.max = available;
                                     iss.max = available;
                                     req.disabled = (available === 0);
                                     iss.disabled = (available === 0);
 
-                                    // Adjust values if they exceed new availability
                                     if (+req.value > available) req.value = available;
                                     if (+iss.value > available) iss.value = available;
                                 }
@@ -1095,7 +1271,6 @@
                                 return;
                             }
 
-                            // Check if all supplies are already selected
                             if (selectedSupplyIds.length >= availableSupplies.length) {
                                 showAlert('All available supplies have been added.', 'warning');
                                 return;
@@ -1104,118 +1279,20 @@
                             const templateContent = template.content.cloneNode(true);
                             const row = templateContent.querySelector('tr');
 
-                            // Replace INDEX with actual index
                             row.innerHTML = row.innerHTML.replace(/INDEX/g, itemIndex);
 
-                            // Get row elements
-                            const supplySelect = row.querySelector('.supply-select');
                             const availableQtySpan = row.querySelector('.available-qty');
                             const requestedQtyInput = row.querySelector('.requested-qty');
                             const issuedQtyInput = row.querySelector('.issued-qty');
                             const removeBtn = row.querySelector('.remove-manual-item-btn');
 
-                            if (supplySelect) {
-                                supplySelect.innerHTML = '<option value="">Select Supply</option>';
+                            const supplyOptions = row.querySelectorAll('.supply-option');
+                            supplyOptions.forEach(option => {
+                                if (selectedSupplyIds.includes(option.dataset.supplyId)) {
+                                    option.style.display = 'none';
+                                }
+                            });
 
-                                // Populate supply options with data attributes
-                                availableSupplies.forEach(supply => {
-                                    const option = document.createElement('option');
-                                    option.value = supply.supply_id;
-                                    option.setAttribute('data-available', supply.available_quantity);
-                                    option.setAttribute('data-stock-no', supply.stock_no);
-                                    option.setAttribute('data-unit', supply.unit_of_measurement);
-                                    option.textContent = `${supply.item_name} (${supply.stock_no})`;
-
-                                    // FIXED: Check if already selected but don't disable in new rows
-                                    if (selectedSupplyIds.includes(supply.supply_id)) {
-                                        option.disabled = true;
-                                        option.textContent += ' (Already selected)';
-                                    }
-
-                                    supplySelect.appendChild(option);
-                                });
-
-                                // CRITICAL: Add supply selection change handler
-                                supplySelect.addEventListener('change', function() {
-                                    const selectedOption = this.options[this.selectedIndex];
-
-                                    if (selectedOption.value) {
-                                        // FIXED: Check for duplicates more reliably
-                                        const allSelects = itemsTable.querySelectorAll('.supply-select');
-                                        let isDuplicate = false;
-
-                                        allSelects.forEach(otherSelect => {
-                                            if (otherSelect !== this && otherSelect.value === selectedOption.value) {
-                                                isDuplicate = true;
-                                            }
-                                        });
-
-                                        if (isDuplicate) {
-                                            showAlert('This item has already been added to this requisition. Each item can only appear once per RIS.', 'error');
-                                            this.value = '';
-                                            return;
-                                        }
-
-                                        const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
-
-                                        console.log(`Selected supply: ${selectedOption.textContent}, Available: ${available}`);
-
-                                        // Update available quantity display
-                                        if (availableQtySpan) {
-                                            availableQtySpan.textContent = available;
-                                            availableQtySpan.className = `available-qty font-medium ${available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
-                                        }
-
-                                        // Set max limits on inputs
-                                        if (requestedQtyInput) {
-                                            requestedQtyInput.max = available;
-                                            requestedQtyInput.disabled = available === 0;
-                                        }
-
-                                        if (issuedQtyInput) {
-                                            issuedQtyInput.max = available;
-                                            issuedQtyInput.disabled = available === 0;
-                                        }
-
-                                        // Clear input values when changing supply
-                                        if (requestedQtyInput) requestedQtyInput.value = '';
-                                        if (issuedQtyInput) issuedQtyInput.value = '';
-
-                                        // NEW: Fetch real-time availability for selected date
-                                        const currentDate = risDateInput?.value;
-                                        if (currentDate) {
-                                            const rowIndex = Array.from(itemsTable.querySelectorAll('tr.manual-item-row')).indexOf(this.closest('tr'));
-                                            fetchAvailabilityForDate(selectedOption.value, rowIndex, currentDate);
-                                        }
-
-                                    } else {
-                                        // No supply selected
-                                        if (availableQtySpan) {
-                                            availableQtySpan.textContent = '0';
-                                            availableQtySpan.className = 'available-qty font-medium text-gray-400';
-                                        }
-
-                                        if (requestedQtyInput) {
-                                            requestedQtyInput.max = '';
-                                            requestedQtyInput.disabled = false;
-                                            requestedQtyInput.value = '';
-                                        }
-
-                                        if (issuedQtyInput) {
-                                            issuedQtyInput.max = '';
-                                            issuedQtyInput.disabled = false;
-                                            issuedQtyInput.value = '';
-                                        }
-                                    }
-
-                                    // FIXED: Update selected supplies list after change
-                                    updateSelectedSupplies();
-                                });
-
-                                console.log(`Added ${availableSupplies.length} options to select`);
-                            }
-
-                            // Add quantity input validation
                             if (requestedQtyInput) {
                                 requestedQtyInput.addEventListener('input', function() {
                                     const available = parseInt(availableQtySpan?.textContent) || 0;
@@ -1226,7 +1303,6 @@
                                         showAlert(`Maximum available: ${available}`, 'warning');
                                     }
 
-                                    // Auto-fill issued quantity for historical entries
                                     if (issuedQtyInput && this.value) {
                                         issuedQtyInput.value = this.value;
                                     }
@@ -1245,7 +1321,6 @@
                                 });
                             }
 
-                            // Remove button handler
                             removeBtn?.addEventListener('click', function() {
                                 if (itemsTable.children.length === 1) {
                                     showAlert('At least one item is required.', 'warning');
@@ -1258,7 +1333,7 @@
 
                                 setTimeout(() => {
                                     row.remove();
-                                    updateSelectedSupplies(); // Update after removal
+                                    updateSelectedSupplies();
                                     updateEmptyState();
                                 }, 300);
                             });
@@ -1267,11 +1342,88 @@
                             itemIndex++;
                             updateEmptyState();
 
-                            // Focus on the supply select
-                            setTimeout(() => supplySelect?.focus(), 100);
-
-                            console.log('Item row added successfully with change handlers');
+                            console.log('Item row added successfully with searchable dropdown');
                         }
+
+                        // Close dropdowns when clicking outside
+                        document.addEventListener('click', function(event) {
+                            if (!event.target.closest('.supply-select-wrapper')) {
+                                document.querySelectorAll('.supply-dropdown-menu').forEach(dropdown => {
+                                    dropdown.classList.add('hidden');
+                                });
+                            }
+                        });
+
+                        // Keyboard support for dropdowns
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape') {
+                                const openDropdowns = document.querySelectorAll('.supply-dropdown-menu:not(.hidden)');
+                                if (openDropdowns.length > 0) {
+                                    openDropdowns.forEach(dropdown => dropdown.classList.add('hidden'));
+                                    e.preventDefault();
+                                }
+                            }
+                        });
+
+                        // Handle supply selection change
+                        document.addEventListener('change', function(e) {
+                            if (e.target.classList.contains('supply-select')) {
+                                const selectedOption = e.target.options[e.target.selectedIndex];
+                                const row = e.target.closest('tr');
+
+                                if (selectedOption.value && row) {
+                                    const available = parseInt(selectedOption.getAttribute('data-available')) || 0;
+                                    const availableQtySpan = row.querySelector('.available-qty');
+                                    const requestedQtyInput = row.querySelector('.requested-qty');
+                                    const issuedQtyInput = row.querySelector('.issued-qty');
+
+                                    if (availableQtySpan) {
+                                        availableQtySpan.textContent = available;
+                                        availableQtySpan.className = `available-qty font-medium ${available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
+                                    }
+
+                                    if (requestedQtyInput) {
+                                        requestedQtyInput.max = available;
+                                        requestedQtyInput.disabled = available === 0;
+                                    }
+
+                                    if (issuedQtyInput) {
+                                        issuedQtyInput.max = available;
+                                        issuedQtyInput.disabled = available === 0;
+                                    }
+
+                                    if (requestedQtyInput) requestedQtyInput.value = '';
+                                    if (issuedQtyInput) issuedQtyInput.value = '';
+
+                                    const currentDate = risDateInput?.value;
+                                    if (currentDate) {
+                                        const rowIndex = Array.from(itemsTable.querySelectorAll('tr.manual-item-row')).indexOf(row);
+                                        fetchAvailabilityForDate(selectedOption.value, rowIndex, currentDate);
+                                    }
+                                } else if (row) {
+                                    const availableQtySpan = row.querySelector('.available-qty');
+                                    const requestedQtyInput = row.querySelector('.requested-qty');
+                                    const issuedQtyInput = row.querySelector('.issued-qty');
+
+                                    if (availableQtySpan) {
+                                        availableQtySpan.textContent = '0';
+                                        availableQtySpan.className = 'available-qty font-medium text-gray-400';
+                                    }
+
+                                    if (requestedQtyInput) {
+                                        requestedQtyInput.max = '';
+                                        requestedQtyInput.disabled = false;
+                                        requestedQtyInput.value = '';
+                                    }
+
+                                    if (issuedQtyInput) {
+                                        issuedQtyInput.max = '';
+                                        issuedQtyInput.disabled = false;
+                                        issuedQtyInput.value = '';
+                                    }
+                                }
+                            }
+                        });
 
                         function updateEmptyState() {
                             const rowCount = itemsTable.children.length;
@@ -1282,11 +1434,38 @@
                             }
                         }
 
-                        // Form submission
+                        // SIMPLIFIED Status change handler (no complex CAO logic)
+                        const finalStatusSelect = document.getElementById('finalStatusSelect');
+                        const declineReasonDiv = document.getElementById('declineReasonDiv');
+                        const receiverOption = document.getElementById('receiverOption');
+
+                        if (finalStatusSelect) {
+                            finalStatusSelect.addEventListener('change', function() {
+                                const selectedStatus = this.value;
+
+                                if (selectedStatus === 'declined') {
+                                    if (declineReasonDiv) declineReasonDiv.classList.remove('hidden');
+                                    if (receiverOption) receiverOption.classList.add('hidden');
+                                } else {
+                                    if (declineReasonDiv) declineReasonDiv.classList.add('hidden');
+
+                                    if (selectedStatus === 'completed') {
+                                        if (receiverOption) receiverOption.classList.remove('hidden');
+                                    } else {
+                                        if (receiverOption) receiverOption.classList.add('hidden');
+                                        const sameAsRequesterCheckbox = document.getElementById('sameAsRequester');
+                                        if (sameAsRequesterCheckbox) {
+                                            sameAsRequesterCheckbox.checked = false;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // SIMPLIFIED Form submission (no CAO validation)
                         document.querySelector('#manualEntryModal form')?.addEventListener('submit', function(e) {
                             e.preventDefault();
 
-                            // Basic validation
                             const requiredFields = ['ris_date', 'entity_name', 'division', 'requested_by', 'purpose'];
                             let isValid = true;
 
@@ -1310,7 +1489,6 @@
                                 return;
                             }
 
-                            // Check for duplicate supplies before submission
                             const allSelects = itemsTable.querySelectorAll('.supply-select');
                             const suppliesInForm = [];
                             let hasDuplicates = false;
@@ -1330,44 +1508,22 @@
                                 return;
                             }
 
-                            // Show loading
                             if (submitBtn) {
                                 submitBtn.disabled = true;
                                 submitBtn.innerHTML = '⏳ Processing...';
                             }
 
-                            // Submit form
                             this.submit();
                         });
 
-                        // Status change handler
-                        const finalStatusSelect = document.getElementById('finalStatusSelect');
-                        const declineReasonDiv = document.getElementById('declineReasonDiv');
-
-                        finalStatusSelect?.addEventListener('change', function() {
-                            if (this.value === 'declined') {
-                                declineReasonDiv?.classList.remove('hidden');
-                            } else {
-                                declineReasonDiv?.classList.add('hidden');
-                            }
-                        });
-
-                        // FIXED: Initialize on first load
                         updateEmptyState();
 
-                        console.log('✅ Manual RIS entry initialization complete');
-
-                        // FIXED: If modal should be open due to validation errors, reinitialize properly
+                        // Handle validation errors modal reopening (SIMPLIFIED)
                         @if ($errors->any() && old('is_manual_entry'))
                             console.log('🔄 Reopening modal due to validation errors...');
-
-                            // Reset state first
                             resetModalState();
-
-                            // Load supplies with fresh data
                             loadAvailableSupplies();
 
-                            // Set the date and generate RIS number if date is available
                             @if (old('ris_date'))
                                 const savedDate = "{{ old('ris_date') }}";
                                 if (risDateInput) {
@@ -1378,20 +1534,20 @@
                                 }
                             @endif
 
-                            // Mark as initialized
                             isInitialized = true;
                         @endif
+
+                        console.log('✅ Manual RIS entry with simplified CAO handling initialization complete');
                     });
                 </script>
 
-                <!-- Keep your existing RIS date change handler for backward compatibility -->
+                <!-- Keep existing compatibility scripts -->
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
                         const risDateInput = document.querySelector('input[name="ris_date"]');
                         const tableBody = document.getElementById('manualItemsTable');
                         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-                        // Fetch availability as of ris_date for one supply row
                         function fetchAvailability(supplyId, rowIndex) {
                             if (!risDateInput?.value) return;
 
@@ -1416,7 +1572,6 @@
                                     const req = row.querySelector('.requested-qty');
                                     const iss = row.querySelector('.issued-qty');
 
-                                    // Update display
                                     span.textContent = available;
                                     span.className = `available-qty font-medium ${
                                         available > 0
@@ -1424,7 +1579,6 @@
                                         : 'text-red-600   dark:text-red-400'
                                     }`;
 
-                                    // Enforce limits
                                     req.max = available;
                                     iss.max = available;
                                     req.disabled = (available === 0);
@@ -1436,7 +1590,6 @@
                             .catch(console.error);
                         }
 
-                        // When RIS date changes, refresh all rows
                         risDateInput?.addEventListener('change', () => {
                             Array.from(tableBody.querySelectorAll('tr.manual-item-row'))
                             .forEach((row, idx) => {
@@ -1444,7 +1597,6 @@
                                 if (sel.value) {
                                     fetchAvailability(sel.value, idx);
                                 } else {
-                                    // Reset if no supply chosen
                                     const span = row.querySelector('.available-qty');
                                     if (span) {
                                         span.textContent = '0';
@@ -1454,7 +1606,6 @@
                             });
                         });
 
-                        // When you pick a supply in a row, fetch just that row's availability
                         tableBody?.addEventListener('change', e => {
                             if (!e.target.classList.contains('supply-select')) return;
                             const rows = Array.from(tableBody.querySelectorAll('tr.manual-item-row'));
@@ -1492,7 +1643,6 @@
                         });
                     });
                 </script>
-
 
                 <div class="p-5">
                     <!-- Alert Messages -->
@@ -1730,7 +1880,6 @@
         });
     </script>
 
-    <!-- Add these NEW script tags AFTER your existing scripts -->
     <!-- Script 1: Handle Final Status Change -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

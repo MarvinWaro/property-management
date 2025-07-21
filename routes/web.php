@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
     Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel'); // ADD THIS LINE
+    Route::get('/ris/current-cao', [RisSlipController::class, 'getCurrentCAO'])->name('ris.current-cao');
 
 
     Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
