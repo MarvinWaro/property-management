@@ -444,31 +444,6 @@
                                         <!-- IAR Information Card -->
                                         <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6">
                                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                                <div>
-                                                    <label for="reference_no" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                                        IAR REFERENCE
-                                                    </label>
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                                        <!-- icon -->
-                                                        </div>
-                                                        <input
-                                                        type="text"
-                                                        name="reference_no"
-                                                        id="reference_no"
-                                                        value="{{ old('reference_no', $defaultIar) }}"
-                                                        placeholder="IAR YYYY-MM-XXX"
-                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border
-                                                                @error('reference_no') border-red-500 @else border-gray-200 @enderror
-                                                                rounded-lg text-sm text-gray-900 dark:text-white
-                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
-                                                        >
-                                                    </div>
-                                                    @error('reference_no')
-                                                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-
 
                                                 <div>
                                                     <label for="receipt_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -477,9 +452,7 @@
                                                     <div class="flex items-center space-x-3">
                                                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                                                         <!-- calendar icon -->
-                                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path /* … */ />
-                                                        </svg>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days-icon lucide-calendar-days text-gray-700"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                                                         </div>
 
                                                         <input
@@ -495,6 +468,31 @@
                                                         >
                                                     </div>
                                                     @error('receipt_date')
+                                                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+
+                                                <div>
+                                                    <label for="reference_no" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                        IAR REFERENCE
+                                                    </label>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ticket-check-icon lucide-ticket-check text-gray-700"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9 12 2 2 4-4"/></svg>
+                                                        </div>
+                                                        <input
+                                                        type="text"
+                                                        name="reference_no"
+                                                        id="reference_no"
+                                                        value="{{ old('reference_no', $defaultIar) }}"
+                                                        placeholder="IAR YYYY-MM-XXX"
+                                                        class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border
+                                                                @error('reference_no') border-red-500 @else border-gray-200 @enderror
+                                                                rounded-lg text-sm text-gray-900 dark:text-white
+                                                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                                        >
+                                                    </div>
+                                                    @error('reference_no')
                                                         <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                                                     @enderror
                                                 </div>
