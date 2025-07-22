@@ -490,8 +490,8 @@ class SupplyStockController extends Controller
             'fund_cluster'     => 'required|in:101,151',
             'days_to_consume'  => 'nullable|integer|min:0',
             'remarks'          => 'nullable|string',
-            'receipt_date'     => 'nullable|date|before_or_equal:today', // NEW
-            'reference_no'     => 'nullable|string|max:255',             // NEW
+            'receipt_date'     => 'nullable|date|before_or_equal:today',
+            'reference_no'     => 'nullable|string|max:255',
             'submission_token' => 'required|string',
         ]);
 
@@ -505,27 +505,37 @@ class SupplyStockController extends Controller
             // Update stock with all validated fields, including remarks
             $stock->update($validated);
 
-            // Get the authenticated user's department_id or default to a system department
-            $departmentId = auth()->user()->department_id ?? 1;
+            // ============================================================================
+            // FIX: Use the same pattern as SupplyTransactionController
+            // Only set department_id if it's actually provided and not empty
+            // ============================================================================
 
-            // Create an adjustment transaction to log this change
-            SupplyTransaction::create([
+            // Prepare transaction data
+            $transactionData = [
                 'supply_id'        => $stock->supply_id,
                 'transaction_type' => 'adjustment',
-                'transaction_date' => $validated['receipt_date'] ?? now()->toDateString(), // Use the provided date
-                'reference_no'     => $validated['reference_no'] ?? 'Re-valuation',        // Use the provided reference
+                'transaction_date' => $validated['receipt_date'] ?? now()->toDateString(),
+                'reference_no'     => $validated['reference_no'] ?? 'Re-valuation',
                 'quantity'         => 0, // Zero quantity for re-valuation
                 'unit_cost'        => $validated['unit_cost'],
                 'total_cost'       => 0, // Zero cost impact
                 'balance_quantity' => $stock->quantity_on_hand,
                 'balance_unit_cost' => $validated['unit_cost'],
                 'balance_total_cost' => $validated['total_cost'],
-                'department_id'    => $departmentId,
                 'user_id'          => auth()->id(),
                 'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
                 'fund_cluster'     => $validated['fund_cluster'],
                 'days_to_consume'  => $validated['days_to_consume'],
-            ]);
+            ];
+
+            // Only set department_id if it's actually provided and not empty
+            if (!empty($validated['department_id'])) {
+                $transactionData['department_id'] = $validated['department_id'];
+            }
+            // If not provided, department_id will remain null (not set)
+
+            // Create an adjustment transaction to log this change
+            SupplyTransaction::create($transactionData);
 
             session()->forget($sessionKey);
 
