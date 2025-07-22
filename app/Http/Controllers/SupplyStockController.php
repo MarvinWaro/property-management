@@ -122,6 +122,8 @@ class SupplyStockController extends Controller
         return response()->json(['defaultIar' => $defaultIar]);
     }
 
+
+
     public function store(Request $request)
     {
         // ── DOUBLE‐SUBMISSION GUARD ──
@@ -478,6 +480,7 @@ class SupplyStockController extends Controller
             'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
         ]);
 
+        // UPDATED VALIDATION - Added receipt_date and reference_no
         $validated = $request->validate([
             'unit_cost'        => 'required|numeric|min:0',
             'supplier_id'      => 'nullable|exists:suppliers,id',
@@ -487,6 +490,8 @@ class SupplyStockController extends Controller
             'fund_cluster'     => 'required|in:101,151',
             'days_to_consume'  => 'nullable|integer|min:0',
             'remarks'          => 'nullable|string',
+            'receipt_date'     => 'nullable|date|before_or_equal:today', // NEW
+            'reference_no'     => 'nullable|string|max:255',             // NEW
             'submission_token' => 'required|string',
         ]);
 
@@ -500,27 +505,27 @@ class SupplyStockController extends Controller
             // Update stock with all validated fields, including remarks
             $stock->update($validated);
 
-                // Get the authenticated user's department_id or default to a system department
-                $departmentId = auth()->user()->department_id ?? 1; // Use a default department ID if null
+            // Get the authenticated user's department_id or default to a system department
+            $departmentId = auth()->user()->department_id ?? 1;
 
-                // Create an adjustment transaction to log this change
-                SupplyTransaction::create([
-                    'supply_id'        => $stock->supply_id,
-                    'transaction_type' => 'adjustment',
-                    'transaction_date' => now()->toDateString(),
-                    'reference_no'     => 'Re-valuation',
-                    'quantity'         => 0, // Zero quantity for re-valuation
-                    'unit_cost'        => $validated['unit_cost'],
-                    'total_cost'       => 0, // Zero cost impact
-                    'balance_quantity' => $stock->quantity_on_hand,
-                    'balance_unit_cost' => $validated['unit_cost'],
-                    'balance_total_cost' => $validated['total_cost'],
-                    'department_id'    => $departmentId, // Use the checked department ID
-                    'user_id'          => auth()->id(),
-                    'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
-                    'fund_cluster'     => $validated['fund_cluster'],
-                    'days_to_consume'  => $validated['days_to_consume'],
-                ]);
+            // Create an adjustment transaction to log this change
+            SupplyTransaction::create([
+                'supply_id'        => $stock->supply_id,
+                'transaction_type' => 'adjustment',
+                'transaction_date' => $validated['receipt_date'] ?? now()->toDateString(), // Use the provided date
+                'reference_no'     => $validated['reference_no'] ?? 'Re-valuation',        // Use the provided reference
+                'quantity'         => 0, // Zero quantity for re-valuation
+                'unit_cost'        => $validated['unit_cost'],
+                'total_cost'       => 0, // Zero cost impact
+                'balance_quantity' => $stock->quantity_on_hand,
+                'balance_unit_cost' => $validated['unit_cost'],
+                'balance_total_cost' => $validated['total_cost'],
+                'department_id'    => $departmentId,
+                'user_id'          => auth()->id(),
+                'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
+                'fund_cluster'     => $validated['fund_cluster'],
+                'days_to_consume'  => $validated['days_to_consume'],
+            ]);
 
             session()->forget($sessionKey);
 
@@ -637,4 +642,51 @@ class SupplyStockController extends Controller
                 ->with('error', 'Failed to delete stock: ' . $e->getMessage());
         }
     }
+
+
+    public function getIarData($stockId)
+    {
+        try {
+            $stock = SupplyStock::with(['supply'])->findOrFail($stockId);
+
+            // Get the latest receipt transaction for this stock
+            $latestReceipt = SupplyTransaction::where('supply_id', $stock->supply_id)
+                ->where('fund_cluster', $stock->fund_cluster)
+                ->where('transaction_type', 'receipt')
+                ->where('reference_no', 'like', 'IAR %')
+                ->orderBy('transaction_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $iarData = [
+                'stock_id' => $stock->stock_id,
+                'supply_id' => $stock->supply_id,
+                'supply_name' => $stock->supply->item_name ?? 'N/A',
+                'current_quantity' => number_format($stock->quantity_on_hand) . ' ' . ($stock->supply->unit_of_measurement ?? ''),
+                'unit_cost' => number_format($stock->unit_cost, 2, '.', ''),
+                'status' => $stock->status,
+                'expiry_date' => $stock->expiry_date ? $stock->expiry_date->format('Y-m-d') : '',
+                'fund_cluster' => $stock->fund_cluster,
+                'days_to_consume' => $stock->days_to_consume,
+                'remarks' => $stock->remarks,
+                'supplier_id' => $stock->supplier_id,
+                'department_id' => $stock->department_id,
+                'receipt_date' => $latestReceipt ? \Carbon\Carbon::parse($latestReceipt->transaction_date)->format('Y-m-d') : now()->format('Y-m-d'),
+                'reference_no' => $latestReceipt ? $latestReceipt->reference_no : '',
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $iarData
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch stock data'
+            ], 404);
+        }
+    }
+
+
 }
