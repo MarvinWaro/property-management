@@ -248,6 +248,7 @@
                                                             class="edit-stock-btn p-2 text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded-lg
                                                             focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24]
                                                             dark:hover:bg-[#f59e0b]/20 transition-all duration-200"
+                                                            data-stock-id="{{ $stock->stock_id }}"
                                                             title="Re‑value stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
@@ -1352,6 +1353,206 @@
 
                     @endif
 
+                    <!-- Add this Confirmation Modal AFTER your existing modals -->
+                    @if(auth()->user()->hasRole('admin'))
+                        <!-- Stock Save Confirmation Modal -->
+                        <div id="confirmStockModal" tabindex="-1" aria-hidden="true"
+                            class="hidden fixed inset-0 z-[60] w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900/70 backdrop-blur-sm">
+
+                            <div class="relative w-full max-w-md max-h-full animate-modal-slide-up">
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden border border-gray-200 dark:border-gray-700">
+                                    <!-- Modal header -->
+                                    <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
+                                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    Confirm Stock Save
+                                                </h3>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    Please review before saving
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <!-- Close button -->
+                                        <button type="button" id="confirmModalCloseBtn"
+                                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
+                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            <span class="sr-only">Close modal</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal body -->
+                                    <div class="p-6">
+                                        <!-- Summary for Create Stock -->
+                                        <div id="createStockSummary" class="hidden">
+                                            <div class="mb-4">
+                                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Stock Receipt Summary</h4>
+
+                                                <!-- IAR Info -->
+                                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+                                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-gray-400">IAR Reference:</span>
+                                                            <div class="font-medium text-gray-900 dark:text-white" id="confirm_iar_ref">-</div>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-gray-400">Receipt Date:</span>
+                                                            <div class="font-medium text-gray-900 dark:text-white" id="confirm_receipt_date">-</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Items Summary -->
+                                                <div class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                                                    <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                                                        <div class="text-xs font-medium text-gray-700 dark:text-gray-300">Items to be added</div>
+                                                    </div>
+                                                    <div id="confirm_items_list" class="max-h-32 overflow-y-auto">
+                                                        <!-- Items will be inserted here -->
+                                                    </div>
+                                                    <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 border-t border-gray-200 dark:border-gray-600">
+                                                        <div class="flex justify-between text-sm font-medium text-gray-900 dark:text-white">
+                                                            <span>Total:</span>
+                                                            <span id="confirm_total_amount">₱0.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Summary for Edit Stock -->
+                                        <div id="editStockSummary" class="hidden">
+                                            <div class="mb-4">
+                                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Re-valuation Summary</h4>
+
+                                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                                    <div class="space-y-2 text-xs">
+                                                        <div class="flex justify-between">
+                                                            <span class="text-gray-500 dark:text-gray-400">Supply Item:</span>
+                                                            <span class="font-medium text-gray-900 dark:text-white" id="confirm_edit_supply">-</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span class="text-gray-500 dark:text-gray-400">New Unit Cost:</span>
+                                                            <span class="font-medium text-gray-900 dark:text-white" id="confirm_edit_cost">-</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span class="text-gray-500 dark:text-gray-400">Current Quantity:</span>
+                                                            <span class="font-medium text-gray-900 dark:text-white" id="confirm_edit_quantity">-</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Confirmation Message -->
+                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900 rounded-lg p-3 mb-4">
+                                            <div class="flex">
+                                                <svg class="w-4 h-4 text-amber-400 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <div>
+                                                    <p class="text-xs text-amber-700 dark:text-amber-300 font-medium">
+                                                        Please review all information carefully before confirming.
+                                                    </p>
+                                                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                                        This action will create permanent transaction records.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                                            Are you sure all information is correct?
+                                        </p>
+                                    </div>
+
+                                    <!-- Modal footer -->
+                                    <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                                        <button type="button" id="cancelConfirmBtn"
+                                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300
+                                            bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                                            rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600
+                                            focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600
+                                            transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                        <button type="button" id="confirmSaveBtn"
+                                            class="px-4 py-2 text-sm font-medium text-white
+                                            bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                                            rounded-lg shadow-sm hover:shadow-md
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                            transition-all duration-200 transform hover:-translate-y-0.5
+                                            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Yes, Save Now
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add CSS for modal animation if not already present -->
+                        <style>
+                            .animate-modal-slide-up {
+                                animation: modalSlideUp 0.3s ease-out;
+                            }
+
+                            @keyframes modalSlideUp {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(20px) scale(0.95);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0) scale(1);
+                                }
+                            }
+
+                            /* Prevent modal backdrop clicks during submission */
+                            .modal-submitting {
+                                pointer-events: none !important;
+                            }
+
+                            .modal-submitting .modal-content {
+                                pointer-events: auto;
+                            }
+                        </style>
+
+                        <!-- Additional JavaScript for the close button -->
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const confirmModalCloseBtn = document.getElementById('confirmModalCloseBtn');
+                                if (confirmModalCloseBtn) {
+                                    confirmModalCloseBtn.addEventListener('click', function() {
+                                        const confirmStockModal = document.getElementById('confirmStockModal');
+                                        if (confirmStockModal) {
+                                            confirmStockModal.classList.add('hidden');
+                                            // Reset confirmation variables
+                                            setTimeout(() => {
+                                                window.pendingForm = null;
+                                                window.isConfirmed = false;
+                                                window.isSubmitting = false;
+                                            }, 100);
+                                        }
+                                    });
+                                }
+                            });
+                        </script>
+                    @endif
+
                     {{-- For date and reference number auto-fill --}}
                     <script>
                         document.addEventListener('DOMContentLoaded', function(){
@@ -1384,25 +1585,27 @@
                     </script>
 
                     @if(auth()->user()->hasRole('admin'))
-                        <!-- Edit / Re‑value Stock Modal -->
+                        <!-- Edit / Re‑value Stock Modal - Wider Design -->
                         <div id="editStockModal" tabindex="-1" aria-hidden="true"
-                            class="hidden fixed inset-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900 bg-opacity-50"
-                            data-modal-backdrop="static" data-modal-placement="center">
+                            class="hidden fixed inset-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full flex justify-center items-center bg-gray-900/60 backdrop-blur-sm">
 
-                            <div class="relative w-full max-w-3xl max-h-full">
+                            <div class="relative w-full max-w-7xl max-h-[90vh] animate-modal-slide-up">
                                 <!-- Modal content -->
-                                <div class="relative bg-white rounded-xl shadow-2xl dark:bg-gray-800 overflow-hidden">
-                                    <!-- Modal header -->
-                                    <div class="flex items-center justify-between p-5 border-b dark:border-gray-700 bg-gradient-to-r from-yellow-600 to-yellow-800">
-                                        <h3 class="text-2xl font-bold text-white flex items-center">
-                                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                            </svg>
-                                            Re‑value Stock
-                                        </h3>
-                                        <button type="button" data-modal-hide="editStockModal"
-                                            class="text-white bg-yellow-700 hover:bg-yellow-800 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center
-                                            dark:hover:bg-gray-600 transition-all duration-200">
+                                <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+                                    <!-- Modal header - Modern Clean Style -->
+                                    <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+                                        <div>
+                                            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                                Re-value Stock
+                                            </h3>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                Update stock information including cost, status, and other details
+                                            </p>
+                                        </div>
+                                        <button type="button"
+                                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg p-2
+                                            hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                                            data-modal-hide="editStockModal">
                                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1412,301 +1615,290 @@
                                         </button>
                                     </div>
 
-                                    <!-- Modal body -> Form -->
-                                    <form id="editStockForm" method="POST" action="{{ route('stocks.update', ['stock' => 0]) }}">
+                                    <!-- Modal body with matching padding -->
+                                    <form id="editStockForm" method="POST" action="{{ route('stocks.update', ['stock' => 0]) }}" class="p-6">
                                         @csrf
                                         @method('PUT')
-
-                                        <!-- ADD THIS LINE HERE -->
                                         <input type="hidden" name="submission_token" value="{{ uniqid() . time() }}">
-
                                         <input type="hidden" name="stock_id" id="edit_stock_id">
                                         <input type="hidden" name="supply_id" id="edit_supply_id">
 
-                                        <div class="p-6 bg-gray-50 dark:bg-gray-800">
-                                            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Update stock information including cost, status, and other details.</p>
+                                        <!-- Updated IAR Information Card - Now with matching spacing -->
+                                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6">
+                                            <div class="mb-4">
+                                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                    IAR Information
+                                                </h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    Receipt and reference details
+                                                </p>
+                                            </div>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <!-- Left Column -->
-                                                <div class="space-y-5">
-                                                    <!-- Supply Information Section -->
-                                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                        <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                                                <!-- Receipt Date - NOW EDITABLE -->
+                                                <div>
+                                                    <label for="edit_receipt_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                        RECEIPT DATE
+                                                    </label>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700">
+                                                                <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>
                                                             </svg>
-                                                            Supply Information
-                                                        </h4>
+                                                        </div>
+                                                        <input
+                                                            type="date"
+                                                            name="receipt_date"
+                                                            id="edit_receipt_date"
+                                                            max="{{ now()->format('Y-m-d') }}"
+                                                            class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                                    rounded-lg text-sm text-gray-900 dark:text-white
+                                                                    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                    </div>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Date when stock was received</p>
+                                                </div>
 
-                                                        <!-- Supply (read‑only) -->
-                                                        <div class="mb-4">
-                                                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Supply Item
+                                                <!-- IAR Reference - NOW EDITABLE -->
+                                                <div>
+                                                    <label for="edit_reference_no" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                        IAR REFERENCE
+                                                    </label>
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700">
+                                                                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9 12 2 2 4-4"/>
+                                                            </svg>
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            name="reference_no"
+                                                            id="edit_reference_no"
+                                                            placeholder="IAR YYYY-MM-XXX"
+                                                            class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                                    rounded-lg text-sm text-gray-900 dark:text-white
+                                                                    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                    </div>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">IAR reference number</p>
+                                                </div>
+
+                                                <!-- Supplier -->
+                                                <div>
+                                                    <label for="edit_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        SUPPLIER (OPTIONAL)
+                                                    </label>
+                                                    <select name="supplier_id" id="edit_supplier_id"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="">No Supplier</option>
+                                                        @foreach($suppliers as $supplier)
+                                                            <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <!-- Department -->
+                                                <div>
+                                                    <label for="edit_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        DEPARTMENT (OPTIONAL)
+                                                    </label>
+                                                    <select name="department_id" id="edit_department_id"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="">No Department</option>
+                                                        @foreach($departments as $department)
+                                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Supply Information Section with matching spacing -->
+                                        <div class="mb-6">
+                                            <div class="mb-4">
+                                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    Supply Information
+                                                </h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    Current item being re-valued
+                                                </p>
+                                            </div>
+
+                                            <!-- Supply Item Table with matching layout -->
+                                            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 mb-6">
+                                                <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4">
+                                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                                        <!-- Supply Item (Read-only) -->
+                                                        <div>
+                                                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                                SUPPLY ITEM
                                                             </label>
                                                             <div class="relative">
                                                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
                                                                     </svg>
                                                                 </div>
                                                                 <input type="text" id="edit_supply_name" disabled
                                                                     class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-gray-300" />
+                                                                    block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600
+                                                                    dark:placeholder-gray-400 dark:text-gray-300" />
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Current Quantity (Read-only) -->
+                                                        <div>
+                                                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                                CURRENT QUANTITY
+                                                            </label>
+                                                            <div class="relative">
+                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <input type="text" id="edit_current_quantity" disabled
+                                                                    class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                                                    block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600
+                                                                    dark:placeholder-gray-400 dark:text-gray-300" />
                                                             </div>
                                                         </div>
 
                                                         <!-- New Unit Cost -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_unit_cost" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                New Unit Cost <span class="text-red-500">*</span>
+                                                        <div>
+                                                            <label for="edit_unit_cost" class="block text-xs font-medium text-orange-500 dark:text-yellow-400 mb-2">
+                                                                NEW UNIT COST / MOVING AVERAGE COST
                                                             </label>
                                                             <div class="relative">
                                                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
-                                                                    </svg>
+                                                                    <span class="text-gray-500 dark:text-gray-400 text-sm">₱</span>
                                                                 </div>
                                                                 <input type="text" name="unit_cost" id="edit_unit_cost" required
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" />
-                                                            </div>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">New cost per unit in your local currency</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Status Information Section -->
-                                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                        <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Status Information
-                                                        </h4>
-
-                                                        <!-- Status -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_status" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Status <span class="text-red-500">*</span>
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <select name="status" id="edit_status" required
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
-                                                                    <option value="available">Available</option>
-                                                                    <option value="reserved">Reserved</option>
-                                                                    <option value="expired">Expired</option>
-                                                                    <option value="depleted">Depleted</option>
-                                                                </select>
+                                                                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 text-sm rounded-lg
+                                                                    focus:ring-blue-500 focus:border-blue-500 block w-full pl-8 p-2.5
+                                                                    dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                                             </div>
                                                         </div>
-
-                                                        <!-- Expiry Date -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_expiry_date" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Expiry Date
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="date" name="expiry_date" id="edit_expiry_date"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" />
-                                                            </div>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Date when this item will expire (if applicable)</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Right Column -->
-                                                <div class="space-y-5">
-                                                    <!-- Fund & Consumption Section -->
-                                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                        <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Funding & Consumption
-                                                        </h4>
-
-                                                        <!-- Fund Cluster -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_fund_cluster" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Fund Cluster <span class="text-red-500">*</span>
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <select name="fund_cluster" id="edit_fund_cluster" required
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
-                                                                    <option value="101">101</option>
-                                                                    <option value="151">151</option>
-                                                                </select>
-                                                            </div>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Budget source for this stock</p>
-                                                        </div>
-
-                                                        <!-- Days to Consume -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_days_to_consume" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Days to Consume
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="number" name="days_to_consume" id="edit_days_to_consume" min="0"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" />
-                                                            </div>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Estimated time until this stock is consumed</p>
-                                                        </div>
-
-                                                        <!-- Supplier Section -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_supplier_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Supplier
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <select name="supplier_id" id="edit_supplier_id"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
-                                                                    <option value="">No Supplier</option>
-                                                                    @foreach($suppliers as $supplier)
-                                                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Department Section -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_department_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Department
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm6 6H7v2h6v-2z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <select name="department_id" id="edit_department_id"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:text-white
-                                                                    dark:focus:ring-yellow-500 dark:focus:border-yellow-500">
-                                                                    <option value="">No Department</option>
-                                                                    @foreach($departments as $department)
-                                                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Remarks Section -->
-                                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                                        <h4 class="text-lg font-medium text-gray-800 dark:text-white mb-4 flex items-center">
-                                                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Additional Information
-                                                        </h4>
-
-                                                        <!-- Remarks -->
-                                                        <div class="mb-4">
-                                                            <label for="edit_remarks" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                Remarks
-                                                            </label>
-                                                            <div class="relative">
-                                                                <div class="absolute top-3 left-0 flex items-center pl-3 pointer-events-none">
-                                                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <textarea name="remarks" id="edit_remarks" rows="3"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                                                    focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5
-                                                                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                                                    dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500"
-                                                                    placeholder="Enter reason for re-valuation or other notes"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Notes & Tips -->
-                                                    <div class="p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg border border-yellow-200 dark:border-yellow-900">
-                                                        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2 flex items-center">
-                                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Important Information
-                                                        </h4>
-                                                        <ul class="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 ml-6 list-disc">
-                                                            <li>All fields marked with <span class="text-red-500">*</span> are required</li>
-                                                            <li>Re-valuation creates a transaction record for auditing</li>
-                                                            <li>The original supply item cannot be changed</li>
-                                                            <li>Include the reason for re-valuation in remarks</li>
-                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Modal Footer -->
-                                            <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
-                                                <button type="button" data-modal-hide="editStockModal"
-                                                    class="py-2.5 px-5 mr-3 text-sm font-medium text-gray-900 focus:outline-none
-                                                        bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-yellow-700
-                                                        focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700
-                                                        dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                                                        dark:hover:text-white dark:hover:bg-gray-700 transition-all duration-200">
-                                                    Cancel
-                                                </button>
-                                                <button type="submit"
-                                                    class="text-white bg-gradient-to-r from-yellow-500 to-yellow-700 hover:from-yellow-600 hover:to-yellow-800
-                                                        focus:ring-4 focus:outline-none focus:ring-yellow-300
-                                                        font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center
-                                                        dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800 transition-all duration-200">
-                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                            <!-- Additional Details Grid with matching layout -->
+                                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                                <!-- Status -->
+                                                <div>
+                                                    <label for="edit_status" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        STATUS <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <select name="status" id="edit_status" required
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="available">Available</option>
+                                                        <option value="reserved">Reserved</option>
+                                                        <option value="expired">Expired</option>
+                                                        <option value="depleted">Depleted</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Fund Cluster -->
+                                                <div>
+                                                    <label for="edit_fund_cluster" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        FUND CLUSTER <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <select name="fund_cluster" id="edit_fund_cluster" required
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                        <option value="101">101</option>
+                                                        <option value="151">151</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Expiry Date -->
+                                                <div>
+                                                    <label for="edit_expiry_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        EXPIRY DATE
+                                                    </label>
+                                                    <input type="date" name="expiry_date" id="edit_expiry_date"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" />
+                                                </div>
+
+                                                <!-- Days to Consume -->
+                                                <div>
+                                                    <label for="edit_days_to_consume" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        DAYS TO CONSUME
+                                                    </label>
+                                                    <input type="number" name="days_to_consume" id="edit_days_to_consume" min="0"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" />
+                                                </div>
+
+                                                <!-- Remarks - spans 2 columns on xl screens -->
+                                                <div class="xl:col-span-2">
+                                                    <label for="edit_remarks" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                        REMARKS
+                                                    </label>
+                                                    <textarea name="remarks" id="edit_remarks" rows="2"
+                                                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                                                        rounded-lg text-sm text-gray-900 dark:text-white
+                                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                                                        placeholder="Enter reason for re-valuation or other notes"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Important Notes with matching spacing -->
+                                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4 mb-6">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                                     </svg>
-                                                    Save Re‑valuation
-                                                </button>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                                        Important Notes
+                                                    </h3>
+                                                    <div class="mt-2 text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                                                        <p>• All fields marked with <span class="text-red-500">*</span> are required</p>
+                                                        <p>• Re-valuation creates a transaction record for auditing</p>
+                                                        <p>• The original supply item cannot be changed</p>
+                                                        <p>• Include the reason for re-valuation in remarks</p>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        </div>
+
+                                        <!-- Modal Footer with matching spacing -->
+                                        <div class="flex items-center justify-end space-x-3">
+                                            <button type="button" data-modal-hide="editStockModal"
+                                                class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300
+                                                bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
+                                                rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700
+                                                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600
+                                                transition-all duration-200">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" id="editSubmitBtn"
+                                                class="px-6 py-2.5 text-sm font-medium text-white
+                                                bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                                                rounded-lg shadow-sm hover:shadow-md
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                                transition-all duration-200 transform hover:-translate-y-0.5
+                                                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                                <span class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Save Re-valuation
+                                                </span>
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -1792,10 +1984,16 @@
     @if(auth()->user()->hasRole('admin'))
         <script>
             document.addEventListener('DOMContentLoaded', () => {
+                // Confirmation Modal Variables
+                let pendingForm = null;
+                let isConfirmed = false;
+                let isSubmitting = false; // Add this to prevent multiple submissions
+
                 // Initialize Flowbite modals
                 const modals = {
                     createStockModal: document.getElementById('createStockModal'),
-                    editStockModal: document.getElementById('editStockModal')
+                    editStockModal: document.getElementById('editStockModal'),
+                    confirmStockModal: document.getElementById('confirmStockModal')
                 };
 
                 // Manual modal control functions
@@ -1834,28 +2032,284 @@
                     btn.addEventListener('click', () => hide(btn.getAttribute('data-modal-hide')))
                 );
 
-                // === Edit‑Stock button (updated) ===
+                // === CONFIRMATION MODAL FUNCTIONS ===
+                function showConfirmModal() {
+                    if (modals.confirmStockModal) {
+                        modals.confirmStockModal.classList.remove('hidden');
+                    }
+                }
+
+                function hideConfirmModal() {
+                    if (modals.confirmStockModal) {
+                        modals.confirmStockModal.classList.add('hidden');
+                    }
+                    // Don't reset pendingForm here immediately
+                    // pendingForm = null;
+                    // isConfirmed = false;
+                }
+
+                function resetConfirmModal() {
+                    // Reset form button state if pendingForm exists
+                    if (pendingForm) {
+                        // Remove the confirmed flag
+                        delete pendingForm.dataset.confirmed;
+
+                        // Reset submit button to original state
+                        const submitBtn = pendingForm.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+
+                            // Determine if it's create or edit form and restore original button text
+                            const isCreateForm = pendingForm.closest('#createStockModal');
+                            if (isCreateForm) {
+                                submitBtn.innerHTML = `
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Save Stock Receipt
+                                    </span>
+                                `;
+                            } else {
+                                submitBtn.innerHTML = `
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Save Re-valuation
+                                    </span>
+                                `;
+                            }
+
+                            // Remove any added classes
+                            submitBtn.className = submitBtn.className.replace(/\s*opacity-50\s*/, '').replace(/\s*cursor-not-allowed\s*/, '');
+                        }
+
+                        // Re-enable modal close buttons
+                        const modal = pendingForm.closest('[id$="Modal"]');
+                        if (modal) {
+                            const closeButtons = modal.querySelectorAll('[data-modal-hide]');
+                            closeButtons.forEach(btn => {
+                                btn.disabled = false;
+                                btn.style.opacity = '';
+                                btn.style.pointerEvents = '';
+                            });
+                        }
+                    }
+
+                    // Reset modal variables
+                    pendingForm = null;
+                    isConfirmed = false;
+                    isSubmitting = false;
+
+                    // Reset confirmation modal button
+                    const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+                    if (confirmSaveBtn) {
+                        confirmSaveBtn.disabled = false;
+                        confirmSaveBtn.innerHTML = `
+                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Yes, Save Now
+                        `;
+                    }
+                }
+
+                // Make resetConfirmModal available globally
+                window.resetConfirmModal = resetConfirmModal;
+
+                // Format currency for display
+                function formatCurrency(amount) {
+                    return parseFloat(amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+
+                // Parse currency input
+                function parseCurrency(value) {
+                    return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
+                }
+
+                // Populate confirmation modal for Create Stock
+                function populateCreateStockConfirmation(form) {
+                    const createSummary = document.getElementById('createStockSummary');
+                    const editSummary = document.getElementById('editStockSummary');
+
+                    if (createSummary) createSummary.classList.remove('hidden');
+                    if (editSummary) editSummary.classList.add('hidden');
+
+                    const iarRef = form.querySelector('#reference_no')?.value || 'Not specified';
+                    const receiptDate = form.querySelector('#receipt_date')?.value || 'Not specified';
+
+                    const iarRefEl = document.getElementById('confirm_iar_ref');
+                    const receiptDateEl = document.getElementById('confirm_receipt_date');
+
+                    if (iarRefEl) iarRefEl.textContent = iarRef;
+                    if (receiptDateEl) receiptDateEl.textContent = receiptDate;
+
+                    const itemRows = form.querySelectorAll('.supply-item-row');
+                    const itemsList = document.getElementById('confirm_items_list');
+                    let totalAmount = 0;
+
+                    if (itemsList) {
+                        itemsList.innerHTML = '';
+
+                        itemRows.forEach((row) => {
+                            const supplyName = row.querySelector('.selected-supply-text')?.textContent || 'Unknown Item';
+                            const quantity = row.querySelector('.quantity-input')?.value || '0';
+                            const unitCost = parseCurrency(row.querySelector('.unit-cost-input')?.value || '0');
+                            const itemTotal = parseInt(quantity) * unitCost;
+                            totalAmount += itemTotal;
+
+                            if (supplyName === 'Select Supply Item') return;
+
+                            const itemDiv = document.createElement('div');
+                            itemDiv.className = 'px-3 py-2 border-b border-gray-100 dark:border-gray-600 last:border-b-0';
+                            itemDiv.innerHTML = `
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-xs font-medium text-gray-900 dark:text-white truncate">${supplyName}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">${quantity} × ₱${formatCurrency(unitCost)}</div>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-900 dark:text-white ml-2">
+                                        ₱${formatCurrency(itemTotal)}
+                                    </div>
+                                </div>
+                            `;
+                            itemsList.appendChild(itemDiv);
+                        });
+                    }
+
+                    const totalAmountEl = document.getElementById('confirm_total_amount');
+                    if (totalAmountEl) totalAmountEl.textContent = `₱${formatCurrency(totalAmount)}`;
+                }
+
+                // Populate confirmation modal for Edit Stock
+                function populateEditStockConfirmation(form) {
+                    const createSummary = document.getElementById('createStockSummary');
+                    const editSummary = document.getElementById('editStockSummary');
+
+                    if (editSummary) editSummary.classList.remove('hidden');
+                    if (createSummary) createSummary.classList.add('hidden');
+
+                    const supplyName = form.querySelector('#edit_supply_name')?.value || 'Not specified';
+                    const unitCost = form.querySelector('#edit_unit_cost')?.value || '0';
+                    const quantity = form.querySelector('#edit_current_quantity')?.value || '0';
+
+                    const supplyEl = document.getElementById('confirm_edit_supply');
+                    const costEl = document.getElementById('confirm_edit_cost');
+                    const quantityEl = document.getElementById('confirm_edit_quantity');
+
+                    if (supplyEl) supplyEl.textContent = supplyName;
+                    if (costEl) costEl.textContent = `₱${unitCost}`;
+                    if (quantityEl) quantityEl.textContent = quantity;
+                }
+
+                // === FIXED Edit‑Stock button with AJAX ===
                 document.querySelectorAll('.edit-stock-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const d = btn.dataset;
-                        // Set the stock_id in the hidden field
-                        document.getElementById('edit_stock_id').value = d.stockId;
-                        document.getElementById('edit_supply_id').value = d.supplyId;
-                        document.getElementById('edit_supply_name').value = d.supplyName;
-                        document.getElementById('edit_unit_cost').value = d.unitCost;
-                        document.getElementById('edit_status').value = d.status;
-                        document.getElementById('edit_expiry_date').value = d.expiryDate;
-                        document.getElementById('edit_fund_cluster').value = d.fundCluster;
-                        document.getElementById('edit_days_to_consume').value = d.daysToConsume;
-                        document.getElementById('edit_remarks').value = d.remarks;
-                        document.getElementById('edit_supplier_id').value = d.supplierId || '';
-                        document.getElementById('edit_department_id').value = d.departmentId || '';
+                    btn.addEventListener('click', async () => {
+                        const stockId = btn.dataset.stockId;
 
-                        // Update form action to point to the correct route
-                        document.getElementById('editStockForm').action = `/stocks/${d.stockId}`;
+                        if (!stockId) {
+                            alert('Stock ID not found');
+                            return;
+                        }
 
-                        // Show the modal
-                        show('editStockModal');
+                        // Declare variables outside try-catch for proper scope
+                        const originalContent = btn.innerHTML;
+                        const originalDisabled = btn.disabled;
+
+                        try {
+                            // Show loading state on button
+                            btn.disabled = true;
+                            btn.innerHTML = `
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            `;
+
+                            // Fetch stock data via AJAX
+                            const response = await fetch(`/stocks/${stockId}/iar-data`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                const data = result.data;
+
+                                console.log('Loaded stock data:', data); // Debug log
+
+                                // Populate the modal fields
+                                document.getElementById('edit_stock_id').value = data.stock_id || '';
+                                document.getElementById('edit_supply_id').value = data.supply_id || '';
+
+                                // Supply information (read-only)
+                                document.getElementById('edit_supply_name').value = data.supply_name || '';
+
+                                // Current quantity (read-only)
+                                const currentQuantityField = document.getElementById('edit_current_quantity');
+                                if (currentQuantityField) {
+                                    currentQuantityField.value = data.current_quantity || '0';
+                                }
+
+                                // Editable fields
+                                document.getElementById('edit_unit_cost').value = data.unit_cost || '';
+                                document.getElementById('edit_status').value = data.status || '';
+                                document.getElementById('edit_expiry_date').value = data.expiry_date || '';
+                                document.getElementById('edit_fund_cluster').value = data.fund_cluster || '';
+                                document.getElementById('edit_days_to_consume').value = data.days_to_consume || '';
+                                document.getElementById('edit_remarks').value = data.remarks || '';
+                                document.getElementById('edit_supplier_id').value = data.supplier_id || '';
+                                document.getElementById('edit_department_id').value = data.department_id || '';
+
+                                // IAR reference and date (now editable)
+                                const receiptDateField = document.getElementById('edit_receipt_date');
+                                if (receiptDateField) {
+                                    receiptDateField.value = data.receipt_date || '';
+                                }
+
+                                const referenceNoField = document.getElementById('edit_reference_no');
+                                if (referenceNoField) {
+                                    referenceNoField.value = data.reference_no || '';
+                                }
+
+                                // Update form action
+                                const form = document.getElementById('editStockForm');
+                                if (form) {
+                                    form.action = `/stocks/${data.stock_id}`;
+                                }
+
+                                // Restore button state before showing modal
+                                btn.disabled = originalDisabled;
+                                btn.innerHTML = originalContent;
+
+                                // Show the modal
+                                show('editStockModal');
+
+                            } else {
+                                alert('Error loading stock data: ' + (result.message || 'Unknown error'));
+                            }
+
+                        } catch (error) {
+                            console.error('Error fetching stock data:', error);
+                            alert('Error loading stock data. Please try again.');
+                        } finally {
+                            // Always restore button state
+                            btn.disabled = originalDisabled;
+                            btn.innerHTML = originalContent;
+                        }
                     });
                 });
 
@@ -1873,6 +2327,155 @@
                         }).then(() => location.reload());
                     });
                 });
+
+                // === FORM SUBMISSION INTERCEPTORS ===
+
+                // Intercept Create Stock Form Submission
+                const createStockForm = document.querySelector('#createStockModal form');
+                if (createStockForm) {
+                    createStockForm.addEventListener('submit', function(e) {
+                        if (isConfirmed && !isSubmitting) {
+                            isSubmitting = true;
+                            return true; // Let it proceed
+                        }
+
+                        e.preventDefault();
+
+                        // Validate form first
+                        const itemRows = this.querySelectorAll('.supply-item-row');
+                        if (itemRows.length === 0) {
+                            alert('Please add at least one supply item.');
+                            return false;
+                        }
+
+                        let isValid = true;
+                        itemRows.forEach((row) => {
+                            const supplyId = row.querySelector('input[name*="supply_id"]')?.value;
+                            const quantity = row.querySelector('input[name*="quantity"]')?.value;
+                            const unitCost = parseCurrency(row.querySelector('input[name*="unit_cost"]')?.value || '0');
+
+                            if (!supplyId || !quantity || quantity < 1 || unitCost <= 0) {
+                                isValid = false;
+                            }
+                        });
+
+                        if (!isValid) {
+                            alert('Please complete all required fields for each item.');
+                            return false;
+                        }
+
+                        pendingForm = this;
+                        populateCreateStockConfirmation(this);
+                        showConfirmModal();
+                    });
+                }
+
+                // Intercept Edit Stock Form Submission
+                const editStockForm = document.querySelector('#editStockModal form');
+                if (editStockForm) {
+                    editStockForm.addEventListener('submit', function(e) {
+                        if (isConfirmed && !isSubmitting) {
+                            isSubmitting = true;
+                            return true; // Let it proceed
+                        }
+
+                        e.preventDefault();
+
+                        const unitCost = this.querySelector('#edit_unit_cost')?.value;
+                        if (!unitCost || parseCurrency(unitCost) <= 0) {
+                            alert('Please enter a valid unit cost.');
+                            return false;
+                        }
+
+                        pendingForm = this;
+                        populateEditStockConfirmation(this);
+                        showConfirmModal();
+                    });
+                }
+
+                // Confirmation Modal Event Listeners
+                const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+                const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+
+                if (cancelConfirmBtn) {
+                    cancelConfirmBtn.addEventListener('click', function() {
+                        // First reset everything, then hide modal
+                        resetConfirmModal();
+                        hideConfirmModal();
+                    });
+                }
+
+                if (confirmSaveBtn) {
+                    confirmSaveBtn.addEventListener('click', function() {
+                        // Check if we have a valid form and not already submitting
+                        if (!pendingForm) {
+                            console.error('No pending form found');
+                            return;
+                        }
+
+                        if (isSubmitting) {
+                            console.log('Already submitting, please wait...');
+                            return;
+                        }
+
+                        // Disable the button immediately to prevent double clicks
+                        this.disabled = true;
+                        this.innerHTML = `
+                            <svg class="animate-spin w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                        `;
+
+                        // Set confirmation flags
+                        isConfirmed = true;
+                        pendingForm.dataset.confirmed = 'true';
+
+                        // Hide the confirmation modal
+                        hideConfirmModal();
+
+                        // Submit the form with a small delay to ensure modal is hidden
+                        setTimeout(() => {
+                            try {
+                                if (pendingForm && typeof pendingForm.submit === 'function') {
+                                    pendingForm.submit();
+                                } else {
+                                    console.error('Form submit method not available');
+                                    // Reset states if submission fails
+                                    resetConfirmModal();
+                                    this.disabled = false;
+                                    this.innerHTML = `
+                                        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Yes, Save Now
+                                    `;
+                                }
+                            } catch (error) {
+                                console.error('Error submitting form:', error);
+                                resetConfirmModal();
+                                this.disabled = false;
+                                this.innerHTML = `
+                                    <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Yes, Save Now
+                                `;
+                            }
+                        }, 150);
+                    });
+                }
+
+                // Close confirmation modal when clicking outside
+                if (modals.confirmStockModal) {
+                    modals.confirmStockModal.addEventListener('click', function(e) {
+                        if (e.target === modals.confirmStockModal) {
+                            resetConfirmModal();
+                            hideConfirmModal();
+                        }
+                    });
+                }
 
                 // format money fields
                 const formatMoney = el => {
@@ -1902,6 +2505,14 @@
                     }
                 }
 
+                // Handle ESC key to close confirmation modal
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modals.confirmStockModal && !modals.confirmStockModal.classList.contains('hidden')) {
+                        resetConfirmModal();
+                        hideConfirmModal();
+                    }
+                });
+
                 // re‑open on validation errors
                 @if ($errors->any() && session('show_create_modal'))
                     show('createStockModal');
@@ -1915,10 +2526,9 @@
                 @endif
             });
         </script>
-
     @endif
 
-    <!-- Add this script tag AFTER your existing scripts -->
+    <!-- Simplified Double submission prevention -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Prevent double submission for stock forms
@@ -1931,68 +2541,39 @@
                 stockForms.forEach(form => {
                     if (!form) return;
 
-                    let isSubmitting = false;
-
                     form.addEventListener('submit', function(e) {
-                        // Prevent double submission
-                        if (isSubmitting) {
-                            e.preventDefault();
-                            console.log('Double submission prevented');
-                            return false;
-                        }
+                        // Only apply double submission prevention to confirmed forms
+                        if (form.dataset.confirmed === 'true') {
+                            const submitBtn = form.querySelector('button[type="submit"]');
+                            if (submitBtn && !submitBtn.disabled) {
+                                const originalHTML = submitBtn.innerHTML;
+                                const originalClasses = submitBtn.className;
 
-                        // Mark as submitting
-                        isSubmitting = true;
+                                submitBtn.disabled = true;
+                                submitBtn.className = originalClasses + ' opacity-50 cursor-not-allowed';
 
-                        // Get the submit button
-                        const submitBtn = form.querySelector('button[type="submit"]');
+                                const isCreateForm = form.closest('#createStockModal');
+                                const loadingText = isCreateForm ? 'Saving Stock...' : 'Updating Stock...';
 
-                        if (submitBtn) {
-                            // Store original content
-                            const originalHTML = submitBtn.innerHTML;
-                            const originalClasses = submitBtn.className;
+                                submitBtn.innerHTML = `
+                                    <svg class="animate-spin w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    ${loadingText}
+                                `;
 
-                            // Disable and show loading state
-                            submitBtn.disabled = true;
-                            submitBtn.className = originalClasses + ' opacity-50 cursor-not-allowed';
-
-                            // Update button content to show loading
-                            const isCreateForm = form.closest('#createStockModal');
-                            const loadingText = isCreateForm ? 'Saving Stock...' : 'Updating Stock...';
-
-                            submitBtn.innerHTML = `
-                                <svg class="animate-spin w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                ${loadingText}
-                            `;
-
-                            // Reset after 8 seconds as fallback (in case form doesn't redirect)
-                            setTimeout(() => {
-                                isSubmitting = false;
-                                submitBtn.disabled = false;
-                                submitBtn.className = originalClasses;
-                                submitBtn.innerHTML = originalHTML;
-                            }, 8000);
-                        }
-
-                        // Also disable modal close buttons to prevent closing during submission
-                        const modal = form.closest('[id$="Modal"]');
-                        if (modal) {
-                            const closeButtons = modal.querySelectorAll('[data-modal-hide]');
-                            closeButtons.forEach(btn => {
-                                btn.disabled = true;
-                                btn.style.opacity = '0.5';
-                                btn.style.pointerEvents = 'none';
-
-                                // Re-enable after timeout
-                                setTimeout(() => {
-                                    btn.disabled = false;
-                                    btn.style.opacity = '';
-                                    btn.style.pointerEvents = '';
-                                }, 8000);
-                            });
+                                // Disable modal close buttons during submission
+                                const modal = form.closest('[id$="Modal"]');
+                                if (modal) {
+                                    const closeButtons = modal.querySelectorAll('[data-modal-hide]');
+                                    closeButtons.forEach(btn => {
+                                        btn.disabled = true;
+                                        btn.style.opacity = '0.5';
+                                        btn.style.pointerEvents = 'none';
+                                    });
+                                }
+                            }
                         }
                     });
                 });
@@ -2027,6 +2608,5 @@
             document.head.appendChild(style);
         }
     </script>
-
 
 </x-app-layout>

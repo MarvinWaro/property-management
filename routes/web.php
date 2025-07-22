@@ -75,6 +75,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         ->name('stocks.create-beginning-balances');
 
     Route::get('/stocks/next-iar', [SupplyStockController::class, 'nextIar'])->name('stocks.next-iar')->middleware(['auth', 'admin-cao']);  // whatever middleware group you use
+    Route::get('/stocks/{stock}/iar-data', [SupplyStockController::class, 'getIarData'])->name('stocks.iar-data');
 
 
     // Signature Management Routes (add these new routes)
