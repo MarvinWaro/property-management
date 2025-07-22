@@ -1768,8 +1768,8 @@
 
                                                         <!-- New Unit Cost -->
                                                         <div>
-                                                            <label for="edit_unit_cost" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                                                                NEW UNIT COST <span class="text-red-500">*</span>
+                                                            <label for="edit_unit_cost" class="block text-xs font-medium text-orange-500 dark:text-yellow-400 mb-2">
+                                                                NEW UNIT COST / MOVING AVERAGE COST
                                                             </label>
                                                             <div class="relative">
                                                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
