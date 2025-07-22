@@ -248,6 +248,17 @@
                                                             class="edit-stock-btn p-2 text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded-lg
                                                             focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24]
                                                             dark:hover:bg-[#f59e0b]/20 transition-all duration-200"
+                                                            data-stock-id="{{ $stock->stock_id }}"
+                                                            data-supply-id="{{ $stock->supply_id }}"
+                                                            data-supply-name="{{ $stock->supply->item_name ?? 'N/A' }}"
+                                                            data-unit-cost="{{ number_format($stock->unit_cost, 2, '.', '') }}"
+                                                            data-status="{{ $stock->status }}"
+                                                            data-expiry-date="{{ $stock->expiry_date ? $stock->expiry_date->format('Y-m-d') : '' }}"
+                                                            data-fund-cluster="{{ $stock->fund_cluster }}"
+                                                            data-days-to-consume="{{ $stock->days_to_consume ?? '' }}"
+                                                            data-remarks="{{ $stock->remarks ?? '' }}"
+                                                            data-supplier-id="{{ $stock->supplier_id ?? '' }}"
+                                                            data-department-id="{{ $stock->department_id ?? '' }}"
                                                             title="Re‑value stock">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
