@@ -7,26 +7,7 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            {{-- <!-- Category Section - Minimal Design -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-5">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
-                        Select by category
-                    </h2>
 
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($categories as $category)
-                            <a href="#"
-                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50
-                                border border-gray-200 rounded-md hover:bg-white hover:text-gray-900 hover:border-gray-300
-                                dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700
-                                transition-colors duration-200">
-                                {{ $category->name }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div> --}}
 
             <!-- Supplies Section - Now in its own card -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
@@ -192,17 +173,18 @@
                                                 <td class="px-6 py-4 text-center dark:text-white">
                                                     <div class="flex items-center justify-center space-x-2">
                                                         <!-- Edit Button - Now with Yellow styling -->
+                                                        <!-- Replace the Edit Button section in your blade file with this -->
                                                         <button type="button" data-modal-target="editSupplyModal"
                                                             data-modal-toggle="editSupplyModal"
                                                             class="edit-supply-btn p-2 text-yellow-600 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-300 dark:text-yellow-400 dark:hover:bg-gray-700 transition-all duration-200"
                                                             data-supply-id="{{ $supply->supply_id }}"
-                                                            data-stock-no="{{ $supply->stock_no }}"
-                                                            data-item-name="{{ $supply->item_name }}"
-                                                            data-description="{{ $supply->description }}"
-                                                            data-unit="{{ $supply->unit_of_measurement }}"
-                                                            data-category-id="{{ $supply->category_id }}"
-                                                            data-reorder-point="{{ $supply->reorder_point }}"
-                                                            data-acquisition-cost="{{ number_format($supply->acquisition_cost, 2) }}">
+                                                            data-stock-no="{{ $supply->stock_no ?? '' }}"
+                                                            data-item-name="{{ $supply->item_name ?? '' }}"
+                                                            data-description="{{ $supply->description ?? '' }}"
+                                                            data-unit="{{ $supply->unit_of_measurement ?? '' }}"
+                                                            data-category-id="{{ $supply->category_id ?? '' }}"
+                                                            data-reorder-point="{{ $supply->reorder_point ?? 0 }}"
+                                                            data-acquisition-cost="{{ $supply->acquisition_cost ? number_format($supply->acquisition_cost, 2) : '0.00' }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -474,7 +456,7 @@
                                                                     dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                 <option value="" disabled selected>Select unit
                                                                 </option>
-                                                                <option value="PIECES" {{ old('unit_of_measurement') == 'PIECES' ? 'selected' : '' }}>PIECES (PCS)</option>
+                                                                <option value="PIECE" {{ old('unit_of_measurement') == 'PIECE' ? 'selected' : '' }}>PIECE (PCS)</option>
                                                                 <option value="BOX" {{ old('unit_of_measurement') == 'BOX' ? 'selected' : '' }}>BOX</option>
                                                                 <option value="REAM" {{ old('unit_of_measurement') == 'REAM' ? 'selected' : '' }}>REAM</option>
                                                                 <option value="GALLON" {{ old('unit_of_measurement') == 'GALLON' ? 'selected' : '' }}>GALLON</option>
@@ -873,7 +855,7 @@
                                                     dark:bg-gray-700 dark:border-gray-600 dark:text-white
                                                     dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                                 <option value="" disabled>Select unit</option>
-                                                                <option value="PIECES">PIECES (PCS)</option>
+                                                                <option value="PIECE">PIECE (PCS)</option>
                                                                 <option value="BOX">BOX</option>
                                                                 <option value="REAM">REAM</option>
                                                                 <option value="GALLON">GALLON</option>
@@ -1171,7 +1153,7 @@
             </div>
         </div>
     </div>
-
+f
     <!-- JavaScript for Search Input -->
     <script>
         function toggleClearButton() {
@@ -1293,48 +1275,91 @@
         }
 
         function setupModalToggles() {
-            // Handle edit button clicks - UPDATED WITHOUT SUPPLIER/DEPARTMENT
+            // Handle edit button clicks - FIXED WITH BETTER NULL HANDLING
             const editButtons = document.querySelectorAll('.edit-supply-btn');
             editButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Get the data attributes (removed supplier and department)
-                    const id = this.getAttribute('data-supply-id');
-                    const stockNo = this.getAttribute('data-stock-no');
-                    const itemName = this.getAttribute('data-item-name');
-                    const description = this.getAttribute('data-description');
-                    const unit = this.getAttribute('data-unit');
-                    const categoryId = this.getAttribute('data-category-id');
-                    const reorderPoint = this.getAttribute('data-reorder-point');
-                    const acquisitionCost = this.getAttribute('data-acquisition-cost');
+                    try {
+                        // Get the data attributes with null checking
+                        const id = this.getAttribute('data-supply-id') || '';
+                        const stockNo = this.getAttribute('data-stock-no') || '';
+                        const itemName = this.getAttribute('data-item-name') || '';
+                        const description = this.getAttribute('data-description') || '';
+                        const unit = this.getAttribute('data-unit') || '';
+                        const categoryId = this.getAttribute('data-category-id') || '';
+                        const reorderPoint = this.getAttribute('data-reorder-point') || '0';
+                        const acquisitionCost = this.getAttribute('data-acquisition-cost') || '0.00';
 
-                    // Populate form fields
-                    document.getElementById('edit_supply_id').value = id;
-                    document.getElementById('edit_stock_no').value = stockNo;
-                    // Convert item name to uppercase when populating edit form
-                    document.getElementById('edit_item_name').value = itemName.toUpperCase();
-                    document.getElementById('edit_description').value = description || '';
+                        console.log('Edit button clicked. Data:', {
+                            id, stockNo, itemName, description, unit, categoryId, reorderPoint, acquisitionCost
+                        });
 
-                    // Set the select dropdowns
-                    const unitDropdown = document.getElementById('edit_unit_of_measurement');
-                    if (unitDropdown) {
-                        unitDropdown.value = unit;
+                        // Populate form fields with null checking
+                        const supplyIdInput = document.getElementById('edit_supply_id');
+                        if (supplyIdInput) supplyIdInput.value = id;
+
+                        const stockNoInput = document.getElementById('edit_stock_no');
+                        if (stockNoInput) stockNoInput.value = stockNo;
+
+                        const itemNameInput = document.getElementById('edit_item_name');
+                        if (itemNameInput) {
+                            // Safely convert to uppercase only if itemName exists
+                            itemNameInput.value = itemName ? itemName.toUpperCase() : '';
+                        }
+
+                        const descriptionInput = document.getElementById('edit_description');
+                        if (descriptionInput) descriptionInput.value = description;
+
+                        // Set the select dropdowns with null checking
+                        const unitDropdown = document.getElementById('edit_unit_of_measurement');
+                        if (unitDropdown && unit) {
+                            // Reset all options first
+                            Array.from(unitDropdown.options).forEach(option => {
+                                option.selected = false;
+                            });
+                            // Then select the matching option
+                            unitDropdown.value = unit;
+                            // If value didn't set, try to find and select manually
+                            if (unitDropdown.value !== unit) {
+                                Array.from(unitDropdown.options).forEach(option => {
+                                    if (option.value === unit) {
+                                        option.selected = true;
+                                    }
+                                });
+                            }
+                        }
+
+                        const categoryDropdown = document.getElementById('edit_category_id');
+                        if (categoryDropdown) {
+                            // Reset all options first
+                            Array.from(categoryDropdown.options).forEach(option => {
+                                option.selected = false;
+                            });
+                            // Set the value, handling empty/null categoryId
+                            categoryDropdown.value = categoryId || '';
+                        }
+
+                        const reorderPointInput = document.getElementById('edit_reorder_point');
+                        if (reorderPointInput) reorderPointInput.value = reorderPoint;
+
+                        const acquisitionCostInput = document.getElementById('edit_acquisition_cost');
+                        if (acquisitionCostInput) acquisitionCostInput.value = acquisitionCost;
+
+                        // Set the form action URL
+                        const form = document.getElementById('editSupplyForm');
+                        if (form) {
+                            form.action = `/supplies/${id}`;
+                        }
+
+                        // Open the modal programmatically
+                        const modal = document.getElementById('editSupplyModal');
+                        if (modal) {
+                            modal.classList.remove('hidden');
+                        }
+                    } catch (error) {
+                        console.error('Error populating edit form:', error);
+                        alert('An error occurred while loading the supply data. Please try again.');
                     }
-
-                    const categoryDropdown = document.getElementById('edit_category_id');
-                    if (categoryDropdown) {
-                        categoryDropdown.value = categoryId;
-                    }
-
-                    document.getElementById('edit_reorder_point').value = reorderPoint;
-                    document.getElementById('edit_acquisition_cost').value = acquisitionCost;
-
-                    // Set the form action URL
-                    const form = document.getElementById('editSupplyForm');
-                    form.action = `/supplies/${id}`;
-
-                    // Open the modal programmatically
-                    const modal = document.getElementById('editSupplyModal');
-                    modal.classList.remove('hidden');
                 });
             });
 

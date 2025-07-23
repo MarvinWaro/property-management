@@ -16,7 +16,9 @@ use App\Services\ReferenceNumberService;
 use App\Events\RequisitionStatusUpdated;
 use App\Events\UserNotificationUpdated;
 use App\Constants\RisStatus;
-use Carbon\Carbon; // <-- ADD THIS IMPORT
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
