@@ -500,7 +500,7 @@
 
 
                                                 <div>
-                                                    <label for="general_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                    <label for="general_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         SUPPLIER (OPTIONAL)
                                                     </label>
                                                     <select name="general_supplier_id" id="general_supplier_id"
@@ -515,7 +515,7 @@
                                                 </div>
 
                                                 <div>
-                                                    <label for="general_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                    <label for="general_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         DEPARTMENT (OPTIONAL)
                                                     </label>
                                                     <select name="general_department_id" id="general_department_id"
@@ -1683,7 +1683,7 @@
 
                                                 <!-- Supplier -->
                                                 <div>
-                                                    <label for="edit_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                    <label for="edit_supplier_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         SUPPLIER (OPTIONAL)
                                                     </label>
                                                     <select name="supplier_id" id="edit_supplier_id"
@@ -1699,7 +1699,7 @@
 
                                                 <!-- Department -->
                                                 <div>
-                                                    <label for="edit_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                    <label for="edit_department_id" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                                         DEPARTMENT (OPTIONAL)
                                                     </label>
                                                     <select name="department_id" id="edit_department_id"

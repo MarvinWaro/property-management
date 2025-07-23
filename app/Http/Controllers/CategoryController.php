@@ -20,7 +20,7 @@ class CategoryController extends Controller
                 return $query->where('name', 'like', "%{$search}%")
                             ->orWhere('description', 'like', "%{$search}%");
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->paginate(5);
 
         return view('manage-category.index', compact('categories'));
