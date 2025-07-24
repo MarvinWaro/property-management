@@ -1200,7 +1200,7 @@ f
         }
     </script>
 
-    <!-- JavaScript for Supply Modals - UPDATED WITHOUT SUPPLIER/DEPARTMENT -->
+    <!-- JavaScript for Supply Modals - UPDATED WITH REORDER POINT FIX -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Format acquisition cost inputs
@@ -1212,6 +1212,9 @@ f
 
             // Setup modal toggling
             setupModalToggles();
+
+            // Setup reorder point inputs (NEW)
+            setupReorderPointInputs();
 
             // Check for validation errors and show modals if needed
             @if (session('show_create_modal'))
@@ -1229,6 +1232,39 @@ f
                 });
             @endif
         });
+
+        /**
+         * Setup reorder point inputs to auto-select on focus (NEW FUNCTION)
+         */
+        function setupReorderPointInputs() {
+            // Handle both create and edit modal reorder point inputs
+            const reorderInputs = ['reorder_point', 'edit_reorder_point'];
+
+            reorderInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    // Select all text when input gains focus
+                    input.addEventListener('focus', function() {
+                        this.select();
+                    });
+
+                    // Alternative: Clear if value is "0" when user starts typing a number
+                    input.addEventListener('keydown', function(e) {
+                        // If the current value is "0" and user presses a number key, clear it first
+                        if (this.value === '0' && /^[0-9]$/.test(e.key)) {
+                            this.value = '';
+                        }
+                    });
+
+                    // Prevent negative values
+                    input.addEventListener('input', function() {
+                        if (this.value < 0) {
+                            this.value = 0;
+                        }
+                    });
+                }
+            });
+        }
 
         /**
          * Setup uppercase conversion for item name inputs
