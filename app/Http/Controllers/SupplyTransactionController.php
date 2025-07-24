@@ -24,10 +24,10 @@ class SupplyTransactionController extends Controller
         return view('supply-transaction.index', compact('txns'));
     }
 
-    public function show(SupplyTransaction $supplyTransaction)
-    {
-        return view('supply-transaction.show', ['txn' => $supplyTransaction]);
-    }
+    // public function show(SupplyTransaction $supplyTransaction)
+    // {
+    //     return view('supply-transaction.show', ['txn' => $supplyTransaction]);
+    // }
 
     public function store(Request $request, ReferenceNumberService $referenceNumberService)
     {
