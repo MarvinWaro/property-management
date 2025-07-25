@@ -84,9 +84,8 @@ class SupplyLedgerCardController extends Controller
         //   3) created_at       ASC
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
-            ->orderBy('transaction_date', 'asc')
-            ->orderBy('reference_no', 'asc')
-            ->orderBy('created_at', 'asc')
+            ->orderBy('transaction_date')
+            ->orderBy('created_at')
             ->get();
 
         // Available fund clusters

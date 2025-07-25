@@ -79,9 +79,8 @@ class StockCardController extends Controller
         // Get all transactions for this supply
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
-            ->orderBy('transaction_date', 'asc')
-            ->orderBy('reference_no', 'asc')
-            ->orderBy('created_at', 'asc')
+            ->orderBy('transaction_date')
+            ->orderBy('created_at')
             ->get();
 
         // Get available fund clusters for this supply
