@@ -14,6 +14,8 @@ use App\Http\Controllers\SupplyStockController;
 use App\Http\Controllers\SupplyTransactionController;
 use App\Http\Controllers\SignatureController;
 
+use App\Http\Controllers\RpciController;
+use App\Http\Controllers\ReportPhysicalCountController;
 
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\RisSlipController;
@@ -120,6 +122,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
+
+
+        // RPCI (Report on Physical Count of Inventories) routes
+        Route::get('/rpci', [ReportPhysicalCountController::class, 'index'])->name('rpci.index');
+        Route::get('/rpci/generate', [ReportPhysicalCountController::class, 'generate'])->name('rpci.generate');
+        Route::get('/rpci/export-excel', [ReportPhysicalCountController::class, 'exportExcel'])->name('rpci.export-excel');
+
 
         // Example route, adjusting the URI as you see fit:
         Route::post('/users', [UserController::class, 'storeUser'])->name('users.store');
