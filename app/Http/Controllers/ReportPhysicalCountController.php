@@ -477,9 +477,49 @@ class ReportPhysicalCountController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
         ]);
 
-        // TODO: Add "Approved by:" and "Verified by:" sections
-        // Please specify the column layout for these sections so I can complete them
-        // For now, leaving space for you to clarify the exact format
+        // Approved by section
+        // Row 1: "Approved by:" in column E (same row as "Certified Correct by:")
+        $sheet->setCellValue("E{$signatureStartRow}", "Approved by:");
+        $sheet->getStyle("E{$signatureStartRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
+        ]);
+
+        // Row 2: Signature line in column E (same row as certified signature line)
+        $sheet->setCellValue("E{$signatureLineRow}", "_______________________");
+        $sheet->getStyle("E{$signatureLineRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Row 3: Description in column E (same row as certified description) - ALL IN ONE CELL
+        $sheet->setCellValue("E{$descriptionRow}", "Signature over Printed Name of Head of Agency/Entity or Authorized Representative");
+        $sheet->getStyle("E{$descriptionRow}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
+        ]);
+
+        // Verified by section
+        // Row 1: "Verified by:" in column J (same row as "Certified Correct by:")
+        $sheet->setCellValue("J{$signatureStartRow}", "Verified by:");
+        $sheet->getStyle("J{$signatureStartRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
+        ]);
+
+        // Row 2: Signature line in column J (same row as certified signature line)
+        $sheet->setCellValue("J{$signatureLineRow}", "_______________________");
+        $sheet->getStyle("J{$signatureLineRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Row 3: Description in column J (same row as certified description) - ALL IN ONE CELL
+        $sheet->setCellValue("J{$descriptionRow}", "Signature over Printed Name of COA Representative");
+        $sheet->getStyle("J{$descriptionRow}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
+        ]);
 
         // Set column widths to match template exactly
         $sheet->getColumnDimension('A')->setWidth(8);   // Article
