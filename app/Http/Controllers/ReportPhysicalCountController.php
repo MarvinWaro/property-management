@@ -449,7 +449,7 @@ class ReportPhysicalCountController extends Controller
 
         // ========== UPDATED SIGNATORY SECTION WITH TOP ALIGNMENT AND BORDERS ==========
         // Add spacing before signature section
-        $currentRow += 2;
+        // $currentRow += 2;
 
         $signatureStartRow = $currentRow;
 
@@ -489,16 +489,18 @@ class ReportPhysicalCountController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
         ]);
 
-        // Row 2: Signature line in column E (same row as certified signature line)
-        $sheet->setCellValue("E{$signatureLineRow}", "_______________________");
-        $sheet->getStyle("E{$signatureLineRow}")->applyFromArray([
+        // Row 2: Signature line spanning F:H (same row as certified signature line)
+        $sheet->mergeCells("F{$signatureLineRow}:H{$signatureLineRow}");
+        $sheet->setCellValue("F{$signatureLineRow}", "________________________________");
+        $sheet->getStyle("F{$signatureLineRow}")->applyFromArray([
             'font' => ['size' => 10, 'name' => 'Arial'],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
         // Row 3: Description in column E (same row as certified description) - ALL IN ONE CELL - TOP ALIGNED
-        $sheet->setCellValue("E{$descriptionRow}", "Signature over Printed Name of Head of Agency/Entity or Authorized Representative");
-        $sheet->getStyle("E{$descriptionRow}")->applyFromArray([
+        $sheet->mergeCells("F{$descriptionRow}:H{$descriptionRow}");
+        $sheet->setCellValue("F{$descriptionRow}", "Signature over Printed Name of Head of Agency/Entity or Authorized Representative");
+        $sheet->getStyle("F{$descriptionRow}")->applyFromArray([
             'font' => ['size' => 9, 'name' => 'Arial'],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -516,7 +518,7 @@ class ReportPhysicalCountController extends Controller
         ]);
 
         // Row 2: Signature line in column J (same row as certified signature line)
-        $sheet->setCellValue("J{$signatureLineRow}", "_______________________");
+        $sheet->setCellValue("J{$signatureLineRow}", "______________________________");
         $sheet->getStyle("J{$signatureLineRow}")->applyFromArray([
             'font' => ['size' => 10, 'name' => 'Arial'],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
