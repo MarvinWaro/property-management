@@ -119,7 +119,7 @@ class ReportPhysicalCountController extends Controller
 
         $supplies = $suppliesQuery->get();
 
-        // Build report data
+        // Build report data (simplified - only book quantities)
         $reportData = collect();
 
         foreach ($supplies as $supply) {
@@ -132,16 +132,11 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity (stock card quantity) at the end of semester
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // For now, we'll use the current quantity as physical count
-                // In a real system, this would come from actual physical count data
-                $physicalCount = $stock->quantity_on_hand;
+                // Calculate weighted average unit cost (same as Supply Ledger Card)
+                $weightedAverageUnitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
-                // Calculate variance
-                $variance = $physicalCount - $bookQuantity;
-                $varianceAmount = $variance * $stock->unit_cost;
-
-                // Only include items that have activity or discrepancies
-                if ($bookQuantity > 0 || $physicalCount > 0 || $variance != 0) {
+                // Only include items with book balance
+                if ($bookQuantity > 0) {
                     $reportData->push([
                         'supply_id' => $supply->supply_id,
                         'stock_no' => $supply->stock_no,
@@ -150,11 +145,7 @@ class ReportPhysicalCountController extends Controller
                         'unit' => $supply->unit_of_measurement,
                         'fund_cluster' => $stock->fund_cluster,
                         'book_quantity' => $bookQuantity,
-                        'physical_count' => $physicalCount,
-                        'variance_quantity' => $variance,
-                        'unit_cost' => $stock->unit_cost,
-                        'variance_amount' => $varianceAmount,
-                        'remarks' => $this->generateVarianceRemarks($variance),
+                        'unit_cost' => $weightedAverageUnitCost,
                     ]);
                 }
             }
@@ -163,19 +154,12 @@ class ReportPhysicalCountController extends Controller
         // Sort by stock number
         $reportData = $reportData->sortBy('stock_no')->values();
 
-        // Calculate summary
+        // Calculate simplified summary (only book-related data)
         $summary = [
             'total_items' => $reportData->count(),
             'total_book_value' => $reportData->sum(function($item) {
                 return $item['book_quantity'] * $item['unit_cost'];
             }),
-            'total_physical_value' => $reportData->sum(function($item) {
-                return $item['physical_count'] * $item['unit_cost'];
-            }),
-            'total_variance_amount' => $reportData->sum('variance_amount'),
-            'items_with_shortage' => $reportData->where('variance_quantity', '<', 0)->count(),
-            'items_with_overage' => $reportData->where('variance_quantity', '>', 0)->count(),
-            'items_balanced' => $reportData->where('variance_quantity', '=', 0)->count(),
         ];
 
         // Get entity information
@@ -188,7 +172,7 @@ class ReportPhysicalCountController extends Controller
             'fund_cluster' => $fundCluster ?? 'All',
             'department_id' => $departmentId,
             'total_items' => $reportData->count(),
-            'total_variance' => $summary['total_variance_amount']
+            'total_book_value' => $summary['total_book_value']
         ]);
 
         return view('rpci.report', compact(
@@ -348,9 +332,8 @@ class ReportPhysicalCountController extends Controller
 
         // Row 8: Fund Cluster - left aligned with shorter underline
         $sheet->setCellValue('A8', 'Fund Cluster :');
-        $sheet->mergeCells('B8:D8'); // Shorter merge - only B to D
         $sheet->setCellValue('B8', ''); // Leave blank for manual entry
-        $sheet->getStyle('B8:D8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('B8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle('A8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         // Row 10: Accountability section - ONE MERGED LINE from A to J
@@ -439,13 +422,10 @@ class ReportPhysicalCountController extends Controller
             $articleNumber++;
         }
 
-        // Add empty rows with borders (minimum 15 empty rows)
-        $emptyRowsToAdd = max(15 - $reportData->count(), 5);
-        for ($i = 0; $i < $emptyRowsToAdd; $i++) {
-            $sheet->getStyle("A{$currentRow}:J{$currentRow}")->getBorders()
-                ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $currentRow++;
-        }
+        // Add only 1 empty row with borders after the data
+        $sheet->getStyle("A{$currentRow}:J{$currentRow}")->getBorders()
+            ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $currentRow++;
 
         // ========== UPDATED SIGNATORY SECTION WITH TOP ALIGNMENT AND BORDERS ==========
         // Add spacing before signature section
@@ -653,6 +633,18 @@ class ReportPhysicalCountController extends Controller
 
         // Otherwise, calculate from transactions up to that date
         return $this->calculateBookQuantity($stock, $endDate);
+    }
+
+
+    private function generateVarianceRemarks($variance)
+    {
+        if ($variance == 0) {
+            return 'Balanced';
+        } elseif ($variance < 0) {
+            return 'Shortage';
+        } else {
+            return 'Overage';
+        }
     }
 
 }
