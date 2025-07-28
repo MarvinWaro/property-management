@@ -220,6 +220,18 @@
                         </span>
                     </a>
 
+                    <a href="{{ route('rpci.index') }}"
+                        class="dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200
+                                {{ request()->routeIs('rpci.*')
+                                    ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]'
+                                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                            <span>RPCI</span>
+                        </span>
+                    </a>
+
+
                     @if (auth()->user()->hasRole('admin'))
                         <!-- Management Dropdown -->
                         <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
@@ -345,6 +357,15 @@
                 <a href="{{ route('rsmi.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('rsmi.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     RSMI
                 </a>
+
+                <a href="{{ route('rpci.index') }}"
+                    class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200
+                            {{ request()->routeIs('rpci.*')
+                                ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    RPCI
+                </a>
+
 
                 <!-- Management section for mobile -->
                 <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
