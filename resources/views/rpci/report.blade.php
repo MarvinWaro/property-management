@@ -150,7 +150,7 @@
 
                 <!-- Summary Cards -->
                 <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <!-- Total Items Card -->
                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                             <div class="text-center">
@@ -159,27 +159,11 @@
                             </div>
                         </div>
 
-                        <!-- Items Balanced Card -->
+                        <!-- Total Book Value Card -->
                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                             <div class="text-center">
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Balanced Items</p>
-                                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($summary['items_balanced']) }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Items with Shortage Card -->
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                            <div class="text-center">
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Shortages</p>
-                                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ number_format($summary['items_with_shortage']) }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Items with Overage Card -->
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                            <div class="text-center">
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Overages</p>
-                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($summary['items_with_overage']) }}</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Book Value</p>
+                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">₱{{ number_format($summary['total_book_value'], 2) }}</p>
                             </div>
                         </div>
                     </div>
@@ -196,13 +180,10 @@
                                 @if(!$fundCluster)
                                     <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Fund Cluster</th>
                                 @endif
-                                <th scope="col" class="px-6 py-4 font-semibold text-gray-800 dark:text-gray-200">Item</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-gray-800 dark:text-gray-200">Item Description</th>
                                 <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Unit</th>
-                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Unit Cost</th>
-                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Book<br>Quantity</th>
-                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Physical<br>Count</th>
-                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Variance</th>
-                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Remarks</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Unit Value</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">Balance Per Card<br>(Quantity)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -223,25 +204,10 @@
                                     <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">{{ $item['unit'] }}</td>
                                     <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">₱{{ number_format($item['unit_cost'], 2) }}</td>
                                     <td class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">{{ number_format($item['book_quantity']) }}</td>
-                                    <td class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">{{ number_format($item['physical_count']) }}</td>
-                                    <td class="px-6 py-4 text-center font-semibold
-                                        @if($item['variance_quantity'] < 0) text-red-600 dark:text-red-400
-                                        @elseif($item['variance_quantity'] > 0) text-blue-600 dark:text-blue-400
-                                        @else text-green-600 dark:text-green-400 @endif">
-                                        {{ $item['variance_quantity'] > 0 ? '+' : '' }}{{ number_format($item['variance_quantity']) }}
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
-                                            @if($item['variance_quantity'] < 0) bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
-                                            @elseif($item['variance_quantity'] > 0) bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300
-                                            @else bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 @endif">
-                                            {{ $item['remarks'] }}
-                                        </span>
-                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ !$fundCluster ? '9' : '8' }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="{{ !$fundCluster ? '6' : '5' }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                                         No inventory data found for the selected criteria.
                                     </td>
                                 </tr>
