@@ -449,62 +449,37 @@ class ReportPhysicalCountController extends Controller
 
         // ========== CORRECTED SIGNATORY SECTION (COA TEMPLATE FORMAT) ==========
         // Add spacing before signature section
-        // $currentRow += 2;
+        $currentRow += 2;
 
-        $signatureRow = $currentRow;
+        $signatureStartRow = $currentRow;
 
-        // All signatories are in ONE ROW with merged cells as per COA template
-
-        // Certified Correct by section (Columns A-C)
-        $sheet->mergeCells("A{$signatureRow}:C{$signatureRow}");
-        $certifiedText = "Certified Correct by:\n\n_______________________\n\nSignature over Printed Name of\nInventory Committee Chair and Members";
-        $sheet->setCellValue("A{$signatureRow}", $certifiedText);
-        $sheet->getStyle("A{$signatureRow}:C{$signatureRow}")->applyFromArray([
-            'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true
-            ],
-            'borders' => [
-                'outline' => ['borderStyle' => Border::BORDER_THIN]
-            ]
+        // Certified Correct by section (NO MERGE - individual cells as per COA template)
+        // Row 1: "Certified Correct by:" in column A
+        $sheet->setCellValue("A{$signatureStartRow}", "Certified Correct by:");
+        $sheet->getStyle("A{$signatureStartRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
         ]);
 
-        // Approved by section (Columns D-H)
-        $sheet->mergeCells("D{$signatureRow}:H{$signatureRow}");
-        $approvedText = "Approved by:\n\n_______________________\n\nSignature over Printed Name of Head of\nAgency/Entity or Authorized Representative";
-        $sheet->setCellValue("D{$signatureRow}", $approvedText);
-        $sheet->getStyle("D{$signatureRow}:H{$signatureRow}")->applyFromArray([
-            'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true
-            ],
-            'borders' => [
-                'outline' => ['borderStyle' => Border::BORDER_THIN]
-            ]
+        // Row 2: Signature line in column B (1 row below)
+        $signatureLineRow = $signatureStartRow + 1;
+        $sheet->setCellValue("B{$signatureLineRow}", "_______________________");
+        $sheet->getStyle("B{$signatureLineRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
-        // Verified by section (Columns I-J)
-        $sheet->mergeCells("I{$signatureRow}:J{$signatureRow}");
-        $verifiedText = "Verified by:\n\n_______________________\n\nSignature over Printed Name of COA\nRepresentative";
-        $sheet->setCellValue("I{$signatureRow}", $verifiedText);
-        $sheet->getStyle("I{$signatureRow}:J{$signatureRow}")->applyFromArray([
+        // Row 3: Description in column B (1 row below signature line) - ALL IN ONE CELL
+        $descriptionRow = $signatureLineRow + 1;
+        $sheet->setCellValue("B{$descriptionRow}", "Signature over Printed Name of Inventory Committee Chair and Members");
+        $sheet->getStyle("B{$descriptionRow}")->applyFromArray([
             'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true
-            ],
-            'borders' => [
-                'outline' => ['borderStyle' => Border::BORDER_THIN]
-            ]
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
         ]);
 
-        // Set row height for signature section
-        $sheet->getRowDimension($signatureRow)->setRowHeight(80);
+        // TODO: Add "Approved by:" and "Verified by:" sections
+        // Please specify the column layout for these sections so I can complete them
+        // For now, leaving space for you to clarify the exact format
 
         // Set column widths to match template exactly
         $sheet->getColumnDimension('A')->setWidth(8);   // Article
@@ -528,7 +503,7 @@ class ReportPhysicalCountController extends Controller
             'fund_cluster' => $fundCluster ?? 'All',
             'items_count' => $reportData->count(),
             'filename' => $filename,
-            'signature_section_row' => $signatureRow
+            'signature_section_row' => $signatureStartRow
         ]);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
