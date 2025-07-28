@@ -206,7 +206,7 @@ class ReportPhysicalCountController extends Controller
         ));
     }
 
-/**
+    /**
      * Calculate weighted average unit cost based on transactions (same as Supply Ledger Card)
      */
     private function calculateWeightedAverageUnitCost($stock, $endDate)
@@ -287,7 +287,7 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity at semester end
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // FIXED: Calculate weighted average unit cost (same as Supply Ledger Card)
+                // Calculate weighted average unit cost (same as Supply Ledger Card)
                 $weightedAverageUnitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
                 // Only include items with book balance
@@ -297,7 +297,7 @@ class ReportPhysicalCountController extends Controller
                         'item_name' => $supply->item_name,
                         'description' => $supply->description,
                         'unit' => $supply->unit_of_measurement,
-                        'unit_value' => $weightedAverageUnitCost, // FIXED: Use weighted average instead of $stock->unit_cost
+                        'unit_value' => $weightedAverageUnitCost,
                         'balance_per_card' => $bookQuantity,
                     ]);
                 }
@@ -306,8 +306,6 @@ class ReportPhysicalCountController extends Controller
 
         // Sort by stock number
         $reportData = $reportData->sortBy('stock_no')->values();
-
-        $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
         // Create Excel file
         $spreadsheet = new Spreadsheet();
@@ -318,108 +316,81 @@ class ReportPhysicalCountController extends Controller
         $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
         $sheet->getPageMargins()->setTop(0.5)->setRight(0.5)->setLeft(0.5)->setBottom(0.5);
 
-        // Appendix 66 (top right) - Cell L1
-        $sheet->setCellValue('L1', 'Appendix 66');
-        $sheet->getStyle('L1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle('L1')->getFont()->setItalic(true)->setSize(10);
+        // ========== EXACT TEMPLATE REPLICATION ==========
 
-        // Title - Row 3, centered across columns
-        $sheet->mergeCells('A3:L3');
+        // Appendix 66 (top right) - Cell J1
+        $sheet->setCellValue('J1', 'Appendix 66');
+        $sheet->getStyle('J1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('J1')->getFont()->setItalic(true)->setSize(10);
+
+        // Row 3: Main Title - centered across columns A to J
+        $sheet->mergeCells('A3:J3');
         $sheet->setCellValue('A3', 'REPORT ON THE PHYSICAL COUNT OF INVENTORIES');
-        $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Subtitle - Row 4, centered
-        $sheet->mergeCells('A4:L4');
-        $sheet->setCellValue('A4', '(Type of Inventory Item)');
+        // Row 4: Underlined blank area above subtitle - merged but underline centered
+        $sheet->mergeCells('A4:J4');
+        $sheet->setCellValue('A4', '___________________');
         $sheet->getStyle('A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4')->getFont()->setItalic(true);
 
-        // Underline for subtitle
-        $sheet->getStyle('E4:H4')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Row 5: Subtitle - centered
+        $sheet->mergeCells('A5:J5');
+        $sheet->setCellValue('A5', '(Type of Inventory Item)');
+        $sheet->getStyle('A5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5')->getFont()->setSize(10);
 
-        // As at - Row 6
-        $sheet->setCellValue('A6', 'As at');
-        $sheet->mergeCells('B6:F6');
-        $sheet->setCellValue('B6', $endDate->format('F d, Y'));
-        $sheet->getStyle('B6:F6')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Row 6: As at - directly under subtitle, merged and with blank line for manual filling
+        $sheet->mergeCells('A6:J6');
+        $sheet->setCellValue('A6', 'As at ______________________');
+        $sheet->getStyle('A6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A6')->getFont()->setSize(10);
 
-        // Fund Cluster - Row 8
-        $sheet->setCellValue('A8', 'Fund Cluster:');
-        $sheet->mergeCells('B8:F8');
-        $fundClusterDisplay = $fundCluster ? $fundCluster : 'All Fund Clusters';
-        $sheet->setCellValue('B8', $fundClusterDisplay);
-        $sheet->getStyle('B8:F8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Row 8: Fund Cluster - left aligned with shorter underline
+        $sheet->setCellValue('A8', 'Fund Cluster :');
+        $sheet->mergeCells('B8:D8'); // Shorter merge - only B to D
+        $sheet->setCellValue('B8', ''); // Leave blank for manual entry
+        $sheet->getStyle('B8:D8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        // Accountability section - Row 10
-        $sheet->setCellValue('A10', 'For which');
-        $sheet->mergeCells('B10:D10');
-        $sheet->setCellValue('B10', '(Name of Accountable Officer)');
-        $sheet->getStyle('B10:D10')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Row 10: Accountability section - ONE MERGED LINE from A to J
+        $sheet->mergeCells('A10:J10');
+        $sheet->setCellValue('A10', 'For which ___(Name of Accountable Officer)_________, _  (Official Designation)___, __________(Entity Name)______________ is accountable, having assumed such accountability on ___(Date of Assumption)____.');
+        $sheet->getStyle('A10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A10')->getFont()->setSize(10);
 
-        $sheet->setCellValue('E10', ',');
+        // Table Headers - Rows 12 & 13
+        // Row 12: Main headers
+        $sheet->setCellValue('A12', 'Article');
+        $sheet->setCellValue('B12', 'Description');
+        $sheet->setCellValue('C12', 'Stock Number');
+        $sheet->setCellValue('D12', 'Unit of Measure');
+        $sheet->setCellValue('E12', 'Unit Value');
+        $sheet->setCellValue('F12', 'Balance Per Card');
+        $sheet->setCellValue('G12', 'On Hand Per Count');
 
-        $sheet->mergeCells('F10:G10');
-        $sheet->setCellValue('F10', '(Official Designation)');
-        $sheet->getStyle('F10:G10')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Shortage/Overage spans H12:I12
+        $sheet->mergeCells('H12:I12');
+        $sheet->setCellValue('H12', 'Shortage/Overage');
 
-        $sheet->setCellValue('H10', ',');
+        $sheet->setCellValue('J12', 'Remarks');
 
-        $sheet->mergeCells('I10:K10');
-        $sheet->setCellValue('I10', '(Entity Name)');
-        $sheet->getStyle('I10:K10')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Row 13: Sub-headers
+        $sheet->setCellValue('F13', '(Quantity)');
+        $sheet->setCellValue('G13', '(Quantity)');
+        $sheet->setCellValue('H13', 'Quantity');
+        $sheet->setCellValue('I13', 'Value');
 
-        // Continuation of accountability - Row 11
-        $sheet->setCellValue('A11', 'is accountable, having assumed such accountability on');
-        $sheet->mergeCells('I11:L11');
-        $sheet->setCellValue('I11', '(Date of Assumption)');
-        $sheet->getStyle('I11:L11')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        // Merge cells for single headers (rows 12-13)
+        $sheet->mergeCells('A12:A13');
+        $sheet->mergeCells('B12:B13');
+        $sheet->mergeCells('C12:C13');
+        $sheet->mergeCells('D12:D13');
+        $sheet->mergeCells('E12:E13');
+        $sheet->mergeCells('J12:J13');
 
-        // Main table starts at Row 13
-        $currentRow = 13;
-
-        // Table headers
-        $sheet->setCellValue("A{$currentRow}", 'Article');
-        $sheet->setCellValue("B{$currentRow}", 'Description');
-        $sheet->setCellValue("C{$currentRow}", 'Stock Number');
-        $sheet->setCellValue("D{$currentRow}", 'Unit of Measure');
-        $sheet->setCellValue("E{$currentRow}", 'Unit Value');
-
-        // Multi-column headers
-        $sheet->mergeCells("F{$currentRow}:F" . ($currentRow + 1));
-        $sheet->setCellValue("F{$currentRow}", "Balance Per Card");
-
-        $sheet->mergeCells("G{$currentRow}:G" . ($currentRow + 1));
-        $sheet->setCellValue("G{$currentRow}", "On Hand Per Count");
-
-        $sheet->mergeCells("H{$currentRow}:I{$currentRow}");
-        $sheet->setCellValue("H{$currentRow}", "Shortage/Overage");
-
-        $sheet->mergeCells("J{$currentRow}:J" . ($currentRow + 1));
-        $sheet->setCellValue("J{$currentRow}", "Remarks");
-
-        // Sub-headers for multi-column sections
-        $currentRow++;
-        $sheet->setCellValue("A{$currentRow}", '');
-        $sheet->setCellValue("B{$currentRow}", '');
-        $sheet->setCellValue("C{$currentRow}", '');
-        $sheet->setCellValue("D{$currentRow}", '');
-        $sheet->setCellValue("E{$currentRow}", '');
-        $sheet->setCellValue("F{$currentRow}", '(Quantity)');
-        $sheet->setCellValue("G{$currentRow}", '(Quantity)');
-        $sheet->setCellValue("H{$currentRow}", 'Quantity');
-        $sheet->setCellValue("I{$currentRow}", 'Value');
-        $sheet->setCellValue("J{$currentRow}", '');
-
-        // Merge cells for single-column headers that span both rows
-        $sheet->mergeCells("A" . ($currentRow - 1) . ":A{$currentRow}");
-        $sheet->mergeCells("B" . ($currentRow - 1) . ":B{$currentRow}");
-        $sheet->mergeCells("C" . ($currentRow - 1) . ":C{$currentRow}");
-        $sheet->mergeCells("D" . ($currentRow - 1) . ":D{$currentRow}");
-        $sheet->mergeCells("E" . ($currentRow - 1) . ":E{$currentRow}");
-
-        // Style headers
-        $headerRange = "A" . ($currentRow - 1) . ":J{$currentRow}";
+        // Style headers with borders
+        $headerRange = 'A12:J13';
         $sheet->getStyle($headerRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 9],
             'alignment' => [
@@ -432,8 +403,8 @@ class ReportPhysicalCountController extends Controller
             ]
         ]);
 
-        // Data rows
-        $currentRow++;
+        // Data rows start at row 14
+        $currentRow = 14;
         $articleNumber = 1;
 
         foreach ($reportData as $item) {
@@ -444,81 +415,116 @@ class ReportPhysicalCountController extends Controller
             $sheet->setCellValue("E{$currentRow}", $item['unit_value']);
             $sheet->setCellValue("F{$currentRow}", $item['balance_per_card']);
 
-            // Leave these blank for manual entry
-            $sheet->setCellValue("G{$currentRow}", ''); // On Hand Per Count
-            $sheet->setCellValue("H{$currentRow}", ''); // Shortage/Overage Quantity
-            $sheet->setCellValue("I{$currentRow}", ''); // Shortage/Overage Value
-            $sheet->setCellValue("J{$currentRow}", ''); // Remarks
+            // Leave blank for manual entry
+            $sheet->setCellValue("G{$currentRow}", '');
+            $sheet->setCellValue("H{$currentRow}", '');
+            $sheet->setCellValue("I{$currentRow}", '');
+            $sheet->setCellValue("J{$currentRow}", '');
 
             // Format numbers
             $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
             $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
 
-            // Apply borders
+            // Borders for data row
             $sheet->getStyle("A{$currentRow}:J{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
             // Alignment
             $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $sheet->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("C{$currentRow}:J{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $sheet->getStyle("F{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("G{$currentRow}:J{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $currentRow++;
             $articleNumber++;
         }
 
-        // Add empty rows to make it at least 20 rows of data
-        $emptyRowsToAdd = max(20 - $reportData->count(), 0);
+        // Add empty rows with borders (minimum 15 empty rows)
+        $emptyRowsToAdd = max(15 - $reportData->count(), 5);
         for ($i = 0; $i < $emptyRowsToAdd; $i++) {
             $sheet->getStyle("A{$currentRow}:J{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
             $currentRow++;
         }
 
-        // Signature sections - Start after a gap
+        // ========== CORRECTED SIGNATORY SECTION (COA TEMPLATE FORMAT) ==========
+        // Add spacing before signature section
         $currentRow += 2;
 
-        // Three signature boxes side by side
-        // Certified Correct by (A-D)
-        $sheet->mergeCells("A{$currentRow}:D" . ($currentRow + 6));
-        $sheet->setCellValue("A{$currentRow}", "Certified Correct by:\n\n\n\n\nSignature over Printed Name of\nInventory Committee Chair and\nMembers");
-        $sheet->getStyle("A{$currentRow}")->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_TOP)
-            ->setWrapText(true);
-        $sheet->getStyle("A{$currentRow}:D" . ($currentRow + 6))->getBorders()
-            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        $signatureStartRow = $currentRow;
 
-        // Approved by (E-G)
-        $sheet->mergeCells("E{$currentRow}:G" . ($currentRow + 6));
-        $sheet->setCellValue("E{$currentRow}", "Approved by:\n\n\n\n\nSignature over Printed Name of Head of\nAgency/Entity or Authorized Representative");
-        $sheet->getStyle("E{$currentRow}")->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_TOP)
-            ->setWrapText(true);
-        $sheet->getStyle("E{$currentRow}:G" . ($currentRow + 6))->getBorders()
-            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        // Certified Correct by section (NO MERGE - individual cells as per COA template)
+        // Row 1: "Certified Correct by:" in column A
+        $sheet->setCellValue("A{$signatureStartRow}", "Certified Correct by:");
+        $sheet->getStyle("A{$signatureStartRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
+        ]);
 
-        // Verified by (H-J)
-        $sheet->mergeCells("H{$currentRow}:J" . ($currentRow + 6));
-        $sheet->setCellValue("H{$currentRow}", "Verified by:\n\n\n\n\nSignature over Printed Name of COA\nRepresentative");
-        $sheet->getStyle("H{$currentRow}")->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_TOP)
-            ->setWrapText(true);
-        $sheet->getStyle("H{$currentRow}:J" . ($currentRow + 6))->getBorders()
-            ->getOutline()->setBorderStyle(Border::BORDER_THIN);
+        // Row 2: Signature line in column B (1 row below)
+        $signatureLineRow = $signatureStartRow + 1;
+        $sheet->setCellValue("B{$signatureLineRow}", "_______________________");
+        $sheet->getStyle("B{$signatureLineRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
 
-        // Adjust column widths to match template
+        // Row 3: Description in column B (1 row below signature line)
+        $descriptionRow = $signatureLineRow + 1;
+        $sheet->setCellValue("B{$descriptionRow}", "Signature over Printed Name of");
+        $sheet->getStyle("B{$descriptionRow}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Row 4: Continuation of description in column B
+        $descriptionRow2 = $descriptionRow + 1;
+        $sheet->setCellValue("B{$descriptionRow2}", "Inventory Committee Chair and Members");
+        $sheet->getStyle("B{$descriptionRow2}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Approved by section
+        // Row 1: "Approved by:" in column E (same row as "Certified Correct by:")
+        $sheet->setCellValue("E{$signatureStartRow}", "Approved by:");
+        $sheet->getStyle("E{$signatureStartRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
+        ]);
+
+        // Row 2: Signature line in column E (same row as certified signature line)
+        $sheet->setCellValue("E{$signatureLineRow}", "_______________________");
+        $sheet->getStyle("E{$signatureLineRow}")->applyFromArray([
+            'font' => ['size' => 10, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Row 3: Description spanning columns F, G, H (same row as certified description)
+        $sheet->mergeCells("F{$descriptionRow}:H{$descriptionRow}");
+        $sheet->setCellValue("F{$descriptionRow}", "Signature over Printed Name of Head of");
+        $sheet->getStyle("F{$descriptionRow}:H{$descriptionRow}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // Row 4: Continuation of description spanning columns F, G, H
+        $sheet->mergeCells("F{$descriptionRow2}:H{$descriptionRow2}");
+        $sheet->setCellValue("F{$descriptionRow2}", "Agency/Entity or Authorized Representative");
+        $sheet->getStyle("F{$descriptionRow2}:H{$descriptionRow2}")->applyFromArray([
+            'font' => ['size' => 9, 'name' => 'Arial'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+        ]);
+
+        // TODO: Add "Verified by:" section
+        // Please specify the column layout for "Verified by:" section
+
+        // Set column widths to match template exactly
         $sheet->getColumnDimension('A')->setWidth(8);   // Article
         $sheet->getColumnDimension('B')->setWidth(25);  // Description
         $sheet->getColumnDimension('C')->setWidth(12);  // Stock Number
-        $sheet->getColumnDimension('D')->setWidth(12);  // Unit of Measure
-        $sheet->getColumnDimension('E')->setWidth(10);  // Unit Value
+        $sheet->getColumnDimension('D')->setWidth(10);  // Unit of Measure
+        $sheet->getColumnDimension('E')->setWidth(12);  // Unit Value
         $sheet->getColumnDimension('F')->setWidth(12);  // Balance Per Card
         $sheet->getColumnDimension('G')->setWidth(12);  // On Hand Per Count
         $sheet->getColumnDimension('H')->setWidth(10);  // Shortage/Overage Quantity
@@ -529,13 +535,13 @@ class ReportPhysicalCountController extends Controller
         $writer = new Xlsx($spreadsheet);
         $filename = 'RPCI_' . $year . '_S' . $semester . ($fundCluster ? "_FC{$fundCluster}" : "_AllFC") . '.xlsx';
 
-        // Log for debugging
         \Log::info('RPCI Excel Export Generated', [
             'year' => $year,
             'semester' => $semester,
             'fund_cluster' => $fundCluster ?? 'All',
             'items_count' => $reportData->count(),
-            'filename' => $filename
+            'filename' => $filename,
+            'signature_section_row' => $signatureStartRow
         ]);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
