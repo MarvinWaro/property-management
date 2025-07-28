@@ -447,7 +447,7 @@ class ReportPhysicalCountController extends Controller
             $currentRow++;
         }
 
-        // ========== CORRECTED SIGNATORY SECTION (COA TEMPLATE FORMAT) ==========
+        // ========== UPDATED SIGNATORY SECTION WITH TOP ALIGNMENT AND BORDERS ==========
         // Add spacing before signature section
         $currentRow += 2;
 
@@ -469,12 +469,16 @@ class ReportPhysicalCountController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
-        // Row 3: Description in column B (1 row below signature line) - ALL IN ONE CELL
+        // Row 3: Description in column B (1 row below signature line) - ALL IN ONE CELL - TOP ALIGNED
         $descriptionRow = $signatureLineRow + 1;
         $sheet->setCellValue("B{$descriptionRow}", "Signature over Printed Name of Inventory Committee Chair and Members");
         $sheet->getStyle("B{$descriptionRow}")->applyFromArray([
             'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true
+            ]
         ]);
 
         // Approved by section
@@ -492,11 +496,15 @@ class ReportPhysicalCountController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
-        // Row 3: Description in column E (same row as certified description) - ALL IN ONE CELL
+        // Row 3: Description in column E (same row as certified description) - ALL IN ONE CELL - TOP ALIGNED
         $sheet->setCellValue("E{$descriptionRow}", "Signature over Printed Name of Head of Agency/Entity or Authorized Representative");
         $sheet->getStyle("E{$descriptionRow}")->applyFromArray([
             'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true
+            ]
         ]);
 
         // Verified by section
@@ -514,11 +522,24 @@ class ReportPhysicalCountController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
         ]);
 
-        // Row 3: Description in column J (same row as certified description) - ALL IN ONE CELL
+        // Row 3: Description in column J (same row as certified description) - ALL IN ONE CELL - TOP ALIGNED
         $sheet->setCellValue("J{$descriptionRow}", "Signature over Printed Name of COA Representative");
         $sheet->getStyle("J{$descriptionRow}")->applyFromArray([
             'font' => ['size' => 9, 'name' => 'Arial'],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true]
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true
+            ]
+        ]);
+
+        // Add borders around the entire signature section (outline only)
+        $signatureEndRow = $descriptionRow;
+        $signatureRange = "A{$signatureStartRow}:J{$signatureEndRow}";
+        $sheet->getStyle($signatureRange)->applyFromArray([
+            'borders' => [
+                'outline' => ['borderStyle' => Border::BORDER_THIN]
+            ]
         ]);
 
         // Set column widths to match template exactly
