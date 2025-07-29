@@ -1191,8 +1191,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
                 // Format numbers
                 $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-                $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
-                $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+                $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
 
                 // Apply borders
                 $sheet->getStyle("A{$currentRow}:H{$currentRow}")->getBorders()
@@ -1227,7 +1227,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Total row
         $sheet->mergeCells("A{$currentRow}:G{$currentRow}");
         $sheet->setCellValue("H{$currentRow}", $totalAmount);
-        $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');
         $sheet->getStyle("A{$currentRow}:H{$currentRow}")->applyFromArray([
             'font' => ['bold' => true],
             'fill' => [
@@ -1358,8 +1358,9 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
             // Format numbers
             $sheet->getStyle("C{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
-            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+
 
             // Apply borders to all cells in the row
             $sheet->getStyle("B{$currentRow}:C{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
@@ -1381,7 +1382,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // Total label and amount in columns F-G
         $sheet->setCellValue("F{$currentRow}", 'Total:');
         $sheet->setCellValue("G{$currentRow}", $totalAmount);
-        $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
 
         // Apply style to total row
         $sheet->getStyle("F{$currentRow}:H{$currentRow}")->applyFromArray([
