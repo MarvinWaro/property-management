@@ -15,12 +15,12 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@gmail.com',
+            'name' => 'CHED Administrator',
+            'email' => 'admin@ched.com',
             'role' => 'admin',
             'status' => 1, // 1 for active
             'email_verified_at' => now(),
-            'password' => Hash::make('12345678'), // Default admin password
+            'password' => Hash::make('hemisro12'), // Default admin password
         ]);
     }
 }

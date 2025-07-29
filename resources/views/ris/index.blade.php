@@ -13,7 +13,7 @@
                 @if (auth()->user()->hasRole('admin'))
                     <!-- Manual Entry Button -->
                     <button type="button" id="openManualEntryModal"
-                        class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white
+                        class="inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white
                             font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30
                             dark:bg-[#ce201f] dark:hover:bg-[#a01b1a]">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
