@@ -132,8 +132,14 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity (stock card quantity) at the end of semester
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // Calculate weighted average unit cost (same as Supply Ledger Card)
-                $weightedAverageUnitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                // UPDATED: Get the latest receipt transaction unit cost
+                if ($endDate->isToday() || $endDate->isFuture()) {
+                    // Use the latest receipt unit cost for current period
+                    $unitCost = $this->getLatestReceiptUnitCost($stock, $endDate);
+                } else {
+                    // Calculate weighted average unit cost for historical periods
+                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                }
 
                 // Only include items with book balance
                 if ($bookQuantity > 0) {
@@ -145,7 +151,7 @@ class ReportPhysicalCountController extends Controller
                         'unit' => $supply->unit_of_measurement,
                         'fund_cluster' => $stock->fund_cluster,
                         'book_quantity' => $bookQuantity,
-                        'unit_cost' => $weightedAverageUnitCost,
+                        'unit_cost' => $unitCost,
                     ]);
                 }
             }
@@ -191,7 +197,24 @@ class ReportPhysicalCountController extends Controller
     }
 
     /**
+     * Get the latest receipt unit cost for a stock
+     */
+    private function getLatestReceiptUnitCost($stock, $endDate)
+    {
+        $latestReceipt = SupplyTransaction::where('supply_id', $stock->supply_id)
+            ->where('fund_cluster', $stock->fund_cluster)
+            ->where('transaction_type', 'receipt')
+            ->where('transaction_date', '<=', $endDate)
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return $latestReceipt ? $latestReceipt->unit_cost : $stock->unit_cost;
+    }
+
+    /**
      * Calculate weighted average unit cost based on transactions (same as Supply Ledger Card)
+     * UPDATED to match Supply Ledger Card logic exactly
      */
     private function calculateWeightedAverageUnitCost($stock, $endDate)
     {
@@ -229,8 +252,8 @@ class ReportPhysicalCountController extends Controller
             }
         }
 
-        // Return weighted average unit cost
-        return $runningBalance > 0 ? ($runningTotalCost / $runningBalance) : 0;
+        // Return weighted average unit cost rounded to 2 decimal places
+        return $runningBalance > 0 ? round($runningTotalCost / $runningBalance, 2) : 0;
     }
 
     public function exportExcel(Request $request)
@@ -271,8 +294,13 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity at semester end
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // Calculate weighted average unit cost (same as Supply Ledger Card)
-                $weightedAverageUnitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                // UPDATED: Use latest receipt unit cost for current period
+                if ($endDate->isToday() || $endDate->isFuture()) {
+                    // Use the latest receipt unit cost
+                    $unitCost = $this->getLatestReceiptUnitCost($stock, $endDate);
+                } else {
+                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                }
 
                 // Only include items with book balance
                 if ($bookQuantity > 0) {
@@ -281,7 +309,7 @@ class ReportPhysicalCountController extends Controller
                         'item_name' => $supply->item_name,
                         'description' => $supply->description,
                         'unit' => $supply->unit_of_measurement,
-                        'unit_value' => $weightedAverageUnitCost,
+                        'unit_value' => $unitCost,
                         'balance_per_card' => $bookQuantity,
                     ]);
                 }
