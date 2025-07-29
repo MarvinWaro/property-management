@@ -29,8 +29,8 @@ return new class extends Migration
 
             /* summary values (ONE row per supply + fund‑cluster) */
             $table->integer('quantity_on_hand')->default(0);
-            $table->decimal('unit_cost', 10, 2)->default(0.00);
-            $table->decimal('total_cost', 12, 2)->default(0.00);
+            $table->decimal('unit_cost', 10, 4)->default(0.0000);
+            $table->decimal('total_cost', 12, 4)->default(0.0000);
 
             /* metadata */
             $table->date('expiry_date')->nullable();

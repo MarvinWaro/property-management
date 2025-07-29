@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('reference_no');
 
             $table->integer('quantity');               // 0 for adjustment
-            $table->decimal('unit_cost', 10, 2);
-            $table->decimal('total_cost', 12, 2);
+            $table->decimal('unit_cost', 10, 4);
+            $table->decimal('total_cost', 12, 4);
 
             $table->integer('balance_quantity');       // running balance after txn
 

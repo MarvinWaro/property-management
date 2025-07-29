@@ -134,7 +134,7 @@
                         </div>
                         <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Moving Average Cost</p>
-                            <p class="font-medium text-gray-800 dark:text-white">₱{{ number_format($movingAverageCost, 2) }}</p>
+                            <p class="font-medium text-gray-800 dark:text-white">₱{{ number_format($movingAverageCost, 4) }}</p>
                         </div>
                     </div>
                 </div>
@@ -246,7 +246,7 @@
                                         class="px-4 py-3 text-center bg-green-50/30 dark:bg-green-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if ($entry['receipt_unit_cost'])
                                             <span class="font-medium text-green-600 dark:text-green-400">
-                                                {{ number_format($entry['receipt_unit_cost'], 2) }}
+                                                {{ number_format($entry['receipt_unit_cost'], 4) }}
                                             </span>
                                         @endif
                                     </td>
@@ -254,7 +254,7 @@
                                         class="px-4 py-3 text-center bg-green-50/30 dark:bg-green-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if ($entry['receipt_total_cost'])
                                             <span class="font-medium text-green-600 dark:text-green-400">
-                                                ₱{{ number_format($entry['receipt_total_cost'], 2) }}
+                                                ₱{{ number_format($entry['receipt_total_cost'], 4) }}
                                             </span>
                                         @endif
                                     </td>
@@ -271,7 +271,7 @@
                                         class="px-4 py-3 text-center bg-red-50/30 dark:bg-red-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if ($entry['issue_unit_cost'])
                                             <span class="font-medium text-red-600 dark:text-red-400">
-                                                {{ number_format($entry['issue_unit_cost'], 2) }}
+                                                {{ number_format($entry['issue_unit_cost'], 4) }}
                                             </span>
                                         @endif
                                     </td>
@@ -279,7 +279,7 @@
                                         class="px-4 py-3 text-center bg-red-50/30 dark:bg-red-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if ($entry['issue_total_cost'])
                                             <span class="font-medium text-red-600 dark:text-red-400">
-                                                ₱{{ number_format($entry['issue_total_cost'], 2) }}
+                                                ₱{{ number_format($entry['issue_total_cost'], 4) }}
                                             </span>
                                         @endif
                                     </td>
@@ -293,14 +293,14 @@
                                     <td
                                         class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
                                         @if ($entry['balance_unit_cost'] !== null && $entry['balance_qty'] > 0)
-                                            {{ number_format($entry['balance_unit_cost'], 2) }}
+                                            {{ number_format($entry['balance_unit_cost'], 4) }}
                                         @else
-                                            0.00
+                                            0.0000
                                         @endif
                                     </td>
                                     <td
                                         class="px-4 py-3 text-center font-medium text-gray-800 dark:text-white bg-blue-50/30 dark:bg-blue-900/5 border-r border-gray-100 dark:border-gray-700">
-                                        ₱{{ number_format($entry['balance_total_cost'], 2) }}
+                                        ₱{{ number_format($entry['balance_total_cost'], 4) }}
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         {{ $entry['days_to_consume'] ?? 'N/A' }}
@@ -611,7 +611,7 @@
                     const cell_address = XLSX.utils.encode_cell({r:R, c:col});
                     if (ws[cell_address] && ws[cell_address].v) {
                         if (!ws[cell_address].s) ws[cell_address].s = {};
-                        ws[cell_address].s.numFmt = '#,##0';
+                        ws[cell_address].s.numFmt = '#,##0.0000';
                         ws[cell_address].s.alignment = {horizontal: 'center'};
                     }
                 });
@@ -621,7 +621,7 @@
                     const cell_address = XLSX.utils.encode_cell({r:R, c:col});
                     if (ws[cell_address] && ws[cell_address].v) {
                         if (!ws[cell_address].s) ws[cell_address].s = {};
-                        ws[cell_address].s.numFmt = '#,##0.00';
+                        ws[cell_address].s.numFmt = '#,##0.0000';
                         ws[cell_address].s.alignment = {horizontal: 'center'};
                     }
                 });
