@@ -433,7 +433,7 @@ class ReportPhysicalCountController extends Controller
             $sheet->setCellValue("J{$currentRow}", '');
 
             // Format numbers
-            $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');
             $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
 
             // Borders for data row
