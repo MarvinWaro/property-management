@@ -102,106 +102,104 @@
                     <!-- Department Table - Enhanced table -->
                     <div class="overflow-hidden shadow-md sm:rounded-lg border border-gray-200 dark:border-gray-700">
                         <div class="overflow-x-auto">
-                            <div class="overflow-y-auto max-h-[500px]">
-                                <table class="w-full text-sm text-left">
-                                    <thead
-                                        class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
-                                            <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Name</th>
-                                            <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse ($departments as $department)
-                                            <tr
-                                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                                <th scope="row"
-                                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    {{ $department->id }}
-                                                </th>
-                                                <td class="px-6 py-4 font-medium">
-                                                    <div class="text-gray-900 dark:text-white">{{ $department->name }}
-                                                    </div>
-                                                </td>
-                                                <td class="px-2 py-4">
-                                                    <div class="flex items-center justify-center space-x-2">
-                                                        <!-- Edit Button -->
-                                                        <button type="button" data-modal-target="editDepartmentModal"
-                                                            data-modal-toggle="editDepartmentModal"
-                                                            data-department-id="{{ $department->id }}"
-                                                            data-department-name="{{ $department->name }}"
-                                                            class="edit-department-btn p-2 text-[#f59e0b] rounded-lg hover:bg-[#f59e0b]/10 focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24] dark:hover:bg-[#f59e0b]/20 transition-all duration-200">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path
-                                                                    d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                                                            </svg>
-                                                        </button>
-
-                                                        <!-- Delete Button -->
-                                                        <button type="button"
-                                                            data-modal-target="deleteDepartmentModal{{ $department->id }}"
-                                                            data-modal-toggle="deleteDepartmentModal{{ $department->id }}"
-                                                            class="p-2 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/10 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/20 transition-all duration-200">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path d="M3 6h18" />
-                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                                <line x1="10" x2="10" y1="11"
-                                                                    y2="17" />
-                                                                <line x1="14" x2="14" y1="11"
-                                                                    y2="17" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="3" class="px-6 py-8 text-center">
-                                                    <!-- Empty state content -->
-                                                    <div class="flex flex-col items-center justify-center">
-                                                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
-                                                            </path>
+                            <table class="w-full text-sm text-left">
+                                <thead
+                                    class="text-xs uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">ID</th>
+                                        <th scope="col" class="px-6 py-3 font-bold text-gray-800 dark:text-gray-200">Name</th>
+                                        <th scope="col" class="px-6 py-3 text-center font-bold text-gray-800 dark:text-gray-200">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($departments as $department)
+                                        <tr
+                                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                            <th scope="row"
+                                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {{ $department->id }}
+                                            </th>
+                                            <td class="px-6 py-4 font-medium">
+                                                <div class="text-gray-900 dark:text-white">{{ $department->name }}
+                                                </div>
+                                            </td>
+                                            <td class="px-2 py-4">
+                                                <div class="flex items-center justify-center space-x-2">
+                                                    <!-- Edit Button -->
+                                                    <button type="button" data-modal-target="editDepartmentModal"
+                                                        data-modal-toggle="editDepartmentModal"
+                                                        data-department-id="{{ $department->id }}"
+                                                        data-department-name="{{ $department->name }}"
+                                                        class="edit-department-btn p-2 text-[#f59e0b] rounded-lg hover:bg-[#f59e0b]/10 focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/30 dark:text-[#fbbf24] dark:hover:bg-[#f59e0b]/20 transition-all duration-200">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                            height="16" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path
+                                                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                            <path
+                                                                d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
                                                         </svg>
-                                                        <p
-                                                            class="text-lg font-medium text-gray-500 dark:text-gray-400">
-                                                            No Division found</p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
-                                                            started by adding a new Division</p>
-                                                        <button type="button"
-                                                            data-modal-target="createDepartmentModal"
-                                                            data-modal-toggle="createDepartmentModal"
-                                                            class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30">
-                                                            <svg class="w-4 h-4 mr-2" fill="currentColor"
-                                                                viewBox="0 0 20 20"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path fill-rule="evenodd"
-                                                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                    clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            Add Division
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                                                    </button>
+
+                                                    <!-- Delete Button -->
+                                                    <button type="button"
+                                                        data-modal-target="deleteDepartmentModal{{ $department->id }}"
+                                                        data-modal-toggle="deleteDepartmentModal{{ $department->id }}"
+                                                        class="p-2 text-[#ce201f] rounded-lg hover:bg-[#ce201f]/10 focus:outline-none focus:ring-2 focus:ring-[#ce201f]/30 dark:text-[#ce201f] dark:hover:bg-[#ce201f]/20 transition-all duration-200">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                            height="16" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M3 6h18" />
+                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                            <line x1="10" x2="10" y1="11"
+                                                                y2="17" />
+                                                            <line x1="14" x2="14" y1="11"
+                                                                y2="17" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-6 py-8 text-center">
+                                                <!-- Empty state content -->
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M18 6h-4V2a1 1 0 00-1-1H7a1 1 0 00-1 1v4H2a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1z">
+                                                        </path>
+                                                    </svg>
+                                                    <p
+                                                        class="text-lg font-medium text-gray-500 dark:text-gray-400">
+                                                        No Division found</p>
+                                                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Get
+                                                        started by adding a new Division</p>
+                                                    <button type="button"
+                                                        data-modal-target="createDepartmentModal"
+                                                        data-modal-toggle="createDepartmentModal"
+                                                        class="mt-4 inline-flex items-center px-4 py-2 bg-[#ce201f] hover:bg-[#a01b1a] text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#ce201f]/30">
+                                                        <svg class="w-4 h-4 mr-2" fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                        Add Division
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
