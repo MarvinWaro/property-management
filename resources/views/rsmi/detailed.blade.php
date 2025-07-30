@@ -163,7 +163,7 @@
                                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                                     <div class="text-center">
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Average Unit Cost</p>
-                                        <p class="text-xl font-bold text-gray-800 dark:text-white">₱{{ number_format($supplyData['average_unit_cost'], 2) }}</p>
+                                        <p class="text-xl font-bold text-gray-800 dark:text-white">₱{{ number_format($supplyData['average_unit_cost'], 4) }}</p>
                                     </div>
                                 </div>
 
@@ -171,7 +171,7 @@
                                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                                     <div class="text-center">
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Cost</p>
-                                        <p class="text-xl font-bold text-gray-800 dark:text-white">₱{{ number_format($supplyData['total_cost'], 2) }}</p>
+                                        <p class="text-xl font-bold text-gray-800 dark:text-white">₱{{ number_format($supplyData['total_cost'], 4) }}</p>
                                     </div>
                                 </div>
 
@@ -205,16 +205,16 @@
                                                 <td class="px-6 py-4">
                                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                                                         {{ $txn['fund_cluster'] == '101' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                                                           ($txn['fund_cluster'] == '151' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
-                                                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300') }}">
+                                                            ($txn['fund_cluster'] == '151' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300') }}">
                                                         {{ $txn['fund_cluster'] ?? 'N/A' }}
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $txn['department'] }}</td>
                                                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ \Carbon\Carbon::parse($txn['date'])->format('M d, Y') }}</td>
                                                 <td class="px-6 py-4 text-right font-semibold text-gray-800 dark:text-gray-200">{{ number_format($txn['quantity']) }}</td>
-                                                <td class="px-6 py-4 text-right text-gray-700 dark:text-gray-300">₱{{ number_format($txn['unit_cost'], 2) }}</td>
-                                                <td class="px-6 py-4 text-right font-semibold text-gray-800 dark:text-gray-200">₱{{ number_format($txn['total'], 2) }}</td>
+                                                <td class="px-6 py-4 text-right text-gray-700 dark:text-gray-300">₱{{ number_format($txn['unit_cost'], 4) }}</td>
+                                                <td class="px-6 py-4 text-right font-semibold text-gray-800 dark:text-gray-200">₱{{ number_format($txn['total'], 4) }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

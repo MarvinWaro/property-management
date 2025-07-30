@@ -582,14 +582,14 @@ class SupplyLedgerCardController extends Controller
 
             // Format numbers
             $sheet->getStyle("C{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("D{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
-            $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("D{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+            $sheet->getStyle("E{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
             $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
-            $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+            $sheet->getStyle("H{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
             $sheet->getStyle("I{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle("J{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
-            $sheet->getStyle("K{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle("J{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
+            $sheet->getStyle("K{$currentRow}")->getNumberFormat()->setFormatCode('#,##0.0000');  // Changed from .00 to .0000
 
             // Apply borders
             $sheet->getStyle("A{$currentRow}:L{$currentRow}")->getBorders()

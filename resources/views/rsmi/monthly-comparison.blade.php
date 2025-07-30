@@ -85,7 +85,7 @@
                                             {{ $data['month'] }}
                                         </td>
                                         <td class="px-6 py-4 text-right {{ $data['total'] > 0 ? 'text-[#10b981] font-medium' : 'text-gray-600 dark:text-gray-400' }}">
-                                            ₱{{ number_format($data['total'], 2) }}
+                                            ₱{{ number_format($data['total'], 4) }}
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             @if($data['total'] > 0)
@@ -116,7 +116,7 @@
                                 <tr class="bg-gray-50 dark:bg-gray-700 font-bold">
                                     <td class="px-6 py-4 text-gray-800 dark:text-gray-200">YEAR TOTAL</td>
                                     <td class="px-6 py-4 text-right text-[#10b981] font-bold">
-                                        ₱{{ number_format($yearTotal, 2) }}
+                                        ₱{{ number_format($yearTotal, 4) }}
                                     </td>
                                     <td></td>
                                 </tr>
@@ -178,8 +178,8 @@
                                     label: function(context) {
                                         let value = context.raw;
                                         return '₱' + value.toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
+                                            minimumFractionDigits: 4,
+                                            maximumFractionDigits: 4
                                         });
                                     }
                                 }

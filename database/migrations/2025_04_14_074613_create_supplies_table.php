@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('unit_of_measurement');
             $table->unsignedBigInteger('category_id')->nullable();
             $table->integer('reorder_point')->default(0);
-            $table->decimal('acquisition_cost', 10, 2)->default(0.00);
+            $table->decimal('acquisition_cost', 10, 4)->default(0.0000);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

@@ -163,7 +163,7 @@
                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                             <div class="text-center">
                                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Total Book Value</p>
-                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">₱{{ number_format($summary['total_book_value'], 2) }}</p>
+                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">₱{{ number_format($summary['total_book_value'], 4) }}</p>
                             </div>
                         </div>
                     </div>
@@ -202,7 +202,7 @@
                                     @endif
                                     <td class="px-6 py-4 text-gray-800 dark:text-gray-200">{{ $item['item_name'] }}@if(!empty($item['description'])), {{ $item['description'] }}@endif</td>
                                     <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">{{ $item['unit'] }}</td>
-                                    <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">₱{{ number_format($item['unit_cost'], 2) }}</td>
+                                    <td class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">₱{{ number_format($item['unit_cost'], 4) }}</td>
                                     <td class="px-6 py-4 text-center font-semibold text-gray-800 dark:text-gray-200">{{ number_format($item['book_quantity']) }}</td>
                                 </tr>
                             @empty
