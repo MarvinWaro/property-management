@@ -16,7 +16,7 @@ class DesignationController extends Controller
 
         $designations = \App\Models\Designation::when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%");
-            })->paginate(10);
+            })->paginate(25);
 
         return view('manage-designation.index', compact('designations'));
     }
