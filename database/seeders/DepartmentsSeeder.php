@@ -14,20 +14,25 @@ class DepartmentsSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            'Office of the Regional Director',
-            'Administrative Division - CAO',
             'Administrative Division - Accounting',
-            'Administrative Division - Records',
-            'Administrative Division - HEMIS',
-            'Administrative Division - Supply and Procurement',
+            'Administrative Division - CAO',
             'Administrative Division - Cashier',
-            'Scholarship Division - UniFAST Region XII',
-            'Scholarship Division - UniFAST BARMM',
-            'Scholarship Division - StuFAPs',
-            'LGSO',
+            'Administrative Division - HEMIS',
+            'Administrative Division - Records',
+            'Administrative Division - Supply and Procurement',
             'HECBOL',
+            'LGSO',
+            'MARITIME',
+            'Office of the Regional Director',
+            'Scholarship Division - StuFAPs',
+            'Scholarship Division - UniFAST BARMM',
+            'Scholarship Division - UniFAST Region XII',
+            'SPORTS',
+            'STUFAPS',
             'Technical Division',
+            'TNHE',
         ];
+
 
         foreach ($departments as $department) {
             Department::create([

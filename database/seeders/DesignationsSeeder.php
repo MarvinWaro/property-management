@@ -13,60 +13,39 @@ class DesignationsSeeder extends Seeder
      */
     public function run(): void
     {
+        $designations = [
+            'Accounting Staff - Book Keeper',
+            'Accounting Staff - Job Order',
+            'Administrative Aide III',
+            'Administrative Aide IV',
+            'Administrative Aide VI',
+            'Administrative Assistant II',
+            'Administrative Officer III',
+            'Administrative officer IV',
+            'CAO - Project Support Staff',
+            'Cashier Staff -Job Order',
+            'Chief Administrative Officer',
+            'Director III/Officer-in-Charge (OIC), Office of the Director IV',
+            'Education Supervisor II',
+            'Job Order - COA Staff',
+            'Job Order - Technical Staff',
+            'OIC-Chief Education Specialist',
+            'Project Support Staff',
+            'Project Support Staff V',
+            'Project Technical Staff I',
+            'Project Technical Staff II',
+            'Project Technical Staff III',
+            'Record\'s Staff - Job Order',
+            'Security Guard',
+            'Utility',
+        ];
 
-        Designation::create([
-            'name' => 'Regional Director',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Chief Administrative Officer',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Project Technical Staff III',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Project Technical Staff II',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Project Technical Staff I',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Administrative Aide VI',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Administrative Aide V',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Administrative Aide IV',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Administrative Aide III',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'Job-Order',
-            'description' => null, // Keep description blank as requested
-        ]);
-
-        Designation::create([
-            'name' => 'OJT',
-            'description' => null, // Keep description blank as requested
-        ]);
+        foreach ($designations as $designation) {
+            Designation::create([
+                'name' => $designation,
+                'description' => null, // Keep description blank as requested
+            ]);
+        }
     }
+
 }
