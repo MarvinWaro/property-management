@@ -117,7 +117,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      */
     Route::middleware(['admin-cao'])->group(function () {
 
-        // these now share your normal web session cookie
+
 
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -230,6 +230,15 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::delete('/property/{property}', [PropertyController::class, 'destroy'])->name('property.destroy');
         Route::get('/property/{property}', [PropertyController::class, 'view'])->name('property.view');
         Route::get('/property/{property}/download-qr', [PropertyController::class, 'downloadQr'])->name('property.download-qr');
+
+        // Role switching routes
+        Route::post('/switch-to-user-mode', [DashboardController::class, 'switchToUserMode'])->name('admin.switch-to-user');
+        Route::post('/switch-to-admin-mode', [DashboardController::class, 'switchToAdminMode'])->name('admin.switch-to-admin');
+
+        // User dashboard access for admin/cao (when in user mode)
+        Route::get('/user-dashboard', [StaffDashboardController::class, 'adminAsUser'])->name('admin.user-dashboard');
+
+
     });
 
     /**

@@ -91,19 +91,53 @@
                                 </x-dropdown-link>
 
                                 @if (in_array(auth()->user()->role, ['admin', 'cao']))
+                                    <!-- Only show admin links when NOT in user mode -->
+                                    @if (!session('admin_user_mode'))
+                                        <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                        <x-dropdown-link href="{{ route('supply-transactions.index') }}">
+                                            {{ __('Transactions') }}
+                                        </x-dropdown-link>
+
+                                        @php
+                                            $isAssetsMode = request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
+                                                (request()->routeIs('profile.show') && session('from_assets_mode', false));
+                                        @endphp
+
+                                        <x-dropdown-link href="{{ $isAssetsMode ? route('dashboard') : route('assets.dashboard') }}">
+                                            {{ $isAssetsMode ? __('Supplies') : __('Assets | Properties') }}
+                                        </x-dropdown-link>
+                                    @endif
+
+                                    <!-- Role Switch Section -->
                                     <div class="border-t border-gray-200 dark:border-gray-600"></div>
-                                    <x-dropdown-link href="{{ route('supply-transactions.index') }}">
-                                        {{ __('Transactions') }}
-                                    </x-dropdown-link>
 
-                                    @php
-                                        $isAssetsMode = request()->routeIs(['assets.dashboard', 'property.*', 'end_users.*', 'location.*']) ||
-                                            (request()->routeIs('profile.show') && session('from_assets_mode', false));
-                                    @endphp
-
-                                    <x-dropdown-link href="{{ $isAssetsMode ? route('dashboard') : route('assets.dashboard') }}">
-                                        {{ $isAssetsMode ? __('Supplies') : __('Assets | Properties') }}
-                                    </x-dropdown-link>
+                                    @if(session('admin_user_mode'))
+                                        <!-- Switch back to Admin Mode -->
+                                        <form method="POST" action="{{ route('admin.switch-to-admin') }}" class="w-full">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+                                                    </svg>
+                                                    Back to {{ ucfirst(session('original_role', 'Admin')) }} Mode
+                                                </div>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <!-- Switch to User Mode -->
+                                        <form method="POST" action="{{ route('admin.switch-to-user') }}" class="w-full">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                    Switch as User
+                                                </div>
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
 
                                 <div class="border-t border-gray-200 dark:border-gray-600"></div>
@@ -146,8 +180,22 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Desktop Navigation Tabs -->
             <div class="hidden sm:flex space-x-8 -mb-px">
-                @if (in_array(auth()->user()->role, ['admin', 'cao']) && !$isAssetsMode)
-                    <!-- Supplies Mode Tabs -->
+
+                @if (auth()->user()->role === 'staff' || (in_array(auth()->user()->role, ['admin', 'cao']) && session('admin_user_mode')))
+                    <!-- Staff Tabs OR Admin in User Mode - Show simple "Home" tab -->
+                    <a href="{{ session('admin_user_mode') ? route('admin.user-dashboard') : route('staff.dashboard') }}"
+                       class="dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ (session('admin_user_mode') && request()->routeIs('admin.user-dashboard')) || (!session('admin_user_mode') && request()->routeIs('staff.dashboard')) ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 border-transparent' }}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span>Home</span>
+                        </span>
+                    </a>
+                @endif
+
+                @if (in_array(auth()->user()->role, ['admin', 'cao']) && !session('admin_user_mode') && !$isAssetsMode)
+                    <!-- Admin/CAO Normal Mode - Supplies Mode Tabs -->
                     <a href="{{ route('dashboard') }}"
                        class="dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300  border-transparent' }}">
                         <span class="flex items-center space-x-2">
@@ -231,7 +279,6 @@
                         </span>
                     </a>
 
-
                     @if (auth()->user()->hasRole('admin'))
                         <!-- Management Dropdown -->
                         <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
@@ -267,7 +314,7 @@
                     @endif
                 @endif
 
-                @if (in_array(auth()->user()->role, ['admin', 'cao']) && $isAssetsMode)
+                @if (in_array(auth()->user()->role, ['admin', 'cao']) && !session('admin_user_mode') && $isAssetsMode)
                     <!-- Assets Mode Tabs -->
                     <a href="{{ route('assets.dashboard') }}"
                     class=" dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent' }}">
@@ -300,19 +347,6 @@
                         </span>
                     </a>
                 @endif
-
-                @if (auth()->user()->role === 'staff')
-                    <!-- Staff Tabs -->
-                    <a href="{{ route('staff.dashboard') }}"
-                       class=" dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 {{ request()->routeIs('staff.dashboard') ? 'border-[#ce201f] text-[#ce201f] dark:border-[#ce201f] dark:text-[#ce201f]' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 border-transparent' }}">
-                        <span class="flex items-center space-x-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                            </svg>
-                            <span>Home</span>
-                        </span>
-                    </a>
-                @endif
             </div>
         </div>
     </div>
@@ -320,7 +354,17 @@
     <!-- Mobile Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div class="pt-2 pb-3 space-y-1">
-            @if (!$isAssetsMode && in_array(auth()->user()->role, ['admin', 'cao']))
+
+            @if (auth()->user()->role === 'staff' || (in_array(auth()->user()->role, ['admin', 'cao']) && session('admin_user_mode')))
+                <!-- Staff OR Admin in User Mode - Simple Home -->
+                <a href="{{ session('admin_user_mode') ? route('admin.user-dashboard') : route('staff.dashboard') }}"
+                   class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ (session('admin_user_mode') && request()->routeIs('admin.user-dashboard')) || (!session('admin_user_mode') && request()->routeIs('staff.dashboard')) ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Home
+                </a>
+            @endif
+
+            @if (in_array(auth()->user()->role, ['admin', 'cao']) && !session('admin_user_mode') && !$isAssetsMode)
+                <!-- Admin/CAO Normal Mode Navigation -->
                 <a href="{{ route('dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Dashboard
                 </a>
@@ -357,7 +401,6 @@
                 <a href="{{ route('rsmi.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('rsmi.*') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     RSMI
                 </a>
-
                 <a href="{{ route('rpci.index') }}"
                     class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200
                             {{ request()->routeIs('rpci.*')
@@ -365,7 +408,6 @@
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     RPCI
                 </a>
-
 
                 <!-- Management section for mobile -->
                 <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
@@ -389,7 +431,8 @@
                 </div>
             @endif
 
-            @if ($isAssetsMode && in_array(auth()->user()->role, ['admin', 'cao']))
+            @if (in_array(auth()->user()->role, ['admin', 'cao']) && !session('admin_user_mode') && $isAssetsMode)
+                <!-- Assets Mode Mobile Navigation -->
                 <a href="{{ route('assets.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('assets.dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Assets Dashboard
                 </a>
@@ -398,12 +441,6 @@
                 </a>
                 <a href="{{ route('location.index') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('location.index') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
                     Location
-                </a>
-            @endif
-
-            @if (auth()->user()->role === 'staff')
-                <a href="{{ route('staff.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-200 {{ request()->routeIs('staff.dashboard') ? 'border-[#ce201f] text-[#ce201f] bg-red-50 dark:bg-red-900/20' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700' }}">
-                    Home
                 </a>
             @endif
         </div>
