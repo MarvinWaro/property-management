@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\TrackAssetsMode;
 use App\Http\Middleware\RoleMiddleware; // Import your RoleMiddleware
 use App\Http\Middleware\AdminCaoMiddleware; // Import your AdminCaoMiddleware
+use App\Http\Middleware\AdminUserModeMiddleware; // Import the new middleware
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,5 +28,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
 // Register the route middleware aliases
 $app->router->aliasMiddleware('role', RoleMiddleware::class);
 $app->router->aliasMiddleware('admin-cao', AdminCaoMiddleware::class);
+$app->router->aliasMiddleware('admin.not-user-mode', AdminUserModeMiddleware::class); // Add this line
 
 return $app;

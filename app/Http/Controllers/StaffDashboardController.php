@@ -174,4 +174,153 @@ class StaffDashboardController extends Controller
             ->route('staff.dashboard')
             ->with('success', 'Password changed successfully!');
     }
+
+    /**
+     * Dashboard for admin/cao when they switch to user mode
+     */
+    public function adminAsUser(Request $request)
+    {
+        // Check if admin is in user mode
+        if (!session('admin_user_mode')) {
+            return redirect()->route('dashboard')->with('error', 'Access denied. Please switch to user mode first.');
+        }
+
+        $user   = Auth::user();
+        $userId = $user->id;
+
+        // No force password change for admin users
+        $forceChangePassword = false;
+
+        // 2. Dropdown data for the modal
+        $departments = Department::orderBy('name')->get(['id','name']);
+
+        // 3. Get all stocks (available and depleted) for better UX
+        $stocks = SupplyStock::with('supply')
+            ->whereIn('status', ['available', 'depleted'])
+            ->get()
+            ->map(function ($stock) {
+                // Calculate pending requests for this supply
+                $pendingRequested = RisItem::where('supply_id', $stock->supply_id)
+                    ->whereHas('risSlip', function($q) {
+                        $q->whereIn('status', ['draft', 'approved']);
+                    })
+                    ->sum('quantity_requested');
+
+                // Calculate available for request
+                if ($stock->status === 'depleted' || $stock->quantity_on_hand <= 0) {
+                    $available = 0;
+                } else {
+                    $available = max(0, $stock->quantity_on_hand - $pendingRequested);
+                }
+
+                $stock->available_for_request = $available;
+                $stock->is_requestable = $available > 0;
+
+                return $stock;
+            })
+            ->sortBy(function ($stock) {
+                return $stock->is_requestable ? 0 : 1;
+            })
+            ->values();
+
+        // 4. Stats for the status filters (for admin's own requests)
+        $totalRequests       = RisSlip::where('requested_by', $userId)->count();
+        $pendingCount        = RisSlip::where('requested_by', $userId)
+                                ->where('status', 'draft')
+                                ->count();
+        $approvedCount       = RisSlip::where('requested_by', $userId)
+                                ->where('status', 'approved')
+                                ->count();
+        $pendingReceiptCount = RisSlip::where('requested_by', $userId)
+                                ->where('status', 'posted')
+                                ->whereNull('received_at')
+                                ->count();
+        $completedCount      = RisSlip::where('requested_by', $userId)
+                                ->where('status', 'posted')
+                                ->whereNotNull('received_at')
+                                ->count();
+        $declinedCount       = RisSlip::where('requested_by', $userId)
+                                ->where('status', 'declined')
+                                ->count();
+
+        // 5. Build query for "My Requests" with filters and search
+        $query = RisSlip::where('requested_by', $userId)
+            ->with(['department', 'items.supply'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply status filter if present
+        if ($request->filled('status')) {
+            match($request->status) {
+                'draft'           => $query->where('status', 'draft'),
+                'approved'        => $query->where('status', 'approved'),
+                'pending-receipt' => $query->where('status','posted')
+                                        ->whereNull('received_at'),
+                'completed'       => $query->where('status','posted')
+                                        ->whereNotNull('received_at'),
+                'declined'        => $query->where('status', 'declined'),
+                default           => null,
+            };
+        }
+
+        // Apply search filter if present
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('ris_no', 'like', "%{$search}%");
+        }
+
+        // Paginate with preserved query parameters
+        $myRequests = $query
+            ->paginate(5, ['*'], 'requests')
+            ->appends($request->only(['status','search']));
+
+        // 6. Received requisitions (for admin's own requests)
+        $risNumbers = DB::table('supply_transactions')
+            ->join('user_transactions', 'supply_transactions.transaction_id', '=', 'user_transactions.transaction_id')
+            ->where('user_transactions.user_id', $userId)
+            ->where('user_transactions.role', 'receiver')
+            ->select('reference_no')
+            ->distinct()
+            ->pluck('reference_no')
+            ->toArray();
+
+        $receivedRequisitions = RisSlip::whereIn('ris_no', $risNumbers)
+            ->with('requester')
+            ->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'received');
+
+        // 7. User properties
+        $properties = $user->properties()
+            ->with('images')
+            ->orderBy('created_at', 'desc')
+            ->paginate(6, ['*'], 'properties');
+
+        // 8. Get notification counts for initial load
+        $approvedRequestsCount = RisSlip::where('requested_by', $userId)
+            ->where('status', 'approved')
+            ->count();
+
+        $pendingReceiptNotificationCount = RisSlip::where('received_by', $userId)
+            ->where('status', 'posted')
+            ->whereNull('received_at')
+            ->count();
+
+        // Use the same view as staff dashboard but pass admin_user_mode flag
+        return view('staff-dashboard', compact(
+            'forceChangePassword',
+            'departments',
+            'stocks',
+            'myRequests',
+            'receivedRequisitions',
+            'properties',
+            'totalRequests',
+            'pendingCount',
+            'approvedCount',
+            'pendingReceiptCount',
+            'completedCount',
+            'declinedCount',
+            'approvedRequestsCount',
+            'pendingReceiptNotificationCount'
+        ))->with('isAdminUserMode', true);
+    }
+    
 }

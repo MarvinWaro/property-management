@@ -14,6 +14,7 @@ use App\Models\SupplyTransaction;
 use App\Models\RisSlip;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth; // Add this line
 
 class DashboardController extends Controller
 {
@@ -418,4 +419,29 @@ class DashboardController extends Controller
 
         return view('assets', compact('totalUsers', 'lastUpdated', 'totalProperties', 'totalLocations'));
     }
+
+
+    /**
+     * Switch admin/cao to user mode for requesting supplies
+     */
+    public function switchToUserMode(Request $request)
+    {
+        // Store in session that admin is in user mode
+        session(['admin_user_mode' => true]);
+        session(['original_role' => Auth::user()->role]);
+
+        return redirect()->route('admin.user-dashboard')->with('success', 'Switched to User Mode. You can now request supplies.');
+    }
+
+    /**
+     * Switch back to admin mode
+     */
+    public function switchToAdminMode(Request $request)
+    {
+        // Remove user mode session
+        session()->forget(['admin_user_mode', 'original_role']);
+
+        return redirect()->route('dashboard')->with('success', 'Switched back to Admin Mode.');
+    }
+
 }
