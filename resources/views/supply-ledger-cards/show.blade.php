@@ -6,7 +6,7 @@
             </h2>
             <div class="flex space-x-2">
                 <!-- PDF Export Button -->
-                <a href="{{ route('supply-ledger-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                {{-- <a href="{{ route('supply-ledger-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
                     <span class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -16,7 +16,7 @@
                         </svg>
                         <span>Export as PDF</span>
                     </span>
-                </a>
+                </a> --}}
 
                 <!-- Replace your Excel Export Button with this direct link approach -->
                 <a href="{{ route('supply-ledger-cards.export-excel', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"

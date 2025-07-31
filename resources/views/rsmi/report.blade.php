@@ -16,7 +16,7 @@
                 </a>
 
                 {{-- Export PDF Button --}}
-                <a href="{{ route('rsmi.export-pdf-formatted') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
+                {{-- <a href="{{ route('rsmi.export-pdf-formatted') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-red-400/30 transition-all duration-200 shadow-sm">
                     <span class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,7 +25,7 @@
                         </svg>
                         <span>Export PDF</span>
                     </span>
-                </a>
+                </a> --}}
 
                 {{-- Export Excel Button --}}
                 <a href="{{ route('rsmi.export-excel') }}?month={{ $month }}&fund_cluster={{ $fundCluster }}&department_id={{ $departmentId }}"
