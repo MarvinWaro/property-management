@@ -104,7 +104,7 @@ class RisSlipController extends Controller
         }
 
         // Paginate with query string preservation
-        $risSlips = $query->paginate(10)->appends($request->query());
+        $risSlips = $query->paginate(25)->appends($request->query());
 
         // Get departments for filter dropdown
         $departments = Department::orderBy('name')->get();
