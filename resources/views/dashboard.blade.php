@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="space-y-2">
                                     <p class="text-3xl font-semibold text-gray-900 dark:text-white">₱{{ number_format($totalStockValue, 2) }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">Current inventory value</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">This Year Inventory Value</p>
                                 </div>
                             </div>
                         </div>
