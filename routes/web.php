@@ -46,17 +46,20 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // Shared routes (accessible by admin, cao, and staff)
     // web.php
 
-    // must come BEFORE Route::get('/ris/{risSlip}', …)
+    // SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES
     Route::get('/ris/next', [RisSlipController::class, 'nextRis'])->name('ris.next')->middleware(['auth','admin-cao']);
+    Route::get('/ris/current-cao', [RisSlipController::class, 'getCurrentCAO'])->name('ris.current-cao');
+
+    // ✅ MOVE THIS HERE - BEFORE the dynamic {risSlip} route
+    Route::get('/ris/department-details', [RisSlipController::class, 'getDepartmentDetails'])->name('ris.department-details');
 
     Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
     Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store');
+
+    // DYNAMIC ROUTES COME AFTER SPECIFIC ROUTES
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
-    Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel'); // ADD THIS LINE
-    Route::get('/ris/current-cao', [RisSlipController::class, 'getCurrentCAO'])->name('ris.current-cao');
-
-
+    Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel');
     Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
 
     Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');

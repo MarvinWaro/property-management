@@ -2030,5 +2030,38 @@ class RisSlipController extends Controller
         }
     }
 
+    /**
+     * Get department details for auto-filling office field
+     */
+    public function getDepartmentDetails(Request $request)
+    {
+        $departmentId = $request->get('department_id');
+
+        \Log::info('getDepartmentDetails called', ['department_id' => $departmentId]);
+
+        if (!$departmentId) {
+            return response()->json(['office' => '', 'debug' => 'No department ID provided']);
+        }
+
+        $department = Department::find($departmentId);
+
+        if (!$department) {
+            return response()->json(['office' => '', 'debug' => 'Department not found']);
+        }
+
+        // Check what fields your department has
+        \Log::info('Department found', ['department' => $department->toArray()]);
+
+        // Try different approaches
+        $office = $department->office ?? $department->name ?? '';
+
+        return response()->json([
+            'office' => $office,
+            'debug' => 'Success',
+            'department_name' => $department->name,
+            'department_data' => $department->toArray()
+        ]);
+    }
+
 }
 
