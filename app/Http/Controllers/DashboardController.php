@@ -84,7 +84,7 @@ class DashboardController extends Controller
         // NEW: Get stock status data for donut chart
         $stockStatusData = $this->getStockStatusData();
 
-        // For user listing with search functionality
+        // For user listing with search functionality 80 pages
         $users = User::with('department', 'designation')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
