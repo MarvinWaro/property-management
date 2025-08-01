@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Broadcast;
 // Add this line BEFORE your middleware groups
 Broadcast::routes(['middleware' => ['web', 'auth:sanctum']]);
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -42,55 +43,48 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/api/initial-counts', [NotificationController::class, 'getInitialCounts'])->middleware(['admin-cao']);
     Route::get('/api/user-initial-counts', [NotificationController::class, 'getUserInitialCounts']);
 
-    // ==========================================
-    // SHARED ROUTES - Available to ALL authenticated users (admin, cao, staff)
-    // ==========================================
+    // Shared routes (accessible by admin, cao, and staff)
+    // web.php
 
-    // RIS routes that work for everyone (viewing, creating requests, receiving)
+    // must come BEFORE Route::get('/ris/{risSlip}', …)
+    Route::get('/ris/next', [RisSlipController::class, 'nextRis'])->name('ris.next')->middleware(['auth','admin-cao']);
+
     Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
     Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store');
     Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
     Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
-    Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel');
+    Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel'); // ADD THIS LINE
     Route::get('/ris/current-cao', [RisSlipController::class, 'getCurrentCAO'])->name('ris.current-cao');
+
+
     Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
 
-    // Stock cards (viewing - works for everyone)
     Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');
     Route::get('/stock-cards/{supplyId}', [StockCardController::class, 'show'])->name('stock-cards.show');
     Route::get('/stock-cards/{supplyId}/export-pdf', [StockCardController::class, 'exportPdf'])->name('stock-cards.export-pdf');
     Route::get('/stock-cards/{supplyId}/export-excel', [StockCardController::class, 'exportExcel'])->name('stock-cards.export-excel');
 
-    // Supply Ledger Card routes (viewing - works for everyone)
+    // Supply Ledger Card routes
     Route::get('/supply-ledger-cards', [App\Http\Controllers\SupplyLedgerCardController::class, 'index'])->name('supply-ledger-cards.index');
     Route::get('/supply-ledger-cards/{supplyId}', [App\Http\Controllers\SupplyLedgerCardController::class, 'show'])->name('supply-ledger-cards.show');
     Route::get('/supply-ledger-cards/{supplyId}/export-pdf', [App\Http\Controllers\SupplyLedgerCardController::class, 'exportPdf'])->name('supply-ledger-cards.export-pdf');
+    // ADD THIS NEW LINE:
     Route::get('/supply-ledger-cards/{supplyId}/export-excel', [App\Http\Controllers\SupplyLedgerCardController::class, 'exportExcel'])->name('supply-ledger-cards.export-excel');
 
-    // Signature Management (works for everyone)
+
+    // Beginning Balance creation route
+    Route::post('/stocks/create-beginning-balances', [App\Http\Controllers\SupplyStockController::class, 'createBeginningBalances'])
+        ->name('stocks.create-beginning-balances');
+
+    Route::get('/stocks/next-iar', [SupplyStockController::class, 'nextIar'])->name('stocks.next-iar')->middleware(['auth', 'admin-cao']);  // whatever middleware group you use
+    Route::get('/stocks/{stock}/iar-data', [SupplyStockController::class, 'getIarData'])->name('stocks.iar-data');
+
+
+    // Signature Management Routes (add these new routes)
     Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
     Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
 
-    // Debug route (works for everyone)
-    Route::get('/debug-users', function() {
-        try {
-            $users1 = \App\Models\User::where('status', true)->count();
-            $users2 = \App\Models\User::where('status', true)->get(['id', 'name', 'email']);
 
-            return response()->json([
-                'success' => true,
-                'active_users_count' => $users1,
-                'sample_users' => $users2->take(3)
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => basename($e->getFile()),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-    });
 
     /**
      * ------------------
@@ -99,56 +93,69 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
      */
     Route::middleware(['admin-cao'])->group(function () {
 
-        // ==========================================
-        // ROLE SWITCHING ROUTES - Always available to admin/cao
-        // ==========================================
+        // Role switching routes (always available to admin/cao, regardless of mode)
         Route::post('/switch-to-user-mode', [DashboardController::class, 'switchToUserMode'])->name('admin.switch-to-user');
         Route::post('/switch-to-admin-mode', [DashboardController::class, 'switchToAdminMode'])->name('admin.switch-to-admin');
         Route::get('/user-dashboard', [StaffDashboardController::class, 'adminAsUser'])->name('admin.user-dashboard');
 
-        // ==========================================
-        // PROTECTED ADMIN FUNCTIONS - Only when NOT in user mode
-        // ==========================================
+        // Routes that work in both admin and user mode (viewing, reports, etc.)
+        Route::get('/ris/{risSlip}', [RisSlipController::class, 'show'])->name('ris.show');
+        Route::get('/ris/{risSlip}/print', [RisSlipController::class, 'print'])->name('ris.print');
+        Route::get('/ris/{risSlip}/export-excel', [RisSlipController::class, 'exportExcel'])->name('ris.export-excel');
+        Route::get('/stock-cards', [StockCardController::class, 'index'])->name('stock-cards.index');
+        Route::get('/stock-cards/{supplyId}', [StockCardController::class, 'show'])->name('stock-cards.show');
+
+        // Routes that admins can use even in user mode (like creating requests, viewing their own data)
+        Route::get('/ris', [RisSlipController::class, 'index'])->name('ris.index');
+        Route::post('/ris', [RisSlipController::class, 'store'])->name('ris.store'); // Allow admins to create requests in user mode
+        Route::post('/ris/{risSlip}/receive', [RisSlipController::class, 'receive'])->name('ris.receive');
+        Route::get('/ris/current-cao', [RisSlipController::class, 'getCurrentCAO'])->name('ris.current-cao');
+
+        // Signature Management (works in both modes)
+        // Route::post('/signature/upload', [SignatureController::class, 'store'])->name('signature.upload');
+        // Route::delete('/signature/delete', [SignatureController::class, 'delete'])->name('signature.delete');
+
+        // PROTECTED ADMIN FUNCTIONS - Only accessible when NOT in user mode
         Route::middleware(['admin.not-user-mode'])->group(function () {
 
-            // Dashboard Routes
+            // MOST IMPORTANT: Protect the main dashboard
             Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
             Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
-
-            // RIS Admin Functions (approve, decline, issue, next number)
-            Route::get('/ris/next', [RisSlipController::class, 'nextRis'])->name('ris.next');
-            Route::post('/ris/{risSlip}/approve', [RisSlipController::class, 'approve'])->name('ris.approve');
-            Route::post('/ris/{risSlip}/decline', [RisSlipController::class, 'decline'])->name('ris.decline');
-            Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
-            Route::post('/ris/manual-entry', [RisSlipController::class, 'storeManual'])->name('ris.store-manual');
-            Route::post('/ris/validate-manual-stock', [RisSlipController::class, 'validateManualStock'])->name('ris.validate-manual-stock');
 
             // RPCI (Report on Physical Count of Inventories) routes
             Route::get('/rpci', [ReportPhysicalCountController::class, 'index'])->name('rpci.index');
             Route::get('/rpci/generate', [ReportPhysicalCountController::class, 'generate'])->name('rpci.generate');
             Route::get('/rpci/export-excel', [ReportPhysicalCountController::class, 'exportExcel'])->name('rpci.export-excel');
 
-            // User Management
+            // User management - Admin only
             Route::post('/users', [UserController::class, 'storeUser'])->name('users.store');
             Route::put('/users/{id}', [UserController::class, 'updateUser'])->name('users.update');
             Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
-            // Supply Management
+            // Supply Management - Admin only
             Route::get('/supplies', [SupplyController::class, 'index'])->name('supplies.index');
             Route::post('/supplies', [SupplyController::class, 'store'])->name('supplies.store');
             Route::put('/supplies/{supply}', [SupplyController::class, 'update'])->name('supplies.update');
             Route::delete('/supplies/{supply}', [SupplyController::class, 'destroy'])->name('supplies.destroy');
 
-            // Supply Stock Management
+            // Supply Stock Management - Admin only
             Route::resource('stocks', SupplyStockController::class)->except(['create','show']);
             Route::get('/stocks/next-iar', [SupplyStockController::class, 'nextIar'])->name('stocks.next-iar');
             Route::get('/stocks/{stock}/iar-data', [SupplyStockController::class, 'getIarData'])->name('stocks.iar-data');
             Route::post('/stocks/create-beginning-balances', [SupplyStockController::class, 'createBeginningBalances'])->name('stocks.create-beginning-balances');
 
-            // Supply Transaction Management
+            // Supply Transaction Management - Admin only
             Route::get('supply-transactions', [SupplyTransactionController::class,'index'])->name('supply-transactions.index');
             Route::post('supply-transactions', [SupplyTransactionController::class,'store'])->name('supply-transactions.store');
             Route::get('supply-transactions/{txn}', [SupplyTransactionController::class,'show'])->name('supply-transactions.show');
+
+            // RIS Management Functions - Admin/CAO only
+            Route::get('/ris/next', [RisSlipController::class, 'nextRis'])->name('ris.next');
+            Route::post('/ris/{risSlip}/approve', [RisSlipController::class, 'approve'])->name('ris.approve');
+            Route::post('/ris/{risSlip}/decline', [RisSlipController::class, 'decline'])->name('ris.decline');
+            Route::post('/ris/{risSlip}/issue', [RisSlipController::class, 'issue'])->name('ris.issue');
+            Route::post('/ris/manual-entry', [RisSlipController::class, 'storeManual'])->name('ris.store-manual');
+            Route::post('/ris/validate-manual-stock', [RisSlipController::class, 'validateManualStock'])->name('ris.validate-manual-stock');
 
             // RSMI (Report of Supplies and Materials Issued) routes
             Route::get('/rsmi', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'index'])->name('rsmi.index');
@@ -162,7 +169,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::get('/rsmi/export-pdf-formatted', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'exportPdfFormatted'])->name('rsmi.export-pdf-formatted');
             Route::get('/rsmi/export-excel', [App\Http\Controllers\ReportSuppliesMaterialsIssuedController::class, 'exportExcel'])->name('rsmi.export-excel');
 
-            // Department Management
+            // Master Data Management - Admin only
             Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
             Route::get('/departments/create', [DepartmentController::class, 'create'])->name('departments.create');
             Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
@@ -171,7 +178,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
             Route::get('/departments/{department}', [DepartmentController::class, 'view'])->name('departments.view');
 
-            // Designation Management
             Route::get('/designations', [DesignationController::class, 'index'])->name('designations.index');
             Route::get('/designations/create', [DesignationController::class, 'create'])->name('designations.create');
             Route::post('/designations', [DesignationController::class, 'store'])->name('designations.store');
@@ -179,7 +185,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::put('/designations/{designation}', [DesignationController::class, 'update'])->name('designations.update');
             Route::delete('/designations/{designation}', [DesignationController::class, 'destroy'])->name('designations.destroy');
 
-            // Supplier Management
             Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
             Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
             Route::post('/supplier', [SupplierController::class, 'store'])->name('supplier.store');
@@ -187,7 +192,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::put('/supplier/{id}', [SupplierController::class, 'update'])->name('supplier.update');
             Route::delete('/supplier/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
 
-            // Category Management
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
             Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
@@ -195,7 +199,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
             Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-            // Location Management
             Route::get('/location', [LocationController::class, 'index'])->name('location.index');
             Route::get('/location/create', [LocationController::class, 'create'])->name('location.create');
             Route::post('/location', [LocationController::class, 'store'])->name('location.store');
@@ -203,7 +206,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::put('/location/{location}', [LocationController::class, 'update'])->name('location.update');
             Route::delete('/location/{location}', [LocationController::class, 'destroy'])->name('location.destroy');
 
-            // Property Management
             Route::get('/property', [PropertyController::class, 'index'])->name('property.index');
             Route::get('/property/create', [PropertyController::class, 'create'])->name('property.create');
             Route::post('/property', [PropertyController::class, 'store'])->name('property.store');
@@ -217,7 +219,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     /**
      * ------------------
-     *  STAFF ROUTES (Unchanged)
+     *  STAFF ROUTES
      * ------------------
      */
     Route::middleware(['role:staff'])->group(function () {
@@ -230,10 +232,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/force-change-password', [StaffDashboardController::class, 'updatePassword'])
             ->name('user.force-change-password.update');
 
-        // ────────── RIS (Requisition & Issue Slip) ──────────
+
+            // ────────── RIS (Requisition & Issue Slip) ──────────
         Route::resource('ris-slips', RisSlipController::class)
         ->only(['index', 'create', 'store', 'show'])
         ->names('ris-slips');                       // ris-slips.index, ris-slips.create, …
+
     });
 
 });
