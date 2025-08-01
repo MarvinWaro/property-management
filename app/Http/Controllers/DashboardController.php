@@ -84,7 +84,7 @@ class DashboardController extends Controller
         // NEW: Get stock status data for donut chart
         $stockStatusData = $this->getStockStatusData();
 
-        // For user listing with search functionality
+        // For user listing with search functionality 80 pages
         $users = User::with('department', 'designation')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -103,8 +103,13 @@ class DashboardController extends Controller
                     });
                 });
             })
-            ->orderBy('created_at', 'asc')
-            ->paginate(5);
+            ->orderByRaw('CASE
+                WHEN role = "admin" THEN 1
+                WHEN role = "cao" THEN 2
+                ELSE 3
+            END')
+            ->orderBy('id', 'asc')
+            ->paginate(80);
 
         // Append search parameter to pagination links
         if ($search) {
