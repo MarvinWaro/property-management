@@ -103,8 +103,13 @@ class DashboardController extends Controller
                     });
                 });
             })
-            ->orderBy('created_at', 'asc')
-            ->paginate(5);
+            ->orderByRaw('CASE
+                WHEN role = "admin" THEN 1
+                WHEN role = "cao" THEN 2
+                ELSE 3
+            END')
+            ->orderBy('id', 'asc')
+            ->paginate(80);
 
         // Append search parameter to pagination links
         if ($search) {
