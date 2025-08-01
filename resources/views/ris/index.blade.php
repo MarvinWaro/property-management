@@ -813,11 +813,9 @@
                     }
                 </style>
 
-                <!-- Enhanced JavaScript with searchable dropdown functionality (SIMPLIFIED - AUTO RECEIVER) -->
+                <!-- Enhanced JavaScript with searchable dropdown functionality (CLEAN PRODUCTION VERSION) -->
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        console.log('DOM loaded, initializing manual RIS entry with auto receiver functionality...');
-
                         const modal = document.getElementById('manualEntryModal');
                         const openBtn = document.getElementById('openManualEntryModal');
                         const closeBtn = document.getElementById('closeManualEntryModal');
@@ -940,14 +938,12 @@
                         }
 
                         // Helper functions
+                        // Replace your showLoadingState function with this:
                         function showLoadingState() {
                             if (addItemBtn) {
                                 addItemBtn.disabled = true;
                                 addItemBtn.innerHTML = `
-                                    <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
+                                    <span class="inline-block animate-spin mr-2">⏳</span>
                                     Loading...
                                 `;
                             }
@@ -1031,7 +1027,6 @@
                                 }, 800);
                             })
                             .catch(error => {
-                                console.error('❌ RIS number generation failed:', error);
                                 risNoInput.value = originalValue;
                                 risNoInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
                                 risNoInput.classList.add('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
@@ -1048,7 +1043,6 @@
 
                         // Reset modal state
                         function resetModalState() {
-                            console.log('🔄 Resetting modal state...');
                             itemsTable.innerHTML = '';
                             itemIndex = 0;
                             selectedSupplyIds = [];
@@ -1087,7 +1081,6 @@
 
                         // Load available supplies
                         function loadAvailableSupplies() {
-                            console.log('=== Loading Available Supplies ===');
                             try {
                                 showLoadingState();
                                 let suppliesData = @json($availableSupplies ?? []);
@@ -1134,7 +1127,6 @@
                                 }
 
                             } catch (error) {
-                                console.error('❌ Error loading supplies:', error);
                                 hideLoadingState();
                                 availableSupplies = [];
                                 showNoSuppliesMessage();
@@ -1170,7 +1162,7 @@
                             itemsSection.insertBefore(alertDiv, itemsSection.firstChild);
                         }
 
-                        // SIMPLIFIED Modal controls (no CAO fetching)
+                        // Modal controls
                         openBtn?.addEventListener('click', () => {
                             resetModalState();
                             modal.classList.remove('hidden');
@@ -1258,15 +1250,15 @@
                                     if (+iss.value > available) iss.value = available;
                                 }
                             })
-                            .catch(console.error);
+                            .catch(() => {
+                                // Silent error handling - functionality continues without logging
+                            });
                         }
 
                         // Add item functionality
                         addItemBtn?.addEventListener('click', addManualItem);
 
                         function addManualItem() {
-                            console.log('Add item clicked, available supplies:', availableSupplies.length);
-
                             if (availableSupplies.length === 0) {
                                 showAlert('No supplies available in the system.', 'warning');
                                 return;
@@ -1342,8 +1334,6 @@
                             itemsTable.appendChild(row);
                             itemIndex++;
                             updateEmptyState();
-
-                            console.log('Item row added successfully with searchable dropdown');
                         }
 
                         // Close dropdowns when clicking outside
@@ -1435,7 +1425,7 @@
                             }
                         }
 
-                        // UPDATED Status change handler (auto receiver - no checkbox)
+                        // Status change handler
                         const finalStatusSelect = document.getElementById('finalStatusSelect');
                         const declineReasonDiv = document.getElementById('declineReasonDiv');
                         const completedInfoMessage = document.getElementById('completedInfoMessage');
@@ -1450,7 +1440,6 @@
                                 } else {
                                     if (declineReasonDiv) declineReasonDiv.classList.add('hidden');
 
-                                    // Show info message for completed status
                                     if (selectedStatus === 'completed') {
                                         if (completedInfoMessage) completedInfoMessage.classList.remove('hidden');
                                     } else {
@@ -1460,7 +1449,7 @@
                             });
                         }
 
-                        // SIMPLIFIED Form submission (no checkbox validation)
+                        // Form submission
                         document.querySelector('#manualEntryModal form')?.addEventListener('submit', function(e) {
                             e.preventDefault();
 
@@ -1516,9 +1505,8 @@
 
                         updateEmptyState();
 
-                        // Handle validation errors modal reopening (SIMPLIFIED)
+                        // Handle validation errors modal reopening
                         @if ($errors->any() && old('is_manual_entry'))
-                            console.log('🔄 Reopening modal due to validation errors...');
                             resetModalState();
                             loadAvailableSupplies();
 
@@ -1534,8 +1522,6 @@
 
                             isInitialized = true;
                         @endif
-
-                        console.log('✅ Manual RIS entry with auto receiver functionality initialization complete');
                     });
                 </script>
 
@@ -1639,6 +1625,94 @@
                         })
                         .catch(err => console.error('RIS lookup failed:', err));
                         });
+                    });
+                </script>
+
+                <!-- Division-Office Auto-fill Script (PRODUCTION VERSION - NO CONSOLE LOGS) -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // For regular RIS form (if you have one)
+                        const regularDivisionSelect = document.querySelector('select[name="division"]:not(#manualEntryModal select)');
+                        const regularOfficeInput = document.querySelector('input[name="office"]:not(#manualEntryModal input)');
+
+                        if (regularDivisionSelect && regularOfficeInput) {
+                            regularDivisionSelect.addEventListener('change', function() {
+                                updateOfficeField(this.value, regularOfficeInput);
+                            });
+                        }
+
+                        // For manual entry modal
+                        const manualDivisionSelect = document.querySelector('#manualEntryModal select[name="division"]');
+                        const manualOfficeInput = document.querySelector('#manualEntryModal input[name="office"]');
+
+                        if (manualDivisionSelect && manualOfficeInput) {
+                            manualDivisionSelect.addEventListener('change', function() {
+                                updateOfficeField(this.value, manualOfficeInput);
+                            });
+                        }
+
+                        function updateOfficeField(departmentId, officeInput) {
+                            if (!departmentId || !officeInput) {
+                                if (officeInput) {
+                                    officeInput.value = '';
+                                }
+                                return;
+                            }
+
+                            // Show loading state
+                            const originalValue = officeInput.value;
+                            const originalPlaceholder = officeInput.placeholder;
+                            officeInput.value = '';
+                            officeInput.placeholder = 'Loading office...';
+                            officeInput.disabled = true;
+                            officeInput.classList.add('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+
+                            // Fetch department details
+                            const baseUrl = window.location.origin;
+                            const fetchUrl = `${baseUrl}/ris/department-details?department_id=${departmentId}`;
+
+                            fetch(fetchUrl, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                                },
+                                credentials: 'same-origin'
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                officeInput.value = data.office || '';
+                                officeInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+                                officeInput.classList.add('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
+                                setTimeout(() => {
+                                    officeInput.classList.remove('bg-green-50', 'dark:bg-green-900/20', 'border-green-300', 'dark:border-green-700');
+                                }, 800);
+                            })
+                            .catch(error => {
+                                officeInput.value = originalValue;
+                                officeInput.classList.remove('animate-pulse', 'bg-blue-50', 'dark:bg-blue-900/20');
+                                officeInput.classList.add('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
+                                setTimeout(() => {
+                                    officeInput.classList.remove('bg-red-50', 'dark:bg-red-900/20', 'border-red-300', 'dark:border-red-700');
+                                }, 2000);
+
+                                // Optional: Show user-friendly error message
+                                if (typeof showAlert === 'function') {
+                                    showAlert('Failed to load office information. Please enter manually.', 'warning');
+                                }
+                            })
+                            .finally(() => {
+                                officeInput.disabled = false;
+                                officeInput.placeholder = originalPlaceholder;
+                            });
+                        }
                     });
                 </script>
 
