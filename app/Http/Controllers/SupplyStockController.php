@@ -47,7 +47,11 @@ class SupplyStockController extends Controller
                 $query->orderBy('transaction_date', 'desc')
                     ->orderBy('created_at', 'desc');
             }
-        ]);
+        ])
+        // Join with supplies table to order by stock_no
+        ->join('supplies', 'supply_stocks.supply_id', '=', 'supplies.supply_id')
+        ->select('supply_stocks.*') // Select only supply_stocks columns to avoid conflicts
+        ->orderByRaw('CAST(supplies.stock_no AS UNSIGNED) ASC'); // Order by stock_no as number in ascending order
 
         // Text‐search filter
         if ($search) {
@@ -90,7 +94,7 @@ class SupplyStockController extends Controller
         $departments = Department::orderBy('name')->get();
         $stocks      = $stocksQuery->paginate(25);
 
-        // ─── NEW: generate a default IAR for the modal’s reference_no input
+        // ─── NEW: generate a default IAR for the modal's reference_no input
         //    pick any existing supply_id (we just need an int for the generator)
         $seedSupplyId = optional($supplies->first())->supply_id ?? 1;
         $defaultIar   = $this->referenceNumberService
