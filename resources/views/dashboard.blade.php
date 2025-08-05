@@ -205,10 +205,10 @@
                 </div>
             </div>
 
-            <!-- NEW: Improved Donut Charts Section -->
-            <div class="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <!-- Division Distribution Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-visible mb-8">
+            <!-- NEW: Improved Donut Charts Section with 8:4 Layout -->
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Division Distribution Chart (8/12 width) -->
+                <div class="lg:col-span-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-visible">
                     <div class="p-8 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <div>
@@ -280,48 +280,38 @@
                     </div>
                 </div>
 
-                <!-- Stock Status Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                    <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                                    <svg class="w-6 h-6 mr-3 text-[#ce201f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                    </svg>
-                                    Stock Status Overview
-                                </h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Current inventory status breakdown</p>
-                            </div>
-                            <div class="mt-6 sm:mt-0">
-                                <button id="refreshStockBtn" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg hover:bg-gray-100 focus:ring-[#ce201f] focus:border-[#ce201f] px-4 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 transition-all duration-200 flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                    </svg>
-                                    Refresh
-                                </button>
-                            </div>
+                <!-- Stock Status Chart (4/12 width) -->
+                <div class="lg:col-span-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div class="text-center p-2">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2 text-[#ce201f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                Stock Overview
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Current inventory status</p>
                         </div>
                     </div>
 
-                    <div class="p-8">
-                        <div class="relative" style="height: 420px;">
+                    <div class="p-6">
+                        <div class="relative" style="height: 300px;">
                             <canvas id="stockStatusChart"></canvas>
                         </div>
 
-                        <!-- Stock Stats -->
-                        <div class="mt-6 grid grid-cols-3 gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                                <p class="text-2xl font-bold text-green-600" id="wellStockedCount">0</p>
-                                <p class="text-xs text-green-600 dark:text-green-400 font-medium mt-1">Well Stocked</p>
+                        <!-- Stock Stats - Compact Version -->
+                        <div class="mt-4 space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                <p class="text-xl font-bold text-green-600" id="wellStockedCount">0</p>
+                                <p class="text-xs text-green-600 dark:text-green-400 font-medium">Well Stocked</p>
                             </div>
-                            <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                <p class="text-2xl font-bold text-yellow-600" id="lowStockCount">0</p>
-                                <p class="text-xs text-yellow-600 dark:text-yellow-400 font-medium mt-1">Low Stock</p>
+                            <div class="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                <p class="text-xl font-bold text-yellow-600" id="lowStockCount">0</p>
+                                <p class="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Low Stock</p>
                             </div>
-                            <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                                <p class="text-2xl font-bold text-red-600" id="outOfStockCount">0</p>
-                                <p class="text-xs text-red-600 dark:text-red-400 font-medium mt-1">Out of Stock</p>
+                            <div class="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                <p class="text-xl font-bold text-red-600" id="outOfStockCount">0</p>
+                                <p class="text-xs text-red-600 dark:text-red-400 font-medium">Out of Stock</p>
                             </div>
                         </div>
                     </div>
@@ -2056,7 +2046,6 @@
             document.getElementById('deptMonthFilter').addEventListener('change', updateDepartmentChart);
             document.getElementById('deptYearFilter').addEventListener('change', updateDepartmentChart);
             document.getElementById('deptTypeFilter').addEventListener('change', updateDepartmentChart);
-            document.getElementById('refreshStockBtn').addEventListener('click', refreshStockChart);
         }, 500);
     });
 
@@ -2264,32 +2253,6 @@
         document.getElementById('wellStockedCount').textContent = wellStocked;
         document.getElementById('lowStockCount').textContent = lowStock;
         document.getElementById('outOfStockCount').textContent = outOfStock;
-    }
-
-    function refreshStockChart() {
-        // Add a loading state
-        const refreshBtn = document.getElementById('refreshStockBtn');
-        const originalText = refreshBtn.innerHTML;
-
-        refreshBtn.innerHTML = `
-            <svg class="w-4 h-4 mr-1 inline animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            Refreshing...
-        `;
-        refreshBtn.disabled = true;
-
-        // Simulate refresh (you can replace this with an actual API call)
-        setTimeout(() => {
-            // In a real implementation, you would fetch fresh data here
-            // fetch('/api/stock-status').then(response => response.json()).then(data => { ... })
-
-            updateStockChart();
-
-            // Reset button
-            refreshBtn.innerHTML = originalText;
-            refreshBtn.disabled = false;
-        }, 1000);
     }
 </script>
 
