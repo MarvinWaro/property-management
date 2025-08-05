@@ -45,8 +45,7 @@ class RisSlipController extends Controller
         $declinedCount = RisSlip::declined()->count();
 
         // Start building the query with relationships
-        $query = RisSlip::with(['department', 'requester', 'approver', 'issuer', 'receiver', 'decliner'])
-                    ->orderBy('created_at', 'desc');
+        $query = RisSlip::with(['department', 'requester', 'approver', 'issuer', 'receiver', 'decliner']);
 
         // Apply status filter using constants
         if ($request->filled('status')) {
@@ -102,6 +101,12 @@ class RisSlipController extends Controller
         if ($request->filled('department')) {
             $query->where('division', $request->department);
         }
+
+        // FIXED: Sort by ris_date (request date) - newest first, then by created_at, then by ris_id
+        // This shows the most recent requests at the top based on actual request date
+        $query->orderBy('ris_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('ris_id', 'desc');
 
         // Paginate with query string preservation
         $risSlips = $query->paginate(25)->appends($request->query());
