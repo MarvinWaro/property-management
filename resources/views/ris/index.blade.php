@@ -348,21 +348,229 @@
                                         </div>
 
                                         <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Requested By <span class="text-red-500">*</span>
                                             </label>
-                                            <select name="requested_by" required
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
-                                                dark:bg-gray-700 dark:text-white rounded-md
-                                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                                <option value="">Select User</option>
-                                                @foreach ($users as $user)
-                                                    <option value="{{ $user->id }}">{{ $user->name }}
-                                                        ({{ $user->email }})</option>
-                                                @endforeach
-                                            </select>
+
+                                            <!-- Custom Searchable Dropdown -->
+                                            <div class="relative">
+                                                <!-- Hidden input for form submission -->
+                                                <input type="hidden" name="requested_by" id="requested_by_value" required>
+
+                                                <!-- Dropdown trigger -->
+                                                <div id="userDropdownTrigger"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+                                                            dark:bg-gray-700 dark:text-white rounded-md
+                                                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                                            cursor-pointer flex items-center justify-between min-h-[2.5rem]">
+                                                    <span id="selectedUserText" class="text-gray-500 dark:text-gray-400">Select User</span>
+                                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" id="dropdownIcon"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+
+                                                <!-- Dropdown content -->
+                                                <div id="userDropdownContent"
+                                                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
+                                                            rounded-md shadow-lg hidden max-h-80 overflow-hidden">
+
+                                                    <!-- Search input inside dropdown -->
+                                                    <div class="p-3 border-b border-gray-200 dark:border-gray-600">
+                                                        <div class="relative">
+                                                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                            </svg>
+                                                            <input type="text" id="userSearchInput"
+                                                                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600
+                                                                        rounded-md bg-white dark:bg-gray-800 dark:text-white
+                                                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                placeholder="Search users by name, department, or designation..."
+                                                                autocomplete="off">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Users list -->
+                                                    <div class="max-h-60 overflow-y-auto" id="usersList">
+                                                        @php
+                                                            // Group users by department
+                                                            $usersByDepartment = collect($users)->groupBy(function ($user) {
+                                                                return $user->department ? $user->department->name : 'No Department';
+                                                            })->sortKeys();
+                                                        @endphp
+
+                                                        @foreach ($usersByDepartment as $departmentName => $departmentUsers)
+                                                            <div class="user-department-group" data-department="{{ $departmentName }}">
+                                                                <div class="px-3 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
+                                                                    {{ $departmentName }}
+                                                                </div>
+                                                                @foreach ($departmentUsers->sortBy('name') as $user)
+                                                                    <div class="user-option px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-50 dark:border-gray-700"
+                                                                        data-value="{{ $user->id }}"
+                                                                        data-search-text="{{ strtolower($user->name . ' ' . $user->email . ' ' . $departmentName . ' ' . ($user->designation->name ?? '')) }}">
+                                                                        <div class="font-medium text-gray-900 dark:text-white">
+                                                                            {{ $user->name }}
+                                                                            @if ($user->designation)
+                                                                                <span class="text-sm text-gray-600 dark:text-gray-400">- {{ $user->designation->name }}</span>
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        <style>
+                                            /* Enhanced styling for the custom dropdown */
+                                            .user-option.hidden {
+                                                display: none !important;
+                                            }
+
+                                            .user-department-group.hidden {
+                                                display: none !important;
+                                            }
+
+                                            .user-option:hover {
+                                                background-color: #f9fafb !important;
+                                            }
+
+                                            .dark .user-option:hover {
+                                                background-color: #374151 !important;
+                                            }
+
+                                            /* Smooth transitions */
+                                            #userDropdownContent {
+                                                transition: all 0.2s ease-in-out;
+                                            }
+
+                                            #dropdownIcon {
+                                                transition: transform 0.2s ease-in-out;
+                                            }
+
+                                            #dropdownIcon.rotated {
+                                                transform: rotate(180deg);
+                                            }
+                                        </style>
+
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const dropdownTrigger = document.getElementById('userDropdownTrigger');
+                                                const dropdownContent = document.getElementById('userDropdownContent');
+                                                const searchInput = document.getElementById('userSearchInput');
+                                                const selectedUserText = document.getElementById('selectedUserText');
+                                                const hiddenInput = document.getElementById('requested_by_value');
+                                                const dropdownIcon = document.getElementById('dropdownIcon');
+                                                const userOptions = document.querySelectorAll('.user-option');
+                                                const departmentGroups = document.querySelectorAll('.user-department-group');
+
+                                                // Toggle dropdown
+                                                dropdownTrigger.addEventListener('click', function() {
+                                                    const isOpen = !dropdownContent.classList.contains('hidden');
+
+                                                    if (isOpen) {
+                                                        closeDropdown();
+                                                    } else {
+                                                        openDropdown();
+                                                    }
+                                                });
+
+                                                function openDropdown() {
+                                                    dropdownContent.classList.remove('hidden');
+                                                    dropdownIcon.classList.add('rotated');
+                                                    searchInput.focus();
+                                                    searchInput.value = '';
+                                                    filterUsers(); // Reset filter
+                                                }
+
+                                                function closeDropdown() {
+                                                    dropdownContent.classList.add('hidden');
+                                                    dropdownIcon.classList.remove('rotated');
+                                                }
+
+                                                // Close dropdown when clicking outside
+                                                document.addEventListener('click', function(event) {
+                                                    if (!dropdownTrigger.contains(event.target) && !dropdownContent.contains(event.target)) {
+                                                        closeDropdown();
+                                                    }
+                                                });
+
+                                                // Handle user selection
+                                                userOptions.forEach(option => {
+                                                    option.addEventListener('click', function() {
+                                                        const userId = this.getAttribute('data-value');
+                                                        const userName = this.querySelector('.font-medium').textContent.trim();
+
+                                                        hiddenInput.value = userId;
+                                                        selectedUserText.textContent = userName;
+                                                        selectedUserText.classList.remove('text-gray-500', 'dark:text-gray-400');
+                                                        selectedUserText.classList.add('text-gray-900', 'dark:text-white');
+
+                                                        closeDropdown();
+                                                    });
+                                                });
+
+                                                // Search functionality
+                                                searchInput.addEventListener('input', filterUsers);
+                                                searchInput.addEventListener('keyup', filterUsers);
+
+                                                function filterUsers() {
+                                                    const searchTerm = searchInput.value.toLowerCase();
+
+                                                    if (searchTerm === '') {
+                                                        // Show all options and groups
+                                                        userOptions.forEach(option => {
+                                                            option.classList.remove('hidden');
+                                                        });
+                                                        departmentGroups.forEach(group => {
+                                                            group.classList.remove('hidden');
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    // Track which groups have visible options
+                                                    const visibleGroups = new Set();
+
+                                                    // Filter options
+                                                    userOptions.forEach(option => {
+                                                        const searchText = option.getAttribute('data-search-text') || '';
+
+                                                        if (searchText.includes(searchTerm)) {
+                                                            option.classList.remove('hidden');
+                                                            // Mark this group as having visible options
+                                                            const group = option.closest('.user-department-group');
+                                                            if (group) {
+                                                                visibleGroups.add(group);
+                                                            }
+                                                        } else {
+                                                            option.classList.add('hidden');
+                                                        }
+                                                    });
+
+                                                    // Show/hide groups based on whether they have visible options
+                                                    departmentGroups.forEach(group => {
+                                                        if (visibleGroups.has(group)) {
+                                                            group.classList.remove('hidden');
+                                                        } else {
+                                                            group.classList.add('hidden');
+                                                        }
+                                                    });
+                                                }
+
+                                                // Prevent form submission when Enter is pressed in search
+                                                searchInput.addEventListener('keydown', function(e) {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                    }
+                                                });
+                                            });
+                                        </script>
+
                                     </div>
 
                                     <!-- Purpose -->
