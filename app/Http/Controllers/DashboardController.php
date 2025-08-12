@@ -449,4 +449,32 @@ class DashboardController extends Controller
         return redirect()->route('dashboard')->with('success', 'Switched back to Admin Mode.');
     }
 
+
+    /**
+     * API endpoint for transaction chart data
+     */
+    public function getChartTransactions()
+    {
+        return response()->json($this->getMonthlyTransactionsData())
+            ->header('Cache-Control', 'public, max-age=300'); // 5 min cache
+    }
+
+    /**
+     * API endpoint for department chart data
+     */
+    public function getChartDepartments()
+    {
+        return response()->json($this->getDepartmentTransactionsData())
+            ->header('Cache-Control', 'public, max-age=300');
+    }
+
+    /**
+     * API endpoint for stock chart data
+     */
+    public function getChartStock()
+    {
+        return response()->json($this->getStockStatusData())
+            ->header('Cache-Control', 'public, max-age=300');
+    }
+
 }
