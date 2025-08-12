@@ -1822,9 +1822,11 @@
 
                     years.forEach((year, yearIndex) => {
                         if (chartData[type][year]) {
+                            // when building datasets
                             const monthlyData = Array(12).fill(0);
-                            Object.keys(chartData[type][year]).forEach(month => {
-                                monthlyData[parseInt(month) - 1] = chartData[type][year][month];
+                                Object.keys(chartData[type][year]).forEach(month => {
+                                const v = Number(chartData[type][year][month]) || 0;
+                                monthlyData[parseInt(month, 10) - 1] = v;
                             });
 
                             const typeColor = colors[type];
@@ -1849,9 +1851,11 @@
 
                 years.forEach((year, yearIndex) => {
                     if (chartData[selectedType][year]) {
+                        // when building datasets
                         const monthlyData = Array(12).fill(0);
-                        Object.keys(chartData[selectedType][year]).forEach(month => {
-                            monthlyData[parseInt(month) - 1] = chartData[selectedType][year][month];
+                            Object.keys(chartData[type][year]).forEach(month => {
+                            const v = Number(chartData[type][year][month]) || 0;
+                            monthlyData[parseInt(month, 10) - 1] = v;
                         });
 
                         const typeColor = colors[selectedType];

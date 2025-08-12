@@ -700,65 +700,49 @@
 
                     <!-- Add this to the show.blade.php where appropriate -->
                     @if (auth()->id() === $risSlip->received_by && !$risSlip->received_at && $risSlip->status === 'posted')
-                        <div
-                            class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Confirm Receipt of Supplies
-                            </h3>
+                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Confirm Receipt of Supplies</h3>
                             <p class="text-sm text-blue-700 dark:text-blue-400 mb-3">
                                 These supplies have been issued to you. Please confirm receipt.
                             </p>
 
-                            <form action="{{ route('ris.receive', $risSlip) }}" method="POST" id="receiveForm"
-                                class="mt-2">
+                            <form action="{{ route('ris.receive', $risSlip) }}" method="POST" id="receiveForm" class="mt-2">
                                 @csrf
                                 <div class="mb-3">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Signature
-                                        Type</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Signature Type</label>
                                     <div class="flex items-center mb-2">
-                                        <input type="radio" id="receive-esign" name="signature_type"
-                                            value="esign" class="mr-2"
+                                        <input type="radio" id="receive-esign" name="signature_type" value="esign" class="mr-2"
                                             {{ auth()->user()->signature_path ? '' : 'disabled' }}>
                                         <label for="receive-esign" class="text-sm">Use E-Signature</label>
                                     </div>
                                     <div class="flex items-center">
-                                        <input type="radio" id="receive-sgd" name="signature_type" value="sgd"
-                                            class="mr-2" checked>
-                                        <label for="receive-sgd" class="text-sm">Mark as SGD (Sign physically
-                                            later)</label>
+                                        <input type="radio" id="receive-sgd" name="signature_type" value="sgd" class="mr-2" checked>
+                                        <label for="receive-sgd" class="text-sm">Mark as SGD (Sign physically later)</label>
                                     </div>
                                     @if (!auth()->user()->signature_path)
-                                        <p class="text-xs text-red-500 mt-1">You need to upload a signature in your
-                                            profile to use E-Signature.</p>
+                                        <p class="text-xs text-red-500 mt-1">You need to upload a signature in your profile to use E-Signature.</p>
                                     @endif
                                 </div>
 
                                 <!-- Signature preview -->
                                 @if (auth()->user()->signature_path)
-                                    <div id="receive-signature-preview"
-                                        class="mb-3 p-2 border rounded text-center hidden">
+                                    <div id="receive-signature-preview" class="mb-3 p-2 border rounded text-center hidden">
                                         <p class="text-sm mb-1">Your signature will appear as:</p>
-                                        <img src="{{ Storage::url(auth()->user()->signature_path) }}"
-                                            alt="Your signature" class="max-h-16 mx-auto">
+                                        <img src="{{ Storage::url(auth()->user()->signature_path) }}" alt="Your signature" class="max-h-16 mx-auto">
                                     </div>
                                 @endif
 
                                 <!-- Terms and conditions for e-signature -->
-                                <div id="receive-esign-terms"
-                                    class="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs mb-3 hidden">
-                                    <p class="font-bold mb-1 text-gray-900 dark:text-white">E-Signature Terms and
-                                        Conditions:</p>
+                                <div id="receive-esign-terms" class="bg-gray-100 dark:bg-gray-700 p-3 rounded text-xs mb-3 hidden">
+                                    <p class="font-bold mb-1 text-gray-900 dark:text-white">E-Signature Terms and Conditions:</p>
                                     <ul class="list-disc pl-4 space-y-1 text-gray-700 dark:text-gray-300">
                                         <li>I authorize the use of my electronic signature to confirm receipt.</li>
-                                        <li>I understand this e-signature has the same legal validity as my handwritten
-                                            signature.</li>
+                                        <li>I understand this e-signature has the same legal validity as my handwritten signature.</li>
                                         <li>I confirm I have received all the items as specified.</li>
                                     </ul>
                                     <div class="mt-2">
                                         <input type="checkbox" id="receive-agree-terms" class="mr-1">
-                                        <label for="receive-agree-terms"
-                                            class="text-xs text-gray-800 dark:text-gray-200">I agree to the above
-                                            terms</label>
+                                        <label for="receive-agree-terms" class="text-xs text-gray-800 dark:text-gray-200">I agree to the above terms</label>
                                     </div>
                                 </div>
 
@@ -771,63 +755,121 @@
 
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Receive form validation
-                                const receiveForm = document.getElementById('receiveForm');
-                                const receiveEsignRadio = document.getElementById('receive-esign');
-                                const receiveSgdRadio = document.getElementById('receive-sgd');
-                                const receiveTermsCheckbox = document.getElementById('receive-agree-terms');
-                                const receiveTermsDiv = document.getElementById('receive-esign-terms');
-                                const receiveSignaturePreview = document.getElementById('receive-signature-preview');
-                                const submitReceiveBtn = document.getElementById('submitReceiveBtn');
+                                // Add error handling and debugging
+                                try {
+                                    console.log('Initializing receive form JavaScript...');
 
-                                // Function to toggle submit button state
-                                function updateReceiveSubmitButton() {
-                                    if (receiveEsignRadio.checked && !receiveTermsCheckbox.checked) {
-                                        submitReceiveBtn.disabled = true;
-                                        submitReceiveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                    // Receive form validation with better element checking
+                                    const receiveForm = document.getElementById('receiveForm');
+                                    const receiveEsignRadio = document.getElementById('receive-esign');
+                                    const receiveSgdRadio = document.getElementById('receive-sgd');
+                                    const receiveTermsCheckbox = document.getElementById('receive-agree-terms');
+                                    const receiveTermsDiv = document.getElementById('receive-esign-terms');
+                                    const receiveSignaturePreview = document.getElementById('receive-signature-preview');
+                                    const submitReceiveBtn = document.getElementById('submitReceiveBtn');
+
+                                    // Debug: Log which elements were found
+                                    console.log('Form elements found:', {
+                                        receiveForm: !!receiveForm,
+                                        receiveEsignRadio: !!receiveEsignRadio,
+                                        receiveSgdRadio: !!receiveSgdRadio,
+                                        receiveTermsCheckbox: !!receiveTermsCheckbox,
+                                        receiveTermsDiv: !!receiveTermsDiv,
+                                        receiveSignaturePreview: !!receiveSignaturePreview,
+                                        submitReceiveBtn: !!submitReceiveBtn
+                                    });
+
+                                    // Function to toggle submit button state
+                                    function updateReceiveSubmitButton() {
+                                        if (!submitReceiveBtn) {
+                                            console.warn('Submit button not found!');
+                                            return;
+                                        }
+
+                                        // Only disable if e-signature is selected AND terms are not checked
+                                        if (receiveEsignRadio && receiveEsignRadio.checked && receiveTermsCheckbox && !receiveTermsCheckbox.checked) {
+                                            submitReceiveBtn.disabled = true;
+                                            submitReceiveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                            console.log('Button disabled - e-signature selected but terms not agreed');
+                                        } else {
+                                            submitReceiveBtn.disabled = false;
+                                            submitReceiveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                            console.log('Button enabled');
+                                        }
+                                    }
+
+                                    // Add event listeners with error handling
+                                    if (receiveEsignRadio) {
+                                        receiveEsignRadio.addEventListener('change', function() {
+                                            console.log('E-signature radio changed:', this.checked);
+                                            if (this.checked) {
+                                                if (receiveTermsDiv) receiveTermsDiv.classList.remove('hidden');
+                                                if (receiveSignaturePreview) receiveSignaturePreview.classList.remove('hidden');
+                                            }
+                                            updateReceiveSubmitButton();
+                                        });
+                                    }
+
+                                    if (receiveSgdRadio) {
+                                        receiveSgdRadio.addEventListener('change', function() {
+                                            console.log('SGD radio changed:', this.checked);
+                                            if (this.checked) {
+                                                if (receiveTermsDiv) receiveTermsDiv.classList.add('hidden');
+                                                if (receiveSignaturePreview) receiveSignaturePreview.classList.add('hidden');
+                                            }
+                                            updateReceiveSubmitButton();
+                                        });
+                                    }
+
+                                    if (receiveTermsCheckbox) {
+                                        receiveTermsCheckbox.addEventListener('change', function() {
+                                            console.log('Terms checkbox changed:', this.checked);
+                                            updateReceiveSubmitButton();
+                                        });
+                                    }
+
+                                    // Handle form submission with debugging
+                                    if (receiveForm) {
+                                        receiveForm.addEventListener('submit', function(e) {
+                                            console.log('Form submission attempted');
+
+                                            // Check if e-signature is selected and terms not agreed
+                                            if (receiveEsignRadio && receiveEsignRadio.checked && receiveTermsCheckbox && !receiveTermsCheckbox.checked) {
+                                                e.preventDefault();
+                                                alert('You must agree to the terms to use e-signature');
+                                                console.log('Form submission prevented - terms not agreed');
+                                                return false;
+                                            }
+
+                                            console.log('Form submission proceeding...');
+
+                                            // Add loading state to prevent double submission
+                                            if (submitReceiveBtn) {
+                                                submitReceiveBtn.disabled = true;
+                                                submitReceiveBtn.innerHTML = 'Processing...';
+                                            }
+                                        });
                                     } else {
-                                        submitReceiveBtn.disabled = false;
-                                        submitReceiveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                        console.error('Receive form not found!');
+                                    }
+
+                                    // Initialize button state - ensure it's enabled by default for SGD
+                                    setTimeout(() => {
+                                        updateReceiveSubmitButton();
+                                        console.log('Initial button state set');
+                                    }, 100);
+
+                                } catch (error) {
+                                    console.error('Error in receive form JavaScript:', error);
+
+                                    // Fallback: ensure button is enabled if there's any error
+                                    const fallbackBtn = document.getElementById('submitReceiveBtn');
+                                    if (fallbackBtn) {
+                                        fallbackBtn.disabled = false;
+                                        fallbackBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                        console.log('Fallback: Button enabled due to JavaScript error');
                                     }
                                 }
-
-                                // Add event listeners
-                                if (receiveEsignRadio) {
-                                    receiveEsignRadio.addEventListener('change', function() {
-                                        if (this.checked) {
-                                            receiveTermsDiv.classList.remove('hidden');
-                                            if (receiveSignaturePreview) receiveSignaturePreview.classList.remove('hidden');
-                                            updateReceiveSubmitButton();
-                                        }
-                                    });
-                                }
-
-                                if (receiveSgdRadio) {
-                                    receiveSgdRadio.addEventListener('change', function() {
-                                        if (this.checked) {
-                                            receiveTermsDiv.classList.add('hidden');
-                                            if (receiveSignaturePreview) receiveSignaturePreview.classList.add('hidden');
-                                            updateReceiveSubmitButton();
-                                        }
-                                    });
-                                }
-
-                                if (receiveTermsCheckbox) {
-                                    receiveTermsCheckbox.addEventListener('change', updateReceiveSubmitButton);
-                                }
-
-                                // Handle form submission
-                                if (receiveForm) {
-                                    receiveForm.addEventListener('submit', function(e) {
-                                        if (receiveEsignRadio.checked && !receiveTermsCheckbox.checked) {
-                                            e.preventDefault();
-                                            alert('You must agree to the terms to use e-signature');
-                                        }
-                                    });
-                                }
-
-                                // Initialize button state
-                                updateReceiveSubmitButton();
                             });
                         </script>
                     @endif
