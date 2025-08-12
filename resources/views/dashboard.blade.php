@@ -1660,11 +1660,101 @@
 
 
 <!-- Chart JavaScript -->
+<!-- Optimized Chart JavaScript with Async Loading -->
 <script>
+    // Data cache and loading state management
+    const ChartDataManager = {
+        cache: {},
+        loading: {},
+
+        async fetchData(endpoint, cacheKey) {
+            // Return cached data if available
+            if (this.cache[cacheKey]) {
+                return this.cache[cacheKey];
+            }
+
+            // Prevent multiple simultaneous requests for same data
+            if (this.loading[cacheKey]) {
+                return this.loading[cacheKey];
+            }
+
+            // Show loading state
+            this.showLoadingState(cacheKey);
+
+            // Create fetch promise and store it
+            this.loading[cacheKey] = fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    this.cache[cacheKey] = data;
+                    delete this.loading[cacheKey];
+                    this.hideLoadingState(cacheKey);
+                    return data;
+                })
+                .catch(error => {
+                    console.error(`Error fetching ${cacheKey}:`, error);
+                    delete this.loading[cacheKey];
+                    this.hideLoadingState(cacheKey);
+                    // Return the initial data if fetch fails
+                    return window[`initial${cacheKey.charAt(0).toUpperCase() + cacheKey.slice(1)}Data`] || null;
+                });
+
+            return this.loading[cacheKey];
+        },
+
+        showLoadingState(type) {
+            const loadingHTML = `
+                <div class="chart-loading" id="${type}-loading">
+                    <div class="flex flex-col items-center justify-center h-64">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ce201f]"></div>
+                        <p class="mt-4 text-gray-600 dark:text-gray-400">Loading chart data...</p>
+                    </div>
+                </div>
+            `;
+
+            if (type === 'transactions') {
+                const container = document.getElementById('transactionsChart')?.parentElement;
+                if (container && !container.querySelector('.chart-loading')) {
+                    container.insertAdjacentHTML('beforeend', loadingHTML);
+                }
+            } else if (type === 'department') {
+                const container = document.getElementById('departmentChartContainer');
+                if (container && !container.querySelector('.chart-loading')) {
+                    container.insertAdjacentHTML('beforeend', loadingHTML);
+                }
+            } else if (type === 'stock') {
+                const container = document.getElementById('stockStatusChart')?.parentElement;
+                if (container && !container.querySelector('.chart-loading')) {
+                    container.insertAdjacentHTML('beforeend', loadingHTML);
+                }
+            }
+        },
+
+        hideLoadingState(type) {
+            const loadingElement = document.getElementById(`${type}-loading`);
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+        }
+    };
+
+    // Debounce utility function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     // Chart Configuration and Data
     let transactionsChart;
-    let chartData = @json($monthlyTransactions ?? []); // This will be provided by the controller
+    let chartData = null;
     let currentChartType = 'line';
+    let chartsInitialized = false;
 
     // Color schemes for different transaction types
     const colors = {
@@ -1676,23 +1766,173 @@
         info: '#06b6d4'
     };
 
-    // Initialize Chart
+    // Intersection Observer for lazy loading
+    const chartObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const chartId = entry.target.getAttribute('data-chart');
+                if (chartId === 'transactions' && !transactionsChart) {
+                    loadTransactionChart();
+                } else if (chartId === 'department' && !departmentChart) {
+                    loadDepartmentChart();
+                } else if (chartId === 'stock' && !stockStatusChart) {
+                    loadStockChart();
+                }
+                chartObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Initialize Charts
     document.addEventListener('DOMContentLoaded', function() {
-        initializeChart();
-        populateYearFilter();
-        updateChartStats();
+        // Check if we have initial data passed from the server
+        if (typeof initialChartData !== 'undefined' && initialChartData) {
+            chartData = initialChartData;
+        }
+        if (typeof initialDepartmentData !== 'undefined' && initialDepartmentData) {
+            departmentData = initialDepartmentData;
+        }
+        if (typeof initialStockData !== 'undefined' && initialStockData) {
+            stockData = initialStockData;
+        }
 
-        // Chart type toggle listeners
-        document.getElementById('lineChartBtn').addEventListener('click', () => switchChartType('line'));
-        document.getElementById('barChartBtn').addEventListener('click', () => switchChartType('bar'));
+        // Option 1: Immediate initialization if data is available (no lazy loading)
+        const immediateInit = true; // Set to false to enable lazy loading
 
-        // Filter listeners
-        document.getElementById('yearFilter').addEventListener('change', applyFilters);
-        document.getElementById('transactionTypeFilter').addEventListener('change', applyFilters);
+        if (immediateInit) {
+            // Initialize all charts immediately with available data
+            if (chartData) {
+                initializeChart();
+                populateYearFilter();
+                updateChartStats();
+                setupChartEventListeners();
+            }
+
+            // Initialize department chart after a small delay
+            setTimeout(() => {
+                if (departmentData) {
+                    initializeDepartmentChart();
+                    populateDeptYearFilter();
+                    setupDepartmentEventListeners();
+                }
+                if (stockData) {
+                    initializeStockChart();
+                }
+            }, 500);
+
+            // Then fetch fresh data in background
+            fetchFreshData();
+        } else {
+            // Option 2: Lazy loading with intersection observer
+            setupLazyLoading();
+        }
     });
 
+    function setupLazyLoading() {
+        const transactionChartEl = document.getElementById('transactionsChart');
+        const departmentChartEl = document.getElementById('departmentChart');
+        const stockChartEl = document.getElementById('stockStatusChart');
+
+        if (transactionChartEl) {
+            transactionChartEl.setAttribute('data-chart', 'transactions');
+            chartObserver.observe(transactionChartEl);
+        }
+
+        if (departmentChartEl) {
+            departmentChartEl.setAttribute('data-chart', 'department');
+            chartObserver.observe(departmentChartEl);
+        }
+
+        if (stockChartEl) {
+            stockChartEl.setAttribute('data-chart', 'stock');
+            chartObserver.observe(stockChartEl);
+        }
+    }
+
+    function setupChartEventListeners() {
+        // Chart type toggle listeners
+        document.getElementById('lineChartBtn')?.addEventListener('click', () => switchChartType('line'));
+        document.getElementById('barChartBtn')?.addEventListener('click', () => switchChartType('bar'));
+
+        // Filter listeners with debouncing
+        const debouncedApplyFilters = debounce(applyFilters, 300);
+        document.getElementById('yearFilter')?.addEventListener('change', debouncedApplyFilters);
+        document.getElementById('transactionTypeFilter')?.addEventListener('change', debouncedApplyFilters);
+    }
+
+    function setupDepartmentEventListeners() {
+        const debouncedUpdateDept = debounce(updateDepartmentChart, 300);
+        document.getElementById('deptMonthFilter')?.addEventListener('change', debouncedUpdateDept);
+        document.getElementById('deptYearFilter')?.addEventListener('change', debouncedUpdateDept);
+        document.getElementById('deptTypeFilter')?.addEventListener('change', debouncedUpdateDept);
+    }
+
+    async function fetchFreshData() {
+        // Only fetch if API endpoints are available
+        try {
+            // Try to fetch fresh data in background
+            const transactionsPromise = ChartDataManager.fetchData('/api/charts/transactions', 'transactions');
+            const departmentPromise = ChartDataManager.fetchData('/api/charts/departments', 'department');
+            const stockPromise = ChartDataManager.fetchData('/api/charts/stock', 'stock');
+
+            // Update charts as fresh data arrives
+            transactionsPromise.then(data => {
+                if (data && data !== chartData) {
+                    chartData = data;
+                    if (transactionsChart) {
+                        transactionsChart.data.datasets = generateDatasets();
+                        transactionsChart.update('active');
+                        updateChartStats();
+                    }
+                }
+            }).catch(() => {
+                // Silently fail if API not available
+            });
+
+            departmentPromise.then(data => {
+                if (data && data !== departmentData) {
+                    departmentData = data;
+                    if (departmentChart) {
+                        updateDepartmentChart();
+                    }
+                }
+            }).catch(() => {
+                // Silently fail if API not available
+            });
+
+            stockPromise.then(data => {
+                if (data && data !== stockData) {
+                    stockData = data;
+                    if (stockStatusChart) {
+                        updateStockChart();
+                    }
+                }
+            }).catch(() => {
+                // Silently fail if API not available
+            });
+        } catch (error) {
+            // If API endpoints don't exist, just use the initial data
+            console.log('Using initial data from server');
+        }
+    }
+
+    async function loadTransactionChart() {
+        if (!chartData) {
+            // Try to fetch if no initial data
+            chartData = await ChartDataManager.fetchData('/api/charts/transactions', 'transactions');
+        }
+
+        if (chartData) {
+            initializeChart();
+            populateYearFilter();
+            updateChartStats();
+            setupChartEventListeners();
+        }
+    }
+
     function initializeChart() {
-        const ctx = document.getElementById('transactionsChart').getContext('2d');
+        const ctx = document.getElementById('transactionsChart')?.getContext('2d');
+        if (!ctx) return;
 
         const config = {
             type: currentChartType,
@@ -1703,6 +1943,9 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: chartsInitialized ? 750 : 0 // No animation on first load
+                },
                 interaction: {
                     mode: 'index',
                     intersect: false,
@@ -1795,6 +2038,7 @@
         };
 
         transactionsChart = new Chart(ctx, config);
+        chartsInitialized = true;
     }
 
     function generateDatasets() {
@@ -1808,8 +2052,8 @@
             }];
         }
 
-        const selectedYear = document.getElementById('yearFilter').value;
-        const selectedType = document.getElementById('transactionTypeFilter').value;
+        const selectedYear = document.getElementById('yearFilter')?.value || 'all';
+        const selectedType = document.getElementById('transactionTypeFilter')?.value || 'all';
         const datasets = [];
 
         if (selectedType === 'all') {
@@ -1886,20 +2130,24 @@
         document.querySelectorAll('.chart-type-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.getElementById(type + 'ChartBtn').classList.add('active');
+        document.getElementById(type + 'ChartBtn')?.classList.add('active');
 
-        // Update chart
-        transactionsChart.config.type = type;
-        transactionsChart.data.datasets = generateDatasets();
-        transactionsChart.update();
+        // Update chart with smooth animation
+        if (transactionsChart) {
+            transactionsChart.config.type = type;
+            transactionsChart.data.datasets = generateDatasets();
+            transactionsChart.update('active');
+        }
     }
 
     function populateYearFilter() {
         const yearFilter = document.getElementById('yearFilter');
+        if (!yearFilter || !chartData) return;
+
         const allYears = new Set();
 
         // Collect all years from all transaction types
-        Object.keys(chartData || {}).forEach(type => {
+        Object.keys(chartData).forEach(type => {
             if (typeof chartData[type] === 'object') {
                 Object.keys(chartData[type]).forEach(year => {
                     allYears.add(year);
@@ -1921,14 +2169,18 @@
     }
 
     function applyFilters() {
-        transactionsChart.data.datasets = generateDatasets();
-        transactionsChart.update();
+        if (transactionsChart) {
+            transactionsChart.data.datasets = generateDatasets();
+            transactionsChart.update('active');
+        }
         updateChartStats();
     }
 
     function updateChartStats() {
-        const selectedYear = document.getElementById('yearFilter').value;
-        const selectedType = document.getElementById('transactionTypeFilter').value;
+        if (!chartData) return;
+
+        const selectedYear = document.getElementById('yearFilter')?.value || 'all';
+        const selectedType = document.getElementById('transactionTypeFilter')?.value || 'all';
 
         let totalTransactions = 0;
         let monthlyTotals = Array(12).fill(0);
@@ -1937,7 +2189,7 @@
 
         if (selectedType === 'all') {
             // Calculate across all transaction types
-            Object.keys(chartData || {}).forEach(type => {
+            Object.keys(chartData).forEach(type => {
                 if (typeof chartData[type] === 'object') {
                     const years = selectedYear === 'all' ? Object.keys(chartData[type]) : [selectedYear];
                     years.forEach(year => {
@@ -1981,13 +2233,36 @@
         const nonZeroMonths = monthlyTotals.filter(total => total > 0).length;
         const avgPerMonth = nonZeroMonths > 0 ? Math.round(totalTransactions / nonZeroMonths) : 0;
 
-        // Update DOM
-        document.getElementById('totalTransactions').textContent = totalTransactions.toLocaleString();
-        document.getElementById('avgPerMonth').textContent = avgPerMonth.toLocaleString();
+        // Update DOM with animation
+        animateValue('totalTransactions', totalTransactions);
+        animateValue('avgPerMonth', avgPerMonth);
         document.getElementById('highestMonth').textContent = highestMonthName || '-';
     }
 
-    // CSS for chart type buttons
+    // Animate number changes
+    function animateValue(id, value) {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        const current = parseInt(element.textContent.replace(/,/g, '')) || 0;
+        if (current === value) return; // No animation if value hasn't changed
+
+        const increment = (value - current) / 20;
+        let step = 0;
+
+        const timer = setInterval(() => {
+            step++;
+            const newValue = Math.round(current + increment * step);
+            element.textContent = newValue.toLocaleString();
+
+            if (step >= 20) {
+                clearInterval(timer);
+                element.textContent = value.toLocaleString();
+            }
+        }, 30);
+    }
+
+    // CSS for chart type buttons and loading states
     document.addEventListener('DOMContentLoaded', function() {
         const style = document.createElement('style');
         style.textContent = `
@@ -2004,21 +2279,39 @@
                 background: #374151;
                 color: #ce201f;
             }
+            .chart-loading {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.9);
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .dark .chart-loading {
+                background: rgba(31, 41, 55, 0.9);
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
         `;
         document.head.appendChild(style);
     });
-
-    // All your existing JavaScript functions remain unchanged below this point
-    // Including filterTable, clearAllFilters, modal functions, etc.
-    // ...
 </script>
 
 <script>
     // Donut Charts Configuration and Data
     let departmentChart;
     let stockStatusChart;
-    let departmentData = @json($departmentTransactions ?? []);
-    let stockData = @json($stockStatusData ?? []);
+    let departmentData = null;
+    let stockData = null;
 
     // Donut chart color schemes
     const donutColors = {
@@ -2034,23 +2327,33 @@
         }
     };
 
-    // Initialize Donut Charts when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        // Wait a bit for the line chart to initialize first
-        setTimeout(() => {
-            initializeDepartmentChart();
-            initializeStockChart();
-            populateDeptYearFilter();
+    async function loadDepartmentChart() {
+        if (!departmentData) {
+            // Try to fetch if no initial data
+            departmentData = await ChartDataManager.fetchData('/api/charts/departments', 'department');
+        }
 
-            // Add event listeners for department chart filters
-            document.getElementById('deptMonthFilter').addEventListener('change', updateDepartmentChart);
-            document.getElementById('deptYearFilter').addEventListener('change', updateDepartmentChart);
-            document.getElementById('deptTypeFilter').addEventListener('change', updateDepartmentChart);
-        }, 500);
-    });
+        if (departmentData) {
+            initializeDepartmentChart();
+            populateDeptYearFilter();
+            setupDepartmentEventListeners();
+        }
+    }
+
+    async function loadStockChart() {
+        if (!stockData) {
+            // Try to fetch if no initial data
+            stockData = await ChartDataManager.fetchData('/api/charts/stock', 'stock');
+        }
+
+        if (stockData) {
+            initializeStockChart();
+        }
+    }
 
     function initializeDepartmentChart() {
-        const ctx = document.getElementById('departmentChart').getContext('2d');
+        const ctx = document.getElementById('departmentChart')?.getContext('2d');
+        if (!ctx) return;
 
         departmentChart = new Chart(ctx, {
             type: 'doughnut',
@@ -2067,6 +2370,11 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: false,
+                    duration: chartsInitialized ? 750 : 0
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -2100,9 +2408,11 @@
     }
 
     function updateDepartmentChart() {
-        const selType  = document.getElementById('deptTypeFilter').value;
-        const selMonth = document.getElementById('deptMonthFilter').value;
-        const selYear  = document.getElementById('deptYearFilter').value;
+        if (!departmentData) return;
+
+        const selType  = document.getElementById('deptTypeFilter')?.value || 'all';
+        const selMonth = document.getElementById('deptMonthFilter')?.value || 'all';
+        const selYear  = document.getElementById('deptYearFilter')?.value || 'all';
 
         const filtered = {};
 
@@ -2138,32 +2448,33 @@
         const data   = Object.values(filtered);
 
         if (labels.length === 0) {
-            document.getElementById('noDepartmentData').classList.remove('hidden');
-            document.getElementById('departmentChartContainer').classList.add('hidden');
+            document.getElementById('noDepartmentData')?.classList.remove('hidden');
+            document.getElementById('departmentChartContainer')?.classList.add('hidden');
         } else {
-            document.getElementById('noDepartmentData').classList.add('hidden');
-            document.getElementById('departmentChartContainer').classList.remove('hidden');
+            document.getElementById('noDepartmentData')?.classList.add('hidden');
+            document.getElementById('departmentChartContainer')?.classList.remove('hidden');
 
-            departmentChart.data.labels = labels;
-            departmentChart.data.datasets[0].data = data;
-            departmentChart.update();
+            if (departmentChart) {
+                departmentChart.data.labels = labels;
+                departmentChart.data.datasets[0].data = data;
+                departmentChart.update('active');
+            }
         }
 
-        // update stats
-        document.getElementById('totalDepartments').textContent = labels.length;
-        document.getElementById('topDepartment').textContent =
-            labels.length
-                ? labels[data.indexOf(Math.max(...data))]
-                : '-';
+        // update stats with animation
+        animateValue('totalDepartments', labels.length);
+        const topDept = labels.length ? labels[data.indexOf(Math.max(...data))] : '-';
+        document.getElementById('topDepartment').textContent = topDept;
     }
 
     function populateDeptYearFilter() {
         const yearFilter = document.getElementById('deptYearFilter');
+        if (!yearFilter || !departmentData) return;
+
         const years = new Set();
 
         // The structure is: departmentData[type][department][year][month]
-        // So we need to iterate through types first, then departments, then years
-        Object.keys(departmentData || {}).forEach(type => {
+        Object.keys(departmentData).forEach(type => {
             const departments = departmentData[type] || {};
             Object.keys(departments).forEach(dept => {
                 const deptYears = departments[dept] || {};
@@ -2187,7 +2498,8 @@
     }
 
     function initializeStockChart() {
-        const ctx = document.getElementById('stockStatusChart').getContext('2d');
+        const ctx = document.getElementById('stockStatusChart')?.getContext('2d');
+        if (!ctx) return;
 
         stockStatusChart = new Chart(ctx, {
             type: 'doughnut',
@@ -2208,6 +2520,11 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: false,
+                    duration: chartsInitialized ? 750 : 0
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -2241,19 +2558,31 @@
     }
 
     function updateStockChart() {
+        if (!stockData) return;
+
         // Update chart with current stock data
         const wellStocked = stockData.wellStocked || 0;
         const lowStock = stockData.lowStock || 0;
         const outOfStock = stockData.outOfStock || 0;
 
-        stockStatusChart.data.datasets[0].data = [wellStocked, lowStock, outOfStock];
-        stockStatusChart.update();
+        if (stockStatusChart) {
+            stockStatusChart.data.datasets[0].data = [wellStocked, lowStock, outOfStock];
+            stockStatusChart.update('active');
+        }
 
-        // Update stock stats
-        document.getElementById('wellStockedCount').textContent = wellStocked;
-        document.getElementById('lowStockCount').textContent = lowStock;
-        document.getElementById('outOfStockCount').textContent = outOfStock;
+        // Update stock stats with animation
+        animateValue('wellStockedCount', wellStocked);
+        animateValue('lowStockCount', lowStock);
+        animateValue('outOfStockCount', outOfStock);
     }
+</script>
+
+<!-- Pass initial data from PHP (this goes in your blade template) -->
+<script>
+    // Initial data from server - prevents blank charts on first load
+    var initialChartData = @json($monthlyTransactions ?? []);
+    var initialDepartmentData = @json($departmentTransactions ?? []);
+    var initialStockData = @json($stockStatusData ?? []);
 </script>
 
 <script>

@@ -39,6 +39,12 @@ Route::get('/run-storage-link', function () {
 // Combine admin + staff + cao under one main group, but nest role checks
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
+
+    // Chart API endpoints
+    Route::get('/api/charts/transactions', [DashboardController::class, 'getChartTransactions']);
+    Route::get('/api/charts/departments', [DashboardController::class, 'getChartDepartments']);
+    Route::get('/api/charts/stock', [DashboardController::class, 'getChartStock']);
+
     Route::get('/api/initial-counts', [NotificationController::class, 'getInitialCounts'])->middleware(['admin-cao']);
     Route::get('/api/user-initial-counts', [NotificationController::class, 'getUserInitialCounts']);
 
