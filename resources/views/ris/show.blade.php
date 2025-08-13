@@ -699,7 +699,7 @@
                     </div>
 
                     <!-- Add this to the show.blade.php where appropriate -->
-                    @if (auth()->id() === $risSlip->received_by && !$risSlip->received_at && $risSlip->status === 'posted')
+                    @if ((int) auth()->id() === (int) $risSlip->received_by && is_null($risSlip->received_at) && $risSlip->status === 'posted')
                         <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Confirm Receipt of Supplies</h3>
                             <p class="text-sm text-blue-700 dark:text-blue-400 mb-3">
