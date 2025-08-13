@@ -1947,10 +1947,11 @@
                     years.forEach(year => {
                         if (chartData[type][year]) {
                             Object.keys(chartData[type][year]).forEach(month => {
-                                const monthIndex = parseInt(month) - 1;
-                                const value = chartData[type][year][month];
-                                totalTransactions += value;
-                                monthlyTotals[monthIndex] += value;
+                                const monthIndex = parseInt(month, 10) - 1;
+                                const v = Number(chartData[type][year][month]) || 0;
+                                totalTransactions += v;
+                                monthlyTotals[monthIndex] += v;
+
                             });
                         }
                     });
@@ -1963,10 +1964,11 @@
                 years.forEach(year => {
                     if (chartData[selectedType][year]) {
                         Object.keys(chartData[selectedType][year]).forEach(month => {
-                            const monthIndex = parseInt(month) - 1;
-                            const value = chartData[selectedType][year][month];
-                            totalTransactions += value;
-                            monthlyTotals[monthIndex] += value;
+                            const monthIndex = parseInt(month, 10) - 1;
+                            const v = Number(chartData[type][year][month]) || 0;
+                            totalTransactions += v;
+                            monthlyTotals[monthIndex] += v;
+
                         });
                     }
                 });
