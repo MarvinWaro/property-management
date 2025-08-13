@@ -1824,7 +1824,7 @@
                         if (chartData[type][year]) {
                             // when building datasets
                             const monthlyData = Array(12).fill(0);
-                                Object.keys(chartData[type][year]).forEach(month => {
+                            Object.keys(chartData[type][year]).forEach(month => {
                                 const v = Number(chartData[type][year][month]) || 0;
                                 monthlyData[parseInt(month, 10) - 1] = v;
                             });
@@ -1845,16 +1845,16 @@
                 }
             });
         } else {
-            // Show only selected transaction type
+            // Show only selected transaction type - FIXED HERE
             if (chartData[selectedType]) {
                 const years = selectedYear === 'all' ? Object.keys(chartData[selectedType]).sort() : [selectedYear];
 
                 years.forEach((year, yearIndex) => {
                     if (chartData[selectedType][year]) {
-                        // when building datasets
+                        // when building datasets - FIXED: using selectedType instead of type
                         const monthlyData = Array(12).fill(0);
-                            Object.keys(chartData[type][year]).forEach(month => {
-                            const v = Number(chartData[type][year][month]) || 0;
+                        Object.keys(chartData[selectedType][year]).forEach(month => {
+                            const v = Number(chartData[selectedType][year][month]) || 0;
                             monthlyData[parseInt(month, 10) - 1] = v;
                         });
 
@@ -1951,24 +1951,23 @@
                                 const v = Number(chartData[type][year][month]) || 0;
                                 totalTransactions += v;
                                 monthlyTotals[monthIndex] += v;
-
                             });
                         }
                     });
                 }
             });
         } else {
-            // Calculate for selected transaction type only
+            // Calculate for selected transaction type only - FIXED HERE
             if (chartData[selectedType]) {
                 const years = selectedYear === 'all' ? Object.keys(chartData[selectedType]) : [selectedYear];
                 years.forEach(year => {
                     if (chartData[selectedType][year]) {
                         Object.keys(chartData[selectedType][year]).forEach(month => {
                             const monthIndex = parseInt(month, 10) - 1;
-                            const v = Number(chartData[type][year][month]) || 0;
+                            // FIXED: using selectedType instead of type
+                            const v = Number(chartData[selectedType][year][month]) || 0;
                             totalTransactions += v;
                             monthlyTotals[monthIndex] += v;
-
                         });
                     }
                 });
@@ -2013,12 +2012,9 @@
         `;
         document.head.appendChild(style);
     });
-
-    // All your existing JavaScript functions remain unchanged below this point
-    // Including filterTable, clearAllFilters, modal functions, etc.
-    // ...
 </script>
 
+<!-- Keep all your other scripts exactly as they are -->
 <script>
     // Donut Charts Configuration and Data
     let departmentChart;
@@ -2262,6 +2258,7 @@
     }
 </script>
 
+<!-- Keep all your other existing scripts unchanged -->
 <script>
     // Client-side filtering function
     function filterTable() {
@@ -2289,6 +2286,7 @@
     }
 </script>
 
+<!-- Keep all your remaining scripts exactly as they are -->
 <script>
     // Data Filter
     document.addEventListener('DOMContentLoaded', function() {
