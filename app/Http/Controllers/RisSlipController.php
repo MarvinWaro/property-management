@@ -825,18 +825,22 @@ class RisSlipController extends Controller
             'signature_type' => 'required|in:esign,sgd',
         ]);
 
+        // Normalize types (some hosts return IDs as strings)
+        $currentUserId = (int) auth()->id();
+        $receiverId    = (int) $risSlip->received_by;
+
         // Check if the current user is the one assigned to receive
-        if ($risSlip->received_by !== auth()->id()) {
+        if ($receiverId !== $currentUserId) {
             return back()->with('error', 'You are not authorized to receive this RIS.');
         }
 
         // Check if already received
-        if ($risSlip->received_at) {
+        if (!is_null($risSlip->received_at)) {
             return back()->with('error', 'This RIS has already been received.');
         }
 
         // Check if the RIS has been issued
-        if ($risSlip->status !== 'posted' || !$risSlip->issued_at) {
+        if ($risSlip->status !== 'posted' || is_null($risSlip->issued_at)) {
             return back()->with('error', 'This RIS has not been issued yet.');
         }
 
@@ -847,11 +851,11 @@ class RisSlipController extends Controller
         ]);
 
         // Broadcast completion event
-        broadcast(new RequisitionStatusUpdated($risSlip, 'completed'));
+        broadcast(new RequisitionStatusUpdated($risSlip->fresh(), 'completed'));
 
-        if ($risSlip->received_by) {
+        if ($receiverId) {
             broadcast(new UserNotificationUpdated(
-                $risSlip->received_by,
+                $receiverId,
                 'supplies_received',
                 ['ris_no' => $risSlip->ris_no]
             ));

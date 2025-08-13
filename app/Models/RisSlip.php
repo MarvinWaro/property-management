@@ -49,15 +49,27 @@ class RisSlip extends Model
         'manual_entry_notes',
     ];
 
+    // app/Models/RisSlip.php
+
     protected $casts = [
-        'ris_date'           => 'date',
-        'approved_at'        => 'datetime',
-        'issued_at'          => 'datetime',
-        'received_at'        => 'datetime',
-        'declined_at'        => 'datetime',
-        'manual_entry_at'    => 'datetime',
-        'is_manual_entry'    => 'boolean',
+        'ris_date'        => 'date',
+        'approved_at'     => 'datetime',
+        'issued_at'       => 'datetime',
+        'received_at'     => 'datetime',
+        'declined_at'     => 'datetime',
+        'manual_entry_at' => 'datetime',
+        'is_manual_entry' => 'boolean',
+
+        // 🔧 add these so ids are always integers
+        'division'        => 'integer',
+        'requested_by'    => 'integer',
+        'approved_by'     => 'integer',
+        'issued_by'       => 'integer',
+        'received_by'     => 'integer',
+        'declined_by'     => 'integer',
+        'manual_entry_by' => 'integer',
     ];
+
 
     protected $attributes = [
         'status' => RisStatus::DRAFT,
