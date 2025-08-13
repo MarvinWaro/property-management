@@ -2124,14 +2124,19 @@
                 years.forEach(y => {
                     const months = byDept[dept][y] || {};
                     if (selMonth === 'all') {
-                        Object.values(months).forEach(v => total += v);
+                        // FIX: Convert to number before adding
+                        Object.values(months).forEach(v => {
+                            total += Number(v) || 0;
+                        });
                     } else {
-                        total += months[selMonth] || 0;
+                        // FIX: Convert to number before adding
+                        total += Number(months[selMonth]) || 0;
                     }
                 });
 
                 if (total > 0) {
-                    filtered[dept] = (filtered[dept] || 0) + total;
+                    // FIX: Ensure we're adding numbers, not concatenating
+                    filtered[dept] = (Number(filtered[dept]) || 0) + total;
                 }
             });
         });
