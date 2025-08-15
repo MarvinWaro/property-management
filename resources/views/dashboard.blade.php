@@ -8,7 +8,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Minimal Dashboard Cards Section -->
-            <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
+            <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
 
                 <!-- Employees Card -->
                 <a href="#user-section" class="group">
@@ -73,7 +73,7 @@
                 </a>
 
                 <!-- Total Stock Value Card -->
-                <a href="{{ url('/stocks') }}" class="group">
+                {{-- <a href="{{ url('/stocks') }}" class="group">
                     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
@@ -94,7 +94,7 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                </a> --}}
 
                 <!-- Transactions This Month Card -->
                 <a href="{{ route('supply-transactions.index') }}" class="group">
