@@ -8,6 +8,7 @@ use App\Models\SupplyTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use DateTime; // ADD THIS LINE
 
 // Add these imports at the top of your StockCardController.php file
 
@@ -102,7 +103,7 @@ class StockCardController extends Controller
             $availableYears = collect([Carbon::now()->year]);
         }
 
-        // Get available months for the selected year
+        // FIXED: Get available months for the selected year
         $availableMonths = SupplyTransaction::where('supply_id', $supplyId)
             ->whereYear('transaction_date', $selectedYear)
             ->selectRaw('MONTH(transaction_date) as month')
@@ -110,9 +111,13 @@ class StockCardController extends Controller
             ->orderBy('month', 'asc')
             ->pluck('month')
             ->map(function ($month) {
+                // FIXED: Ensure month is integer and use DateTime for month names
+                $monthInt = (int) $month;
+                $monthName = DateTime::createFromFormat('!m', $monthInt)->format('F');
+
                 return [
-                    'value' => $month,
-                    'name' => Carbon::create()->month($month)->format('F')
+                    'value' => $monthInt,
+                    'name' => $monthName
                 ];
             });
 
