@@ -7,6 +7,7 @@ use App\Models\SupplyTransaction;
 use App\Models\RisSlip;
 use App\Models\RisItem;
 use App\Models\Department;
+use App\Models\SupplyStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -173,8 +174,11 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             ->get()
             ->keyBy('ris_no');
 
+        // FIXED: Calculate correct unit costs using moving average
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Group by RIS number with fund cluster information
-        $reportData = $transactions->groupBy('reference_no')->map(function($items, $risNo) use ($risSlips) {
+        $reportData = $transactionsWithCorrectCost->groupBy('reference_no')->map(function($items, $risNo) use ($risSlips) {
             $firstItem = $items->first();
             $risSlip = $risSlips->get($risNo);
 
@@ -190,20 +194,20 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                         'description' => $item->supply->description,
                         'unit' => $item->supply->unit_of_measurement,
                         'quantity_issued' => $item->quantity,
-                        'unit_cost' => $item->unit_cost,
-                        'total_cost' => $item->total_cost
+                        'unit_cost' => $item->corrected_unit_cost, // Use corrected unit cost
+                        'total_cost' => $item->corrected_total_cost // Use corrected total cost
                     ];
                 })
             ];
         })->sortKeys(); // Sort by RIS number (ascending)
 
-        // Calculate summary
+        // Calculate summary using corrected costs
         $summary = [
-            'total_items' => $transactions->count(),
-            'total_cost' => $transactions->sum('total_cost'),
-            'unique_supplies' => $transactions->pluck('supply_id')->unique()->count(),
-            'departments_served' => $transactions->pluck('department_id')->unique()->count(),
-            'ris_count' => $transactions->pluck('reference_no')->unique()->count(),
+            'total_items' => $transactionsWithCorrectCost->count(),
+            'total_cost' => $transactionsWithCorrectCost->sum('corrected_total_cost'),
+            'unique_supplies' => $transactionsWithCorrectCost->pluck('supply_id')->unique()->count(),
+            'departments_served' => $transactionsWithCorrectCost->pluck('department_id')->unique()->count(),
+            'ris_count' => $transactionsWithCorrectCost->pluck('reference_no')->unique()->count(),
             'fund_clusters_used' => $risSlips->pluck('fund_cluster')->filter()->unique()->sort()->values()
         ];
 
@@ -215,7 +219,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'month' => $month,
             'fund_cluster' => $fundCluster ?? 'All',
             'department_id' => $departmentId,
-            'total_transactions' => $transactions->count(),
+            'total_transactions' => $transactionsWithCorrectCost->count(),
             'total_ris' => $reportData->count(),
             'fund_clusters_used' => $summary['fund_clusters_used']->toArray()
         ]);
@@ -232,6 +236,66 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'availableMonths',
             'fundClusters'
         ));
+    }
+
+    /**
+     * NEW METHOD: Calculate correct unit costs using moving average logic
+     */
+    private function calculateCorrectUnitCosts($transactions, $fundCluster)
+    {
+        // Group transactions by supply to calculate moving average for each
+        $transactionsBySupply = $transactions->groupBy('supply_id');
+        $correctedTransactions = collect();
+
+        foreach ($transactionsBySupply as $supplyId => $supplyTransactions) {
+            // Get all transactions for this supply (receipts and issues) ordered by date
+            $allTransactions = SupplyTransaction::where('supply_id', $supplyId)
+                ->orderBy('transaction_date')
+                ->orderBy('created_at')
+                ->get();
+
+            // Calculate moving average costs
+            $runningBalance = 0;
+            $runningTotalCost = 0;
+            $movingAverageCosts = [];
+
+            foreach ($allTransactions as $transaction) {
+                if ($transaction->transaction_type == 'receipt') {
+                    $runningBalance += $transaction->quantity;
+                    $runningTotalCost += $transaction->total_cost;
+                } elseif ($transaction->transaction_type == 'issue') {
+                    // Calculate weighted average BEFORE the issue
+                    $weightedAverageUnitCost = $runningBalance > 0
+                        ? $runningTotalCost / $runningBalance
+                        : 0;
+
+                    // Store the moving average cost for this transaction
+                    $movingAverageCosts[$transaction->transaction_id] = $weightedAverageUnitCost;
+
+                    // Update running totals
+                    $costToDeduct = $weightedAverageUnitCost * $transaction->quantity;
+                    $runningBalance -= $transaction->quantity;
+                    $runningTotalCost = max(0, $runningTotalCost - $costToDeduct);
+                }
+            }
+
+            // Apply corrected costs to our filtered transactions
+            foreach ($supplyTransactions as $transaction) {
+                if (isset($movingAverageCosts[$transaction->transaction_id])) {
+                    $correctedUnitCost = $movingAverageCosts[$transaction->transaction_id];
+                    $transaction->corrected_unit_cost = $correctedUnitCost;
+                    $transaction->corrected_total_cost = $correctedUnitCost * $transaction->quantity;
+                } else {
+                    // Fallback to original cost if not found
+                    $transaction->corrected_unit_cost = $transaction->unit_cost;
+                    $transaction->corrected_total_cost = $transaction->total_cost;
+                }
+
+                $correctedTransactions->push($transaction);
+            }
+        }
+
+        return $correctedTransactions;
     }
 
     public function detailed(Request $request)
@@ -313,17 +377,20 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         $transactions = $transactionsQuery->get();
 
+        // FIXED: Calculate correct unit costs
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Get RIS slip information for fund cluster data
-        $risSlips = RisSlip::whereIn('ris_no', $transactions->pluck('reference_no')->unique())
+        $risSlips = RisSlip::whereIn('ris_no', $transactionsWithCorrectCost->pluck('reference_no')->unique())
             ->select('ris_no', 'fund_cluster')
             ->get()
             ->keyBy('ris_no');
 
         // Group by supply and include fund cluster information
-        $reportData = $transactions->groupBy('supply_id')->map(function($items) use ($risSlips) {
+        $reportData = $transactionsWithCorrectCost->groupBy('supply_id')->map(function($items) use ($risSlips) {
             $supply = $items->first()->supply;
             $totalQuantity = $items->sum('quantity');
-            $totalCost = $items->sum('total_cost');
+            $totalCost = $items->sum('corrected_total_cost'); // Use corrected cost
 
             // Map transactions with fund cluster information
             $transactionData = $items->map(function($item) use ($risSlips) {
@@ -334,8 +401,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                     'department' => $item->department->name ?? 'N/A',
                     'date' => $item->transaction_date,
                     'quantity' => $item->quantity,
-                    'unit_cost' => $item->unit_cost,
-                    'total' => $item->total_cost
+                    'unit_cost' => $item->corrected_unit_cost, // Use corrected cost
+                    'total' => $item->corrected_total_cost // Use corrected cost
                 ];
             });
 
@@ -353,8 +420,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             ];
         })->sortBy('stock_no')->values();
 
-        // Generate analytics data for charts
-        $analyticsData = $this->generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster);
+        // Generate analytics data for charts using corrected costs
+        $analyticsData = $this->generateDetailedAnalytics($transactionsWithCorrectCost, $startDate, $endDate, $fundCluster);
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
@@ -364,7 +431,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'fund_cluster' => $fundCluster,
             'department_id' => $departmentId,
             'total_supplies' => $reportData->count(),
-            'total_transactions' => $transactions->count(),
+            'total_transactions' => $transactionsWithCorrectCost->count(),
             'available_months_count' => $availableMonths->count(),
             'fund_clusters_count' => $fundClusters->count()
         ]);
@@ -385,11 +452,12 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
     private function generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster)
     {
+        // UPDATED: Use corrected costs for all calculations
         // 1. Category-wise distribution
         $categoryData = $transactions->groupBy('supply.category.name')->map(function($items, $category) {
             return [
                 'category' => $category ?: 'Uncategorized',
-                'total_cost' => $items->sum('total_cost'),
+                'total_cost' => $items->sum('corrected_total_cost'),
                 'item_count' => $items->count(),
                 'unique_items' => $items->pluck('supply_id')->unique()->count()
             ];
@@ -401,7 +469,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             return [
                 'item_name' => $supply->item_name ?? 'Unknown Item',
                 'stock_no' => $supply->stock_no ?? 'N/A',
-                'total_cost' => $items->sum('total_cost'),
+                'total_cost' => $items->sum('corrected_total_cost'),
                 'quantity' => $items->sum('quantity')
             ];
         })->sortByDesc('total_cost')->take(10)->values();
@@ -409,7 +477,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // 3. OPTION 4: Supply Efficiency Analysis - Cost per transaction and frequency
         $supplyEfficiency = $transactions->groupBy('supply_id')->map(function($items) {
             $supply = $items->first()->supply;
-            $totalCost = $items->sum('total_cost');
+            $totalCost = $items->sum('corrected_total_cost');
             $totalQuantity = $items->sum('quantity');
             $transactionCount = $items->count();
 
@@ -432,7 +500,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $departmentData = $transactions->groupBy('department.name')->map(function($items, $department) {
             return [
                 'department' => $department ?: 'N/A',
-                'total_cost' => $items->sum('total_cost'),
+                'total_cost' => $items->sum('corrected_total_cost'),
                 'item_count' => $items->count(),
                 'unique_items' => $items->pluck('supply_id')->unique()->count()
             ];
@@ -442,7 +510,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $risData = $transactions->groupBy('reference_no')->map(function($items, $risNo) {
             return [
                 'ris_no' => $risNo,
-                'total_cost' => $items->sum('total_cost'),
+                'total_cost' => $items->sum('corrected_total_cost'),
                 'item_count' => $items->count(),
                 'date' => $items->first()->transaction_date
             ];
@@ -451,7 +519,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         // 6. Unit cost analysis
         $unitCostAnalysis = $transactions->groupBy('supply_id')->map(function($items) {
             $supply = $items->first()->supply;
-            $costs = $items->pluck('unit_cost')->filter();
+            $costs = $items->pluck('corrected_unit_cost')->filter();
 
             if ($costs->count() > 1) {
                 $avgCost = $costs->avg();
@@ -472,7 +540,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         })->filter()->where('cost_variance', '>', 0)->sortByDesc('cost_variance')->take(10)->values();
 
         // 7. Summary statistics
-        $totalCost = $transactions->sum('total_cost');
+        $totalCost = $transactions->sum('corrected_total_cost');
         $transactionCount = $transactions->count();
 
         $summaryStats = [
@@ -482,7 +550,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'unique_departments' => $transactions->pluck('department_id')->unique()->count(),
             'unique_ris' => $transactions->pluck('reference_no')->unique()->count(),
             'avg_transaction_value' => $transactionCount > 0 ? $totalCost / $transactionCount : 0,
-            'highest_single_transaction' => $transactions->max('total_cost') ?? 0,
+            'highest_single_transaction' => $transactions->max('corrected_total_cost') ?? 0,
             'date_range' => [
                 'start' => $startDate->format('M d, Y'),
                 'end' => $endDate->format('M d, Y')
@@ -527,11 +595,14 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
             $transactions = $transactionsQuery->get();
 
+            // FIXED: Calculate correct unit costs
+            $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
             // Group by supply for detailed report
-            $reportData = $transactions->groupBy('supply_id')->map(function($items) {
+            $reportData = $transactionsWithCorrectCost->groupBy('supply_id')->map(function($items) {
                 $supply = $items->first()->supply;
                 $totalQuantity = $items->sum('quantity');
-                $totalCost = $items->sum('total_cost');
+                $totalCost = $items->sum('corrected_total_cost');
 
                 return [
                     'stock_no' => $supply->stock_no,
@@ -559,8 +630,11 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
             $transactions = $transactionsQuery->get();
 
+            // FIXED: Calculate correct unit costs
+            $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
             // Group by RIS for standard report
-            $reportData = $transactions->groupBy('reference_no')->map(function($items, $risNo) {
+            $reportData = $transactionsWithCorrectCost->groupBy('reference_no')->map(function($items, $risNo) {
                 $firstItem = $items->first();
                 return [
                     'ris_no' => $risNo,
@@ -571,8 +645,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                             'item_name' => $item->supply->item_name,
                             'unit' => $item->supply->unit_of_measurement,
                             'quantity_issued' => $item->quantity,
-                            'unit_cost' => $item->unit_cost,
-                            'total_cost' => $item->total_cost
+                            'unit_cost' => $item->corrected_unit_cost,
+                            'total_cost' => $item->corrected_total_cost
                         ];
                     })
                 ];
@@ -614,7 +688,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
             // FIXED: Filter by RIS slip fund cluster instead of supply stock fund cluster
-            $monthlyTotal = SupplyTransaction::where('transaction_type', 'issue')
+            $transactions = SupplyTransaction::where('transaction_type', 'issue')
                 ->whereBetween('transaction_date', [$startDate, $endDate])
                 ->whereIn('reference_no', function($query) use ($fundCluster) {
                     $query->select('ris_no')
@@ -623,7 +697,11 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                         ->where('status', 'posted')
                         ->whereNotNull('issued_at');
                 })
-                ->sum('total_cost');
+                ->get();
+
+            // Calculate correct costs
+            $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+            $monthlyTotal = $transactionsWithCorrectCost->sum('corrected_total_cost');
 
             $monthlyData->push([
                 'month' => $startDate->format('F'),
@@ -652,11 +730,14 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             })
             ->get();
 
+        // FIXED: Calculate correct unit costs
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Group by stock number and calculate totals
-        $summaryData = $transactions->groupBy('supply.stock_no')->map(function($items) {
+        $summaryData = $transactionsWithCorrectCost->groupBy('supply.stock_no')->map(function($items) {
             $supply = $items->first()->supply;
             $totalQuantity = $items->sum('quantity');
-            $totalCost = $items->sum('total_cost');
+            $totalCost = $items->sum('corrected_total_cost');
 
             return [
                 'stock_no' => $supply->stock_no,
@@ -735,8 +816,11 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         $transactions = $transactionsQuery->get();
 
+        // FIXED: Calculate correct unit costs
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Generate analytics data for charts
-        $analyticsData = $this->generateDetailedAnalytics($transactions, $startDate, $endDate, $fundCluster);
+        $analyticsData = $this->generateDetailedAnalytics($transactionsWithCorrectCost, $startDate, $endDate, $fundCluster);
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
@@ -745,7 +829,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'month' => $month,
             'fund_cluster' => $fundCluster ?? 'All',
             'department_id' => $departmentId,
-            'transactions_count' => $transactions->count(),
+            'transactions_count' => $transactionsWithCorrectCost->count(),
             'categories_count' => $analyticsData['categories']->count(),
             'departments_count' => $analyticsData['departments']->count()
         ]);
@@ -791,18 +875,21 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             })
             ->get();
 
+        // FIXED: Calculate correct unit costs
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Monthly breakdown
         $monthlyBreakdown = collect();
         for ($month = 1; $month <= 12; $month++) {
             $monthStart = Carbon::createFromDate($year, $month, 1)->startOfMonth();
             $monthEnd = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
-            $monthTransactions = $transactions->whereBetween('transaction_date', [$monthStart, $monthEnd]);
+            $monthTransactions = $transactionsWithCorrectCost->whereBetween('transaction_date', [$monthStart, $monthEnd]);
 
             $monthlyBreakdown->push([
                 'month' => $monthStart->format('M'),
                 'month_full' => $monthStart->format('F'),
-                'total' => $monthTransactions->sum('total_cost'),
+                'total' => $monthTransactions->sum('corrected_total_cost'),
                 'items' => $monthTransactions->count(),
                 'unique_items' => $monthTransactions->pluck('supply_id')->unique()->count()
             ]);
@@ -813,38 +900,38 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             [
                 'quarter' => 'Q1',
                 'months' => [1, 2, 3],
-                'total' => $transactions->filter(function($item) {
+                'total' => $transactionsWithCorrectCost->filter(function($item) {
                     return in_array(Carbon::parse($item->transaction_date)->month, [1, 2, 3]);
-                })->sum('total_cost')
+                })->sum('corrected_total_cost')
             ],
             [
                 'quarter' => 'Q2',
                 'months' => [4, 5, 6],
-                'total' => $transactions->filter(function($item) {
+                'total' => $transactionsWithCorrectCost->filter(function($item) {
                     return in_array(Carbon::parse($item->transaction_date)->month, [4, 5, 6]);
-                })->sum('total_cost')
+                })->sum('corrected_total_cost')
             ],
             [
                 'quarter' => 'Q3',
                 'months' => [7, 8, 9],
-                'total' => $transactions->filter(function($item) {
+                'total' => $transactionsWithCorrectCost->filter(function($item) {
                     return in_array(Carbon::parse($item->transaction_date)->month, [7, 8, 9]);
-                })->sum('total_cost')
+                })->sum('corrected_total_cost')
             ],
             [
                 'quarter' => 'Q4',
                 'months' => [10, 11, 12],
-                'total' => $transactions->filter(function($item) {
+                'total' => $transactionsWithCorrectCost->filter(function($item) {
                     return in_array(Carbon::parse($item->transaction_date)->month, [10, 11, 12]);
-                })->sum('total_cost')
+                })->sum('corrected_total_cost')
             ]
         ]);
 
         // Top categories (yearly)
-        $topCategories = $transactions->groupBy('supply.category.name')->map(function($items, $category) {
+        $topCategories = $transactionsWithCorrectCost->groupBy('supply.category.name')->map(function($items, $category) {
             return [
                 'category' => $category ?: 'Uncategorized',
-                'total' => $items->sum('total_cost'),
+                'total' => $items->sum('corrected_total_cost'),
                 'items' => $items->count(),
                 'unique_items' => $items->pluck('supply_id')->unique()->count(),
                 'ris_count' => $items->pluck('reference_no')->unique()->count()
@@ -852,12 +939,12 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         })->sortByDesc('total')->values();
 
         // Top items (yearly)
-        $topItems = $transactions->groupBy('supply_id')->map(function($items) {
+        $topItems = $transactionsWithCorrectCost->groupBy('supply_id')->map(function($items) {
             $supply = $items->first()->supply;
             return [
                 'item_name' => $supply->item_name,
                 'stock_no' => $supply->stock_no,
-                'total' => $items->sum('total_cost'),
+                'total' => $items->sum('corrected_total_cost'),
                 'quantity' => $items->sum('quantity')
             ];
         })->sortByDesc('total')->take(15)->values();
@@ -869,22 +956,25 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $mostUsedCategory = $topCategories->first();
 
         // Get last year data for growth calculation
-        $lastYearTotal = SupplyTransaction::where('transaction_type', 'issue')
+        $lastYearTransactions = SupplyTransaction::where('transaction_type', 'issue')
             ->whereYear('transaction_date', $year - 1)
             ->whereHas('supply.stocks', function($q) use ($fundCluster) {
                 $q->where('fund_cluster', $fundCluster);
             })
-            ->sum('total_cost');
+            ->get();
 
-        $currentYearTotal = $transactions->sum('total_cost');
+        $lastYearWithCorrectCost = $this->calculateCorrectUnitCosts($lastYearTransactions, $fundCluster);
+        $lastYearTotal = $lastYearWithCorrectCost->sum('corrected_total_cost');
+
+        $currentYearTotal = $transactionsWithCorrectCost->sum('corrected_total_cost');
         $growthRate = $lastYearTotal > 0 ? (($currentYearTotal - $lastYearTotal) / $lastYearTotal) * 100 : 0;
 
         // Summary statistics
         $summary = [
             'total_value' => $currentYearTotal,
-            'total_items' => $transactions->count(),
-            'unique_items' => $transactions->pluck('supply_id')->unique()->count(),
-            'total_ris' => $transactions->pluck('reference_no')->unique()->count(),
+            'total_items' => $transactionsWithCorrectCost->count(),
+            'unique_items' => $transactionsWithCorrectCost->pluck('supply_id')->unique()->count(),
+            'total_ris' => $transactionsWithCorrectCost->pluck('reference_no')->unique()->count(),
             'avg_monthly' => $currentYearTotal / 12,
             'peak_month' => $peakMonth['month_full'] ?? 'N/A'
         ];
@@ -930,8 +1020,11 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         $transactions = $transactionsQuery->get();
 
+        // FIXED: Calculate correct unit costs
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Group by RIS number
-        $reportData = $transactions
+        $reportData = $transactionsWithCorrectCost
             ->groupBy('reference_no')
             ->map(fn($items, $risNo) => [
                 'ris_no'       => $risNo,
@@ -944,14 +1037,14 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                                             $tx->supply->item_name
                                             . (
                                                 $tx->supply->description
-                                                ?? ', '.$tx->supply->description
-
+                                                ? ', '.$tx->supply->description
+                                                : ''
                                             )
                                         ),
                     'unit'            => $tx->supply->unit_of_measurement,
                     'quantity_issued' => $tx->quantity,
-                    'unit_cost'       => $tx->unit_cost,
-                    'total_cost'      => $tx->total_cost,
+                    'unit_cost'       => $tx->corrected_unit_cost,
+                    'total_cost'      => $tx->corrected_total_cost,
                 ]),
             ])
             ->sortKeys();
@@ -1023,14 +1116,17 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         $transactions = $transactionsQuery->get();
 
+        // FIXED: Calculate correct unit costs using moving average
+        $transactionsWithCorrectCost = $this->calculateCorrectUnitCosts($transactions, $fundCluster);
+
         // Get RIS slip information for fund cluster data
-        $risSlips = RisSlip::whereIn('ris_no', $transactions->pluck('reference_no')->unique())
+        $risSlips = RisSlip::whereIn('ris_no', $transactionsWithCorrectCost->pluck('reference_no')->unique())
             ->select('ris_no', 'fund_cluster')
             ->get()
             ->keyBy('ris_no');
 
         // Group by RIS number with fund cluster information
-        $reportData = $transactions->groupBy('reference_no')->map(function($items, $risNo) use ($risSlips) {
+        $reportData = $transactionsWithCorrectCost->groupBy('reference_no')->map(function($items, $risNo) use ($risSlips) {
             $risSlip = $risSlips->get($risNo);
             return [
                 'ris_no' => $risNo,
@@ -1046,8 +1142,8 @@ class ReportSuppliesMaterialsIssuedController extends Controller
                         ),
                         'unit' => $tx->supply->unit_of_measurement,
                         'quantity_issued' => $tx->quantity,
-                        'unit_cost' => $tx->unit_cost,
-                        'total_cost' => $tx->total_cost,
+                        'unit_cost' => $tx->corrected_unit_cost, // Use corrected unit cost
+                        'total_cost' => $tx->corrected_total_cost, // Use corrected total cost
                     ];
                 }),
             ];
@@ -1473,7 +1569,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'month' => $month,
             'fund_cluster' => $fundCluster ?? 'All',
             'department_id' => $departmentId,
-            'transactions_count' => $transactions->count(),
+            'transactions_count' => $transactionsWithCorrectCost->count(),
             'report_data_count' => $reportData->count(),
             'filename' => $filename
         ]);
