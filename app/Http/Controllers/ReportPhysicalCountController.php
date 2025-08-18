@@ -132,13 +132,12 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity (stock card quantity) at the end of semester
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // UPDATED: Get the latest receipt transaction unit cost
-                if ($endDate->isToday() || $endDate->isFuture()) {
-                    // Use the latest receipt unit cost for current period
-                    $unitCost = $this->getLatestReceiptUnitCost($stock, $endDate);
-                } else {
-                    // Calculate weighted average unit cost for historical periods
-                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
+                $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+
+                // If no transactions found, fall back to stock unit cost
+                if ($unitCost == 0) {
+                    $unitCost = $stock->unit_cost ?? 0;
                 }
 
                 // Only include items with book balance
@@ -199,18 +198,18 @@ class ReportPhysicalCountController extends Controller
     /**
      * Get the latest receipt unit cost for a stock
      */
-    private function getLatestReceiptUnitCost($stock, $endDate)
-    {
-        $latestReceipt = SupplyTransaction::where('supply_id', $stock->supply_id)
-            ->where('fund_cluster', $stock->fund_cluster)
-            ->where('transaction_type', 'receipt')
-            ->where('transaction_date', '<=', $endDate)
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->first();
+    // private function getLatestReceiptUnitCost($stock, $endDate)
+    // {
+    //     $latestReceipt = SupplyTransaction::where('supply_id', $stock->supply_id)
+    //         ->where('fund_cluster', $stock->fund_cluster)
+    //         ->where('transaction_type', 'receipt')
+    //         ->where('transaction_date', '<=', $endDate)
+    //         ->orderBy('transaction_date', 'desc')
+    //         ->orderBy('created_at', 'desc')
+    //         ->first();
 
-        return $latestReceipt ? $latestReceipt->unit_cost : $stock->unit_cost;
-    }
+    //     return $latestReceipt ? $latestReceipt->unit_cost : $stock->unit_cost;
+    // }
 
     /**
      * Calculate weighted average unit cost based on transactions (same as Supply Ledger Card)
@@ -252,8 +251,8 @@ class ReportPhysicalCountController extends Controller
             }
         }
 
-        // Return weighted average unit cost rounded to 2 decimal places
-        return $runningBalance > 0 ? round($runningTotalCost / $runningBalance, 2) : 0;
+        // FIXED: Return weighted average unit cost WITHOUT rounding (same as Supply Ledger Card)
+        return $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
     }
 
     public function exportExcel(Request $request)
@@ -294,12 +293,12 @@ class ReportPhysicalCountController extends Controller
                 // Calculate book quantity at semester end
                 $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // UPDATED: Use latest receipt unit cost for current period
-                if ($endDate->isToday() || $endDate->isFuture()) {
-                    // Use the latest receipt unit cost
-                    $unitCost = $this->getLatestReceiptUnitCost($stock, $endDate);
-                } else {
-                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+                // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
+                $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+
+                // If no transactions found, fall back to stock unit cost
+                if ($unitCost == 0) {
+                    $unitCost = $stock->unit_cost ?? 0;
                 }
 
                 // Only include items with book balance
@@ -416,11 +415,14 @@ class ReportPhysicalCountController extends Controller
 
         // Data rows start at row 14
         $currentRow = 14;
-        $articleNumber = 1;
 
         foreach ($reportData as $item) {
-            $sheet->setCellValue("A{$currentRow}", $articleNumber);
-            $sheet->setCellValue("B{$currentRow}", $item['item_name'] . ($item['description'] ? ', ' . $item['description'] : ''));
+            // UPDATED: Use item name for Article column instead of sequential numbers
+            $sheet->setCellValue("A{$currentRow}", $item['item_name']);
+
+            // UPDATED: Use only description for Description column (not combined with item name)
+            $sheet->setCellValue("B{$currentRow}", $item['description'] ?? '');
+
             $sheet->setCellValue("C{$currentRow}", $item['stock_no']);
             $sheet->setCellValue("D{$currentRow}", $item['unit']);
             $sheet->setCellValue("E{$currentRow}", $item['unit_value']);
@@ -440,14 +442,13 @@ class ReportPhysicalCountController extends Controller
             $sheet->getStyle("A{$currentRow}:J{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-            // Alignment
-            $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            // Alignment - UPDATED Article column to LEFT alignment like CHED format
+            $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $sheet->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $sheet->getStyle("C{$currentRow}:J{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
             $currentRow++;
-            $articleNumber++;
         }
 
         // Add only 1 empty row with borders after the data
