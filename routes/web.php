@@ -104,6 +104,120 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // ==========================================
         Route::middleware(['admin.not-user-mode'])->group(function () {
 
+
+            // Add this temporary route to your web.php
+            // Route::get('/audit-ris-formats', function() {
+            //     $html = '<h2>🔍 RIS Number Format Audit Report</h2>';
+            //     $html .= '<style>
+            //         body { font-family: Arial, sans-serif; margin: 20px; }
+            //         .correct { color: green; }
+            //         .problem { color: red; font-weight: bold; }
+            //         .suggestion { color: blue; font-style: italic; }
+            //         table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            //         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            //         th { background-color: #f2f2f2; }
+            //         .summary { background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #2196F3; }
+            //     </style>';
+
+            //     // 1. Check RIS Slips
+            //     $risSlips = \App\Models\RisSlip::where('ris_no', 'like', 'RIS %')->get();
+            //     $correctRis = $risSlips->filter(fn($ris) => preg_match('/^RIS \d{4}-\d{2}-\d{3}$/', $ris->ris_no));
+            //     $problematicRis = $risSlips->filter(fn($ris) => !preg_match('/^RIS \d{4}-\d{2}-\d{3}$/', $ris->ris_no));
+
+            //     // 2. Check Supply Transactions
+            //     $transactions = \App\Models\SupplyTransaction::where('reference_no', 'like', 'RIS %')->get();
+            //     $correctTxn = $transactions->filter(fn($txn) => preg_match('/^RIS \d{4}-\d{2}-\d{3}$/', $txn->reference_no));
+            //     $problematicTxn = $transactions->filter(fn($txn) => !preg_match('/^RIS \d{4}-\d{2}-\d{3}$/', $txn->reference_no));
+
+            //     // Summary
+            //     $html .= '<div class="summary">';
+            //     $html .= '<h3>📊 Summary</h3>';
+            //     $html .= '<p><strong>RIS Slips:</strong> ' . $correctRis->count() . '/' . $risSlips->count() . ' correct (' . round(($correctRis->count()/$risSlips->count())*100, 1) . '%)</p>';
+            //     $html .= '<p><strong>Supply Transactions:</strong> ' . $correctTxn->count() . '/' . $transactions->count() . ' correct (' . round(($correctTxn->count()/$transactions->count())*100, 1) . '%)</p>';
+            //     $html .= '</div>';
+
+            //     // Problematic RIS Slips
+            //     if ($problematicRis->count() > 0) {
+            //         $html .= '<h3 class="problem">❌ Problematic RIS Slips (' . $problematicRis->count() . ')</h3>';
+            //         $html .= '<table>';
+            //         $html .= '<tr><th>Current Format</th><th>Date</th><th>Status</th><th>Suggested Fix</th></tr>';
+
+            //         $problematicRis->each(function($ris) use (&$html) {
+            //             $suggested = preg_replace_callback('/^RIS (\d{4})-(\d{2})-(\d{1,2})$/', function($matches) {
+            //                 return 'RIS ' . $matches[1] . '-' . $matches[2] . '-' . str_pad($matches[3], 3, '0', STR_PAD_LEFT);
+            //             }, $ris->ris_no);
+
+            //             $html .= '<tr>';
+            //             $html .= '<td class="problem">' . $ris->ris_no . '</td>';
+            //             $html .= '<td>' . $ris->ris_date . '</td>';
+            //             $html .= '<td>' . $ris->status . '</td>';
+            //             $html .= '<td class="suggestion">' . $suggested . '</td>';
+            //             $html .= '</tr>';
+            //         });
+            //         $html .= '</table>';
+            //     } else {
+            //         $html .= '<h3 class="correct">✅ All RIS Slips have correct format!</h3>';
+            //     }
+
+            //     // Problematic Transactions
+            //     if ($problematicTxn->count() > 0) {
+            //         $html .= '<h3 class="problem">❌ Problematic Supply Transactions (' . $problematicTxn->count() . ')</h3>';
+            //         $html .= '<table>';
+            //         $html .= '<tr><th>Current Reference</th><th>Transaction ID</th><th>Date</th><th>Type</th><th>Suggested Fix</th></tr>';
+
+            //         $problematicTxn->each(function($txn) use (&$html) {
+            //             $suggested = preg_replace_callback('/^RIS (\d{4})-(\d{2})-(\d{1,2})$/', function($matches) {
+            //                 return 'RIS ' . $matches[1] . '-' . $matches[2] . '-' . str_pad($matches[3], 3, '0', STR_PAD_LEFT);
+            //             }, $txn->reference_no);
+
+            //             $html .= '<tr>';
+            //             $html .= '<td class="problem">' . $txn->reference_no . '</td>';
+            //             $html .= '<td>' . $txn->transaction_id . '</td>';
+            //             $html .= '<td>' . $txn->transaction_date . '</td>';
+            //             $html .= '<td>' . $txn->transaction_type . '</td>';
+            //             $html .= '<td class="suggestion">' . $suggested . '</td>';
+            //             $html .= '</tr>';
+            //         });
+            //         $html .= '</table>';
+            //     } else {
+            //         $html .= '<h3 class="correct">✅ All Supply Transactions have correct format!</h3>';
+            //     }
+
+            //     // Format patterns found
+            //     $html .= '<h3>📝 Format Patterns Found</h3>';
+            //     $patterns = [];
+
+            //     $risSlips->each(function($ris) use (&$patterns) {
+            //         if (preg_match('/^RIS \d{4}-\d{2}-(\d+)$/', $ris->ris_no, $matches)) {
+            //             $dayLength = strlen($matches[1]);
+            //             $patterns["RIS YYYY-MM-" . str_repeat('X', $dayLength)] = ($patterns["RIS YYYY-MM-" . str_repeat('X', $dayLength)] ?? 0) + 1;
+            //         }
+            //     });
+
+            //     $html .= '<ul>';
+            //     foreach ($patterns as $pattern => $count) {
+            //         $status = str_contains($pattern, 'XXX') ? 'correct' : 'problem';
+            //         $html .= "<li class=\"{$status}\">{$pattern}: {$count} records</li>";
+            //     }
+            //     $html .= '</ul>';
+
+            //     // Recommendations
+            //     if ($problematicRis->count() > 0 || $problematicTxn->count() > 0) {
+            //         $html .= '<div class="summary">';
+            //         $html .= '<h3>🔧 Recommendations</h3>';
+            //         $html .= '<ol>';
+            //         $html .= '<li><strong>Backup your database</strong> before making any changes</li>';
+            //         $html .= '<li>Run the cleanup script to fix format inconsistencies</li>';
+            //         $html .= '<li>Update your RIS generation code to prevent future issues</li>';
+            //         $html .= '<li>Add validation to ensure consistent formatting</li>';
+            //         $html .= '</ol>';
+            //         $html .= '</div>';
+            //     }
+
+            //     return response($html);
+            // })->middleware(['auth', 'admin-cao']);
+
+
             // Dashboard Routes
             Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
             Route::get('/assets-dashboard', [DashboardController::class, 'assets'])->name('assets.dashboard');
