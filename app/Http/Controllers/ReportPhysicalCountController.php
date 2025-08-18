@@ -109,39 +109,71 @@ class ReportPhysicalCountController extends Controller
             $fundClusters = collect(['101', '151']);
         }
 
-        // Get supplies with their stock data
-        $suppliesQuery = Supply::with(['category', 'stocks'])
-            ->whereHas('stocks', function($query) use ($fundCluster) {
-                if ($fundCluster) {
-                    $query->where('fund_cluster', $fundCluster);
-                }
-            });
+        // FIXED: Get ALL active supplies, not just those with stocks
+        $supplies = Supply::with(['category'])
+            ->where('is_active', true)
+            ->get();
 
-        $supplies = $suppliesQuery->get();
-
-        // Build report data (simplified - only book quantities)
+        // Build report data - INCLUDE ALL SUPPLIES even with zero balance
         $reportData = collect();
 
         foreach ($supplies as $supply) {
-            foreach ($supply->stocks as $stock) {
-                // Skip if fund cluster filter doesn't match
-                if ($fundCluster && $stock->fund_cluster !== $fundCluster) {
+            // If fund cluster is specified, check if supply has any stock in that fund cluster
+            if ($fundCluster) {
+                $hasStockInFundCluster = SupplyStock::where('supply_id', $supply->supply_id)
+                    ->where('fund_cluster', $fundCluster)
+                    ->exists();
+
+                // If no stock exists in the specified fund cluster, create a zero entry
+                if (!$hasStockInFundCluster) {
+                    $reportData->push([
+                        'supply_id' => $supply->supply_id,
+                        'stock_no' => $supply->stock_no,
+                        'item_name' => $supply->item_name,
+                        'description' => $supply->description,
+                        'unit' => $supply->unit_of_measurement,
+                        'fund_cluster' => $fundCluster,
+                        'book_quantity' => 0,
+                        'unit_cost' => 0,
+                    ]);
                     continue;
                 }
+            }
 
-                // Calculate book quantity (stock card quantity) at the end of semester
-                $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
+            // Get stocks for this supply (filtered by fund cluster if specified)
+            $stocks = SupplyStock::where('supply_id', $supply->supply_id)
+                ->when($fundCluster, function($query) use ($fundCluster) {
+                    return $query->where('fund_cluster', $fundCluster);
+                })
+                ->get();
 
-                // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
-                $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+            // If no stocks exist for this supply, add a zero entry
+            if ($stocks->isEmpty()) {
+                $reportData->push([
+                    'supply_id' => $supply->supply_id,
+                    'stock_no' => $supply->stock_no,
+                    'item_name' => $supply->item_name,
+                    'description' => $supply->description,
+                    'unit' => $supply->unit_of_measurement,
+                    'fund_cluster' => $fundCluster ?? 'N/A',
+                    'book_quantity' => 0,
+                    'unit_cost' => 0,
+                ]);
+            } else {
+                // Process each stock
+                foreach ($stocks as $stock) {
+                    // Calculate book quantity (stock card quantity) at the end of semester
+                    $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // If no transactions found, fall back to stock unit cost
-                if ($unitCost == 0) {
-                    $unitCost = $stock->unit_cost ?? 0;
-                }
+                    // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
+                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
-                // Only include items with book balance
-                if ($bookQuantity > 0) {
+                    // If no transactions found, fall back to stock unit cost
+                    if ($unitCost == 0) {
+                        $unitCost = $stock->unit_cost ?? 0;
+                    }
+
+                    // FIXED: Include ALL supplies, even those with zero balance
                     $reportData->push([
                         'supply_id' => $supply->supply_id,
                         'stock_no' => $supply->stock_no,
@@ -195,26 +227,6 @@ class ReportPhysicalCountController extends Controller
         ));
     }
 
-    /**
-     * Get the latest receipt unit cost for a stock
-     */
-    // private function getLatestReceiptUnitCost($stock, $endDate)
-    // {
-    //     $latestReceipt = SupplyTransaction::where('supply_id', $stock->supply_id)
-    //         ->where('fund_cluster', $stock->fund_cluster)
-    //         ->where('transaction_type', 'receipt')
-    //         ->where('transaction_date', '<=', $endDate)
-    //         ->orderBy('transaction_date', 'desc')
-    //         ->orderBy('created_at', 'desc')
-    //         ->first();
-
-    //     return $latestReceipt ? $latestReceipt->unit_cost : $stock->unit_cost;
-    // }
-
-    /**
-     * Calculate weighted average unit cost based on transactions (same as Supply Ledger Card)
-     * UPDATED to match Supply Ledger Card logic exactly
-     */
     private function calculateWeightedAverageUnitCost($stock, $endDate)
     {
         // Get all transactions for this supply and fund cluster up to the end date
@@ -272,37 +284,66 @@ class ReportPhysicalCountController extends Controller
         $semesterDates = $this->parseSemester($year, $semester);
         $endDate = $semesterDates['end'];
 
-        // Get supplies with transactions and calculate balances
-        $supplies = Supply::with(['category', 'stocks'])
-            ->whereHas('stocks', function($query) use ($fundCluster) {
-                if ($fundCluster) {
-                    $query->where('fund_cluster', $fundCluster);
-                }
-            })
+        // FIXED: Get ALL active supplies, not just those with stocks
+        $supplies = Supply::with(['category'])
+            ->where('is_active', true)
             ->get();
 
         $reportData = collect();
 
         foreach ($supplies as $supply) {
-            foreach ($supply->stocks as $stock) {
-                // Skip if fund cluster filter doesn't match
-                if ($fundCluster && $stock->fund_cluster !== $fundCluster) {
+            // If fund cluster is specified, check if supply has any stock in that fund cluster
+            if ($fundCluster) {
+                $hasStockInFundCluster = SupplyStock::where('supply_id', $supply->supply_id)
+                    ->where('fund_cluster', $fundCluster)
+                    ->exists();
+
+                // If no stock exists in the specified fund cluster, create a zero entry
+                if (!$hasStockInFundCluster) {
+                    $reportData->push([
+                        'stock_no' => $supply->stock_no,
+                        'item_name' => $supply->item_name,
+                        'description' => $supply->description,
+                        'unit' => $supply->unit_of_measurement,
+                        'unit_value' => 0,
+                        'balance_per_card' => 0,
+                    ]);
                     continue;
                 }
+            }
 
-                // Calculate book quantity at semester end
-                $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
+            // Get stocks for this supply (filtered by fund cluster if specified)
+            $stocks = SupplyStock::where('supply_id', $supply->supply_id)
+                ->when($fundCluster, function($query) use ($fundCluster) {
+                    return $query->where('fund_cluster', $fundCluster);
+                })
+                ->get();
 
-                // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
-                $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
+            // If no stocks exist for this supply, add a zero entry
+            if ($stocks->isEmpty()) {
+                $reportData->push([
+                    'stock_no' => $supply->stock_no,
+                    'item_name' => $supply->item_name,
+                    'description' => $supply->description,
+                    'unit' => $supply->unit_of_measurement,
+                    'unit_value' => 0,
+                    'balance_per_card' => 0,
+                ]);
+            } else {
+                // Process each stock
+                foreach ($stocks as $stock) {
+                    // Calculate book quantity at semester end
+                    $bookQuantity = $this->calculateBookQuantity($stock, $endDate);
 
-                // If no transactions found, fall back to stock unit cost
-                if ($unitCost == 0) {
-                    $unitCost = $stock->unit_cost ?? 0;
-                }
+                    // FIXED: Always use weighted average unit cost for consistency with Supply Ledger Card
+                    $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
-                // Only include items with book balance
-                if ($bookQuantity > 0) {
+                    // If no transactions found, fall back to stock unit cost
+                    if ($unitCost == 0) {
+                        $unitCost = $stock->unit_cost ?? 0;
+                    }
+
+                    // FIXED: Include ALL supplies, even those with zero balance
                     $reportData->push([
                         'stock_no' => $supply->stock_no,
                         'item_name' => $supply->item_name,
