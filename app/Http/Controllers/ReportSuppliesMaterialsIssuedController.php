@@ -238,9 +238,7 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         ));
     }
 
-    /**
-     * NEW METHOD: Calculate correct unit costs using moving average logic
-     */
+
     private function calculateCorrectUnitCosts($transactions, $fundCluster)
     {
         // Group transactions by supply to calculate moving average for each
@@ -248,45 +246,62 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         $correctedTransactions = collect();
 
         foreach ($transactionsBySupply as $supplyId => $supplyTransactions) {
-            // Get all transactions for this supply (receipts and issues) ordered by date
+            // CRITICAL: Get ALL transactions for this supply to calculate accurate moving average
+            // This is EXACTLY how Supply Ledger Card does it
             $allTransactions = SupplyTransaction::where('supply_id', $supplyId)
                 ->orderBy('transaction_date')
-                ->orderBy('created_at')
+                ->orderBy('created_at')  // Same ordering as Supply Ledger Card
                 ->get();
 
-            // Calculate moving average costs
+            // Initialize running totals (same as Supply Ledger Card)
             $runningBalance = 0;
             $runningTotalCost = 0;
             $movingAverageCosts = [];
 
+            // Process ALL transactions to build accurate moving average history
             foreach ($allTransactions as $transaction) {
                 if ($transaction->transaction_type == 'receipt') {
+                    // For receipts: add to running totals
                     $runningBalance += $transaction->quantity;
-                    $runningTotalCost += $transaction->total_cost;
+                    $runningTotalCost += $transaction->total_cost; // Use total_cost from transaction
+
                 } elseif ($transaction->transaction_type == 'issue') {
+                    // EXACT SAME LOGIC as Supply Ledger Card:
                     // Calculate weighted average BEFORE the issue
                     $weightedAverageUnitCost = $runningBalance > 0
                         ? $runningTotalCost / $runningBalance
                         : 0;
 
-                    // Store the moving average cost for this transaction
+                    // Store the moving average cost for this specific transaction
                     $movingAverageCosts[$transaction->transaction_id] = $weightedAverageUnitCost;
 
-                    // Update running totals
+                    // Update running totals AFTER calculating the cost (same as Supply Ledger Card)
                     $costToDeduct = $weightedAverageUnitCost * $transaction->quantity;
                     $runningBalance -= $transaction->quantity;
                     $runningTotalCost = max(0, $runningTotalCost - $costToDeduct);
+
+                } else {
+                    // For adjustments (same as Supply Ledger Card logic)
+                    $runningBalance = $transaction->balance_quantity;
+                    if ($runningBalance > 0 && $transaction->unit_cost) {
+                        $runningTotalCost = $runningBalance * $transaction->unit_cost;
+                    }
                 }
             }
 
-            // Apply corrected costs to our filtered transactions
+            // Apply the calculated moving average costs to our monthly report transactions
             foreach ($supplyTransactions as $transaction) {
-                if (isset($movingAverageCosts[$transaction->transaction_id])) {
+                if ($transaction->transaction_type == 'issue' && isset($movingAverageCosts[$transaction->transaction_id])) {
+                    // Use the pre-calculated moving average cost (same as Supply Ledger Card)
                     $correctedUnitCost = $movingAverageCosts[$transaction->transaction_id];
                     $transaction->corrected_unit_cost = $correctedUnitCost;
                     $transaction->corrected_total_cost = $correctedUnitCost * $transaction->quantity;
+                } elseif ($transaction->transaction_type == 'receipt') {
+                    // For receipts, use the actual transaction values (same as Supply Ledger Card)
+                    $transaction->corrected_unit_cost = $transaction->unit_cost;
+                    $transaction->corrected_total_cost = $transaction->total_cost;
                 } else {
-                    // Fallback to original cost if not found
+                    // Fallback to original values
                     $transaction->corrected_unit_cost = $transaction->unit_cost;
                     $transaction->corrected_total_cost = $transaction->total_cost;
                 }
@@ -673,9 +688,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
         return $pdf->download($filename);
     }
 
-    /**
-     * Get monthly comparison data - FIXED VERSION
-     */
     public function monthlyComparison(Request $request)
     {
         $year = $request->get('year', Carbon::now()->year);
@@ -859,7 +871,6 @@ class ReportSuppliesMaterialsIssuedController extends Controller
             'yearlyData'
         ));
     }
-
 
     private function generateYearlyAnalytics($year, $fundCluster)
     {
@@ -1580,6 +1591,30 @@ class ReportSuppliesMaterialsIssuedController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    private function verifyConsistencyWithLedgerCard($transactions)
+    {
+        $verificationLog = [];
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->transaction_type == 'issue') {
+                $verificationLog[] = [
+                    'transaction_id' => $transaction->transaction_id,
+                    'supply_id' => $transaction->supply_id,
+                    'reference_no' => $transaction->reference_no,
+                    'transaction_date' => $transaction->transaction_date,
+                    'original_unit_cost' => $transaction->unit_cost,
+                    'corrected_unit_cost' => $transaction->corrected_unit_cost,
+                    'quantity' => $transaction->quantity,
+                    'corrected_total_cost' => $transaction->corrected_total_cost
+                ];
+            }
+        }
+
+        \Log::info('RSMI Unit Cost Verification', $verificationLog);
+
+        return $verificationLog;
     }
 
 }
