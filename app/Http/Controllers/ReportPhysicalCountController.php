@@ -124,21 +124,34 @@ class ReportPhysicalCountController extends Controller
                     ->where('fund_cluster', $fundCluster)
                     ->exists();
 
-                // If no stock exists in the specified fund cluster, create a zero entry
                 if (!$hasStockInFundCluster) {
+                    // no current stock row, but we may have historical txns → compute from txns
+                    $dummy = (object)[
+                        'supply_id'       => $supply->supply_id,
+                        'fund_cluster'    => $fundCluster,
+                        'unit_cost'       => null,
+                        'quantity_on_hand'=> 0,
+                    ];
+                    $unitCost    = $this->calculateWeightedAverageUnitCost($dummy, $endDate);
+                    $bookQty     = 0; // as there's no stock row
+                    // In generate()
                     $reportData->push([
-                        'supply_id' => $supply->supply_id,
-                        'stock_no' => $supply->stock_no,
-                        'item_name' => $supply->item_name,
-                        'description' => $supply->description,
-                        'unit' => $supply->unit_of_measurement,
-                        'fund_cluster' => $fundCluster,
-                        'book_quantity' => 0,
-                        'unit_cost' => 0,
+                        'supply_id'      => $supply->supply_id,
+                        'stock_no'       => $supply->stock_no,
+                        'item_name'      => $supply->item_name,
+                        'description'    => $supply->description,
+                        'unit'           => $supply->unit_of_measurement,
+                        'fund_cluster'   => $fundCluster,
+                        'book_quantity'  => $bookQty,
+                        'unit_cost'      => $unitCost,
                     ]);
+                    // In exportExcel()
+                    // $reportData->push([... 'unit_value' => $unitCost, 'balance_per_card' => $bookQty, ...]);
+
                     continue;
                 }
             }
+
 
             // Get stocks for this supply (filtered by fund cluster if specified)
             $stocks = SupplyStock::where('supply_id', $supply->supply_id)
@@ -169,9 +182,9 @@ class ReportPhysicalCountController extends Controller
                     $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
                     // If no transactions found, fall back to stock unit cost
-                    if ($unitCost == 0) {
-                        $unitCost = $stock->unit_cost ?? 0;
-                    }
+                    // if ($unitCost == 0) {
+                    //     $unitCost = $stock->unit_cost ?? 0;
+                    // }
 
                     // FIXED: Include ALL supplies, even those with zero balance
                     $reportData->push([
@@ -229,43 +242,47 @@ class ReportPhysicalCountController extends Controller
 
     private function calculateWeightedAverageUnitCost($stock, $endDate)
     {
-        // Get all transactions for this supply and fund cluster up to the end date
+        // include legacy NULL fund clusters
         $transactions = SupplyTransaction::where('supply_id', $stock->supply_id)
-            ->where('fund_cluster', $stock->fund_cluster)
-            ->where('transaction_date', '<=', $endDate)
+            ->where(function ($q) use ($stock) {
+                $q->where('fund_cluster', $stock->fund_cluster)
+                ->orWhereNull('fund_cluster');
+            })
+            ->whereDate('transaction_date', '<=', $endDate->toDateString())
             ->orderBy('transaction_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $runningBalance = 0;
-        $runningTotalCost = 0;
+        $runningBalance = 0.0;
+        $runningTotal   = 0.0;
+        $lastWA         = null; // keep the last non-zero weighted average we reach
 
-        // Process each transaction to calculate weighted average (same logic as Supply Ledger Card)
-        foreach ($transactions as $transaction) {
-            if ($transaction->transaction_type == 'receipt') {
-                // Add to running totals
-                $runningBalance += $transaction->quantity;
-                $runningTotalCost += $transaction->total_cost;
-            } elseif ($transaction->transaction_type == 'issue') {
-                // Calculate cost to deduct based on current weighted average
+        foreach ($transactions as $t) {
+            if ($t->transaction_type === 'receipt') {
+                $runningBalance += $t->quantity;
+                $runningTotal   += $t->total_cost;
                 if ($runningBalance > 0) {
-                    $currentWeightedAverage = $runningTotalCost / $runningBalance;
-                    $costToDeduct = $currentWeightedAverage * $transaction->quantity;
-                    $runningTotalCost = max(0, $runningTotalCost - $costToDeduct);
+                    $lastWA = $runningTotal / $runningBalance;
                 }
-                $runningBalance -= $transaction->quantity;
-            } elseif ($transaction->transaction_type == 'adjustment') {
-                // For adjustments, use the provided values
-                if ($transaction->balance_quantity !== null && $transaction->unit_cost !== null) {
-                    $runningBalance = $transaction->balance_quantity;
-                    $runningTotalCost = $runningBalance * $transaction->unit_cost;
+            } elseif ($t->transaction_type === 'issue') {
+                // use WA **before** issuing
+                $currentWA = $runningBalance > 0 ? ($runningTotal / $runningBalance) : ($lastWA ?? 0);
+                $runningTotal   = max(0, $runningTotal - ($currentWA * $t->quantity));
+                $runningBalance -= $t->quantity;
+                // keep $lastWA as the last meaningful WA (do not zero it)
+            } elseif ($t->transaction_type === 'adjustment') {
+                if ($t->balance_quantity !== null && $t->unit_cost !== null) {
+                    $runningBalance = $t->balance_quantity;
+                    $runningTotal   = $runningBalance * $t->unit_cost;
+                    $lastWA         = $t->unit_cost;
                 }
             }
         }
 
-        // FIXED: Return weighted average unit cost WITHOUT rounding (same as Supply Ledger Card)
-        return $runningBalance > 0 ? $runningTotalCost / $runningBalance : 0;
+        // If we never saw a WA from transactions, fall back to the stock's unit_cost; otherwise return last WA
+        return $lastWA ?? ($stock->unit_cost ?? 0);
     }
+
 
     public function exportExcel(Request $request)
     {
@@ -298,15 +315,25 @@ class ReportPhysicalCountController extends Controller
                     ->where('fund_cluster', $fundCluster)
                     ->exists();
 
-                // If no stock exists in the specified fund cluster, create a zero entry
+                // UPDATED: If no stock exists in the specified fund cluster, compute from transactions instead of zeros
                 if (!$hasStockInFundCluster) {
+                    // no current stock row, but we may have historical txns → compute from txns
+                    $dummy = (object)[
+                        'supply_id'       => $supply->supply_id,
+                        'fund_cluster'    => $fundCluster,
+                        'unit_cost'       => null,
+                        'quantity_on_hand'=> 0,
+                    ];
+                    $unitCost = $this->calculateWeightedAverageUnitCost($dummy, $endDate);
+                    $bookQty = 0; // as there's no stock row
+
                     $reportData->push([
                         'stock_no' => $supply->stock_no,
                         'item_name' => $supply->item_name,
                         'description' => $supply->description,
                         'unit' => $supply->unit_of_measurement,
-                        'unit_value' => 0,
-                        'balance_per_card' => 0,
+                        'unit_value' => $unitCost,
+                        'balance_per_card' => $bookQty,
                     ]);
                     continue;
                 }
@@ -339,9 +366,9 @@ class ReportPhysicalCountController extends Controller
                     $unitCost = $this->calculateWeightedAverageUnitCost($stock, $endDate);
 
                     // If no transactions found, fall back to stock unit cost
-                    if ($unitCost == 0) {
-                        $unitCost = $stock->unit_cost ?? 0;
-                    }
+                    // if ($unitCost == 0) {
+                    //     $unitCost = $stock->unit_cost ?? 0;
+                    // }
 
                     // FIXED: Include ALL supplies, even those with zero balance
                     $reportData->push([
@@ -660,39 +687,29 @@ class ReportPhysicalCountController extends Controller
 
     private function calculateBookQuantity($stock, $endDate)
     {
-        // For current dates or future dates, use current stock quantity
         if ($endDate->isToday() || $endDate->isFuture()) {
             return $stock->quantity_on_hand;
         }
 
-        // For historical dates, calculate running balance from transactions
-        // Get all transactions for this supply and fund cluster up to the end date
         $transactions = SupplyTransaction::where('supply_id', $stock->supply_id)
-            ->where('fund_cluster', $stock->fund_cluster) // Match exact fund cluster
-            ->where('transaction_date', '<=', $endDate)
+            ->where(function ($q) use ($stock) {
+                $q->where('fund_cluster', $stock->fund_cluster)
+                ->orWhereNull('fund_cluster');
+            })
+            ->whereDate('transaction_date', '<=', $endDate->toDateString())
             ->orderBy('transaction_date', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $runningBalance = 0;
-
-        // Process each transaction to calculate running balance
-        // This follows the same logic as your Stock Card and Supply Ledger Card
-        foreach ($transactions as $transaction) {
-            if ($transaction->transaction_type == 'receipt') {
-                $runningBalance += $transaction->quantity;
-            } elseif ($transaction->transaction_type == 'issue') {
-                $runningBalance -= $transaction->quantity;
-            } elseif ($transaction->transaction_type == 'adjustment') {
-                // For adjustments, use the balance quantity if available
-                if ($transaction->balance_quantity !== null) {
-                    $runningBalance = $transaction->balance_quantity;
-                }
-            }
+        $running = 0;
+        foreach ($transactions as $t) {
+            if ($t->transaction_type === 'receipt')      $running += $t->quantity;
+            elseif ($t->transaction_type === 'issue')    $running -= $t->quantity;
+            elseif ($t->transaction_type === 'adjustment' && $t->balance_quantity !== null) $running = $t->balance_quantity;
         }
-
-        return max(0, $runningBalance);
+        return max(0, $running);
     }
+
 
     private function calculateBookQuantityAlternative($stock, $endDate)
     {
