@@ -27,7 +27,34 @@
                 font-family: 'Inter', sans-serif;
                 line-height: 1.6;
                 color: #374151;
-                background-color: #ffffff;
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ffffff 100%);
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Animated Background Elements */
+            body::before {
+                content: '';
+                position: fixed;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle at 20% 80%, rgba(206, 32, 31, 0.03) 0%, transparent 50%),
+                           radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+                           radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.02) 0%, transparent 50%);
+                animation: float 20s ease-in-out infinite;
+                z-index: -1;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                33% { transform: translateY(-20px) rotate(1deg); }
+                66% { transform: translateY(-10px) rotate(-1deg); }
             }
 
             /* Container */
@@ -35,58 +62,37 @@
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 0 1rem;
-            }
-
-            /* Navigation */
-            .navbar {
-                background: #ffffff;
-                border-bottom: 1px solid #e5e7eb;
-                padding: 1rem 0;
-                position: sticky;
-                top: 0;
-                z-index: 100;
-            }
-
-            .nav-content {
+                width: 100%;
                 display: flex;
-                justify-content: space-between;
+                flex-direction: column;
                 align-items: center;
+                justify-content: center;
+                text-align: center;
             }
 
+            /* Logo Styles */
             .logo {
                 display: flex;
                 align-items: center;
-                gap: 0.75rem;
+                justify-content: center;
+                transition: all 0.3s ease;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+
+            .logo:hover {
+                transform: translateY(-2px);
             }
 
             .logo img {
-                width: 40px;
-                height: 40px;
+                width: 80px;
+                height: 80px;
+                transition: all 0.3s ease;
+                filter: drop-shadow(0 6px 12px rgba(206, 32, 31, 0.2));
             }
 
-            .logo-text {
-                font-size: 1.25rem;
-                font-weight: 700;
-                color: #ce201f;
-            }
-
-            .nav-links {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .nav-link {
-                color: #6b7280;
-                text-decoration: none;
-                font-weight: 500;
-                padding: 0.5rem 1rem;
-                border-radius: 0.375rem;
-                transition: all 0.2s ease;
-            }
-
-            .nav-link:hover {
-                color: #ce201f;
+            .logo:hover img {
+                transform: rotate(5deg) scale(1.05);
             }
 
             .btn {
@@ -94,211 +100,182 @@
                 align-items: center;
                 justify-content: center;
                 padding: 0.75rem 1.5rem;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 font-weight: 600;
                 text-decoration: none;
-                transition: all 0.2s ease;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 border: none;
                 cursor: pointer;
                 font-size: 0.875rem;
+                position: relative;
+                overflow: hidden;
+                text-align: center;
+            }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.6s ease;
+            }
+
+            .btn:hover::before {
+                left: 100%;
             }
 
             .btn-primary {
-                background: #ce201f;
+                background: linear-gradient(135deg, #ce201f 0%, #a01b1a 100%);
                 color: white;
+                box-shadow: 0 4px 14px rgba(206, 32, 31, 0.25);
             }
 
             .btn-primary:hover {
-                background: #a01b1a;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(206, 32, 31, 0.3);
+                background: linear-gradient(135deg, #a01b1a 0%, #8b1a1a 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(206, 32, 31, 0.4);
             }
 
             .btn-secondary {
-                background: white;
+                background: rgba(255, 255, 255, 0.9);
                 color: #ce201f;
                 border: 2px solid #ce201f;
+                backdrop-filter: blur(10px);
             }
 
             .btn-secondary:hover {
                 background: #ce201f;
                 color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(206, 32, 31, 0.3);
             }
 
-            .btn-success {
-                background: #10b981;
-                color: white;
-            }
-
-            .btn-success:hover {
-                background: #059669;
-            }
-
-            /* Hero Section */
-            .hero {
-                background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-                padding: 6rem 0;
-                border-bottom: 1px solid #e5e7eb;
+            /* Main Content */
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 4rem 0;
+                min-height: 100vh;
             }
 
             .hero-content {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 4rem;
+                display: flex;
+                flex-direction: column;
                 align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 2rem;
+                max-width: 800px;
+                margin: 0 auto;
+                animation: fadeInUp 1s ease-out;
+                width: 100%;
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .hero-text {
+                text-align: center;
+                margin: 0 auto;
             }
 
             .hero-text h1 {
-                font-size: 3rem;
-                font-weight: 700;
+                font-size: 3.5rem;
+                font-weight: 800;
                 color: #1f2937;
                 margin-bottom: 1.5rem;
                 line-height: 1.1;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                animation: slideInUp 1.2s ease-out;
+                text-align: center;
+            }
+
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             .hero-text .highlight {
-                color: #ce201f;
+                background: linear-gradient(135deg, #ce201f 0%, #e53e3e 50%, #f56565 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                position: relative;
+            }
+
+            .hero-text .highlight::after {
+                content: '';
+                position: absolute;
+                bottom: -4px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80%;
+                height: 4px;
+                background: linear-gradient(135deg, #ce201f 0%, #e53e3e 100%);
+                border-radius: 2px;
+                opacity: 0.3;
             }
 
             .hero-text p {
-                font-size: 1.125rem;
-                color: #6b7280;
-                margin-bottom: 2rem;
-                line-height: 1.7;
+                font-size: 1.25rem;
+                color: #64748b;
+                margin-bottom: 2.5rem;
+                line-height: 1.8;
+                animation: slideInUp 1.2s ease-out 0.2s both;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
             }
 
             .hero-actions {
                 display: flex;
-                gap: 1rem;
+                gap: 1.5rem;
                 flex-wrap: wrap;
-            }
-
-            .hero-visual {
-                position: relative;
-                display: flex;
-                align-items: center;
                 justify-content: center;
-            }
-
-            .dashboard-mockup {
-                background: white;
-                border-radius: 1rem;
-                padding: 2rem;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .mockup-header {
-                display: flex;
-                justify-content: space-between;
                 align-items: center;
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-                border-bottom: 1px solid #e5e7eb;
-            }
-
-            .mockup-title {
-                font-weight: 600;
-                color: #1f2937;
-            }
-
-            .mockup-stats {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 1rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .stat-card {
-                padding: 1rem;
-                border-radius: 0.5rem;
-                text-align: center;
-            }
-
-            .stat-card.red {
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-            }
-
-            .stat-card.green {
-                background: #f0fdf4;
-                border: 1px solid #bbf7d0;
-            }
-
-            .stat-card.amber {
-                background: #fffbeb;
-                border: 1px solid #fde68a;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-                font-weight: 700;
-                margin-bottom: 0.25rem;
-            }
-
-            .stat-card.red .stat-number {
-                color: #ce201f;
-            }
-
-            .stat-card.green .stat-number {
-                color: #10b981;
-            }
-
-            .stat-card.amber .stat-number {
-                color: #f59e0b;
-            }
-
-            .stat-label {
-                font-size: 0.75rem;
-                color: #6b7280;
-                font-weight: 500;
-            }
-
-            .mockup-chart {
-                height: 120px;
-                background: #f9fafb;
-                border-radius: 0.5rem;
-                display: flex;
-                align-items: end;
-                justify-content: space-around;
-                padding: 1rem;
-            }
-
-            .chart-bar {
-                width: 20px;
-                border-radius: 2px;
-                transition: all 0.3s ease;
-            }
-
-            .chart-bar:hover {
-                transform: scaleY(1.1);
-            }
-
-            .chart-bar.red {
-                background: #ce201f;
-                height: 60%;
-            }
-
-            .chart-bar.green {
-                background: #10b981;
-                height: 80%;
-            }
-
-            .chart-bar.amber {
-                background: #f59e0b;
-                height: 45%;
+                animation: slideInUp 1.2s ease-out 0.4s both;
             }
 
             /* Features Section */
             .features {
                 padding: 6rem 0;
                 background: white;
+                text-align: center;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .section-header {
                 text-align: center;
                 margin-bottom: 4rem;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
             }
 
             .section-title {
@@ -306,6 +283,7 @@
                 font-weight: 700;
                 color: #1f2937;
                 margin-bottom: 1rem;
+                text-align: center;
             }
 
             .section-subtitle {
@@ -313,12 +291,18 @@
                 color: #6b7280;
                 max-width: 600px;
                 margin: 0 auto;
+                text-align: center;
             }
 
             .features-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 2rem;
+                justify-items: center;
+                align-items: center;
+                width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
             }
 
             .feature-card {
@@ -327,11 +311,19 @@
                 border-radius: 1rem;
                 border: 1px solid #e5e7eb;
                 transition: all 0.2s ease;
+                text-align: center;
+                max-width: 400px;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .feature-card:hover {
                 border-color: #ce201f;
                 box-shadow: 0 4px 20px rgba(206, 32, 31, 0.1);
+                transform: translateY(-2px);
             }
 
             .feature-icon {
@@ -341,7 +333,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-bottom: 1.5rem;
+                margin: 0 auto 1.5rem auto;
+                font-size: 1.5rem;
+                text-align: center;
             }
 
             .feature-icon.red {
@@ -364,43 +358,13 @@
                 font-weight: 700;
                 color: #1f2937;
                 margin-bottom: 0.75rem;
+                text-align: center;
             }
 
             .feature-description {
                 color: #6b7280;
                 line-height: 1.6;
-            }
-
-            /* Stats Section */
-            .stats {
-                padding: 6rem 0;
-                background: #f9fafb;
-            }
-
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 2rem;
                 text-align: center;
-            }
-
-            .stat-item {
-                background: white;
-                padding: 2rem;
-                border-radius: 1rem;
-                border: 1px solid #e5e7eb;
-            }
-
-            .stat-item-number {
-                font-size: 2.5rem;
-                font-weight: 700;
-                color: #ce201f;
-                margin-bottom: 0.5rem;
-            }
-
-            .stat-item-label {
-                color: #6b7280;
-                font-weight: 500;
             }
 
             /* CTA Section */
@@ -409,12 +373,18 @@
                 background: #ce201f;
                 color: white;
                 text-align: center;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .cta h2 {
                 font-size: 2.5rem;
                 font-weight: 700;
                 margin-bottom: 1rem;
+                text-align: center;
             }
 
             .cta p {
@@ -424,12 +394,14 @@
                 max-width: 600px;
                 margin-left: auto;
                 margin-right: auto;
+                text-align: center;
             }
 
             .cta-actions {
                 display: flex;
                 gap: 1rem;
                 justify-content: center;
+                align-items: center;
                 flex-wrap: wrap;
             }
 
@@ -461,53 +433,52 @@
                 color: white;
                 padding: 3rem 0;
                 text-align: center;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .footer h3 {
                 font-size: 1.25rem;
                 font-weight: 700;
                 margin-bottom: 1rem;
+                text-align: center;
             }
 
             .footer p {
                 color: #9ca3af;
                 margin-bottom: 1rem;
+                text-align: center;
             }
 
             .footer-info {
                 font-size: 0.875rem;
                 color: #6b7280;
+                text-align: center;
             }
 
             /* Responsive Design */
             @media (max-width: 768px) {
+                .main-content {
+                    padding: 3rem 0;
+                }
+
                 .hero-content {
-                    grid-template-columns: 1fr;
-                    gap: 2rem;
-                    text-align: center;
+                    gap: 1.5rem;
                 }
 
                 .hero-text h1 {
-                    font-size: 2rem;
+                    font-size: 2.5rem;
                 }
 
-                .hero-actions {
-                    justify-content: center;
+                .logo img {
+                    width: 70px;
+                    height: 70px;
                 }
 
-                .nav-links {
-                    display: none;
-                }
-
-                .section-title {
-                    font-size: 2rem;
-                }
-
-                .cta h2 {
-                    font-size: 2rem;
-                }
-
-                .mockup-stats {
+                .features-grid {
                     grid-template-columns: 1fr;
                 }
             }
@@ -517,68 +488,56 @@
                     padding: 0 0.75rem;
                 }
 
-                .hero {
-                    padding: 4rem 0;
+                .main-content {
+                    padding: 2rem 0;
                 }
 
-                .features, .stats, .cta {
-                    padding: 4rem 0;
+                .hero-content {
+                    gap: 1.25rem;
+                }
+
+                .hero-text h1 {
+                    font-size: 2rem;
+                }
+
+                .hero-text p {
+                    font-size: 1.1rem;
                 }
 
                 .hero-actions {
                     flex-direction: column;
                     align-items: center;
+                    gap: 1rem;
                 }
 
-                .cta-actions {
-                    flex-direction: column;
-                    align-items: center;
+                .btn {
+                    width: 100%;
+                    max-width: 280px;
+                }
+
+                .logo img {
+                    width: 60px;
+                    height: 60px;
                 }
             }
         </style>
     </head>
     <body>
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="container">
-                <div class="nav-content">
-                    <div class="logo">
-                        <img src="{{ asset('img/ched-logo.png') }}" alt="CHED Logo">
-                        <span class="logo-text">CIMS XII</span>
-                    </div>
-
-                    @if (Route::has('login'))
-                        <div class="nav-links">
-                            @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-primary">
-                                    Dashboard
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" class="nav-link">
-                                    Sign In
-                                </a>
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="btn btn-primary">
-                                        Get Started
-                                    </a>
-                                @endif
-                            @endauth
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="hero">
+        <!-- Main Content -->
+        <main class="main-content">
             <div class="container">
                 <div class="hero-content">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <img src="{{ asset('img/ched-logo.png') }}" alt="CHED Logo">
+                    </div>
+
                     <div class="hero-text">
                         <h1>
                             <span class="highlight">CHEDRO XII</span> Inventory Management System
                         </h1>
                         <p>
-                            Streamline your educational institution's inventory management with our professional digital solution designed specifically for Commission on Higher Education requirements.
+                            CHEDRO 12 Digital Inventory System for streamlined requests, automated reports, and seamless management.
                         </p>
                         <div class="hero-actions">
                             @auth
@@ -589,168 +548,14 @@
                                 <a href="{{ route('register') }}" class="btn btn-primary">
                                     Get Started
                                 </a>
-                                <a href="#features" class="btn btn-secondary">
-                                    Learn More
+                                <a href="{{ route('login') }}" class="btn btn-secondary">
+                                    Sign In
                                 </a>
                             @endauth
                         </div>
                     </div>
-
-                    <div class="hero-visual">
-                        <div class="dashboard-mockup">
-                            <div class="mockup-header">
-                                <div class="mockup-title">Inventory Dashboard</div>
-                                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                            </div>
-
-                            <div class="mockup-stats">
-                                <div class="stat-card red">
-                                    <div class="stat-number">1,247</div>
-                                    <div class="stat-label">Total Items</div>
-                                </div>
-                                <div class="stat-card green">
-                                    <div class="stat-number">892</div>
-                                    <div class="stat-label">In Stock</div>
-                                </div>
-                                <div class="stat-card amber">
-                                    <div class="stat-number">45</div>
-                                    <div class="stat-label">Low Stock</div>
-                                </div>
-                            </div>
-
-                            <div class="mockup-chart">
-                                <div class="chart-bar red"></div>
-                                <div class="chart-bar green"></div>
-                                <div class="chart-bar amber"></div>
-                                <div class="chart-bar red"></div>
-                                <div class="chart-bar green"></div>
-                                <div class="chart-bar amber"></div>
-                                <div class="chart-bar red"></div>
-                                <div class="chart-bar green"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="features">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Powerful Features for Modern Inventory Management</h2>
-                    <p class="section-subtitle">
-                        Everything you need to efficiently manage your educational institution's inventory and supplies in one comprehensive platform.
-                    </p>
-                </div>
-
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon red">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M4 6h16v2H4zm0 5h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6zm2-7a2 2 0 012-2h8a2 2 0 012 2v1H6V4z"/>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">Real-time Asset Tracking</h3>
-                        <p class="feature-description">
-                            Monitor all institutional assets with detailed information, locations, and status updates in real-time for complete visibility.
-                        </p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon green">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M3 3v18h18v-2H5V3H3zm14 12h2V9h-2v6zm-4 2h2V7h-2v10zm-4 0h2v-4H9v4z"/>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">Advanced Analytics</h3>
-                        <p class="feature-description">
-                            Generate comprehensive reports and analytics to make data-driven decisions about your inventory management and procurement.
-                        </p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon amber">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                        </div>
-                        <h3 class="feature-title">CHED Compliance</h3>
-                        <p class="feature-description">
-                            Ensure full compliance with CHED requirements and regulations for educational institutions with built-in compliance features.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Stats Section -->
-        <section class="stats">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Lorem ipsum dolor sit amet consectetur adipisicing elit.</h2>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-item-number">500+</div>
-                        <div class="stat-item-label">Educational Institutions</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-number">50K+</div>
-                        <div class="stat-item-label">Items Tracked Daily</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-number">99.9%</div>
-                        <div class="stat-item-label">System Uptime</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-number">24/7</div>
-                        <div class="stat-item-label">Support Available</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA Section -->
-        {{-- <section class="cta">
-            <div class="container">
-                <h2>Ready to Transform Your Inventory Management?</h2>
-                <p>
-                    Join hundreds of educational institutions already using CIMS XII to streamline their inventory operations and ensure CHED compliance.
-                </p>
-
-                @auth
-                    <div class="cta-actions">
-                        <a href="{{ url('/dashboard') }}" class="btn btn-white">
-                            Access Your Dashboard
-                        </a>
-                    </div>
-                @else
-                    <div class="cta-actions">
-                        <a href="{{ route('register') }}" class="btn btn-white">
-                            Start Free Today
-                        </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline">
-                            Sign In
-                        </a>
-                    </div>
-                @endauth
-            </div>
-        </section> --}}
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <h3>CIMS XII</h3>
-                <p>
-                    CHED Inventory and Supply Management System
-                </p>
-                <div class="footer-info">
-                    <p>Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})</p>
-                    <p>&copy; 2025 Commission on Higher Education – Regional Office 12. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
+        </main>
     </body>
 </html>
