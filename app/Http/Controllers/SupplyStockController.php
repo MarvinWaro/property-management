@@ -484,7 +484,7 @@ class SupplyStockController extends Controller
             'unit_cost' => $request->unit_cost ? str_replace(',', '', $request->unit_cost) : 0,
         ]);
 
-        // UPDATED VALIDATION - Added receipt_date and reference_no
+        // UPDATED VALIDATION
         $validated = $request->validate([
             'unit_cost'        => 'required|numeric|min:0',
             'supplier_id'      => 'nullable|exists:suppliers,id',
@@ -502,44 +502,104 @@ class SupplyStockController extends Controller
         try {
             $stock = SupplyStock::findOrFail($id);
 
-            // We keep the same quantity but re‑value at the new unit_cost
-            $currentQty = $stock->quantity_on_hand;
-            $validated['total_cost'] = $currentQty * $validated['unit_cost'];
+            DB::transaction(function() use ($validated, $stock, $id) {
+                // We keep the same quantity but re‑value at the new unit_cost
+                $currentQty = $stock->quantity_on_hand;
+                $validated['total_cost'] = $currentQty * $validated['unit_cost'];
 
-            // Update stock with all validated fields, including remarks
-            $stock->update($validated);
+                // Update stock with all validated fields
+                $stock->update($validated);
 
-            // ============================================================================
-            // FIX: Use the same pattern as SupplyTransactionController
-            // Only set department_id if it's actually provided and not empty
-            // ============================================================================
+                // ============================================================================
+                // FIXED: Only update the LATEST receipt transaction for this stock
+                // This prevents corrupting historical data
+                // ============================================================================
 
-            // Prepare transaction data
-            $transactionData = [
-                'supply_id'        => $stock->supply_id,
-                'transaction_type' => 'adjustment',
-                'transaction_date' => $validated['receipt_date'] ?? now()->toDateString(),
-                'reference_no'     => $validated['reference_no'] ?? 'Re-valuation',
-                'quantity'         => 0, // Zero quantity for re-valuation
-                'unit_cost'        => $validated['unit_cost'],
-                'total_cost'       => 0, // Zero cost impact
-                'balance_quantity' => $stock->quantity_on_hand,
-                'balance_unit_cost' => $validated['unit_cost'],
-                'balance_total_cost' => $validated['total_cost'],
-                'user_id'          => auth()->id(),
-                'remarks'          => $validated['remarks'] ?? 'Stock re-valued',
-                'fund_cluster'     => $validated['fund_cluster'],
-                'days_to_consume'  => $validated['days_to_consume'],
-            ];
+                if (!empty($validated['receipt_date']) || !empty($validated['reference_no'])) {
+                    // Find the MOST RECENT receipt transaction for this supply and fund cluster
+                    // This should be the one corresponding to the current stock state
+                    $latestReceiptTransaction = SupplyTransaction::where('supply_id', $stock->supply_id)
+                        ->where('fund_cluster', $stock->fund_cluster)
+                        ->where('transaction_type', 'receipt')
+                        ->orderBy('transaction_date', 'desc')
+                        ->orderBy('created_at', 'desc')
+                        ->first();
 
-            // Only set department_id if it's actually provided and not empty
-            if (!empty($validated['department_id'])) {
-                $transactionData['department_id'] = $validated['department_id'];
-            }
-            // If not provided, department_id will remain null (not set)
+                    if ($latestReceiptTransaction) {
+                        $updateData = [];
 
-            // Create an adjustment transaction to log this change
-            SupplyTransaction::create($transactionData);
+                        if (!empty($validated['receipt_date'])) {
+                            $updateData['transaction_date'] = $validated['receipt_date'];
+                        }
+
+                        if (!empty($validated['reference_no'])) {
+                            $updateData['reference_no'] = $validated['reference_no'];
+                        }
+
+                        // Also update department if provided
+                        if (!empty($validated['department_id'])) {
+                            $updateData['department_id'] = $validated['department_id'];
+                        }
+
+                        // Update fund cluster to match
+                        $updateData['fund_cluster'] = $validated['fund_cluster'];
+
+                        if (!empty($updateData)) {
+                            $latestReceiptTransaction->update($updateData);
+
+                            Log::info('Updated latest receipt transaction for stock re-valuation', [
+                                'stock_id' => $stock->stock_id,
+                                'supply_id' => $stock->supply_id,
+                                'transaction_id' => $latestReceiptTransaction->transaction_id,
+                                'old_date' => $latestReceiptTransaction->getOriginal('transaction_date'),
+                                'new_date' => $validated['receipt_date'] ?? null,
+                                'old_reference' => $latestReceiptTransaction->getOriginal('reference_no'),
+                                'new_reference' => $validated['reference_no'] ?? null,
+                            ]);
+                        }
+                    }
+                }
+
+                // ============================================================================
+                // Create adjustment transaction for unit cost changes (if unit cost changed)
+                // ============================================================================
+
+                $originalUnitCost = $stock->getOriginal('unit_cost');
+                if ($originalUnitCost != $validated['unit_cost']) {
+                    // Only create adjustment transaction if unit cost actually changed
+                    $transactionData = [
+                        'supply_id'        => $stock->supply_id,
+                        'transaction_type' => 'adjustment',
+                        'transaction_date' => $validated['receipt_date'] ?? now()->toDateString(),
+                        'reference_no'     => ($validated['reference_no'] ?? 'Re-valuation') . ' (Adjustment)',
+                        'quantity'         => 0, // Zero quantity for re-valuation
+                        'unit_cost'        => $validated['unit_cost'],
+                        'total_cost'       => 0, // Zero cost impact
+                        'balance_quantity' => $stock->quantity_on_hand,
+                        'balance_unit_cost' => $validated['unit_cost'],
+                        'balance_total_cost' => $validated['total_cost'],
+                        'user_id'          => auth()->id(),
+                        'remarks'          => $validated['remarks'] ?? 'Stock re-valued via edit',
+                        'fund_cluster'     => $validated['fund_cluster'],
+                        'days_to_consume'  => $validated['days_to_consume'],
+                    ];
+
+                    // Only set department_id if it's actually provided and not empty
+                    if (!empty($validated['department_id'])) {
+                        $transactionData['department_id'] = $validated['department_id'];
+                    }
+
+                    // Create an adjustment transaction to log this change
+                    SupplyTransaction::create($transactionData);
+
+                    Log::info('Created adjustment transaction for unit cost change', [
+                        'stock_id' => $stock->stock_id,
+                        'supply_id' => $stock->supply_id,
+                        'old_unit_cost' => $originalUnitCost,
+                        'new_unit_cost' => $validated['unit_cost'],
+                    ]);
+                }
+            });
 
             session()->forget($sessionKey);
 
