@@ -8,9 +8,7 @@ use App\Models\SupplyTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use DateTime; // ADD THIS LINE
-
-// Add these imports at the top of your StockCardController.php file
+use DateTime;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -69,13 +67,31 @@ class StockCardController extends Controller
     public function show(Request $request, $supplyId)
     {
         $supply = Supply::with('category')->findOrFail($supplyId);
-        $fundCluster = $request->get('fund_cluster', '101'); // Default to 101 if not specified
+        $fundCluster = $request->get('fund_cluster', '101');
 
-        // Get selected year (default to current year)
-        $selectedYear = $request->get('year', Carbon::now()->year);
+        // Available years - get this FIRST to determine proper defaults
+        $availableYears = SupplyTransaction::where('supply_id', $supplyId)
+            ->selectRaw('YEAR(transaction_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([Carbon::now()->year]);
+        }
+
+        // Get selected year - if not specified, default to the LATEST year with transactions
+        $selectedYear = $request->get('year');
+        if ($selectedYear === null) {
+            $selectedYear = $availableYears->first() ?? Carbon::now()->year;
+        }
+        $selectedYear = (int) $selectedYear;
 
         // Get selected month (null means show all months for the year)
         $selectedMonth = $request->get('month', null);
+        if ($selectedMonth !== null) {
+            $selectedMonth = (int) $selectedMonth;
+        }
 
         // Get all transactions for this supply
         $transactions = SupplyTransaction::with(['department', 'user'])
@@ -91,19 +107,7 @@ class StockCardController extends Controller
             ->whereNotNull('fund_cluster')
             ->pluck('fund_cluster');
 
-        // Get available years for transactions
-        $availableYears = SupplyTransaction::where('supply_id', $supplyId)
-            ->selectRaw('YEAR(transaction_date) as year')
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year');
-
-        // If no transactions yet, add current year
-        if ($availableYears->isEmpty()) {
-            $availableYears = collect([Carbon::now()->year]);
-        }
-
-        // FIXED: Get available months for the selected year
+        // Get available months for the selected year
         $availableMonths = SupplyTransaction::where('supply_id', $supplyId)
             ->whereYear('transaction_date', $selectedYear)
             ->selectRaw('MONTH(transaction_date) as month')
@@ -111,7 +115,6 @@ class StockCardController extends Controller
             ->orderBy('month', 'asc')
             ->pluck('month')
             ->map(function ($month) {
-                // FIXED: Ensure month is integer and use DateTime for month names
                 $monthInt = (int) $month;
                 $monthName = DateTime::createFromFormat('!m', $monthInt)->format('F');
 
@@ -151,7 +154,6 @@ class StockCardController extends Controller
     {
         $entries = [];
         $runningBalance = 0;
-        $hasBeginningBalance = false;
 
         // Determine the date range based on whether a month is selected
         if ($selectedMonth) {
@@ -177,7 +179,7 @@ class StockCardController extends Controller
             }
         }
 
-        // --- UPDATED: Use Dec 31 previous year or day before month start ---
+        // Set beginning balance date
         if ($selectedMonth) {
             // For monthly, use the last day of the previous month
             $beginningBalanceDate = Carbon::createFromDate($selectedYear, $selectedMonth, 1)->subDay()->format('Y-m-d');
@@ -185,7 +187,6 @@ class StockCardController extends Controller
             // For yearly, use December 31 of previous year
             $beginningBalanceDate = Carbon::createFromDate($selectedYear, 1, 1)->subDay()->format('Y-m-d');
         }
-        // ------------------------------------------------------------------
 
         $entries[] = [
             'date' => $beginningBalanceDate,
@@ -197,8 +198,6 @@ class StockCardController extends Controller
             'days_to_consume' => null,
             'transaction_id' => null,
         ];
-
-        $hasBeginningBalance = true;
 
         // Filter transactions for selected period
         $periodTransactions = $transactions->filter(function ($txn) use ($startDate, $endDate) {
@@ -251,28 +250,32 @@ class StockCardController extends Controller
         $supply = Supply::findOrFail($supplyId);
         $fundCluster = $request->get('fund_cluster', '101');
         $selectedYear = $request->get('year', Carbon::now()->year);
+        $selectedMonth = $request->get('month', null);
 
-        // Get all transactions for this supply
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
             ->orderBy('transaction_date')
             ->orderBy('created_at')
             ->get();
 
-        // Prepare the stock card data
-        $stockCardEntries = $this->prepareStockCardEntries($transactions, $fundCluster, $selectedYear);
+        $stockCardEntries = $this->prepareStockCardEntries($transactions, $fundCluster, $selectedYear, $selectedMonth);
 
-        // Generate PDF using your preferred library (e.g., dompdf, barryvdh/laravel-dompdf)
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('stock-cards.pdf', compact(
             'supply',
             'stockCardEntries',
             'fundCluster',
-            'selectedYear'
+            'selectedYear',
+            'selectedMonth'
         ));
 
-        // Return the PDF for download
-        return $pdf->download("stock-card-{$supply->stock_no}-{$selectedYear}.pdf");
+        $filename = "stock-card-{$supply->stock_no}-{$selectedYear}";
+        if ($selectedMonth) {
+            $filename .= "-" . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
+        }
+        $filename .= ".pdf";
+
+        return $pdf->download($filename);
     }
 
 
@@ -284,43 +287,36 @@ class StockCardController extends Controller
         $supply = Supply::findOrFail($supplyId);
         $fundCluster = $request->get('fund_cluster', '101');
         $selectedYear = $request->get('year', Carbon::now()->year);
+        $selectedMonth = $request->get('month', null);
 
-        // Get all transactions for this supply
         $transactions = SupplyTransaction::with(['department', 'user'])
             ->where('supply_id', $supplyId)
             ->orderBy('transaction_date')
             ->orderBy('created_at')
             ->get();
 
-        // Prepare the stock card data
-        $stockCardEntries = $this->prepareStockCardEntries($transactions, $fundCluster, $selectedYear);
+        $stockCardEntries = $this->prepareStockCardEntries($transactions, $fundCluster, $selectedYear, $selectedMonth);
 
         $entityName = 'COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII';
 
-        // Create Excel file
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Set page setup
         $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
         $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LETTER);
         $sheet->getPageMargins()->setTop(0.5)->setRight(0.5)->setLeft(0.5)->setBottom(0.5);
 
-        // Appendix 58 (top right) - Fixed to column G
         $sheet->setCellValue('G1', 'Appendix 58');
         $sheet->getStyle('G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('G1')->getFont()->setItalic(true)->setSize(15);
 
-        // Title - Fixed to span A-G
         $sheet->mergeCells('A3:G3');
         $sheet->setCellValue('A3', 'STOCK CARD');
         $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Entity info section (following template layout)
         $currentRow = 5;
 
-        // FIXED: Entity Name (A-E) and Fund Cluster (F-G) - no borders, just underlines
         $sheet->setCellValue("A{$currentRow}", "Entity Name:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
 
@@ -336,10 +332,8 @@ class StockCardController extends Controller
         $sheet->getStyle("G{$currentRow}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-        $currentRow++; // Move to next row for item info table
+        $currentRow++;
 
-        // FIXED: Item information table with borders (following template layout)
-        // First row - Item (A-E) and Stock No. (F-G)
         $sheet->setCellValue("A{$currentRow}", "Item:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
         $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
@@ -353,7 +347,6 @@ class StockCardController extends Controller
 
         $currentRow++;
 
-        // Second row - Description (A-E) and Re-order Point (F-G)
         $sheet->setCellValue("A{$currentRow}", "Description:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
         $sheet->mergeCells("B{$currentRow}:E{$currentRow}");
@@ -367,17 +360,14 @@ class StockCardController extends Controller
 
         $currentRow++;
 
-        // Third row - Unit of Measurement (spans A-G)
         $sheet->setCellValue("A{$currentRow}", "Unit of Measurement:");
         $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
         $sheet->mergeCells("B{$currentRow}:G{$currentRow}");
         $sheet->setCellValue("B{$currentRow}", $supply->unit_of_measurement);
         $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $currentRow++; // NO GAP - directly to table headers
+        $currentRow++;
 
-        // FIXED: Main stock card table headers (A-G only, following template)
-        // First header row with merged cells
         $sheet->setCellValue("A{$currentRow}", "Date");
         $sheet->setCellValue("B{$currentRow}", "Reference");
         $sheet->setCellValue("C{$currentRow}", "Receipt");
@@ -386,7 +376,6 @@ class StockCardController extends Controller
         $sheet->setCellValue("F{$currentRow}", "Balance");
         $sheet->setCellValue("G{$currentRow}", "No. of Days\nto Consume");
 
-        // Style first header row
         $headerRange = "A{$currentRow}:G{$currentRow}";
         $sheet->getStyle($headerRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 10],
@@ -406,15 +395,14 @@ class StockCardController extends Controller
 
         $currentRow++;
 
-        // Second header row with sub-headers
         $subHeaders = [
-            'A' => "",      // Date spans both rows
-            'B' => "",      // Reference spans both rows
-            'C' => "Qty.",  // Receipt quantity only
-            'D' => "Qty.",  // Issue quantity
-            'E' => "Office", // Issue office
-            'F' => "Qty.",  // Balance quantity
-            'G' => ""       // Days to consume spans both rows
+            'A' => "",
+            'B' => "",
+            'C' => "Qty.",
+            'D' => "Qty.",
+            'E' => "Office",
+            'F' => "Qty.",
+            'G' => ""
         ];
 
         foreach ($subHeaders as $col => $header) {
@@ -423,13 +411,11 @@ class StockCardController extends Controller
             }
         }
 
-        // Merge cells that span both header rows
         $sheet->mergeCells("A" . ($currentRow - 1) . ":A{$currentRow}");
         $sheet->mergeCells("B" . ($currentRow - 1) . ":B{$currentRow}");
         $sheet->mergeCells("F" . ($currentRow - 1) . ":F{$currentRow}");
         $sheet->mergeCells("G" . ($currentRow - 1) . ":G{$currentRow}");
 
-        // Style second header row
         $subHeaderRange = "A{$currentRow}:G{$currentRow}";
         $sheet->getStyle($subHeaderRange)->applyFromArray([
             'font' => ['bold' => true, 'size' => 10],
@@ -450,36 +436,24 @@ class StockCardController extends Controller
         $sheet->getRowDimension($currentRow - 1)->setRowHeight(25);
         $sheet->getRowDimension($currentRow)->setRowHeight(25);
 
-        // Data rows
         $currentRow++;
 
         foreach ($stockCardEntries as $entry) {
             $sheet->setCellValue("A{$currentRow}", Carbon::parse($entry['date'])->format('m/d/Y'));
             $sheet->setCellValue("B{$currentRow}", $entry['reference']);
-
-            // Receipt column (C only)
             $sheet->setCellValue("C{$currentRow}", $entry['receipt_qty'] ? $entry['receipt_qty'] : '');
-
-            // Issue columns (D-E)
             $sheet->setCellValue("D{$currentRow}", $entry['issue_qty'] ? $entry['issue_qty'] : '');
             $sheet->setCellValue("E{$currentRow}", $entry['issue_office'] ? $entry['issue_office'] : '');
-
-            // Balance (F)
             $sheet->setCellValue("F{$currentRow}", $entry['balance_qty']);
-
-            // Days to consume (G)
             $sheet->setCellValue("G{$currentRow}", $entry['days_to_consume'] ?: '');
 
-            // Format numbers
             $sheet->getStyle("C{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
             $sheet->getStyle("D{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
             $sheet->getStyle("F{$currentRow}")->getNumberFormat()->setFormatCode('#,##0');
 
-            // Apply borders
             $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()
                 ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-            // Alignment
             $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $sheet->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -491,7 +465,6 @@ class StockCardController extends Controller
             $currentRow++;
         }
 
-        // Add empty rows to match template format (minimum 15 rows)
         $emptyRowsToAdd = max(15 - count($stockCardEntries), 0);
         for ($i = 0; $i < $emptyRowsToAdd; $i++) {
             $sheet->getStyle("A{$currentRow}:G{$currentRow}")->getBorders()
@@ -499,18 +472,20 @@ class StockCardController extends Controller
             $currentRow++;
         }
 
-        // Adjust column widths for A-G layout
-        $sheet->getColumnDimension('A')->setWidth(12);  // Date
-        $sheet->getColumnDimension('B')->setWidth(18);  // Reference
-        $sheet->getColumnDimension('C')->setWidth(10);  // Receipt Qty
-        $sheet->getColumnDimension('D')->setWidth(10);  // Issue Qty
-        $sheet->getColumnDimension('E')->setWidth(25);  // Issue Office (wider)
-        $sheet->getColumnDimension('F')->setWidth(12);  // Balance
-        $sheet->getColumnDimension('G')->setWidth(15);  // Days to Consume
+        $sheet->getColumnDimension('A')->setWidth(12);
+        $sheet->getColumnDimension('B')->setWidth(18);
+        $sheet->getColumnDimension('C')->setWidth(10);
+        $sheet->getColumnDimension('D')->setWidth(10);
+        $sheet->getColumnDimension('E')->setWidth(25);
+        $sheet->getColumnDimension('F')->setWidth(12);
+        $sheet->getColumnDimension('G')->setWidth(15);
 
-        // Write file
         $writer = new Xlsx($spreadsheet);
-        $filename = 'Stock_Card_' . $supply->stock_no . '_' . $selectedYear . '.xlsx';
+        $filename = 'Stock_Card_' . $supply->stock_no . '_' . $selectedYear;
+        if ($selectedMonth) {
+            $filename .= '_' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
+        }
+        $filename .= '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
