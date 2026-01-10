@@ -1,28 +1,18 @@
-<!-- stock-cards/show.blade.php -->
 <x-app-layout>
     <x-slot name="header">
-        <!-- Replace your current single button with this section -->
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Stock Card: {{ $supply->item_name }}
             </h2>
 
             <div class="flex space-x-2">
-                <!-- PDF Export Button -->
-                {{-- <a href="{{ route('stock-cards.export-pdf', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
-                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                    <span class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span>Export as PDF</span>
-                    </span>
-                </a> --}}
-
                 <!-- Excel Export Button -->
-                <a href="{{ route('stock-cards.export-excel', $supply->supply_id) }}?fund_cluster={{ $fundCluster }}&year={{ $selectedYear }}"
+                <a href="{{ route('stock-cards.export-excel', [
+                    'supplyId' => $supply->supply_id,
+                    'fund_cluster' => $fundCluster,
+                    'year' => $selectedYear,
+                    'month' => $selectedMonth
+                ]) }}"
                     class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                     <span class="flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -39,7 +29,7 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Supply Details Card (Palette Styled) -->
+            <!-- Supply Details Card -->
             <div
                 class="bg-white dark:bg-[#0a0a0a] overflow-hidden rounded-2xl border border-[#e5e7eb] dark:border-[#374151] shadow mb-6">
                 <!-- Header -->
@@ -51,61 +41,46 @@
                         </div>
                         <div class="mt-2 md:mt-0 flex space-x-2">
                             <!-- Year Selector -->
-                            <form method="GET" action="{{ route('stock-cards.show', $supply->supply_id) }}"
-                                class="flex space-x-2">
-                                <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
-                                <input type="hidden" name="month" value="{{ $selectedMonth }}">
-                                <select name="year" onchange="this.form.submit()"
+                            <select id="yearSelector"
+                                class="px-4 py-2 rounded-lg text-sm
+                                    bg-white text-[#a01b1a] border border-[#a01b1a]
+                                    focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
+                                @foreach ($availableYears as $year)
+                                    <option value="{{ $year }}"
+                                        {{ $selectedYear == $year ? 'selected' : '' }}>
+                                        Year: {{ $year }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <!-- Month Selector -->
+                            @if($availableMonths->isNotEmpty())
+                                <select id="monthSelector"
                                     class="px-4 py-2 rounded-lg text-sm
                                         bg-white text-[#a01b1a] border border-[#a01b1a]
                                         focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
-                                    @foreach ($availableYears as $year)
-                                        <option value="{{ $year }}"
-                                            {{ $selectedYear == $year ? 'selected' : '' }}>
-                                            Year: {{ $year }}
+                                    <option value="">All Months</option>
+                                    @foreach ($availableMonths as $month)
+                                        <option value="{{ $month['value'] }}"
+                                            {{ $selectedMonth == $month['value'] ? 'selected' : '' }}>
+                                            {{ $month['name'] }}
                                         </option>
                                     @endforeach
                                 </select>
-                            </form>
-
-                            <!-- Month Selector (NEW) -->
-                            @if($availableMonths->isNotEmpty())
-                                <form method="GET" action="{{ route('stock-cards.show', $supply->supply_id) }}"
-                                    class="flex space-x-2">
-                                    <input type="hidden" name="fund_cluster" value="{{ $fundCluster }}">
-                                    <input type="hidden" name="year" value="{{ $selectedYear }}">
-                                    <select name="month" onchange="this.form.submit()"
-                                        class="px-4 py-2 rounded-lg text-sm
-                                            bg-white text-[#a01b1a] border border-[#a01b1a]
-                                            focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
-                                        <option value="">All Months</option>
-                                        @foreach ($availableMonths as $month)
-                                            <option value="{{ $month['value'] }}"
-                                                {{ $selectedMonth == $month['value'] ? 'selected' : '' }}>
-                                                {{ $month['name'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </form>
                             @endif
 
                             <!-- Fund Cluster Selector -->
-                            <form method="GET" action="{{ route('stock-cards.show', $supply->supply_id) }}"
-                                class="flex space-x-2">
-                                <input type="hidden" name="year" value="{{ $selectedYear }}">
-                                <input type="hidden" name="month" value="{{ $selectedMonth }}">
-                                <select name="fund_cluster" onchange="this.form.submit()"
-                                    class="px-4 py-2 rounded-lg text-sm
-                                        bg-white text-[#a01b1a] border border-[#a01b1a]
-                                        focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
-                                    @foreach ($fundClusters as $fc)
-                                        <option value="{{ $fc }}"
-                                            {{ $fundCluster == $fc ? 'selected' : '' }}>
-                                            Fund Cluster: {{ $fc }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </form>
+                            <select id="fundClusterSelector"
+                                class="px-4 py-2 rounded-lg text-sm
+                                    bg-white text-[#a01b1a] border border-[#a01b1a]
+                                    focus:outline-none focus:ring-2 focus:ring-[#a01b1a]">
+                                @foreach ($fundClusters as $fc)
+                                    <option value="{{ $fc }}"
+                                        {{ $fundCluster == $fc ? 'selected' : '' }}>
+                                        Fund Cluster: {{ $fc }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -140,7 +115,11 @@
             <div
                 class="bg-white dark:bg-gray-800 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Stock Card - {{ $selectedYear }}
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                        Stock Card - {{ $selectedYear }}
+                        @if($selectedMonth)
+                            - {{ DateTime::createFromFormat('!m', $selectedMonth)->format('F') }}
+                        @endif
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         Entity Name: COMMISSION ON HIGHER EDUCATION REGIONAL OFFICE XII &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -256,4 +235,32 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearSelector = document.getElementById('yearSelector');
+            const monthSelector = document.getElementById('monthSelector');
+            const fundClusterSelector = document.getElementById('fundClusterSelector');
+            const supplyId = {{ $supply->supply_id }};
+
+            function updateURL() {
+                const year = yearSelector.value;
+                const month = monthSelector ? monthSelector.value : '';
+                const fundCluster = fundClusterSelector.value;
+
+                let url = `/stock-cards/${supplyId}?fund_cluster=${fundCluster}&year=${year}`;
+                if (month) {
+                    url += `&month=${month}`;
+                }
+
+                window.location.href = url;
+            }
+
+            yearSelector.addEventListener('change', updateURL);
+            if (monthSelector) {
+                monthSelector.addEventListener('change', updateURL);
+            }
+            fundClusterSelector.addEventListener('change', updateURL);
+        });
+    </script>
 </x-app-layout>
