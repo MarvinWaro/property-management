@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supply;
+use App\Models\SupplyStock;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -57,7 +58,16 @@ class SupplyController extends Controller
                 'acquisition_cost'    => 'nullable|numeric',
             ]);
 
-            Supply::create(array_merge($validated, ['is_active' => true]));
+            $supply = Supply::create(array_merge($validated, ['is_active' => true]));
+
+            // Auto-create a default supply_stock record so the supply appears in the stocks listing
+            SupplyStock::create([
+                'supply_id'        => $supply->supply_id,
+                'quantity_on_hand' => 0,
+                'unit_cost'        => 0,
+                'total_cost'       => 0,
+                'status'           => 'depleted',
+            ]);
 
             return redirect()->route('supplies.index')->with('success', 'Supply created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {

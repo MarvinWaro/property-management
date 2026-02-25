@@ -350,7 +350,7 @@
                                                             @endif
                                                         </td>
                                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                            <a href="{{ route('ris.show', $request->ris_id) }}"
+                                                            <a href="{{ route('ris.show', $request) }}"
                                                                 class="inline-flex items-center justify-center w-8 h-8 text-[#10b981] dark:text-[#34d399] hover:bg-[#10b981]/10 dark:hover:bg-[#10b981]/20 rounded-lg transition-all duration-200"
                                                                 data-tooltip-target="tooltip-view-request-{{ $loop->index }}"
                                                                 data-tooltip-placement="top">
@@ -593,6 +593,7 @@
                                                                 <div class="product-card border dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
                                                                     data-supply-id="{{ $stock->supply_id }}"
                                                                     data-name="{{ $stock->supply->item_name }}"
+                                                                    data-description="{{ $stock->supply->description ?? '' }}"
                                                                     data-available="{{ $stock->available_for_request }}"
                                                                     data-fund-cluster="{{ $stock->fund_cluster }}">
                                                                     <div class="p-3 sm:p-4 flex flex-col h-full">
@@ -963,6 +964,7 @@
                                         function addItemToSelection(supplyId, supplyName, quantity, maxOriginalQuantity) {
                                             const card = document.querySelector(`.product-card[data-supply-id="${supplyId}"]`);
                                             const currentAvailable = parseInt(card.getAttribute('data-available'), 10);
+                                            const description = card.getAttribute('data-description') || '';
 
                                             // Don't allow adding more than what's available
                                             if (quantity > currentAvailable) {
@@ -1003,6 +1005,7 @@
                                                 selectedItems.push({
                                                     supplyId: supplyId,
                                                     name: supplyName,
+                                                    description: description,
                                                     quantity: quantity,
                                                     maxAvailable: maxOriginalQuantity,
                                                     index: itemIndex++
@@ -1134,6 +1137,7 @@
                                                                 </div>
                                                                 <div>
                                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">${item.name}</p>
+                                                                    ${item.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">${item.description}</p>` : ''}
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -1782,7 +1786,7 @@
 
                                                             <div class="flex items-center justify-center gap-2">
                                                                 <!-- View Button -->
-                                                                <a href="{{ route('ris.show', $requisition->ris_id) }}"
+                                                                <a href="{{ route('ris.show', $requisition) }}"
                                                                     class="inline-flex items-center justify-center w-8 h-8 text-[#ce201f] dark:text-[#ce201f] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                                                     data-tooltip-target="tooltip-view-{{ $loop->index }}"
                                                                     data-tooltip-placement="top">

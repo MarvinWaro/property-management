@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\User;
 use App\Models\RisItem;
 use App\Constants\RisStatus;
+use Hashids\Hashids;
 
 class RisSlip extends Model
 {
@@ -79,6 +80,45 @@ class RisSlip extends Model
         'receiver_signature_type' => 'sgd',
         'is_manual_entry' => false,
     ];
+
+    // ─── Hashids: obfuscate ris_id in URLs ───
+    protected static function getHashids(): Hashids
+    {
+        return new Hashids('ris_slip_salt_key', 10);
+    }
+
+    public static function encodeId(int $id): string
+    {
+        return static::getHashids()->encode($id);
+    }
+
+    public static function decodeHash(string $hash): ?int
+    {
+        $decoded = static::getHashids()->decode($hash);
+        return $decoded[0] ?? null;
+    }
+
+    public function getRouteKey(): string
+    {
+        return static::encodeId($this->getKey());
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        if ($field) {
+            return $this->where($field, $value)->first();
+        }
+
+        // Try to decode the hash first
+        $id = static::decodeHash($value);
+
+        if ($id !== null) {
+            return $this->where($this->getKeyName(), $id)->first();
+        }
+
+        // Fallback: try as raw ID (for backwards compatibility)
+        return $this->where($this->getKeyName(), $value)->first();
+    }
 
     // Relationships
     public function division()
