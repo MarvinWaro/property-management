@@ -10,7 +10,6 @@ use App\Models\Department;
 use App\Models\User;
 use App\Models\RisItem;
 use App\Constants\RisStatus;
-use Hashids\Hashids;
 
 class RisSlip extends Model
 {
@@ -81,21 +80,35 @@ class RisSlip extends Model
         'is_manual_entry' => false,
     ];
 
-    // ─── Hashids: obfuscate ris_id in URLs ───
-    protected static function getHashids(): Hashids
-    {
-        return new Hashids('ris_slip_salt_key', 10);
-    }
+    // ─── Obfuscate ris_id in URLs (pure PHP, no extensions needed) ───
+    private static int $XOR_KEY = 0x5A3C7E19;
+    private static string $ALPHABET = 'k7MnW3xYqR9vJbZp2HdLf8GmTsK4CaN6hFjDwQr5VcBgXtPyEz';
 
     public static function encodeId(int $id): string
     {
-        return static::getHashids()->encode($id);
+        $scrambled = $id ^ self::$XOR_KEY;
+        $base = strlen(self::$ALPHABET);
+        $result = '';
+        $num = $scrambled;
+        do {
+            $result = self::$ALPHABET[$num % $base] . $result;
+            $num = intdiv($num, $base);
+        } while ($num > 0);
+        return $result;
     }
 
     public static function decodeHash(string $hash): ?int
     {
-        $decoded = static::getHashids()->decode($hash);
-        return $decoded[0] ?? null;
+        $base = strlen(self::$ALPHABET);
+        $num = 0;
+        for ($i = 0; $i < strlen($hash); $i++) {
+            $pos = strpos(self::$ALPHABET, $hash[$i]);
+            if ($pos === false) {
+                return null;
+            }
+            $num = $num * $base + $pos;
+        }
+        return $num ^ self::$XOR_KEY;
     }
 
     public function getRouteKey(): string
