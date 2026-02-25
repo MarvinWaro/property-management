@@ -14,6 +14,9 @@
                         <!-- Search Bar Container -->
                         <form method="GET" action="{{ route('stocks.index') }}"
                             class="w-full max-w-sm flex items-center space-x-2">
+                            @if(request()->get('status'))
+                                <input type="hidden" name="status" value="{{ request()->get('status') }}">
+                            @endif
                             <div class="relative flex-grow">
                                 <input type="text" name="search" id="search-input"
                                     value="{{ request()->get('search') }}" oninput="toggleClearButton()"
@@ -133,6 +136,83 @@
                             detailing current stock levels, unit costs, and inventory valuation
                             to support efficient inventory management and financial reporting.
                         </p>
+                    </div>
+
+                    <!-- Status Filter Tabs -->
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        @php
+                            $activeFilter = $currentStatus ?? 'all';
+                            if (!$activeFilter) $activeFilter = 'all';
+                        @endphp
+
+                        {{-- All --}}
+                        <a href="{{ route('stocks.index', array_merge(request()->only('search'), ['status' => 'all'])) }}"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                  {{ $activeFilter === 'all'
+                                     ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-800 shadow-sm'
+                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            All
+                            <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full
+                                        {{ $activeFilter === 'all'
+                                           ? 'bg-white/20 text-white dark:bg-gray-800/30 dark:text-gray-800'
+                                           : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300' }}">
+                                {{ $countAll }}
+                            </span>
+                        </a>
+
+                        {{-- With Stocks (Available) --}}
+                        <a href="{{ route('stocks.index', array_merge(request()->only('search'), ['status' => 'available'])) }}"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                  {{ $activeFilter === 'available'
+                                     ? 'bg-green-600 text-white shadow-sm'
+                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <svg class="w-4 h-4 mr-1.5 {{ $activeFilter === 'available' ? 'text-white' : 'text-green-500' }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            With Stocks
+                            <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full
+                                        {{ $activeFilter === 'available'
+                                           ? 'bg-white/20 text-white'
+                                           : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' }}">
+                                {{ $countAvailable }}
+                            </span>
+                        </a>
+
+                        {{-- Low Stock --}}
+                        <a href="{{ route('stocks.index', array_merge(request()->only('search'), ['status' => 'low_stock'])) }}"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                  {{ $activeFilter === 'low_stock'
+                                     ? 'bg-yellow-500 text-white shadow-sm'
+                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <svg class="w-4 h-4 mr-1.5 {{ $activeFilter === 'low_stock' ? 'text-white' : 'text-yellow-500' }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Low Stock
+                            <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full
+                                        {{ $activeFilter === 'low_stock'
+                                           ? 'bg-white/20 text-white'
+                                           : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' }}">
+                                {{ $countLowStock }}
+                            </span>
+                        </a>
+
+                        {{-- Depleted --}}
+                        <a href="{{ route('stocks.index', array_merge(request()->only('search'), ['status' => 'depleted'])) }}"
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                  {{ $activeFilter === 'depleted'
+                                     ? 'bg-red-600 text-white shadow-sm'
+                                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600' }}">
+                            <svg class="w-4 h-4 mr-1.5 {{ $activeFilter === 'depleted' ? 'text-white' : 'text-red-500' }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                            Depleted
+                            <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full
+                                        {{ $activeFilter === 'depleted'
+                                           ? 'bg-white/20 text-white'
+                                           : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' }}">
+                                {{ $countDepleted }}
+                            </span>
+                        </a>
                     </div>
 
                     <!-- Supply Stock Table - Removed vertical scroll, keeping horizontal scroll for mobile -->

@@ -2023,7 +2023,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4">
-                                                <a href="{{ route('ris.show', $ris->ris_id) }}"
+                                                <a href="{{ route('ris.show', $ris) }}"
                                                     class="p-2 text-[#10b981] hover:bg-[#10b981]/10 rounded-lg inline-flex items-center justify-center
                                                 focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 dark:text-[#34d399]
                                                 dark:hover:bg-[#10b981]/20 transition-all duration-200"

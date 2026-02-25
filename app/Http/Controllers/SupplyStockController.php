@@ -35,6 +35,26 @@ class SupplyStockController extends Controller
      */
     public function index(Request $request)
     {
+        // ─── Ensure every supply has at least one supply_stock record ───
+        $missingSupplyIds = Supply::whereNotIn(
+            'supply_id',
+            SupplyStock::select('supply_id')->distinct()
+        )->pluck('supply_id');
+
+        if ($missingSupplyIds->isNotEmpty()) {
+            $now = now();
+            $records = $missingSupplyIds->map(fn($id) => [
+                'supply_id'        => $id,
+                'quantity_on_hand' => 0,
+                'unit_cost'        => 0,
+                'total_cost'       => 0,
+                'status'           => 'depleted',
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ])->toArray();
+            SupplyStock::insert($records);
+        }
+
         $search = $request->get('search');
         $status = $request->get('status');
 
@@ -92,7 +112,29 @@ class SupplyStockController extends Controller
         $supplies    = Supply::all();
         $suppliers   = Supplier::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
-        $stocks      = $stocksQuery->paginate(25);
+        $stocks      = $stocksQuery->paginate(25)->appends(request()->query());
+
+        // ─── Status counts for filter badges ───
+        $countAll = SupplyStock::count();
+
+        $countAvailable = SupplyStock::join('supplies', 'supply_stocks.supply_id', '=', 'supplies.supply_id')
+            ->where('supply_stocks.quantity_on_hand', '>', 0)
+            ->whereNotIn('supply_stocks.status', ['depleted', 'expired'])
+            ->whereRaw('supply_stocks.quantity_on_hand > supplies.reorder_point')
+            ->count();
+
+        $countLowStock = SupplyStock::join('supplies', 'supply_stocks.supply_id', '=', 'supplies.supply_id')
+            ->whereRaw('supply_stocks.quantity_on_hand <= supplies.reorder_point')
+            ->where('supply_stocks.quantity_on_hand', '>', 0)
+            ->whereNotIn('supply_stocks.status', ['depleted', 'expired'])
+            ->count();
+
+        $countDepleted = SupplyStock::where(function($q) {
+            $q->where('quantity_on_hand', '<=', 0)
+              ->orWhere('status', 'depleted');
+        })->count();
+
+        $currentStatus = $status;
 
         // ─── NEW: generate a default IAR for the modal's reference_no input
         //    pick any existing supply_id (we just need an int for the generator)
@@ -106,7 +148,12 @@ class SupplyStockController extends Controller
             'supplies',
             'suppliers',
             'departments',
-            'defaultIar'
+            'defaultIar',
+            'countAll',
+            'countAvailable',
+            'countLowStock',
+            'countDepleted',
+            'currentStatus'
         ));
     }
 
